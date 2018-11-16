@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Siscom.Agua.Api</name>
+    </assembly>
+    <members>
+        <member name="T:Siscom.Agua.Api.Controllers.ClasificationsController">
+            <summary>
+            End Points Clasification
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.GetClasifications">
+            <summary>
+            Get list of all Clasifications
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.GetClasification(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of region which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>Clasification Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.PutClasification(System.Int32,Siscom.Agua.DAL.Models.Clasification)">
+            <summary>
+            This will provide update for the specific ID,
+            </summary>
+            <param name="id">id from route (URL)</param>
+            <param name="clasification">Model Clasification</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.PostClasification(Siscom.Agua.DAL.Models.Clasification)">
+            <summary>
+            This will provide capability add new clasification 
+            </summary>
+            <param name="clasification">Model Clasification</param>
+            <returns>New clasification added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.DeleteClasification(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of clasification whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <member name="T:Siscom.Agua.Api.Controllers.RegionsController">
+            <summary>
+            End Points Region
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.GetRegions">
+            <summary>
+            Get list of all Regions
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.GetRegion(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of region which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.PutRegion(System.Int32,Siscom.Agua.DAL.Models.Region)">
+            <summary>
+            This will provide update for the specific ID,
+            </summary>
+            <param name="id">id from route (URL)r</param>
+            <param name="region">Model region</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.PostRegion(Siscom.Agua.DAL.Models.Region)">
+            <summary>
+            This will provide capability add new region 
+            </summary>
+            <param name="region">Model region</param>
+            <returns>New region added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.DeleteRegion(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of region whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
