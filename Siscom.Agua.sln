@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2048
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Siscom.Agua.Api", "Siscom.Agua.Api\Siscom.Agua.Api.csproj", "{8EE5190B-B192-4A1A-921C-8D73F4EEE00D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Siscom.Agua.DAL", "Siscom.Agua.DAL\Siscom.Agua.DAL.csproj", "{D459E6A7-381E-4D8F-9E36-7D70C6D18D39}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8EE5190B-B192-4A1A-921C-8D73F4EEE00D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EE5190B-B192-4A1A-921C-8D73F4EEE00D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EE5190B-B192-4A1A-921C-8D73F4EEE00D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EE5190B-B192-4A1A-921C-8D73F4EEE00D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D459E6A7-381E-4D8F-9E36-7D70C6D18D39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D459E6A7-381E-4D8F-9E36-7D70C6D18D39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D459E6A7-381E-4D8F-9E36-7D70C6D18D39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D459E6A7-381E-4D8F-9E36-7D70C6D18D39}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VisualSVNWorkingCopyRoot = .
+		SolutionGuid = {5818A4DD-5B6F-4F57-8536-AA09A1B7E6B3}
+	EndGlobalSection
+EndGlobal
