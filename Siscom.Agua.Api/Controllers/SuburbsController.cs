@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -50,7 +51,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var suburb = await _context.Suburbs.FindAsync(id);
+            var suburb = await _context.Suburbs.Include(r => r.Regions).Include(c => c.Clasifications).SingleOrDefaultAsync(i => i.Id == id);
 
             if (suburb == null)
             {
@@ -62,7 +63,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/Suburbs/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSuburb([FromRoute] int id, [FromBody] Suburb suburb)
+        public async Task<IActionResult> PutSuburb(int TownsId, [FromRoute] int id, [FromBody] SuburbVM suburb)
         {
             if (!ModelState.IsValid)
             {
@@ -73,8 +74,17 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest();
             }
-
-            _context.Entry(suburb).State = EntityState.Modified;
+            var suburbcontent = await _context.Suburbs.FindAsync(suburb.Id);
+            var clas = await _context.Clasifications.FindAsync(suburb.ClasificationId);
+            var region = await _context.Regions.FindAsync(suburb.RegionId);
+            if (suburbcontent == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar la colonia") });
+            }
+            suburbcontent.Clasifications = clas;
+            suburbcontent.Regions = region;
+            suburbcontent.Towns = await _context.Towns.FindAsync(TownsId);
+            _context.Entry(suburbcontent).State = EntityState.Modified;
 
             try
             {

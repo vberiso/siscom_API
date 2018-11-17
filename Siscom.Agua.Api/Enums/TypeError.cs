@@ -12,7 +12,8 @@ namespace Siscom.Agua.Api.Enums
             PartialContent = 206,
             Conflict = 409,
             NoContent =204,
-            Ok = 200
+            Ok = 200,
+            NotFound = 404
         }    
     }
 }
