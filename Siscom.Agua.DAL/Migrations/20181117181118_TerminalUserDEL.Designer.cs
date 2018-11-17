@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181117181118_TerminalUserDEL")]
+    partial class TerminalUserDEL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -675,37 +677,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Terminal");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.TerminalUser", b =>
-                {
-                    b.Property<int>("TermianlId")
-                        .HasColumnName("id_terminal");
-
-                    b.Property<string>("UserId")
-                        .HasColumnName("id_user");
-
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("InOperation")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("in_operation")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime>("OpenDate")
-                        .HasColumnName("open_date")
-                        .HasColumnType("date");
-
-                    b.HasKey("TermianlId", "UserId");
-
-                    b.HasAlternateKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Terminal_User");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Town", b =>
                 {
                     b.Property<int>("Id")
@@ -754,10 +725,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<bool>("Sign")
                         .HasColumnName("sign");
 
-                    b.Property<int?>("TerminalUserTermianlId");
-
-                    b.Property<string>("TerminalUserUserId");
-
                     b.Property<int?>("TypeTransactionId");
 
                     b.HasKey("Id");
@@ -765,8 +732,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("PayMethodId");
 
                     b.HasIndex("TypeTransactionId");
-
-                    b.HasIndex("TerminalUserTermianlId", "TerminalUserUserId");
 
                     b.ToTable("Transaction");
                 });
@@ -1153,19 +1118,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasForeignKey("BranchOfficeId");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.TerminalUser", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Terminal", "Terminal")
-                        .WithMany("TerminalUsers")
-                        .HasForeignKey("TermianlId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Siscom.Agua.DAL.Models.ApplicationUser", "User")
-                        .WithMany("TerminalUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Town", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.State", "States")
@@ -1182,10 +1134,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.TypeTransaction", "TypeTransaction")
                         .WithMany()
                         .HasForeignKey("TypeTransactionId");
-
-                    b.HasOne("Siscom.Agua.DAL.Models.TerminalUser", "TerminalUser")
-                        .WithMany()
-                        .HasForeignKey("TerminalUserTermianlId", "TerminalUserUserId");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Type", b =>

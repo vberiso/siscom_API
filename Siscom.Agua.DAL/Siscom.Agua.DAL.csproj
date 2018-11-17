@@ -18,6 +18,8 @@
     <Compile Remove="Migrations\20181115164711_BranchOfficeHours.cs" />
     <Compile Remove="Migrations\20181115181349_CashBox.cs" />
     <Compile Remove="Migrations\20181115181804_CashBox.cs" />
+    <Compile Remove="Migrations\20181117180629_TerminalUserKey.cs" />
+    <Compile Remove="Migrations\20181117181452_TerminalUserKey.cs" />
   </ItemGroup>
 
   <ItemGroup>

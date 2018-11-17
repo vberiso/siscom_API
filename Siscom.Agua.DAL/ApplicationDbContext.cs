@@ -114,10 +114,13 @@ namespace Siscom.Agua.DAL
             /// <summary> 
             /// Cash Box 
             /// </summary> 
-
             builder.Entity<TerminalUser>()
                 .Property(x => x.InOperation)
                 .HasDefaultValue(false);
+
+            builder.Entity<TerminalUser>()
+                .Property(x => x.OpenDate)
+                .HasColumnType("date");
 
             builder.Entity<Terminal>()
                 .Property(x => x.IsActive)
