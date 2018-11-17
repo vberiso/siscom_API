@@ -9,16 +9,17 @@ namespace Siscom.Agua.DAL.Models
     [Table("Terminal_User")]
     public class TerminalUser
     {
-        [Column("open_date"), Required]
+        [Key]
+        [Column("open_date", Order = 2), Required]
         public DateTime OpenDate { get; set; }
         [Column("in_operation"), Required]
         public bool InOperation { get; set; }
 
-        [Column("id_terminal")]
+        [Column("id_terminal", Order = 1)]
         public int TermianlId { get; set; }
         public Terminal Terminal { get; set; }
 
-        [Column("id_user")]
+        [Column("id_user", Order=0)]
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
     }
