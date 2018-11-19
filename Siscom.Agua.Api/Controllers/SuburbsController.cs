@@ -63,27 +63,34 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/Suburbs/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSuburb(int TownsId, [FromRoute] int id, [FromBody] SuburbVM suburb)
+        public async Task<IActionResult> PutSuburb(int TownsId, [FromRoute] int id, [FromBody] SuburbVM suburbvm)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != suburb.Id)
+            if (id != suburbvm.Id)
             {
                 return BadRequest();
             }
-            var suburbcontent = await _context.Suburbs.FindAsync(suburb.Id);
-            var clas = await _context.Clasifications.FindAsync(suburb.ClasificationId);
-            var region = await _context.Regions.FindAsync(suburb.RegionId);
+            var town = await _context.Towns.FindAsync(TownsId);
+            if (town == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el municipio") });
+            }
+            var suburbcontent = await _context.Suburbs.FindAsync(suburbvm.Id);
             if (suburbcontent == null)
             {
                 return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar la colonia") });
             }
+            var clas = await _context.Clasifications.FindAsync(suburbvm.ClasificationId);
+            var region = await _context.Regions.FindAsync(suburbvm.RegionId);
+           
             suburbcontent.Clasifications = clas;
             suburbcontent.Regions = region;
-            suburbcontent.Towns = await _context.Towns.FindAsync(TownsId);
+            suburbcontent.Towns = town;
+            suburbcontent.Name = suburbvm.Name;
             _context.Entry(suburbcontent).State = EntityState.Modified;
 
             try
@@ -104,29 +111,58 @@ namespace Siscom.Agua.Api.Controllers
 
             return NoContent();
         }
-
+        /// <summary>
+        /// Creates a Suburb.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Todo
+        ///     {
+        ///        "name": "Item1",
+        ///        "RegionId": 2
+        ///        "ClasificationId": 2
+        ///     }
+        ///
+        /// </remarks>
         // POST: api/Suburbs
         [HttpPost]
-        public async Task<IActionResult> PostSuburb([FromBody] Suburb suburb)
+        public async Task<IActionResult> PostSuburb(int TownsId, [FromBody] SuburbVM suburb)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
-            _context.Suburbs.Add(suburb);
+            var town = await _context.Towns.FindAsync(TownsId);
+            if (town == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el municipio") });
+            }
+            Suburb NewSuburb = new Suburb()
+            {
+                Name = suburb.Name,
+                Towns = town,
+                Clasifications = await _context.Clasifications.FindAsync(suburb.ClasificationId),
+                Regions = await _context.Regions.FindAsync(suburb.RegionId)
+            };
+            _context.Suburbs.Add(NewSuburb);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSuburb", new { id = suburb.Id }, suburb);
+            return CreatedAtAction("GetSuburb", new { id = NewSuburb.Id }, suburb);
         }
 
         // DELETE: api/Suburbs/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSuburb([FromRoute] int id)
+        public async Task<IActionResult> DeleteSuburb(int TownsId, [FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var town = await _context.Towns.FindAsync(TownsId);
+            if (town == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el municipio") });
             }
 
             var suburb = await _context.Suburbs.FindAsync(id);
@@ -134,7 +170,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return NotFound();
             }
-
+           
             _context.Suburbs.Remove(suburb);
             await _context.SaveChangesAsync();
 

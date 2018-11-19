@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Siscom.Agua.Api.Model
 {
-    public class SuburbVM
+    public class TownVM
     {
         public int Id { get; set; }
-        [StringLength(100)]
+        [StringLength(30), Required]
         public string Name { get; set; }
-        public int RegionId { get; set; }
-        public int ClasificationId { get; set; }
     }
 }

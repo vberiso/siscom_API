@@ -12,56 +12,56 @@ namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StatesController : ControllerBase
+    public class AdressesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public StatesController(ApplicationDbContext context)
+        public AdressesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/States
+        // GET: api/Adresses
         [HttpGet]
-        public IEnumerable<State> GetStates()
+        public IEnumerable<Adress> GetAdresses()
         {
-            return _context.States.Include(x => x.Countries);
+            return _context.Adresses;
         }
 
-        // GET: api/States/5
+        // GET: api/Adresses/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetState([FromRoute] int id)
+        public async Task<IActionResult> GetAdress([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var state = await _context.States.FindAsync(id);
+            var adress = await _context.Adresses.FindAsync(id);
 
-            if (state == null)
+            if (adress == null)
             {
                 return NotFound();
             }
 
-            return Ok(state);
+            return Ok(adress);
         }
 
-        // PUT: api/States/5
+        // PUT: api/Adresses/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutState([FromRoute] int id, [FromBody] State state)
+        public async Task<IActionResult> PutAdress([FromRoute] int id, [FromBody] Adress adress)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != state.Id)
+            if (id != adress.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(state).State = EntityState.Modified;
+            _context.Entry(adress).State = EntityState.Modified;
 
             try
             {
@@ -69,7 +69,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!StateExists(id))
+                if (!AdressExists(id))
                 {
                     return NotFound();
                 }
@@ -82,45 +82,45 @@ namespace Siscom.Agua.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/States
+        // POST: api/Adresses
         [HttpPost]
-        public async Task<IActionResult> PostState([FromBody] State state)
+        public async Task<IActionResult> PostAdress([FromBody] Adress adress)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.States.Add(state);
+            _context.Adresses.Add(adress);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetState", new { id = state.Id }, state);
+            return CreatedAtAction("GetAdress", new { id = adress.Id }, adress);
         }
 
-        // DELETE: api/States/5
+        // DELETE: api/Adresses/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteState([FromRoute] int id)
+        public async Task<IActionResult> DeleteAdress([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var state = await _context.States.FindAsync(id);
-            if (state == null)
+            var adress = await _context.Adresses.FindAsync(id);
+            if (adress == null)
             {
                 return NotFound();
             }
 
-            _context.States.Remove(state);
+            _context.Adresses.Remove(adress);
             await _context.SaveChangesAsync();
 
-            return Ok(state);
+            return Ok(adress);
         }
 
-        private bool StateExists(int id)
+        private bool AdressExists(int id)
         {
-            return _context.States.Any(e => e.Id == id);
+            return _context.Adresses.Any(e => e.Id == id);
         }
     }
 }

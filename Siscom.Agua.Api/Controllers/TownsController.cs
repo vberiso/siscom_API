@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -39,7 +41,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+           
             var town = await _context.Towns.FindAsync(id);
 
             if (town == null)
@@ -52,7 +54,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/Towns/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTown([FromRoute] int id, [FromBody] Town town)
+        public async Task<IActionResult> PutTown(int StatesId, [FromRoute] int id, [FromBody] TownVM town)
         {
             if (!ModelState.IsValid)
             {
@@ -64,6 +66,20 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest();
             }
 
+            var state = await _context.States.FindAsync(StatesId);
+            if (state == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el estado") });
+            }
+
+            var towncontent = await _context.Towns.FindAsync(town.Id);
+            if (towncontent == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el munucipio") });
+            }
+
+            towncontent.Name = town.Name;
+            towncontent.States = state;
             _context.Entry(town).State = EntityState.Modified;
 
             try
@@ -87,14 +103,24 @@ namespace Siscom.Agua.Api.Controllers
 
         // POST: api/Towns
         [HttpPost]
-        public async Task<IActionResult> PostTown([FromBody] Town town)
+        public async Task<IActionResult> PostTown(int StatesId, [FromBody] TownVM town)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Towns.Add(town);
+            var state = await _context.States.FindAsync(StatesId);
+            if (state == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el estado") });
+            }
+            Town NewTown = new Town()
+            {
+                Name = town.Name,
+                States = state
+            };
+            _context.Towns.Add(NewTown);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTown", new { id = town.Id }, town);
@@ -102,11 +128,17 @@ namespace Siscom.Agua.Api.Controllers
 
         // DELETE: api/Towns/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTown([FromRoute] int id)
+        public async Task<IActionResult> DeleteTown(int StatesId, [FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            var state = await _context.States.FindAsync(StatesId);
+            if (state == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el estado") });
             }
 
             var town = await _context.Towns.FindAsync(id);
