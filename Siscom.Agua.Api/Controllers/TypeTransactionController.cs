@@ -12,77 +12,77 @@ using System.Threading.Tasks;
 namespace Siscom.Agua.Api.Controllers
 {
     /// <summary>
-    /// End Points BranchOffice
+    /// End Points TypeTransaction
     /// </summary>
-    [Route("api/BranchOffice")]
+    [Route("api/TypeTransaction")]
     [Produces("application/json")]
     [ApiController]
     [Authorize]
-    public class BranchOfficeController : ControllerBase
+    public class TypeTransactionController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public BranchOfficeController(ApplicationDbContext context)
+        public TypeTransactionController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         /// <summary>
-        /// Get list of all Branch Office
+        /// Get list of all TypeTransactions
         /// </summary>
         /// <returns></returns>
-        // GET: api/BranchOffice
+        // GET: api/TypeTransaction
         [HttpGet]
-        public IEnumerable<BranchOffice> GetBranchOffice()
+        public IEnumerable<TypeTransaction> GetTypeTransaction()
         {
-            return _context.BranchOffices;
+            return _context.TypeTransactions;
         }
 
         /// <summary>
-        /// This will provide details for the specific ID, of Branch Office which is being passed
+        /// This will provide details for the specific ID, of TypeTransaction which is being passed
         /// </summary>
         /// <param name="id">Mandatory</param>
-        /// <returns>BranchOffice Model</returns>
-        // GET: api/BranchOffice/5
+        /// <returns>TypeTransaction Model</returns>
+        // GET: api/TypeTransaction/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetBranchOffice([FromRoute] int id)
+        public async Task<IActionResult> GetTypeTransaction([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var branchOffice = await _context.BranchOffices.FindAsync(id);
+            var typeTransaction = await _context.TypeTransactions.FindAsync(id);
 
-            if (branchOffice == null)
+            if (typeTransaction == null)
             {
                 return NotFound();
             }
 
-            return Ok(branchOffice);
+            return Ok(typeTransaction);
         }
 
         /// <summary>
         /// This will provide update for the specific ID,
         /// </summary>
         /// <param name="id">id from route (URL)</param>
-        /// <param name="branchOffice">Model BranchOffice</param>
+        /// <param name="typeTransaction">Model TypeTransaction</param>
         /// <returns></returns>
-        // PUT: api/BranchOffice/5
+        // PUT: api/TypeTransaction/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBranchOffice([FromRoute] int id, [FromBody] BranchOffice branchOffice)
+        public async Task<IActionResult> PutBranchOffice([FromRoute] int id, [FromBody] TypeTransaction typeTransaction)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != branchOffice.Id)
+            if (id != typeTransaction.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(branchOffice).State = EntityState.Modified;
+            _context.Entry(typeTransaction).State = EntityState.Modified;
 
             try
             {
@@ -90,7 +90,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BranchOfficeExists(id))
+                if (!TypeTransactionExists(id))
                 {
                     return NotFound();
                 }
@@ -104,54 +104,55 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         /// <summary>
-        /// This will provide capability add new Branch Office 
+        /// This will provide capability add new TypeTransaction
         /// </summary>
-        /// <param name="branchOffice">Model Branch Office</param>
-        /// <returns>New branchOffice added</returns>
-        // POST: api/BranchOffice
+        /// <param name="typeTransaction">Model TypeTransaction</param>
+        /// <returns>New TypeTransaction added</returns>
+        // POST: api/TypeTransaction
         [HttpPost]
-        public async Task<IActionResult> PostBranchOffice([FromBody] BranchOffice branchOffice)
+        public async Task<IActionResult> PostTypeTransaction([FromBody] TypeTransaction typeTransaction)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.BranchOffices.Add(branchOffice);
+            _context.TypeTransactions.Add(typeTransaction);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBranchOffice", new { id = branchOffice.Id }, branchOffice);
+            return CreatedAtAction("GetTypeTransaction", new { id = typeTransaction.Id }, typeTransaction);
         }
 
         /// <summary>
-        /// This will provide delete for especific ID, of Branch Office whitch is begin passed 
+        /// This will provide delete for especific ID, of TypeTransaction whitch is begin passed 
         /// </summary>
         /// <param name="id">Mandatory</param>
         /// <returns></returns>
-        // DELETE: api/BranchOffice/5
+        // DELETE: api/TypeTransaction/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBranchOffice([FromRoute] int id)
+        public async Task<IActionResult> DeleteTypeTransaction([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var branchOffice = await _context.BranchOffices.FindAsync(id);
-            if (branchOffice == null)
+            var typeTransaction = await _context.TypeTransactions.FindAsync(id);
+            if (typeTransaction == null)
             {
                 return NotFound();
             }
 
-            _context.BranchOffices.Remove(branchOffice);
+            _context.TypeTransactions.Remove(typeTransaction);
             await _context.SaveChangesAsync();
 
-            return Ok(branchOffice);
+            return Ok(typeTransaction);
         }
 
-        private bool BranchOfficeExists(int id)
+        private bool TypeTransactionExists(int id)
         {
             return _context.BranchOffices.Any(e => e.Id == id);
         }
     }
+
 }

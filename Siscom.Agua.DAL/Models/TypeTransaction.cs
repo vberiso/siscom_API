@@ -13,7 +13,7 @@ namespace Siscom.Agua.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_type_transaction")]
         public int Id { get; set; }
-        [Required, StringLength(20), Column("name")]
+        [Required, StringLength(50), Column("name")]
         public string Name { get; set; }
 
     }

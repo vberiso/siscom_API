@@ -75,7 +75,6 @@ namespace Siscom.Agua.DAL
         {
             builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
             builder.Entity<AgreementService>().HasKey(x => new { x.IdService, x.IdAgreement });
-            builder.Entity<TerminalUser>().HasKey(x => new { x.TermianlId, x.UserId });
 
             builder.Entity<ViewProfile>()
                 .HasOne<View>(sc => sc.View)
@@ -96,16 +95,6 @@ namespace Siscom.Agua.DAL
                 .HasOne<Agreement>(x => x.Agreement)
                 .WithMany(y => y.AgreementServices)
                 .HasForeignKey(x => x.IdAgreement);
-
-            builder.Entity<TerminalUser>()
-               .HasOne<Terminal>(x => x.Terminal)
-               .WithMany(y => y.TerminalUsers)
-               .HasForeignKey(x => x.TermianlId);
-
-            builder.Entity<TerminalUser>()
-                .HasOne<ApplicationUser>(x => x.User)
-                .WithMany(y => y.TerminalUsers)
-                .HasForeignKey(x => x.UserId);
 
             builder.Entity<Folio>()
                 .HasIndex(x => x.Initial)

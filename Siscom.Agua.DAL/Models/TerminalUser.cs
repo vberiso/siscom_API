@@ -10,19 +10,14 @@ namespace Siscom.Agua.DAL.Models
     public class TerminalUser
     {
         [Key]
-        [Column("id"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id_terminal_user"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }       
         [Column("open_date"), Required]
         public DateTime OpenDate { get; set; }
         [Column("in_operation"), Required]
         public bool InOperation { get; set; }
-
-        [Column("id_terminal")]
-        public int TermianlId { get; set; }
+        
         public Terminal Terminal { get; set; }
-
-        [Column("id_user")]
-        public string UserId { get; set; }
         public ApplicationUser User { get; set; }
     }
 }

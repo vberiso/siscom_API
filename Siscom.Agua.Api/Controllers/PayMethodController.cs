@@ -12,77 +12,77 @@ using System.Threading.Tasks;
 namespace Siscom.Agua.Api.Controllers
 {
     /// <summary>
-    /// End Points BranchOffice
+    /// End Points PayMethod
     /// </summary>
-    [Route("api/BranchOffice")]
+    [Route("api/PayMethod")]
     [Produces("application/json")]
     [ApiController]
     [Authorize]
-    public class BranchOfficeController : ControllerBase
+    public class PayMethodController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public BranchOfficeController(ApplicationDbContext context)
+        public PayMethodController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         /// <summary>
-        /// Get list of all Branch Office
+        /// Get list of all Pay Method
         /// </summary>
         /// <returns></returns>
-        // GET: api/BranchOffice
+        // GET: api/PayMethod
         [HttpGet]
-        public IEnumerable<BranchOffice> GetBranchOffice()
+        public IEnumerable<PayMethod> GetPayMethod()
         {
-            return _context.BranchOffices;
+            return _context.PayMethods;
         }
 
         /// <summary>
-        /// This will provide details for the specific ID, of Branch Office which is being passed
+        /// This will provide details for the specific ID, of PayMethod which is being passed
         /// </summary>
         /// <param name="id">Mandatory</param>
-        /// <returns>BranchOffice Model</returns>
-        // GET: api/BranchOffice/5
+        /// <returns>PayMethod Model</returns>
+        // GET: api/PayMethod/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetBranchOffice([FromRoute] int id)
+        public async Task<IActionResult> GetPayMethod([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var branchOffice = await _context.BranchOffices.FindAsync(id);
+            var payMethod = await _context.PayMethods.FindAsync(id);
 
-            if (branchOffice == null)
+            if (payMethod == null)
             {
                 return NotFound();
             }
 
-            return Ok(branchOffice);
+            return Ok(payMethod);
         }
 
         /// <summary>
         /// This will provide update for the specific ID,
         /// </summary>
         /// <param name="id">id from route (URL)</param>
-        /// <param name="branchOffice">Model BranchOffice</param>
+        /// <param name="payMethod">Model PayMethod</param>
         /// <returns></returns>
-        // PUT: api/BranchOffice/5
+        // PUT: api/PayMethod/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBranchOffice([FromRoute] int id, [FromBody] BranchOffice branchOffice)
+        public async Task<IActionResult> PutBranchOffice([FromRoute] int id, [FromBody] PayMethod payMethod)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != branchOffice.Id)
+            if (id != payMethod.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(branchOffice).State = EntityState.Modified;
+            _context.Entry(payMethod).State = EntityState.Modified;
 
             try
             {
@@ -90,7 +90,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BranchOfficeExists(id))
+                if (!PayMethodExists(id))
                 {
                     return NotFound();
                 }
@@ -104,52 +104,52 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         /// <summary>
-        /// This will provide capability add new Branch Office 
+        /// This will provide capability add new PayMethod
         /// </summary>
-        /// <param name="branchOffice">Model Branch Office</param>
-        /// <returns>New branchOffice added</returns>
-        // POST: api/BranchOffice
+        /// <param name="payMethod">Model PayMethod</param>
+        /// <returns>New PayMethod added</returns>
+        // POST: api/PayMethod
         [HttpPost]
-        public async Task<IActionResult> PostBranchOffice([FromBody] BranchOffice branchOffice)
+        public async Task<IActionResult> PostPayMethod([FromBody] PayMethod payMethod)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.BranchOffices.Add(branchOffice);
+            _context.PayMethods.Add(payMethod);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBranchOffice", new { id = branchOffice.Id }, branchOffice);
+            return CreatedAtAction("GetPayMethod", new { id = payMethod.Id }, payMethod);
         }
 
         /// <summary>
-        /// This will provide delete for especific ID, of Branch Office whitch is begin passed 
+        /// This will provide delete for especific ID, of PayMethod whitch is begin passed 
         /// </summary>
         /// <param name="id">Mandatory</param>
         /// <returns></returns>
-        // DELETE: api/BranchOffice/5
+        // DELETE: api/PayMethod/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBranchOffice([FromRoute] int id)
+        public async Task<IActionResult> DeletePayMethod([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var branchOffice = await _context.BranchOffices.FindAsync(id);
-            if (branchOffice == null)
+            var payMethod = await _context.PayMethods.FindAsync(id);
+            if (payMethod == null)
             {
                 return NotFound();
             }
 
-            _context.BranchOffices.Remove(branchOffice);
+            _context.PayMethods.Remove(payMethod);
             await _context.SaveChangesAsync();
 
-            return Ok(branchOffice);
+            return Ok(payMethod);
         }
 
-        private bool BranchOfficeExists(int id)
+        private bool PayMethodExists(int id)
         {
             return _context.BranchOffices.Any(e => e.Id == id);
         }
