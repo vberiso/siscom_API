@@ -80,7 +80,7 @@ namespace Siscom.Agua.Api.Controllers
 
             towncontent.Name = town.Name;
             towncontent.States = state;
-            _context.Entry(town).State = EntityState.Modified;
+            _context.Entry(towncontent).State = EntityState.Modified;
 
             try
             {

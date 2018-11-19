@@ -2,16 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
 namespace Siscom.Agua.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Countries/{CountriesId}/[controller]")]
+    [Produces("application/json")]
     [ApiController]
+    [Authorize]
     public class StatesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -23,9 +28,15 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/States
         [HttpGet]
-        public IEnumerable<State> GetStates()
+        public IEnumerable<StateVM> GetStates(int CountriesId)
         {
-            return _context.States.Include(x => x.Countries);
+            return _context.States.Include(x => x.Countries)
+                    .Where(c => c.Countries.Id == CountriesId)
+                    .Select(s => new StateVM {
+                    Id = s.Id,
+                    Name = s.Name,
+                    abbreviation = s.Countries.Abbreviation
+                }).ToList();
         }
 
         // GET: api/States/5
@@ -49,7 +60,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/States/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutState([FromRoute] int id, [FromBody] State state)
+        public async Task<IActionResult> PutState(int CountriesId, [FromRoute] int id, [FromBody] StateVM state)
         {
             if (!ModelState.IsValid)
             {
@@ -61,7 +72,19 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(state).State = EntityState.Modified;
+            var country = await _context.Countries.FindAsync(CountriesId);
+            if (country == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el pais") });
+            }
+            var statte = await _context.States.FindAsync(state.Id);
+            if(statte == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el estado") });
+            }
+            statte.Name = state.Name;
+            statte.Countries = country;
+            _context.Entry(statte).State = EntityState.Modified;
 
             try
             {
@@ -84,14 +107,25 @@ namespace Siscom.Agua.Api.Controllers
 
         // POST: api/States
         [HttpPost]
-        public async Task<IActionResult> PostState([FromBody] State state)
+        public async Task<IActionResult> PostState(int CountriesId, [FromBody] StateVM state)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.States.Add(state);
+            var country = await _context.Countries.FindAsync(CountriesId);
+            if (country == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el pais") });
+            }
+
+            State NewState = new State()
+            {
+                Name = state.Name,
+                Countries = country
+            };
+            _context.States.Add(NewState);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetState", new { id = state.Id }, state);
@@ -99,11 +133,17 @@ namespace Siscom.Agua.Api.Controllers
 
         // DELETE: api/States/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteState([FromRoute] int id)
+        public async Task<IActionResult> DeleteState(int CountriesId, [FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            var country = await _context.Countries.FindAsync(CountriesId);
+            if (country == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el pais") });
             }
 
             var state = await _context.States.FindAsync(id);

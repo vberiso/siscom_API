@@ -27,8 +27,8 @@ namespace Siscom.Agua.DAL.Models
         public string Lat { get; set; }
         [Column("Lon"), StringLength(12)]
         public string Lon { get; set; }
-        [Column("type_address")]
-        public TypeClient.TypeClientAgreement TypeAddress { get; set; }
+        [Column("type_address"), StringLength(5)]
+        public string TypeAddress { get; set; }
 
         [ForeignKey("Agreements")]
         public int AgreementsId { get; set; }
