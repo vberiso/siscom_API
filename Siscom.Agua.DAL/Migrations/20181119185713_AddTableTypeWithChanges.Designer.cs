@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181119185713_AddTableTypeWithChanges")]
+    partial class AddTableTypeWithChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -518,7 +520,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("CurrentDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("current_date")
-                        .HasDefaultValue(new DateTime(2018, 11, 19, 12, 37, 37, 564, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 11, 19, 12, 57, 13, 269, DateTimeKind.Local));
+
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
 
@@ -774,33 +777,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("TypeTransactionId");
 
                     b.ToTable("Transaction");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.TransactionDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_transaction_detail")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("CodeConcept")
-                        .HasColumnName("code_concept")
-                        .HasMaxLength(10);
-
-                    b.Property<string>("Description")
-                        .HasColumnName("description")
-                        .HasMaxLength(30);
-
-                    b.Property<int?>("TransactionId");
-
-                    b.Property<double>("amount")
-                        .HasColumnName("amount");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TransactionId");
-
-                    b.ToTable("Transaction_Detail");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.TransactionFolio", b =>
@@ -1226,13 +1202,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.TypeTransaction", "TypeTransaction")
                         .WithMany()
                         .HasForeignKey("TypeTransactionId");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.TransactionDetail", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Transaction", "Transaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionId");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.TransactionFolio", b =>

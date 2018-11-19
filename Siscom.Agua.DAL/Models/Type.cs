@@ -9,11 +9,9 @@ namespace Siscom.Agua.DAL.Models
     [Table("Type")]
     public class Type
     {
-        [Column("id_type"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
-        public int Id { get; set; }
-        [Column("name"), StringLength(5), Required]
-        public string Name { get; set; }
+        [Column("id_type"), DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public string CodeName { get; set; }
         [Column("description"), StringLength(30), Required]
         public string Description { get; set; }
 
