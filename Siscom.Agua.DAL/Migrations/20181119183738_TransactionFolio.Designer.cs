@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181119183738_TransactionFolio")]
+    partial class TransactionFolio
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -144,9 +146,8 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int?>("SuburbsId");
 
-                    b.Property<string>("TypeAddress")
-                        .HasColumnName("type_address")
-                        .HasMaxLength(5);
+                    b.Property<byte>("TypeAddress")
+                        .HasColumnName("type_address");
 
                     b.Property<string>("Zip")
                         .IsRequired()

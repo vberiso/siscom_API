@@ -96,10 +96,6 @@ namespace Siscom.Agua.DAL
                 .WithMany(y => y.AgreementServices)
                 .HasForeignKey(x => x.IdAgreement);
 
-            builder.Entity<Folio>()
-                .HasIndex(x => x.Initial)
-                .IsUnique();
-
             /// <summary> 
             /// Cash Box 
             /// </summary> 
@@ -114,6 +110,10 @@ namespace Siscom.Agua.DAL
             builder.Entity<Terminal>()
                 .Property(x => x.IsActive)
                 .HasDefaultValue(true);
+
+            builder.Entity<Folio>()
+                .Property(x => x.CurrentDate)
+                .HasDefaultValue(System.DateTime.Now);
 
             base.OnModelCreating(builder);
         }

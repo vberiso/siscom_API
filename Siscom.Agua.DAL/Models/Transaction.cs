@@ -13,7 +13,7 @@ namespace Siscom.Agua.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_transaction")]
         public int Id { get; set; }
-        [Column("folio"), StringLength(8)]
+        [Column("folio"), StringLength(40)]
         public string Folio { get; set; }
         [Column("date_transaction"), Required]
         public DateTime DateTransaction { get; set; }
@@ -28,5 +28,6 @@ namespace Siscom.Agua.DAL.Models
         public TypeTransaction TypeTransaction { get; set; }
         public PayMethod PayMethod { get; set; }
 
+        public ICollection<TransactionFolio> TransactionFolios { get; set; }
     }
 }
