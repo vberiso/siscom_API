@@ -55,6 +55,8 @@ namespace Siscom.Agua.DAL
         public DbSet<TerminalUser> TerminalUsers { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<TypeTransaction> TypeTransactions { get; set; }
+        public DbSet<TransactionFolio> TransactionFolios { get; set; }
+        public DbSet<TransactionDetail> TransactionDetails { get; set; }
 
         /// <summary> 
         /// Types 
