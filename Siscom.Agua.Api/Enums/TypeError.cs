@@ -13,7 +13,8 @@ namespace Siscom.Agua.Api.Enums
             Conflict = 409,
             NoContent =204,
             Ok = 200,
-            NotFound = 404
+            NotFound = 404,
+            NotAcceptable = 406
         }    
     }
 }

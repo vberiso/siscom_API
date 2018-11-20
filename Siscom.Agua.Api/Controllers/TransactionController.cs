@@ -67,17 +67,19 @@ namespace Siscom.Agua.Api.Controllers
         /// This will provide capability add new Transaction
         /// </summary>
         /// <param name="ptransaction">Model TransactionVM</param>
+        /// <param name="pconcepts">Model PaymentConcepts
+        /// </param>
         /// <returns>New TerminalUser added</returns>
         // POST: api/Transaction
         [HttpPost]
-        public async Task<IActionResult> PostTransaction([FromBody] TransactionVM ptransaction)
+        public async Task<IActionResult> PostTransaction([FromBody] TransactionVM ptransaction, [FromBody] PaymentConcepts pconcepts)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (!Validate(ptransaction))
+            if (!Validate(ptransaction, pconcepts))
             {
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
             }
@@ -94,7 +96,6 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             Transaction transaction = new Transaction();
-            transaction.Folio = ptransaction.Folio; //falta gestional folio
             transaction.DateTransaction = ptransaction.DateTransaction;
             transaction.Aplication = ptransaction.Aplication;
             transaction.Amount = ptransaction.Amount;
@@ -102,6 +103,10 @@ namespace Siscom.Agua.Api.Controllers
             transaction.TerminalUser = await _context.TerminalUsers.FindAsync(ptransaction.TerminalUserId);
             transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(ptransaction.TypeTransactionId);
             transaction.PayMethod = await _context.PayMethods.FindAsync(ptransaction.PayMethodId);
+            transaction.Folio = Guid.NewGuid().ToString("D");
+
+
+            Folio folio = new Folio();
 
             _context.Transactions.Add(transaction);
             await _context.SaveChangesAsync();
@@ -109,7 +114,7 @@ namespace Siscom.Agua.Api.Controllers
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
         }
 
-        private bool Validate(TransactionVM ptransaction)
+        private bool Validate(TransactionVM ptransaction, PaymentConcepts pconcepts)
         {
             if (ptransaction.PayMethodId == 0)
                 return false;
@@ -117,6 +122,15 @@ namespace Siscom.Agua.Api.Controllers
                 return false;
             if (ptransaction.TypeTransactionId == 0)
                 return false;
+            if (pconcepts.Concepts.Count == 0)
+                return false;
+
+            //double amount = 0;
+            //for (int i = 0; i < pconcepts.Concepts.Count; i++)
+            //{
+            //    amount=
+
+            //}
             return true;
         }
     }
