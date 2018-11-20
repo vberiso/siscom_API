@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -22,11 +23,11 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/Adresses
-        [HttpGet]
-        public IEnumerable<Adress> GetAdresses()
-        {
-            return _context.Adresses;
-        }
+        //[HttpGet]
+        //public IEnumerable<Adress> GetAdresses()
+        //{
+        //    return _context.Adresses;
+        //}
 
         // GET: api/Adresses/5
         [HttpGet("{id}")]
@@ -84,14 +85,26 @@ namespace Siscom.Agua.Api.Controllers
 
         // POST: api/Adresses
         [HttpPost]
-        public async Task<IActionResult> PostAdress([FromBody] Adress adress)
+        public async Task<IActionResult> PostAdress([FromBody] AdressVM adress)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Adresses.Add(adress);
+            Adress NewAdress = new Adress()
+            {
+                Street = adress.Street,
+                Outdoor = adress.Outdoor,
+                Indoor = adress.Indoor,
+                Zip = adress.Zip,
+                Reference = adress.Reference,
+                Lat = adress.Lat,
+                Lon = adress.Lon,
+                TypeAddress = adress.TypeAddress
+            };
+
+            _context.Adresses.Add(NewAdress);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetAdress", new { id = adress.Id }, adress);

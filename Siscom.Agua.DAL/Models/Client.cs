@@ -10,6 +10,12 @@ namespace Siscom.Agua.DAL.Models
     [Table("Client")]
     public class Client
     {
+
+        public Client()
+        {
+            Contacts = new HashSet<Contact>();
+        }
+
         [Column("id_client"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }

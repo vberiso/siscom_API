@@ -33,6 +33,7 @@ namespace Siscom.Agua.DAL.Models
         public TypePeriod TypePeriod { get; set; }
         public TypeCommertialBusiness TypeCommertialBusiness { get; set; }
         public TypeStateService TypeStateService { get; set; }
+        public TypeIntake TypeIntake { get; set; }
         public Diameter Diameter { get; set; }
 
         public ICollection<Client> Clients { get; set; }
