@@ -19,12 +19,14 @@ namespace Siscom.Agua.Api.Model
         public string RFC { get; set; }
         [StringLength(18)]
         public string CURP { get; set; }
-        [StringLength(13), Required]
+        [StringLength(13)]
         public string INE { get; set; }
         [StringLength(150)]
         public string EMail { get; set; }
         [StringLength(5)]
         public string TypeUser { get; set; }
+        public bool IsMale { get; set; }
         public int AgreementId { get; set; }
+        public List<ContactVM> Contacts { get; set; }
     }
 }

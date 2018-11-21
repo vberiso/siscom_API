@@ -29,7 +29,7 @@ namespace Siscom.Agua.DAL.Models
         public string RFC { get; set; }
         [Column("curp"), StringLength(18)]
         public string CURP { get; set; }
-        [Column("ine"), StringLength(13), Required]
+        [Column("ine"), StringLength(13)]
         public string INE { get; set; }
         [Column("email"), StringLength(150)]
         public string EMail { get; set; }

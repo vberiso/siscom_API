@@ -14,8 +14,8 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("phone_number"), StringLength(50), Required]
         public string PhoneNumber { get; set; }
-        [Column("is_movil"), Required]
-        public bool IsMovil { get; set; }
+        [Column("type_number"), Required]
+        public string TypeNumber { get; set; }
 
         public Client Client { get; set; }
     }

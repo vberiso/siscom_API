@@ -133,7 +133,7 @@ namespace Siscom.Agua.Api.Controllers
             client.Contacts.Add(new Contact
             {
                 PhoneNumber = contact.PhoneNumber,
-                IsMovil = contact.IsMovil
+                TypeNumber = contact.TypeNumber
             });
             
             //await _context.SaveChangesAsync();

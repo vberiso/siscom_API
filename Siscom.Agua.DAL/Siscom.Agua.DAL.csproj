@@ -20,6 +20,10 @@
     <Compile Remove="Migrations\20181115181804_CashBox.cs" />
     <Compile Remove="Migrations\20181117180629_TerminalUserKey.cs" />
     <Compile Remove="Migrations\20181117181452_TerminalUserKey.cs" />
+    <Compile Remove="Migrations\20181119175705_AddressTypeUser.cs" />
+    <Compile Remove="Migrations\20181119184245_ChangeKeyType.cs" />
+    <Compile Remove="Migrations\20181119185123_AddTableTypeWithChanges.cs" />
+    <Compile Remove="Migrations\20181119185524_AddTableTypeWithChanges.cs" />
   </ItemGroup>
 
   <ItemGroup>
