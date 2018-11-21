@@ -9,7 +9,6 @@ namespace Siscom.Agua.Api.Model
     {
         public int Id { get; set; }
         public string Folio { get; set; }
-        public DateTime DateTransaction { get; set; }
         public bool Sign { get; set; }
         public double Amount { get; set; }
         public string Aplication { get; set; }

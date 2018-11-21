@@ -109,6 +109,9 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest();
             }
 
+            if(pterminalUser.Id==0)
+                return StatusCode((int)TypeError.Code.NoContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
+
             if (!Validate(pterminalUser))
             {
                 return StatusCode((int)TypeError.Code.NoContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
