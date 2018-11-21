@@ -24,6 +24,7 @@
     <Compile Remove="Migrations\20181119184245_ChangeKeyType.cs" />
     <Compile Remove="Migrations\20181119185123_AddTableTypeWithChanges.cs" />
     <Compile Remove="Migrations\20181119185524_AddTableTypeWithChanges.cs" />
+    <Compile Remove="Migrations\20181121182643_SystemLog.cs" />
   </ItemGroup>
 
   <ItemGroup>

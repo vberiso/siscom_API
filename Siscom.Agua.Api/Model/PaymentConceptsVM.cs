@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Siscom.Agua.Api.Model
 {
-    public class PaymentConcepts
+    public class PaymentConceptsVM
     {
         public TransactionVM Transaction { get; set; }
         public List<TransactionDetailVM> Concepts { get; set; }

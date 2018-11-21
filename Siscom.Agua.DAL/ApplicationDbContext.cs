@@ -64,6 +64,8 @@ namespace Siscom.Agua.DAL
         public DbSet<Type> Types { get; set; }
         public DbSet<GroupType> GroupTypes { get; set; }
 
+        public DbSet<SystemLog> SystemLogs { get; set; }
+
         public ApplicationDbContext()
         {
         }
@@ -114,7 +116,7 @@ namespace Siscom.Agua.DAL
                 .HasDefaultValue(true);
 
             builder.Entity<Folio>()
-                .Property(x => x.CurrentDate)
+                .Property(x => x.DateCurrent)
                 .HasDefaultValue(System.DateTime.Now);
 
             base.OnModelCreating(builder);

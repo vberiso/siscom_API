@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
@@ -72,7 +74,7 @@ namespace Siscom.Agua.Api.Controllers
         /// <returns>New TerminalUser added</returns>
         // POST: api/Transaction
         [HttpPost]
-        public async Task<IActionResult> PostTransaction([FromBody] PaymentConcepts pConcepts)
+        public async Task<IActionResult> PostTransaction([FromBody] PaymentConceptsVM pConcepts)
         {
             if (!ModelState.IsValid)
             {
@@ -99,7 +101,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
             }
 
-            DAL.Models.Transaction transaction = new DAL.Models.Transaction();           
+            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -145,20 +147,28 @@ namespace Siscom.Agua.Api.Controllers
                     //_context.Entry(folio).State = EntityState.Modified;
                     //await _context.SaveChangesAsync();
                     scope.Complete();
-                    
+
                 }
                 catch (System.Exception ex)
                 {
+                    scope.Dispose();                    
+                    SystemLog systemLog = new SystemLog();
+                    systemLog.Description = ex.Message;
+                    systemLog.DateLog = DateTime.Now;
+                    systemLog.Controller = "TransactionController";
+                    systemLog.Action = "PostTransaction";
+                    systemLog.Parameter = JsonConvert.SerializeObject(pConcepts);
+                    _context.SystemLogs.Add(systemLog);
+                    _context.SaveChanges();
+                    
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecitar la transacción" });
 
                 }
-
                 return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+            }
+        }
 
-            } 
-    }
-
-        private bool Validate(PaymentConcepts pConcepts)
+        private bool Validate(PaymentConceptsVM pConcepts)
         {
             double sum = 0;
 
@@ -181,5 +191,6 @@ namespace Siscom.Agua.Api.Controllers
 
             return true;
         }
+
     }
 }

@@ -19,8 +19,8 @@ namespace Siscom.Agua.DAL.Models
         public int Initial { get; set; }
         [Column("secuential"), Required]
         public int Secuential { get; set; }
-        [Column("current_date"), Required]
-        public DateTime CurrentDate { get; set; }
+        [Column("date_current"), Required]
+        public DateTime DateCurrent { get; set; }
         [Column("is_active"), Required]
         public int IsActive { get; set; }
 
