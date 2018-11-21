@@ -150,14 +150,14 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 catch (DbUpdateException e)
                 {
-                    SystemLog systemLog = new SystemLog();
-                    systemLog.Description = e.Message;
-                    systemLog.DateLog = DateTime.Now;
-                    systemLog.Controller = "TransactionController";
-                    systemLog.Action = "PostTransaction";
-                    systemLog.Parameter = JsonConvert.SerializeObject(pConcepts);
-                    _context.SystemLogs.Add(systemLog);
-                    _context.SaveChanges();
+                    //SystemLog systemLog = new SystemLog();
+                    //systemLog.Description = e.Message;
+                    //systemLog.DateLog = DateTime.Now;
+                    //systemLog.Controller = "TransactionController";
+                    //systemLog.Action = "PostTransaction";
+                    //systemLog.Parameter = JsonConvert.SerializeObject(pConcepts);
+                    //_context.SystemLogs.Add(systemLog);
+                    //_context.SaveChanges();
 
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecitar la transacción" });
                 }
