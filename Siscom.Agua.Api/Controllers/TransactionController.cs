@@ -142,9 +142,10 @@ namespace Siscom.Agua.Api.Controllers
                     _context.TransactionFolios.Add(transactionFolio);
                     await _context.SaveChangesAsync();
 
-                    //folio.Secuential += 1;
-                    //_context.Entry(folio).State = EntityState.Modified;
-                    //await _context.SaveChangesAsync();
+                    folio.Secuential += 1;
+                    _context.Entry(folio).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
                     scope.Complete();
 
                 }
