@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181124155748_TypePeriod")]
+    partial class TypePeriod
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,11 +123,11 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("Lat")
                         .HasColumnName("lat")
-                        .HasMaxLength(20);
+                        .HasMaxLength(12);
 
                     b.Property<string>("Lon")
                         .HasColumnName("Lon")
-                        .HasMaxLength(20);
+                        .HasMaxLength(12);
 
                     b.Property<string>("Outdoor")
                         .IsRequired()
@@ -577,7 +579,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 11, 21, 12, 31, 10, 6, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 11, 24, 9, 57, 48, 505, DateTimeKind.Local));
+
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
 
@@ -939,11 +942,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("ClasificationGroup")
                         .HasColumnName("clasification_group");
 
-                    b.Property<string>("IntakeAcronym")
-                        .IsRequired()
-                        .HasColumnName("intake_acronym")
-                        .HasMaxLength(2);
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnName("name")
@@ -977,11 +975,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_type_intake")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Acronym")
-                        .IsRequired()
-                        .HasColumnName("acronym")
-                        .HasMaxLength(2);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1019,11 +1012,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_type_regime")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("IntakeAcronym")
-                        .IsRequired()
-                        .HasColumnName("intake_acronym")
-                        .HasMaxLength(2);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1092,11 +1080,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_type_use")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("IntakeAcronym")
-                        .IsRequired()
-                        .HasColumnName("intake_acronym")
-                        .HasMaxLength(2);
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -44,6 +44,8 @@ namespace Siscom.Agua.DAL
         public DbSet<Service> Services { get; set; }
         public DbSet<AgreementService> AgreementServices { get; set; }
         public DbSet<Diameter> Diameters { get; set; }
+        public DbSet<AgreementDiscount> AgreementDiscounts { get; set; }
+        public DbSet<Discount> Discounts { get; set; }
 
         /// <summary> 
         /// Cash Box 
@@ -79,6 +81,7 @@ namespace Siscom.Agua.DAL
         {
             builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
             builder.Entity<AgreementService>().HasKey(x => new { x.IdService, x.IdAgreement });
+            builder.Entity<AgreementDiscount>().HasKey(x => new { x.IdDiscount, x.IdAgreement });
 
             builder.Entity<ViewProfile>()
                 .HasOne<View>(sc => sc.View)
@@ -100,6 +103,28 @@ namespace Siscom.Agua.DAL
                 .WithMany(y => y.AgreementServices)
                 .HasForeignKey(x => x.IdAgreement);
 
+            builder.Entity<AgreementDiscount>()
+               .HasOne<Agreement>(x => x.Agreement)
+               .WithMany(y => y.AgreementDiscounts)
+               .HasForeignKey(x => x.IdAgreement);
+
+            builder.Entity<AgreementDiscount>()
+              .HasOne<Discount>(x => x.Discount)
+              .WithMany(y => y.AgreementDiscounts)
+              .HasForeignKey(x => x.IdDiscount);
+
+            builder.Entity<Agreement>()
+               .Property(x => x.StratDate)
+               .HasColumnType("date");
+
+            builder.Entity<AgreementDiscount>()
+                .Property(x => x.StartDate)
+                .HasColumnType("date");
+
+            builder.Entity<AgreementDiscount>()
+                .Property(x => x.EndDate)
+                .HasColumnType("date");
+
             /// <summary> 
             /// Cash Box 
             /// </summary> 
@@ -117,7 +142,7 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<Folio>()
                 .Property(x => x.DateCurrent)
-                .HasDefaultValue(System.DateTime.Now);
+                .HasDefaultValue(System.DateTime.Now);            
 
             base.OnModelCreating(builder);
         }

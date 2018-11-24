@@ -25,6 +25,8 @@ namespace Siscom.Agua.DAL.Models
         public DateTime AccountDate { get; set; }
         [Column("derivatives"), Required]
         public int Derivatives { get; set; }
+        [Column("start_date"), Required]
+        public DateTime StratDate { get; set; }
 
         public TypeService TypeService { get; set; }
         public TypeUse TypeUse{ get; set; }
@@ -39,5 +41,6 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<Client> Clients { get; set; }
         public ICollection<Adress> Addresses { get; set; }
         public ICollection<AgreementService> AgreementServices { get; set; }
+        public ICollection<AgreementDiscount> AgreementDiscounts { get; set; }
     }
 }

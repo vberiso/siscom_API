@@ -15,6 +15,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Required, StringLength(15), Column("name")]
         public string Name { get; set; }
-
+        [Column("mounth"), Required]
+        public Int16 Mounth { get; set; }        
     }
 }
