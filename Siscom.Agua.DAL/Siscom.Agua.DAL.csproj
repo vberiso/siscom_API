@@ -25,6 +25,11 @@
     <Compile Remove="Migrations\20181119185123_AddTableTypeWithChanges.cs" />
     <Compile Remove="Migrations\20181119185524_AddTableTypeWithChanges.cs" />
     <Compile Remove="Migrations\20181121182643_SystemLog.cs" />
+    <Compile Remove="Migrations\20181124165657_DebtPeriod.cs" />
+    <Compile Remove="Migrations\20181124170133_DebtPeriod.cs" />
+    <Compile Remove="Migrations\20181124170423_DebtPeriod.cs" />
+    <Compile Remove="Migrations\20181124170540_DebtPeriod.cs" />
+    <Compile Remove="Migrations\20181124171157_DebtPeriod.cs" />
   </ItemGroup>
 
   <ItemGroup>

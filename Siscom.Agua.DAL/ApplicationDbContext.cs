@@ -36,8 +36,7 @@ namespace Siscom.Agua.DAL
         public DbSet<TypeIntake> TypeIntakes { get; set; }
         public DbSet<TypeUse> TypeUses { get; set; }
         public DbSet<TypeConsume> TypeConsumes { get; set; }
-        public DbSet<TypeRegime> TypeRegimes { get; set; }
-        public DbSet<TypePeriod> TypePeriods { get; set; }        
+        public DbSet<TypeRegime> TypeRegimes { get; set; }            
         public DbSet<TypeCommertialBusiness> TypeCommertialBusinesses { get; set; }
         public DbSet<TypeStateService> TypeStateServices { get; set; }
         public DbSet<Agreement> Agreements { get; set; }
@@ -66,6 +65,15 @@ namespace Siscom.Agua.DAL
         public DbSet<Type> Types { get; set; }
         public DbSet<GroupType> GroupTypes { get; set; }
 
+        /// <summary> 
+        /// Calculation of debt
+        /// </summary> 
+        public DbSet<TypePeriod> TypePeriods { get; set; }
+        public DbSet<DebtPeriod> DebtPeriods { get; set; }
+
+        /// <summary>
+        /// System
+        /// </summary>
         public DbSet<SystemLog> SystemLogs { get; set; }
 
         public ApplicationDbContext()
@@ -142,7 +150,23 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<Folio>()
                 .Property(x => x.DateCurrent)
-                .HasDefaultValue(System.DateTime.Now);            
+                .HasDefaultValue(System.DateTime.Now);
+
+            /// <summary> 
+            /// Calculation of debt
+            /// </summary> 
+            builder.Entity<DebtPeriod>()
+               .Property(x => x.StartDate)
+               .HasColumnType("date");
+            builder.Entity<DebtPeriod>()
+              .Property(x => x.EndDate)
+              .HasColumnType("date");
+            builder.Entity<DebtPeriod>()
+              .Property(x => x.RunDate)
+              .HasColumnType("date");
+            builder.Entity<DebtPeriod>()
+              .Property(x => x.RunHour)
+              .HasColumnType("time");
 
             base.OnModelCreating(builder);
         }
