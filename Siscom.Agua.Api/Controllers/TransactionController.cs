@@ -162,7 +162,7 @@ namespace Siscom.Agua.Api.Controllers
 
                     //return RedirectToAction("InsertLog", "SystemLogController", new { log = systemLog });
                     var url = Url.RouteUrl("insertlog");
-                    return RedirectToAction(url, new { log = systemLog });
+                    //return RedirectToAction(url, new { log = systemLog });
                     //return CreatedAtAction("insertlog", new { log = systemLog });
                     //return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecitar la transacción" });
                 }
