@@ -15,7 +15,7 @@ namespace Siscom.Agua.Api.Model
         public string LastName { get; set; }
         [StringLength(80), Required]
         public string SecondLastName { get; set; }
-        [StringLength(13), Required]
+        [StringLength(13)]
         public string RFC { get; set; }
         [StringLength(18)]
         public string CURP { get; set; }
@@ -26,7 +26,6 @@ namespace Siscom.Agua.Api.Model
         [StringLength(5)]
         public string TypeUser { get; set; }
         public bool IsMale { get; set; }
-        public int AgreementId { get; set; }
         public List<ContactVM> Contacts { get; set; }
     }
 }

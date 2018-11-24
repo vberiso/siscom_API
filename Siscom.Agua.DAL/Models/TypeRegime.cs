@@ -15,6 +15,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Required, StringLength(20), Column("name")]
         public string Name { get; set; }
-
+        [Column("intake_acronym"), StringLength(2), Required]
+        public string IntakeAcronym { get; set; }
     }
 }

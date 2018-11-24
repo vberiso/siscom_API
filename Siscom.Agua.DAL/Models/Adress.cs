@@ -23,9 +23,9 @@ namespace Siscom.Agua.DAL.Models
         public string Zip { get; set; }
         [Column("reference"), StringLength(200), Required]
         public string Reference { get; set; }
-        [Column("lat"), StringLength(12)]
+        [Column("lat"), StringLength(20)]
         public string Lat { get; set; }
-        [Column("Lon"), StringLength(12)]
+        [Column("Lon"), StringLength(20)]
         public string Lon { get; set; }
         [Column("type_address"), StringLength(5)]
         public string TypeAddress { get; set; }

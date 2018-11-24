@@ -101,7 +101,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-
+            bool rol = false;
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
@@ -160,16 +160,30 @@ namespace Siscom.Agua.Api.Controllers
                     //_context.SystemLogs.Add(systemLog);
                     //_context.SaveChanges();
 
-                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecitar la transacción" });
+                    //return RedirectToAction("InsertLog", "SystemLogController", new { log = systemLog });
+                    var url = Url.RouteUrl("insertlog");
+                    return RedirectToAction(url, new { log = systemLog });
+                    //return CreatedAtAction("insertlog", new { log = systemLog });
+                    //return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecitar la transacción" });
                 }
                 catch (System.Exception ex)
                 {
-                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = ex.Message });
+                    rol = true;
+                    //return StatusCode((int)TypeError.Code.InternalServerError, new { Error = ex.Message });
                 }
-            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
-            }
-        }
 
+            }
+          
+            
+            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+        }
+        [HttpPost]
+        private async Task<IActionResult> InsertLog(SystemLog log)
+        {
+            await _context.SystemLogs.AddAsync(log);
+            await _context.SaveChangesAsync();
+            return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecitar la transacción" });
+        }
         private bool Validate(PaymentConceptsVM pConcepts)
         {
             double sum = 0;

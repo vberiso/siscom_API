@@ -28,9 +28,10 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/Towns
         [HttpGet]
-        public IEnumerable<Town> GetTowns(int StatesId)
+        public IEnumerable<TownVM> GetTowns(int StatesId)
         {
-            return _context.Towns.Where(s => s.States.Id == StatesId);
+            return _context.Towns.Where(s => s.States.Id == StatesId).Select(x => 
+            new TownVM {Id = x.Id, Name = x.Name });
         }
 
         // GET: api/Towns/5

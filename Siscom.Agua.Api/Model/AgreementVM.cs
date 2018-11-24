@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Siscom.Agua.DAL.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace Siscom.Agua.Api.Model
         {
             Adresses = new List<AdressVM>();
             Clients = new List<ClientVM>();
+            ServicesId = new List<int>();
         }
 
         public int Id { get; set; }
@@ -28,6 +30,7 @@ namespace Siscom.Agua.Api.Model
         public int TypeIntakeId { get; set; }
         public int DiameterId { get; set; }
 
+        public List<int> ServicesId { get; set; }
         public List<AdressVM> Adresses { get; set; }
         public List<ClientVM> Clients { get; set; }
     }

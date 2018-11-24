@@ -19,11 +19,11 @@ namespace Siscom.Agua.Api.Helpers
 
         public void AddLog(SystemLog log)
         {
-            using (var _context = new ApplicationDbContext())
-            {
-                _context.SystemLogs.Add(log);
-                _context.SaveChanges();
-            }
+            //using (var _context = new ApplicationDbContext())
+            //{
+            //    _context.SystemLogs.Add(log);
+            //    _context.SaveChanges();
+            //}
         }
     }
 }

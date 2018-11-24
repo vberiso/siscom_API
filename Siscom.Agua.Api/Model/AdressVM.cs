@@ -19,14 +19,13 @@ namespace Siscom.Agua.Api.Model
         public string Zip { get; set; }
         [StringLength(200)]
         public string Reference { get; set; }
-        [StringLength(12)]
+        [StringLength(20)]
         public string Lat { get; set; }
-        [StringLength(12)]
+        [StringLength(20)]
         public string Lon { get; set; }
         [StringLength(5)]
         public string TypeAddress { get; set; }
 
-        public int AgreementsId { get; set; }
         public int SuburbsId { get; set; }
     }
 }

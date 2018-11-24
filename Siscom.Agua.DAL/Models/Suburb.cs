@@ -15,7 +15,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("name"), StringLength(100), Required]
         public string Name { get; set; }
-        [JsonIgnore]
+
         public Town Towns { get; set; }
         public Region Regions { get; set; }
         public Clasification Clasifications { get; set; }

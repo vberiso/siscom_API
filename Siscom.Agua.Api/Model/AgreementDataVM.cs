@@ -17,5 +17,27 @@ namespace Siscom.Agua.Api.Model
         public List<TypeStateService> TypeStateService { get; set; }
         public List<TypeIntake> TypeIntake { get; set; }
         public List<Diameter> Diameter { get; set; }
+        public List<TypeClient> TypeClients { get; set; }
+        public List<TypeAddress> TypeAddresses { get; set; }
+        public List<TypeContact> TypeContacts { get; set; }
+        public List<ServiceVM> Services { get; set; }
+    }
+
+    public class TypeClient
+    {
+        public string IdType { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class TypeAddress
+    {
+        public string IdType { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class TypeContact
+    {
+        public string IdType { get; set; }
+        public string Description { get; set; }
     }
 }

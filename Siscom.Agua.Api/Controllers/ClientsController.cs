@@ -124,6 +124,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
+          
             var client = _context.Clients.Find(contact.ClientId);
             if(client == null)
             {

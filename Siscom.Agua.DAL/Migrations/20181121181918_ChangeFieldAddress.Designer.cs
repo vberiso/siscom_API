@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181121181918_ChangeFieldAddress")]
+    partial class ChangeFieldAddress
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -519,10 +521,10 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int?>("BranchOfficeId");
 
-                    b.Property<DateTime>("DateCurrent")
+                    b.Property<DateTime>("CurrentDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 11, 21, 14, 24, 54, 210, DateTimeKind.Local));
+                        .HasColumnName("current_date")
+                        .HasDefaultValue(new DateTime(2018, 11, 21, 12, 19, 18, 634, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -658,37 +660,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("TownsId");
 
                     b.ToTable("Suburb");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.SystemLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_system_log")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnName("action");
-
-                    b.Property<string>("Controller")
-                        .IsRequired()
-                        .HasColumnName("controller");
-
-                    b.Property<DateTime>("DateLog")
-                        .HasColumnName("date_log");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnName("description");
-
-                    b.Property<string>("Parameter")
-                        .IsRequired()
-                        .HasColumnName("parameter");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("System_Log");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Terminal", b =>
@@ -885,11 +856,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("ClasificationGroup")
                         .HasColumnName("clasification_group");
 
-                    b.Property<string>("IntakeAcronym")
-                        .IsRequired()
-                        .HasColumnName("intake_acronym")
-                        .HasMaxLength(2);
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnName("name")
@@ -924,11 +890,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_type_intake")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Acronym")
-                        .IsRequired()
-                        .HasColumnName("acronym")
-                        .HasMaxLength(2);
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnName("name")
@@ -962,11 +923,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_type_regime")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("IntakeAcronym")
-                        .IsRequired()
-                        .HasColumnName("intake_acronym")
-                        .HasMaxLength(2);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1035,11 +991,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_type_use")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("IntakeAcronym")
-                        .IsRequired()
-                        .HasColumnName("intake_acronym")
-                        .HasMaxLength(2);
 
                     b.Property<string>("Name")
                         .IsRequired()

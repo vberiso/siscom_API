@@ -28,16 +28,24 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/Suburbs
         [HttpGet]
-        public IEnumerable<Suburb> GetSuburbs(int TownsId)
+        public IEnumerable<SuburbVM> GetSuburbs(int TownsId)
         {
             if ( _context.Towns.Where(x => x.Id == TownsId).SingleOrDefault() != null)
             {
-                var a = _context.Suburbs.Include(r => r.Regions).Include(c => c.Clasifications).Where(t => t.Towns.Id == TownsId).ToList();
+                var a = _context.Suburbs.Include(r => r.Regions)
+                                        .Include(c => c.Clasifications)
+                                        .Where(t => t.Towns.Id == TownsId)
+                                        .Select(x => new SuburbVM{
+                                            Id = x.Id,
+                                            Name = x.Name,
+                                            ClasificationId = x.Clasifications.Id,
+                                            RegionId = x.Regions.Id,
+                                        }).ToList();
                 return a;
             }
             else
             {
-                return Enumerable.Empty<Suburb>();
+                return Enumerable.Empty<SuburbVM>();
             }
             
         }

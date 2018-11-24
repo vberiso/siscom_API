@@ -72,7 +72,7 @@ namespace Siscom.Agua.Api.Controllers
                     var token = new JwtSecurityToken(
                             issuer: appSettings.ValidIssuer,
                             audience: appSettings.ValidAudience,
-                            expires: DateTime.Now.AddHours(1),
+                            expires: DateTime.Now.AddHours(9),
                             claims: claims,
                             signingCredentials: new Microsoft.IdentityModel.Tokens.SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
                         );

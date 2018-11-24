@@ -17,5 +17,7 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
         [Required, Column("clasification_group")]
         public int ClasificationGroup { get; set; }
+        [Column("intake_acronym"), StringLength(2), Required]
+        public string IntakeAcronym { get; set; }
     }
 }
