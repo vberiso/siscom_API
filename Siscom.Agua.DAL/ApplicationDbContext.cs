@@ -60,16 +60,21 @@ namespace Siscom.Agua.DAL
         public DbSet<TransactionDetail> TransactionDetails { get; set; }
 
         /// <summary> 
-        /// Types 
+        /// Groups
         /// </summary> 
         public DbSet<Type> Types { get; set; }
         public DbSet<GroupType> GroupTypes { get; set; }
+        public DbSet<GroupStatus> GroupStatuses { get; set; }
+        public DbSet<Status> Statuses { get; set; }
+
 
         /// <summary> 
         /// Calculation of debt
         /// </summary> 
+        public DbSet<Debt> Debts { get; set; }
         public DbSet<TypePeriod> TypePeriods { get; set; }
         public DbSet<DebtPeriod> DebtPeriods { get; set; }
+       
 
         /// <summary>
         /// System
@@ -158,15 +163,26 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtPeriod>()
                .Property(x => x.StartDate)
                .HasColumnType("date");
+
             builder.Entity<DebtPeriod>()
               .Property(x => x.EndDate)
               .HasColumnType("date");
+
             builder.Entity<DebtPeriod>()
               .Property(x => x.RunDate)
               .HasColumnType("date");
+
             builder.Entity<DebtPeriod>()
               .Property(x => x.RunHour)
               .HasColumnType("time");
+
+            builder.Entity<Debt>()
+             .Property(x => x.FromDate)
+             .HasColumnType("date");
+
+            builder.Entity<Debt>()
+             .Property(x => x.UntilDate)
+             .HasColumnType("date");
 
             base.OnModelCreating(builder);
         }
