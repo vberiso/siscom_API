@@ -30,6 +30,7 @@
     <Compile Remove="Migrations\20181124170423_DebtPeriod.cs" />
     <Compile Remove="Migrations\20181124170540_DebtPeriod.cs" />
     <Compile Remove="Migrations\20181124171157_DebtPeriod.cs" />
+    <Compile Remove="Migrations\20181124175632_ServiceConcepts.cs" />
   </ItemGroup>
 
   <ItemGroup>

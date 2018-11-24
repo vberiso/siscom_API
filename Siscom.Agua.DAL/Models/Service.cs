@@ -18,8 +18,18 @@ namespace Siscom.Agua.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_service")]
         public int Id { get; set; }
-        [Required, StringLength(25), Column("name")]
+        [Required, StringLength(50), Column("name")]
         public string Name { get; set; }
+        [Required, Column("order")]
+        public Int16 Order { get; set; }
+        [Required, Column("is_service")]
+        public bool IsService { get; set; }
+        [Required, Column("have_tax")]
+        public bool HaveTax { get; set; }
+        [Required, Column("in_agreement")]
+        public bool InAgreement { get; set; }
+        [Required, Column("is_active")]
+        public bool IsActive { get; set; }
 
         public ICollection<AgreementService> AgreementServices { get; set; }
     }
