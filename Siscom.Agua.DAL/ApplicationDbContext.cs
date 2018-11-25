@@ -45,6 +45,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Diameter> Diameters { get; set; }
         public DbSet<AgreementDiscount> AgreementDiscounts { get; set; }
         public DbSet<Discount> Discounts { get; set; }
+        public DbSet<Derivative> Derivatives { get; set; }
 
         /// <summary> 
         /// Cash Box 
@@ -74,7 +75,14 @@ namespace Siscom.Agua.DAL
         public DbSet<Debt> Debts { get; set; }
         public DbSet<TypePeriod> TypePeriods { get; set; }
         public DbSet<DebtPeriod> DebtPeriods { get; set; }
-       
+        public DbSet<Meter> Meters { get; set; }
+        public DbSet<Consumption> Consumptions { get; set; }
+
+        /// <summary> 
+        /// Payment
+        /// </summary> 
+        public DbSet<OriginPayment> OriginPayments { get; set; }
+
 
         /// <summary>
         /// System
@@ -183,6 +191,15 @@ namespace Siscom.Agua.DAL
             builder.Entity<Debt>()
              .Property(x => x.UntilDate)
              .HasColumnType("date");
+
+            builder.Entity<Meter>()
+             .Property(x => x.InstallDate)
+             .HasColumnType("date");
+
+            builder.Entity<Meter>()
+             .Property(x => x.DeinstallDate)
+             .HasColumnType("date");
+
 
             base.OnModelCreating(builder);
         }

@@ -25,7 +25,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("type_service"), StringLength(50), Required]
         public string TypeService { get; set; }
         [Column("consumption"), StringLength(10), Required]
-        public string consumption { get; set; }
+        public string Consumption { get; set; }
         [Column("discount"), StringLength(50)]
         public string Discount { get; set; }
         [Column("amount"), Required]
