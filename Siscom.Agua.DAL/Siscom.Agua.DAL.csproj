@@ -33,6 +33,8 @@
     <Compile Remove="Migrations\20181124175632_ServiceConcepts.cs" />
     <Compile Remove="Migrations\20181126165914_Payment.cs" />
     <Compile Remove="Migrations\20181126170227_Payment.cs" />
+    <Compile Remove="Migrations\20181126180816_AgreementLog.cs" />
+    <Compile Remove="Migrations\20181126181036_AgreementLog.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -15,17 +15,7 @@ namespace Siscom.Agua.Api.Helpers
     {
 
         private readonly ApplicationDbContext _context;
-        //private readonly ConnectionString appSettings;
-
-        //public CustomSystemLog(ApplicationDbContext context, ConnectionString appSettings)
-        //{
-        //    _context = context;
-        //    this.appSettings = appSettings;
-        //}
-        //public CustomSystemLog(ConnectionString appSettings)
-        //{
-        //    this.appSettings = appSettings;
-        //}
+     
         public CustomSystemLog(ApplicationDbContext context)
         {
             _context = context;
@@ -38,40 +28,7 @@ namespace Siscom.Agua.Api.Helpers
             int returnValue = _context.SaveChanges();
             return returnValue > 0 ? true : false;
         }
-
-        #region Methods Test
-        //public async System.Threading.Tasks.Task<bool> AddLogAsync(SystemLog systemLog)
-        //{
-        //    string connectionString = appSettings.SiscmomConnection;
-        //    int returnValue = 0;
-        //    var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-        //                .UseSqlServer(new SqlConnection(connectionString))
-        //                .Options;
-
-        //    //ResetContextState();
-        //    using(var dbcontext = new ApplicationDbContext(options))
-        //    {
-        //        using(var transaction = new TransactionScope())
-        //        {
-        //            try
-        //            {
-        //                dbcontext.SystemLogs.Add(systemLog);
-        //                returnValue = dbcontext.SaveChanges();
-        //                transaction.Complete();
-        //            }
-        //            catch (System.Exception)
-        //            {
-
-        //                throw;
-        //            }
-        //        }
-
-        //        return returnValue > 0 ? true : false;
-        //    }
-
-        //}
-
-        #endregion
+        
         private void ResetContextState() => _context.ChangeTracker.Entries()
                                 .Where(e => e.Entity != null && e.State == EntityState.Added)
                                 .ToList().ForEach(e => e.State = EntityState.Detached);

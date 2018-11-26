@@ -46,6 +46,7 @@ namespace Siscom.Agua.DAL
         public DbSet<AgreementDiscount> AgreementDiscounts { get; set; }
         public DbSet<Discount> Discounts { get; set; }
         public DbSet<Derivative> Derivatives { get; set; }
+        public DbSet<AgreementLog> AgreementLogs { get; set; }
 
         /// <summary> 
         /// Cash Box 
