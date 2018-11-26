@@ -212,24 +212,23 @@ namespace Siscom.Agua.Api.Controllers
         /// <summary>
         /// Get the search result
         /// </summary>
-        /// <param name="pterminalUser">TerminalUserVM Model</param>
+        /// <param name="op">0</param>
+        /// <param name="pterminal">TerminalId</param>
         /// <returns></returns>
         // GET: api/TerminalUser
-        [HttpGet("search/find")]
-        public async Task<IActionResult> FindTerminalUser([FromBody] TermimalUserVM pterminalUser)
+        [HttpGet("{op}/{pterminal}")]
+        public async Task<IActionResult> FindTerminalUser([FromRoute] string op, int pterminal)
         {
             string valores = String.Empty;
-            var terminalUser = new object();
-            Terminal terminal = new Terminal();         
+            Terminal terminal = new Terminal();
 
-            if (pterminalUser.TermianlId != 0)
-            {
-                
+            if (pterminal != 0)
+            {                
                 terminal = await _context.Terminal
                                          .Include(x =>x.BranchOffice)
                                          .Include(x => x.TerminalUsers)
                                          .ThenInclude(u => u.User)
-                                         .Where(x => x.Id == pterminalUser.TermianlId).FirstOrDefaultAsync();                
+                                         .Where(x => x.Id == pterminal).FirstOrDefaultAsync();                
             }
 
             if (terminal == null)

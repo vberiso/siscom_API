@@ -181,6 +181,35 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(terminal);
         }
 
+        /// <summary>
+        /// Get the search result
+        /// </summary>
+        /// <param name="mac">MacAdress</param>
+        /// /// <param name="branch">BranchOffice</param>
+        /// <returns></returns>
+        // GET: api/Terminal
+        [HttpGet("{mac}/{branch}")]
+        public async Task<IActionResult> FindTerminalUser([FromRoute] string mac, int branch)
+        {
+            string valores = String.Empty;
+            var terminalUser = new object();
+            Terminal terminal = new Terminal();
+
+            if (!String.IsNullOrEmpty(mac) && branch != 0)
+            {
+                terminal = await _context.Terminal      
+                                         .Include(x => x.BranchOffice)
+                                         .Where(x => x.MacAdress == mac && x.BranchOffice.Id== branch).FirstOrDefaultAsync();
+            }
+
+            if (terminal == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(terminal);
+        }
+
         private bool TerminalExists(int id)
         {
             return _context.Terminal.Any(e => e.Id == id);
