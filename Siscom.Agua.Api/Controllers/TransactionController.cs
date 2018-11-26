@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.Api.Services.Security;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
@@ -159,10 +160,10 @@ namespace Siscom.Agua.Api.Controllers
                         scope.Complete();
                     }
                 }
-                catch (DbUpdateException e)
+                catch (Exception e)
                 {
                     SystemLog systemLog = new SystemLog();
-                    systemLog.Description = e.Message;
+                    systemLog.Description = e.ToMessageAndCompleteStacktrace();
                     systemLog.DateLog = DateTime.Now;
                     systemLog.Controller = "TransactionController";
                     systemLog.Action = "PostTransaction";
@@ -170,10 +171,6 @@ namespace Siscom.Agua.Api.Controllers
                     CustomSystemLog helper = new CustomSystemLog(_context);
                     helper.AddLog(systemLog);
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
-                }
-                catch (System.Exception ex)
-                {
-                    //return StatusCode((int)TypeError.Code.InternalServerError, new { Error = ex.Message });
                 }
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
         }
