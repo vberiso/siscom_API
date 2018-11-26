@@ -21,5 +21,6 @@ namespace Siscom.Agua.DAL.Models
         public string Observation { get; set; }
 
         public ApplicationUser User { get; set; }
+        public Agreement Agreement { get; set; }
     }
 }
