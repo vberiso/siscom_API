@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -37,6 +38,30 @@ namespace Siscom.Agua.Api.Controllers
         public IEnumerable<TerminalUser> GetTerminalUser()
         {
             return _context.TerminalUsers;
+        }
+
+        /// <summary>
+        /// This will provide details for the specific ID, of Terminal User which is being passed
+        /// </summary>
+        /// <param name="id">Mandatory</param>
+        /// <returns>TerminalUser Model</returns>
+        // GET: api/TerminalUser/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBranchOffice([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var terminalUser = await _context.TerminalUsers.FindAsync(id);
+
+            if (terminalUser == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(terminalUser);
         }
 
         /// <summary>
@@ -182,6 +207,37 @@ namespace Siscom.Agua.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(terminalUser);
+        }
+
+        /// <summary>
+        /// Get the search result
+        /// </summary>
+        /// <param name="pterminalUser">TerminalUserVM Model</param>
+        /// <returns></returns>
+        // GET: api/TerminalUser
+        [HttpGet("search/find")]
+        public async Task<IActionResult> FindTerminalUser([FromBody] TermimalUserVM pterminalUser)
+        {
+            string valores = String.Empty;
+            var terminalUser = new object();
+            Terminal terminal = new Terminal();         
+
+            if (pterminalUser.TermianlId != 0)
+            {
+                
+                terminal = await _context.Terminal
+                                         .Include(x =>x.BranchOffice)
+                                         .Include(x => x.TerminalUsers)
+                                         .ThenInclude(u => u.User)
+                                         .Where(x => x.Id == pterminalUser.TermianlId).FirstOrDefaultAsync();                
+            }
+
+            if (terminal == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(terminal);
         }
 
         private bool Validate(TermimalUserVM pterminalUser)
