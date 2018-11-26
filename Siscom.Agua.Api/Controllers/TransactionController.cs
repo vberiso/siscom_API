@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Security;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 using System;
@@ -24,10 +27,12 @@ namespace Siscom.Agua.Api.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ConnectionString appSettings;
 
-        public TransactionController(ApplicationDbContext context)
+        public TransactionController(ApplicationDbContext context, IOptions<ConnectionString> appSettings)
         {
             _context = context;
+            this.appSettings = appSettings.Value;
         }
 
         /// <summary>
@@ -101,89 +106,78 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-            bool rol = false;
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            var option = new TransactionOptions
             {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.FromSeconds(60)
+            };
+         
                 try
                 {
-                    transaction.DateTransaction = DateTime.Now;
-                    transaction.Aplication = pConcepts.Transaction.Aplication;
-                    transaction.Amount = pConcepts.Transaction.Amount;
-                    transaction.Sign = pConcepts.Transaction.Sign;
-                    transaction.TerminalUser = await _context.TerminalUsers.Include(x => x.Terminal).FirstOrDefaultAsync(y => y.Id == pConcepts.Transaction.TerminalUserId).ConfigureAwait(false);
-                    transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pConcepts.Transaction.TypeTransactionId).ConfigureAwait(false);
-                    transaction.PayMethod = await _context.PayMethods.FindAsync(pConcepts.Transaction.PayMethodId).ConfigureAwait(false);
-                    transaction.Folio = Guid.NewGuid().ToString("D");
-                    _context.Transactions.Add(transaction);
-                    await _context.SaveChangesAsync();
-
-                    for (int i = 0; i < pConcepts.Concepts.Count; i++)
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        TransactionDetail transactionDetail = new TransactionDetail();
-                        transactionDetail.CodeConcept = pConcepts.Concepts[i].CodeConcept;
-                        transactionDetail.amount = pConcepts.Concepts[i].amount;
-                        transactionDetail.Description = pConcepts.Concepts[i].Description;
-                        transactionDetail.Transaction = transaction;
-                        _context.TransactionDetails.Add(transactionDetail);
+                        transaction.DateTransaction = DateTime.Now;
+                        transaction.Aplication = pConcepts.Transaction.Aplication;
+                        transaction.Amount = pConcepts.Transaction.Amount;
+                        transaction.Sign = pConcepts.Transaction.Sign;
+                        transaction.TerminalUser = await _context.TerminalUsers.Include(x => x.Terminal).FirstOrDefaultAsync(y => y.Id == pConcepts.Transaction.TerminalUserId).ConfigureAwait(false);
+                        transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pConcepts.Transaction.TypeTransactionId).ConfigureAwait(false);
+                        transaction.PayMethod = await _context.PayMethods.FindAsync(pConcepts.Transaction.PayMethodId).ConfigureAwait(false);
+                        transaction.Folio = Guid.NewGuid().ToString("D");
+                        _context.Transactions.Add(transaction);
                         await _context.SaveChangesAsync();
+
+                        for (int i = 0; i < pConcepts.Concepts.Count; i++)
+                        {
+                            TransactionDetail transactionDetail = new TransactionDetail();
+                            transactionDetail.CodeConcept = pConcepts.Concepts[i].CodeConcept;
+                            transactionDetail.amount = pConcepts.Concepts[i].amount;
+                            transactionDetail.Description = pConcepts.Concepts[i].Description;
+                            transactionDetail.Transaction = transaction;
+                            _context.TransactionDetails.Add(transactionDetail);
+                            await _context.SaveChangesAsync();
+                        }
+
+                        await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+
+                        Folio folio = new Folio();
+                        folio = await _context.Folios
+                                              .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
+                                                           x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
+
+                        TransactionFolio transactionFolio = new TransactionFolio();
+                        transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
+                        transactionFolio.DatePrint = DateTime.Now;
+                        transactionFolio.Transaction = transaction;
+                        _context.TransactionFolios.Add(transactionFolio);
+                        await _context.SaveChangesAsync();
+
+                        //folio.Secuential += 1;
+                        //_context.Entry(folio).State = EntityState.Modified;
+                        //await _context.SaveChangesAsync();
+
+                        scope.Complete();
                     }
-
-                    await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
-
-                    Folio folio = new Folio();
-                    folio = await _context.Folios
-                                          .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
-                                                       x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
-
-                    TransactionFolio transactionFolio = new TransactionFolio();
-                    transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
-                    transactionFolio.DatePrint = DateTime.Now;
-                    transactionFolio.Transaction = transaction;
-                    _context.TransactionFolios.Add(transactionFolio);
-                    await _context.SaveChangesAsync();
-
-                    folio.Secuential += 1;
-                    _context.Entry(folio).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();
-
-                    scope.Complete();
-
                 }
                 catch (DbUpdateException e)
                 {
-                    //SystemLog systemLog = new SystemLog();
-                    //systemLog.Description = e.Message;
-                    //systemLog.DateLog = DateTime.Now;
-                    //systemLog.Controller = "TransactionController";
-                    //systemLog.Action = "PostTransaction";
-                    //systemLog.Parameter = JsonConvert.SerializeObject(pConcepts);
-                    //_context.SystemLogs.Add(systemLog);
-                    //_context.SaveChanges();
-
-                    //return RedirectToAction("InsertLog", "SystemLogController", new { log = systemLog });
-                    var url = Url.RouteUrl("insertlog");
-                    //return RedirectToAction(url, new { log = systemLog });
-                    //return CreatedAtAction("insertlog", new { log = systemLog });
-                    //return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecitar la transacción" });
+                    SystemLog systemLog = new SystemLog();
+                    systemLog.Description = e.Message;
+                    systemLog.DateLog = DateTime.Now;
+                    systemLog.Controller = "TransactionController";
+                    systemLog.Action = "PostTransaction";
+                    systemLog.Parameter = JsonConvert.SerializeObject(pConcepts);
+                    CustomSystemLog helper = new CustomSystemLog(_context);
+                    helper.AddLog(systemLog);
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
                 }
                 catch (System.Exception ex)
                 {
-                    rol = true;
                     //return StatusCode((int)TypeError.Code.InternalServerError, new { Error = ex.Message });
                 }
-
-            }
-          
-            
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
         }
-        [HttpPost]
-        private async Task<IActionResult> InsertLog(SystemLog log)
-        {
-            await _context.SystemLogs.AddAsync(log);
-            await _context.SaveChangesAsync();
-            return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecitar la transacción" });
-        }
+      
         private bool Validate(PaymentConceptsVM pConcepts)
         {
             double sum = 0;

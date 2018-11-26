@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Services\Settings\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

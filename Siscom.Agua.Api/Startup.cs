@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -44,14 +45,17 @@ namespace Siscom.Agua.Api
 
             var settingsIdentity= Configuration.GetSection("AppIdentitySettings");
             var settingsJWT= Configuration.GetSection("ApplicationSettings");
+            var settingsConnection = Configuration.GetSection("ConnectionStrings");
             var settings = settingsIdentity.Get<AppIdentitySettings>();
             var settingsApp = settingsJWT.Get<AppSettings>();
+            var settingsCon = settingsConnection.Get<ConnectionString>();
 
             string assemblyNamespace = typeof(ApplicationDbContext).Namespace;
 
 
             // Inject AppSettings so that others can use too
             services.Configure<AppSettings>(Configuration.GetSection("ApplicationSettings"));
+            services.Configure<ConnectionString>(settingsConnection);
 
             services.AddCors(options =>
             {
@@ -59,19 +63,21 @@ namespace Siscom.Agua.Api
                     policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowCredentials().Build());
             });
 
-           
+
 
             // ===== Add our DbContext ========
-            services.AddDbContext<ApplicationDbContext>(options => 
-                    options.UseSqlServer(Configuration.GetConnectionString("SiscmomConnection"), optionsBuilder =>
-                    optionsBuilder.MigrationsAssembly(assemblyNamespace))
-                        .EnableSensitiveDataLogging(true)
-                        .UseLoggerFactory(new LoggerFactory()
-                            .AddConsole((category, level) => 
-                                level == LogLevel.Information && category == DbLoggerCategory.Database.Command.Name, true
-                            )
-                         )
-                    );
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                //options.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
+                options.UseSqlServer(Configuration.GetConnectionString("SiscmomConnection"), optionsBuilder =>
+                optionsBuilder.MigrationsAssembly(assemblyNamespace))
+                    .EnableSensitiveDataLogging(true)
+                    .UseLoggerFactory(new LoggerFactory()
+                        .AddConsole((category, level) =>
+                            level == LogLevel.Information && category == DbLoggerCategory.Database.Command.Name, true
+                        )
+                     );
+             });
 
             // ===== Add Identity ========
             //===== Configure Identity Options ================

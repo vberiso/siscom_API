@@ -95,7 +95,10 @@ namespace Siscom.Agua.DAL
         public ApplicationDbContext()
         {
         }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options): base(options)
+        {
 
+        }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration) : base(options)
         {
             _configuration = configuration;
