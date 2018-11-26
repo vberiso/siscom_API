@@ -33,7 +33,7 @@ namespace Siscom.Agua.DAL.Models
         public TypeConsume TypeConsume { get; set; }
         public TypeRegime TypeRegime { get; set; }
         public TypePeriod TypePeriod { get; set; }
-        public TypeCommertialBusiness TypeCommertialBusiness { get; set; }
+        public TypeCommercialBusiness TypeCommertialBusiness { get; set; }
         public TypeStateService TypeStateService { get; set; }
         public TypeIntake TypeIntake { get; set; }
         public Diameter Diameter { get; set; }

@@ -26,7 +26,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/TypeCommertialBusinesses
         [HttpGet]
-        public IEnumerable<TypeCommertialBusiness> GetTypeCommertialBusinesses()
+        public IEnumerable<TypeCommercialBusiness> GetTypeCommertialBusinesses()
         {
             return _context.TypeCommertialBusinesses;
         }
@@ -52,7 +52,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/TypeCommertialBusinesses/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTypeCommertialBusiness([FromRoute] int id, [FromBody] TypeCommertialBusiness typeCommertialBusiness)
+        public async Task<IActionResult> PutTypeCommertialBusiness([FromRoute] int id, [FromBody] TypeCommercialBusiness typeCommertialBusiness)
         {
             if (!ModelState.IsValid)
             {
@@ -87,7 +87,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // POST: api/TypeCommertialBusinesses
         [HttpPost]
-        public async Task<IActionResult> PostTypeCommertialBusiness([FromBody] TypeCommertialBusiness typeCommertialBusiness)
+        public async Task<IActionResult> PostTypeCommertialBusiness([FromBody] TypeCommercialBusiness typeCommertialBusiness)
         {
             if (!ModelState.IsValid)
             {

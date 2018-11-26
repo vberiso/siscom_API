@@ -37,7 +37,7 @@ namespace Siscom.Agua.DAL
         public DbSet<TypeUse> TypeUses { get; set; }
         public DbSet<TypeConsume> TypeConsumes { get; set; }
         public DbSet<TypeRegime> TypeRegimes { get; set; }            
-        public DbSet<TypeCommertialBusiness> TypeCommertialBusinesses { get; set; }
+        public DbSet<TypeCommercialBusiness> TypeCommertialBusinesses { get; set; }
         public DbSet<TypeStateService> TypeStateServices { get; set; }
         public DbSet<Agreement> Agreements { get; set; }
         public DbSet<Service> Services { get; set; }

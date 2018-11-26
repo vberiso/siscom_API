@@ -7,7 +7,7 @@ using System.Text;
 namespace Siscom.Agua.DAL.Models
 {
     [Table("Type_Commertial_Business")]
-    public class TypeCommertialBusiness
+    public class TypeCommercialBusiness
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

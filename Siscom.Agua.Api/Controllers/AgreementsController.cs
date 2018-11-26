@@ -125,7 +125,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
             
-            TypeCommertialBusiness cBusiness = null;
+            TypeCommercialBusiness cBusiness = null;
             Agreement NewAgreement = new Agreement();
             if (agreementvm.TypeCommertialBusinessId == 0)
             {

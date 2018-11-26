@@ -13,7 +13,7 @@ namespace Siscom.Agua.Api.Model
         public List<TypeConsume> TypeConsume { get; set; }
         public List<TypeRegime> TypeRegime { get; set; }
         public List<TypePeriod> TypePeriod { get; set; }
-        public List<TypeCommertialBusiness> TypeCommertialBusiness { get; set; }
+        public List<TypeCommercialBusiness> TypeCommertialBusiness { get; set; }
         public List<TypeStateService> TypeStateService { get; set; }
         public List<TypeIntake> TypeIntake { get; set; }
         public List<Diameter> Diameter { get; set; }
