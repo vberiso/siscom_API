@@ -77,11 +77,14 @@ namespace Siscom.Agua.DAL
         public DbSet<DebtPeriod> DebtPeriods { get; set; }
         public DbSet<Meter> Meters { get; set; }
         public DbSet<Consumption> Consumptions { get; set; }
+        public DbSet<Tariff> Tariffs { get; set; }
 
         /// <summary> 
         /// Payment
         /// </summary> 
         public DbSet<OriginPayment> OriginPayments { get; set; }
+        public DbSet<ExternalOriginPayment> ExternalOriginPayments { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
 
         /// <summary>
@@ -169,37 +172,44 @@ namespace Siscom.Agua.DAL
             /// Calculation of debt
             /// </summary> 
             builder.Entity<DebtPeriod>()
-               .Property(x => x.StartDate)
+                .Property(x => x.StartDate)
+                .HasColumnType("date");
+
+            builder.Entity<DebtPeriod>()
+                .Property(x => x.EndDate)
+                .HasColumnType("date");
+
+            builder.Entity<DebtPeriod>()
+                .Property(x => x.RunDate)
+                .HasColumnType("date");
+
+            builder.Entity<DebtPeriod>()
+                .Property(x => x.RunHour)
+                .HasColumnType("time");
+
+            builder.Entity<Debt>()
+               .Property(x => x.FromDate)
                .HasColumnType("date");
 
-            builder.Entity<DebtPeriod>()
-              .Property(x => x.EndDate)
-              .HasColumnType("date");
-
-            builder.Entity<DebtPeriod>()
-              .Property(x => x.RunDate)
-              .HasColumnType("date");
-
-            builder.Entity<DebtPeriod>()
-              .Property(x => x.RunHour)
-              .HasColumnType("time");
-
             builder.Entity<Debt>()
-             .Property(x => x.FromDate)
-             .HasColumnType("date");
-
-            builder.Entity<Debt>()
-             .Property(x => x.UntilDate)
-             .HasColumnType("date");
+               .Property(x => x.UntilDate)
+               .HasColumnType("date");
 
             builder.Entity<Meter>()
-             .Property(x => x.InstallDate)
-             .HasColumnType("date");
+               .Property(x => x.InstallDate)
+               .HasColumnType("date");
 
             builder.Entity<Meter>()
-             .Property(x => x.DeinstallDate)
-             .HasColumnType("date");
+               .Property(x => x.DeinstallDate)
+               .HasColumnType("date");
 
+            builder.Entity<Tariff>()
+              .Property(x => x.FromDate)
+              .HasColumnType("date");
+
+            builder.Entity<Tariff>()
+              .Property(x => x.UntilDate)
+              .HasColumnType("date");
 
             base.OnModelCreating(builder);
         }

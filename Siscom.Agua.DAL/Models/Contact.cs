@@ -16,6 +16,8 @@ namespace Siscom.Agua.DAL.Models
         public string PhoneNumber { get; set; }
         [Column("type_number"), Required]
         public string TypeNumber { get; set; }
+        [Column("is_active"), Required]
+        public int IsActive { get; set; }
 
         public Client Client { get; set; }
     }
