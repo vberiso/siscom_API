@@ -81,6 +81,9 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostTransaction([FromBody] PaymentConceptsVM pConcepts)
         {
+            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            bool _open = false;
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -91,36 +94,67 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
             }
 
-
-            if (await _context.TerminalUsers.Where(x => x.Id == pConcepts.Transaction.TerminalUserId &&
-                                                   x.InOperation == false)
-                                            .FirstOrDefaultAsync() != null)
+            //Type Transaction
+            //1   Apertura de Caja
+            //5   Cierre de Caja
+            if (pConcepts.Transaction.TypeTransactionId != 1 && pConcepts.Transaction.TypeTransactionId != 5)
             {
+                if (!ValidConcept(pConcepts))
+                {
+                    return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("El detalle de conceptos no es correcto") });
+                }
+            }
+
+            TerminalUser terminalUser = new TerminalUser();
+            terminalUser = await _context.TerminalUsers
+                                             .Include(x => x.Terminal)
+                                             .Where(x => x.Id == pConcepts.Transaction.TerminalUserId).FirstOrDefaultAsync();
+        
+            if(!terminalUser.InOperation)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
-            }
 
-            if (await _context.TerminalUsers.Where(x => x.Id == pConcepts.Transaction.TerminalUserId &&
-                                                   x.OpenDate.Date != DateTime.Now.Date)
-                                            .FirstOrDefaultAsync() != null)
-            {
+            if(terminalUser.OpenDate.Date != DateTime.Now.Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
-            }
 
-            if (pConcepts.Transaction.TypeTransactionId==2)
+            if (await _context.Transactions.Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                      x.TypeTransaction.Id == 5)
+                                                      .FirstOrDefaultAsync() == null)
             {
-                if(await _context.Transactions.Where(x => x.TypeTransaction.Id == pConcepts.Transaction.TypeTransactionId &&
-                                                          x.TerminalUser.Id == pConcepts.Transaction.TerminalUserId)
-                                                     .FirstOrDefaultAsync() != null)
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
-            }
+                
 
-            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-            var option = new TransactionOptions
-            {
-                IsolationLevel = IsolationLevel.ReadCommitted,
-                Timeout = TimeSpan.FromSeconds(60)
-            };
-         
+                if (await _context.Transactions.Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                       x.TypeTransaction.Id == 1)
+                                                       .FirstOrDefaultAsync() != null)
+                    _open = true;
+
+                switch (pConcepts.Transaction.TypeTransactionId)
+                {
+                    case 1:                       
+                            if(_open)
+                                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha aperturado" });
+                        break;
+                    default:
+                        if(!_open)
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+                        break;
+                }
+
+                if (pConcepts.Transaction.TypeTransactionId == 2)
+                {
+                    if (await _context.Transactions.Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                               x.TypeTransaction.Id == 2)
+                                                               .FirstOrDefaultAsync() != null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
+                }
+
+                
+
+                    var option = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.FromSeconds(60)
+                };
+
                 try
                 {
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -136,36 +170,42 @@ namespace Siscom.Agua.Api.Controllers
                         _context.Transactions.Add(transaction);
                         await _context.SaveChangesAsync();
 
-                        for (int i = 0; i < pConcepts.Concepts.Count; i++)
+                        if (pConcepts.Transaction.TypeTransactionId != 1  && pConcepts.Transaction.TypeTransactionId != 5)
                         {
-                            TransactionDetail transactionDetail = new TransactionDetail();
-                            transactionDetail.CodeConcept = pConcepts.Concepts[i].CodeConcept;
-                            transactionDetail.amount = pConcepts.Concepts[i].amount;
-                            transactionDetail.Description = pConcepts.Concepts[i].Description;
-                            transactionDetail.Transaction = transaction;
-                            _context.TransactionDetails.Add(transactionDetail);
+                            for (int i = 0; i < pConcepts.Concepts.Count; i++)
+                            {
+                                TransactionDetail transactionDetail = new TransactionDetail();
+                                transactionDetail.CodeConcept = pConcepts.Concepts[i].CodeConcept;
+                                transactionDetail.amount = pConcepts.Concepts[i].amount;
+                                transactionDetail.Description = pConcepts.Concepts[i].Description;
+                                transactionDetail.Transaction = transaction;
+                                _context.TransactionDetails.Add(transactionDetail);
+                                await _context.SaveChangesAsync();
+                            }
+                        }
+                        await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+
+                        if (pConcepts.Transaction.TypeTransactionId != 1 && pConcepts.Transaction.TypeTransactionId != 2 && pConcepts.Transaction.TypeTransactionId != 5)
+                        {
+                            Folio folio = new Folio();
+                            folio = await _context.Folios
+                                                  .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
+                                                               x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
+
+                            TransactionFolio transactionFolio = new TransactionFolio();
+                            transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
+                            transactionFolio.DatePrint = DateTime.Now;
+                            transactionFolio.Transaction = transaction;
+                            _context.TransactionFolios.Add(transactionFolio);
+                            await _context.SaveChangesAsync();
+
+
+                            folio.Secuential += 1;
+                            _context.Entry(folio).State = EntityState.Modified;
                             await _context.SaveChangesAsync();
                         }
 
-                        await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
-
-                        Folio folio = new Folio();
-                        folio = await _context.Folios
-                                              .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
-                                                           x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
-
-                        TransactionFolio transactionFolio = new TransactionFolio();
-                        transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
-                        transactionFolio.DatePrint = DateTime.Now;
-                        transactionFolio.Transaction = transaction;
-                        _context.TransactionFolios.Add(transactionFolio);
-                        await _context.SaveChangesAsync();
-
-                    folio.Secuential += 1;
-                    _context.Entry(folio).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();
-
-                    scope.Complete();
+                        scope.Complete();
                     }
                 }
                 catch (Exception e)
@@ -180,35 +220,39 @@ namespace Siscom.Agua.Api.Controllers
                     helper.AddLog(systemLog);
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
                 }
+
+            }
+            else
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha cerrado" });
+
+
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
         }
       
         private bool Validate(PaymentConceptsVM pConcepts)
         {
-            double sum = 0;
-
             if (pConcepts.Transaction.PayMethodId == 0)
                 return false;
             if(pConcepts.Transaction.TerminalUserId == 0)
                 return false;
             if (pConcepts.Transaction.TypeTransactionId == 0)
                 return false;
+           return true;
+        }
 
-            //Concept validation
-            if (pConcepts.Transaction.TypeTransactionId != 1 &&
-                pConcepts.Transaction.TypeTransactionId != 2 &&
-                pConcepts.Transaction.TypeTransactionId != 5)
+        private bool ValidConcept(PaymentConceptsVM pConcepts)
+        {
+            double sum = 0;
+            
+            if (pConcepts.Concepts.Count() == 0)
+                return false;
+            for (int i = 0; i < pConcepts.Concepts.Count(); i++)
             {
-                if (pConcepts.Concepts.Count() == 0)
-                    return false;
-                for (int i = 0; i < pConcepts.Concepts.Count(); i++)
-                {
-                    sum += (double)pConcepts.Concepts[i].amount;
-                }
-                if (pConcepts.Transaction.Amount != sum)
-                    return false;
+                sum += (double)pConcepts.Concepts[i].amount;
             }
-
+            if (pConcepts.Transaction.Amount != sum)
+                return false;
+           
             return true;
         }
     }

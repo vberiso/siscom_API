@@ -86,8 +86,7 @@ namespace Siscom.Agua.Api.Controllers
             if(pterminalUser.OpenDate != DateTime.Now.Date)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Fecha incorrecta" });
 
-
-            if (await _context.TerminalUsers.Where(x => x.Id == pterminalUser.TermianlId &&
+            if (await _context.TerminalUsers.Where(x => x.Terminal.Id == pterminalUser.TermianlId &&
                                                    x.OpenDate == pterminalUser.OpenDate &&
                                                    x.InOperation==true)
                                             .FirstOrDefaultAsync() != null)
