@@ -212,31 +212,32 @@ namespace Siscom.Agua.Api.Controllers
         /// <summary>
         /// Get the search result
         /// </summary>
-        /// <param name="op">0</param>
-        /// <param name="pterminal">TerminalId</param>
+        /// <param name="user">User Model</param>
+        /// <param name="terminal">TerminalId</param>
         /// <returns></returns>
         // GET: api/TerminalUser
-        [HttpGet("{op}/{pterminal}")]
-        public async Task<IActionResult> FindTerminalUser([FromRoute] string op, int pterminal)
+        [HttpGet("{user}/{terminal}")]
+        public async Task<IActionResult> FindTerminalUser([FromRoute] string user, int terminal)
         {
             string valores = String.Empty;
-            Terminal terminal = new Terminal();
+            TerminalUser terminalUser = new TerminalUser();
 
-            if (pterminal != 0)
-            {                
-                terminal = await _context.Terminal
-                                         .Include(x =>x.BranchOffice)
-                                         .Include(x => x.TerminalUsers)
-                                         .ThenInclude(u => u.User)
-                                         .Where(x => x.Id == pterminal).FirstOrDefaultAsync();                
+            if (terminal != 0)
+            {
+                terminalUser = await _context.TerminalUsers
+                                             .Include(x => x.Terminal)
+                                             .Include(x =>x.User) 
+                                             .Where(x => x.Terminal.Id == terminal &&
+                                                         x.User.Id == user &&
+                                                         x.InOperation == true).FirstOrDefaultAsync();
             }
 
-            if (terminal == null)
+            if (terminalUser == null)
             {
                 return NotFound();
             }
 
-            return Ok(terminal);
+            return Ok(terminalUser);
         }
 
         private bool Validate(TermimalUserVM pterminalUser)

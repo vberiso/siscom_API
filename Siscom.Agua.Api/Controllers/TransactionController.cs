@@ -106,6 +106,14 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
             }
 
+            if (pConcepts.Transaction.TypeTransactionId==2)
+            {
+                if(await _context.Transactions.Where(x => x.TypeTransaction.Id == pConcepts.Transaction.TypeTransactionId &&
+                                                          x.TerminalUser.Id == pConcepts.Transaction.TerminalUserId)
+                                                     .FirstOrDefaultAsync() != null)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
+            }
+
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             var option = new TransactionOptions
             {
@@ -153,11 +161,11 @@ namespace Siscom.Agua.Api.Controllers
                         _context.TransactionFolios.Add(transactionFolio);
                         await _context.SaveChangesAsync();
 
-                        //folio.Secuential += 1;
-                        //_context.Entry(folio).State = EntityState.Modified;
-                        //await _context.SaveChangesAsync();
+                    folio.Secuential += 1;
+                    _context.Entry(folio).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
 
-                        scope.Complete();
+                    scope.Complete();
                     }
                 }
                 catch (Exception e)
@@ -187,14 +195,19 @@ namespace Siscom.Agua.Api.Controllers
                 return false;
 
             //Concept validation
-            if (pConcepts.Concepts.Count() == 0)
-                return false;            
-            for (int i = 0; i < pConcepts.Concepts.Count(); i++)
+            if (pConcepts.Transaction.TypeTransactionId != 1 &&
+                pConcepts.Transaction.TypeTransactionId != 2 &&
+                pConcepts.Transaction.TypeTransactionId != 5)
             {
-                sum += (double)pConcepts.Concepts[i].amount;
+                if (pConcepts.Concepts.Count() == 0)
+                    return false;
+                for (int i = 0; i < pConcepts.Concepts.Count(); i++)
+                {
+                    sum += (double)pConcepts.Concepts[i].amount;
+                }
+                if (pConcepts.Transaction.Amount != sum)
+                    return false;
             }
-            if (pConcepts.Transaction.Amount != sum)
-                return false;
 
             return true;
         }
