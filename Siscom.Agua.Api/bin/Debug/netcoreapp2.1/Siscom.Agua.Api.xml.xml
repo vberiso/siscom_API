@@ -324,7 +324,7 @@
         </member>
         <member name="M:Siscom.Agua.Api.Controllers.TransactionController.PostTransaction(Siscom.Agua.Api.Model.PaymentConceptsVM)">
             <summary>
-            This will provide capability add new Transaction
+            This will provide capability add new Transaction XXX
             </summary>       
             <param name="pConcepts">Model PaymentConcepts
             </param>
