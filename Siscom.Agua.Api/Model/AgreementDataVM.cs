@@ -21,6 +21,7 @@ namespace Siscom.Agua.Api.Model
         public List<TypeAddress> TypeAddresses { get; set; }
         public List<TypeContact> TypeContacts { get; set; }
         public List<ServiceVM> Services { get; set; }
+        public List<TypeAgreemnet> TypeAgreemnets { get; set; }
     }
 
     public class TypeClient
@@ -36,6 +37,12 @@ namespace Siscom.Agua.Api.Model
     }
 
     public class TypeContact
+    {
+        public string IdType { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class TypeAgreemnet
     {
         public string IdType { get; set; }
         public string Description { get; set; }

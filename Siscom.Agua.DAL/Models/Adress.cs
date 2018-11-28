@@ -35,6 +35,11 @@ namespace Siscom.Agua.DAL.Models
         public Agreement Agreements { get; set; }
 
         public Suburb Suburbs { get; set; }
-        
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", Street, Indoor);
+        }
+
     }
 }

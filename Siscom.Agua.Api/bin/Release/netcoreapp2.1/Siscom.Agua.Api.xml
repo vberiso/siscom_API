@@ -1,0 +1,374 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Siscom.Agua.Api</name>
+    </assembly>
+    <members>
+        <member name="T:Siscom.Agua.Api.Controllers.BranchOfficeController">
+            <summary>
+            End Points BranchOffice
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.BranchOfficeController.GetBranchOffice">
+            <summary>
+            Get list of all Branch Office
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.BranchOfficeController.GetBranchOffice(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of Branch Office which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>BranchOffice Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.BranchOfficeController.PutBranchOffice(System.Int32,Siscom.Agua.DAL.Models.BranchOffice)">
+            <summary>
+            This will provide update for the specific ID,
+            </summary>
+            <param name="id">id from route (URL)</param>
+            <param name="branchOffice">Model BranchOffice</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.BranchOfficeController.PostBranchOffice(Siscom.Agua.DAL.Models.BranchOffice)">
+            <summary>
+            This will provide capability add new Branch Office 
+            </summary>
+            <param name="branchOffice">Model Branch Office</param>
+            <returns>New branchOffice added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.BranchOfficeController.DeleteBranchOffice(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of Branch Office whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <member name="T:Siscom.Agua.Api.Controllers.ClasificationsController">
+            <summary>
+            End Points Clasification
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.GetClasifications">
+            <summary>
+            Get list of all Clasifications
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.GetClasification(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of region which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>Clasification Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.PutClasification(System.Int32,Siscom.Agua.DAL.Models.Clasification)">
+            <summary>
+            This will provide update for the specific ID,
+            </summary>
+            <param name="id">id from route (URL)</param>
+            <param name="clasification">Model Clasification</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.PostClasification(Siscom.Agua.DAL.Models.Clasification)">
+            <summary>
+            This will provide capability add new clasification 
+            </summary>
+            <param name="clasification">Model Clasification</param>
+            <returns>New clasification added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ClasificationsController.DeleteClasification(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of clasification whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "T:Siscom.Agua.Api.Controllers.FolioController" -->
+        <member name="M:Siscom.Agua.Api.Controllers.FolioController.GetFolio">
+            <summary>
+            Get list of all Folio
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.FolioController.GetFolio(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of Folio which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>Folio Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.FolioController.PutFolio(System.Int32,Siscom.Agua.Api.Model.FolioVM)">
+            <summary>
+            This will provide update for the specific ID,
+            </summary>
+            <param name="id">id from route (URL)</param>
+            <param name="pfolio">Model FolioVM</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.FolioController.PostFolio(Siscom.Agua.Api.Model.FolioVM)">
+            <summary>
+            This will provide capability add new Folio 
+            </summary>
+            <param name="pfolio">Model FolioVM</param>
+            <returns>New Folio added</returns>
+        </member>
+        <member name="T:Siscom.Agua.Api.Controllers.PayMethodController">
+            <summary>
+            End Points PayMethod
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.PayMethodController.GetPayMethod">
+            <summary>
+            Get list of all Pay Method
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.PayMethodController.GetPayMethod(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of PayMethod which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>PayMethod Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.PayMethodController.PutBranchOffice(System.Int32,Siscom.Agua.DAL.Models.PayMethod)">
+            <summary>
+            This will provide update for the specific ID,
+            </summary>
+            <param name="id">id from route (URL)</param>
+            <param name="payMethod">Model PayMethod</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.PayMethodController.PostPayMethod(Siscom.Agua.DAL.Models.PayMethod)">
+            <summary>
+            This will provide capability add new PayMethod
+            </summary>
+            <param name="payMethod">Model PayMethod</param>
+            <returns>New PayMethod added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.PayMethodController.DeletePayMethod(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of PayMethod whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <member name="T:Siscom.Agua.Api.Controllers.RegionsController">
+            <summary>
+            End Points Region
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.GetRegions">
+            <summary>
+            Get list of all Regions
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.GetRegion(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of region which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.PutRegion(System.Int32,Siscom.Agua.DAL.Models.Region)">
+            <summary>
+            This will provide update for the specific ID,
+            </summary>
+            <param name="id">id from route (URL)r</param>
+            <param name="region">Model region</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.PostRegion(Siscom.Agua.DAL.Models.Region)">
+            <summary>
+            This will provide capability add new region 
+            </summary>
+            <param name="region">Model region</param>
+            <returns>New region added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.RegionsController.DeleteRegion(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of region whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.SuburbsController.PostSuburb(System.Int32,Siscom.Agua.Api.Model.SuburbVM)">
+             <summary>
+             Creates a Suburb.
+             </summary>
+             <remarks>
+             Sample request:
+            
+                 POST /Todo
+                 {
+                    "name": "Item1",
+                    "RegionId": 2
+                    "ClasificationId": 2
+                 }
+            
+             </remarks>
+        </member>
+        <member name="T:Siscom.Agua.Api.Controllers.TerminalController">
+            <summary>
+            End Points Terminal
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.GetTerminal">
+            <summary>
+            Get list of all Terminal
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.GetTerminal(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of Terminal which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>Terminal Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PutTerminal(Siscom.Agua.Api.Model.TerminalVM)">
+            <summary>
+            This will provide update for the specific Terminal,
+            </summary>
+            <param name="pterminal">TerminalVM Model</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PostTerminal(Siscom.Agua.Api.Model.TerminalVM)">
+            <summary>
+            This will provide capability add new Terminal
+            </summary>
+            <param name="pterminal">Model TerminalVM</param>
+            <returns>New Terminal added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.DeleteTerminal(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of Terminal whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.FindTerminalUser(System.String,System.Int32)">
+            <summary>
+            Get the search result
+            </summary>
+            <param name="mac">MacAdress</param>
+            /// <param name="branch">BranchOffice</param>
+            <returns></returns>
+        </member>
+        <member name="T:Siscom.Agua.Api.Controllers.TerminalUserController">
+            <summary>
+            End Points TerminalUser
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.GetTerminalUser">
+            <summary>
+            Get list of all Terminal User
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.GetBranchOffice(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of Terminal User which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>TerminalUser Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.PostTerminalUser(Siscom.Agua.Api.Model.TermimalUserVM)">
+            <summary>
+            This will provide capability add new TerminalUser
+            </summary>
+            <param name="pterminalUser">Model TerminalUserVM</param>
+            <returns>New TerminalUser added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.PutTerminalUser(System.Int32,Siscom.Agua.Api.Model.TermimalUserVM)">
+            <summary>
+            This will provide update for the specific TerminalUser,
+            </summary>
+            <param name="id">Mandatory</param>
+            <param name="pterminalUser">TerminalUserVM Model</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.DeleteTerminalUser(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of TerminalUser whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.FindTerminalUser(System.String,System.Int32)">
+            <summary>
+            Get the search result
+            </summary>
+            <param name="user">User Model</param>
+            <param name="terminal">TerminalId</param>
+            <returns></returns>
+        </member>
+        <member name="T:Siscom.Agua.Api.Controllers.TransactionController">
+            <summary>
+            End Points Transaction
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TransactionController.GetTransaction">
+            <summary>
+            Get list of all Transaction
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TransactionController.GetTransaction(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of Transaction which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>Transaction Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TransactionController.PostTransaction(Siscom.Agua.Api.Model.PaymentConceptsVM)">
+            <summary>
+            This will provide capability add new Transaction
+            </summary>       
+            <param name="pConcepts">Model PaymentConcepts
+            </param>
+            <returns>New TerminalUser added</returns>
+        </member>
+        <member name="T:Siscom.Agua.Api.Controllers.TypeTransactionController">
+            <summary>
+            End Points TypeTransaction
+            </summary>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TypeTransactionController.GetTypeTransaction">
+            <summary>
+            Get list of all TypeTransactions
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TypeTransactionController.GetTypeTransaction(System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of TypeTransaction which is being passed
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns>TypeTransaction Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TypeTransactionController.PutBranchOffice(System.Int32,Siscom.Agua.DAL.Models.TypeTransaction)">
+            <summary>
+            This will provide update for the specific ID,
+            </summary>
+            <param name="id">id from route (URL)</param>
+            <param name="typeTransaction">Model TypeTransaction</param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TypeTransactionController.PostTypeTransaction(Siscom.Agua.DAL.Models.TypeTransaction)">
+            <summary>
+            This will provide capability add new TypeTransaction
+            </summary>
+            <param name="typeTransaction">Model TypeTransaction</param>
+            <returns>New TypeTransaction added</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TypeTransactionController.DeleteTypeTransaction(System.Int32)">
+            <summary>
+            This will provide delete for especific ID, of TypeTransaction whitch is begin passed 
+            </summary>
+            <param name="id">Mandatory</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

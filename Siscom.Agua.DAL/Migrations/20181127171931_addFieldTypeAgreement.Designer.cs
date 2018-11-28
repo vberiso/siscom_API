@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181127171931_addFieldTypeAgreement")]
+    partial class addFieldTypeAgreement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -660,33 +662,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Debt");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnName("id_debt_detail");
-
-                    b.Property<double>("Amount")
-                        .HasColumnName("amount");
-
-                    b.Property<int?>("DebtId");
-
-                    b.Property<bool>("HaveTax")
-                        .HasColumnName("have_tax");
-
-                    b.Property<double>("OnAccount")
-                        .HasColumnName("on_account");
-
-                    b.Property<int?>("ServiceId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DebtId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("Debt_Detail");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtPeriod", b =>
                 {
                     b.Property<int>("Id")
@@ -794,9 +769,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_external_origin_payment")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsBank")
-                        .HasColumnName("is_bank");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -949,8 +921,8 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_payment")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AuthorizationOriginPayment")
-                        .HasColumnName("authorization_origin_payment")
+                    b.Property<string>("Authorization")
+                        .HasColumnName("authorization")
                         .HasMaxLength(50);
 
                     b.Property<string>("BranchOffice")
@@ -958,14 +930,10 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("branch_office")
                         .HasMaxLength(20);
 
-                    b.Property<int>("DebtId")
-                        .HasColumnName("id_debt");
+                    b.Property<int>("Debt")
+                        .HasColumnName("debt");
 
                     b.Property<int?>("OriginPaymentId");
-
-                    b.Property<string>("OriginPaymentMethod")
-                        .HasColumnName("origin_payment_method")
-                        .HasMaxLength(15);
 
                     b.Property<int?>("PayMethodId");
 
@@ -989,10 +957,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<double>("Total")
                         .HasColumnName("total");
-
-                    b.Property<string>("TransactionFolio")
-                        .HasColumnName("transaction_folio")
-                        .HasMaxLength(40);
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -1324,21 +1288,12 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("aplication")
                         .HasMaxLength(20);
 
-                    b.Property<string>("CancellationFolio")
-                        .IsRequired()
-                        .HasColumnName("cancellation_folio")
-                        .HasMaxLength(40);
-
                     b.Property<DateTime>("DateTransaction")
                         .HasColumnName("date_transaction");
 
                     b.Property<string>("Folio")
                         .HasColumnName("folio")
                         .HasMaxLength(40);
-
-                    b.Property<string>("OriginPaymentMethod")
-                        .HasColumnName("origin_payment_method")
-                        .HasMaxLength(15);
 
                     b.Property<int?>("PayMethodId");
 
@@ -1814,17 +1769,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.DebtPeriod", "DebtPeriod")
                         .WithMany()
                         .HasForeignKey("DebtPeriodId");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Debt", "Debt")
-                        .WithMany()
-                        .HasForeignKey("DebtId");
-
-                    b.HasOne("Siscom.Agua.DAL.Models.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtPeriod", b =>

@@ -27,6 +27,8 @@ namespace Siscom.Agua.DAL.Models
         public int Derivatives { get; set; }
         [Column("start_date"), Required]
         public DateTime StratDate { get; set; }
+        [Column("type_agreement"), StringLength(5), Required]
+        public string TypeAgreement { get; set; }
 
         public TypeService TypeService { get; set; }
         public TypeUse TypeUse{ get; set; }

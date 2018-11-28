@@ -42,5 +42,10 @@ namespace Siscom.Agua.DAL.Models
 
         public ICollection<Contact> Contacts { get; set; }
 
+        public override string ToString()
+        {
+            return string.Format("{0} {1} {2}", Name, SecondLastName, LastName);
+        }
+
     }
 }

@@ -4,10 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -18,10 +22,12 @@ namespace Siscom.Agua.Api.Controllers
     public class AgreementsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private UserManager<ApplicationUser> userManager;
 
-        public AgreementsController(ApplicationDbContext context)
+        public AgreementsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            this.userManager = userManager;
         }
 
         // GET: api/Agreements
@@ -71,7 +77,138 @@ namespace Siscom.Agua.Api.Controllers
                                             .Where(i => i.Id == x.Suburbs.Id)
                                             .SingleOrDefault();
             });
-           
+
+
+            if (agreement == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(agreement);
+        }
+
+        [HttpGet("AgreementByAccount/{AcountNumber}")]
+        public async Task<IActionResult> GetGetAgreementByAccount([FromRoute] string AcountNumber)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var agreement = await _context.Agreements
+                                      .Include(x => x.Clients)
+                                        .ThenInclude(contact => contact.Contacts)
+                                      .Include(x => x.Addresses)
+                                        .ThenInclude(s => s.Suburbs)
+                                      .Include(ts => ts.TypeService)
+                                      .Include(tu => tu.TypeUse)
+                                      .Include(tc => tc.TypeConsume)
+                                      .Include(tr => tr.TypeRegime)
+                                      .Include(tp => tp.TypePeriod)
+                                      .Include(tcb => tcb.TypeCommertialBusiness)
+                                      .Include(tss => tss.TypeStateService)
+                                      .Include(ti => ti.TypeIntake)
+                                      .Include(di => di.Diameter)
+                                      .Include(tss => tss.TypeStateService)
+                                      .Include(ags => ags.AgreementServices)
+                                        .ThenInclude(x => x.Service)
+                                      .FirstOrDefaultAsync(a => a.Account == AcountNumber);
+
+            agreement.Addresses.ToList().ForEach(x =>
+            {
+                x.Suburbs = _context.Suburbs.Include(r => r.Regions)
+                                            .Include(c => c.Clasifications)
+                                            .Include(t => t.Towns)
+                                                .ThenInclude(s => s.States)
+                                                .ThenInclude(c => c.Countries)
+                                            .Where(i => i.Id == x.Suburbs.Id)
+                                            .SingleOrDefault();
+            });
+
+
+            if (agreement == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(agreement);
+        }
+
+        // GET: api/Agreements
+        [HttpGet("AgreementsBasic/{AcountNumber}")]
+        public async Task<IActionResult> GetAgreementsBasic([FromRoute] string AcountNumber)
+        {
+            var agreement = _context.Agreements
+                                    .Include(x => x.Clients)
+                                    .Where(a => a.Account == AcountNumber);
+            if (agreement == null)
+            {
+                return NotFound();
+            }
+            return Ok(agreement);
+        }
+
+
+        [HttpGet("FindAgreementParam")]
+        public async Task<IActionResult> FindAgreementParam([FromBody] SearchAgreementVM search)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            List<Agreement> agreement = new List<Agreement>();
+            switch (search.Type)
+            {
+                case 1:
+                    agreement.Add(await _context.Agreements
+                                      .FirstOrDefaultAsync(a => a.Account == search.StringSearch));
+                    break;
+                case 2:
+                    var client = await _context.Clients.Include(x => x.Agreement)
+                                                       .Where(x => x.ToString().Contains(search.StringSearch))
+                                                       .ToListAsync();
+                    foreach (var item in client)
+                    {
+                        agreement.Add(new Agreement
+                        {
+                            Account = item.Agreement.Account,
+                            Id = item.Agreement.Id
+                        });
+                    }
+                    //client.ForEach(x =>
+                    //{
+                    //    x.Agreement = _context.Agreements.Find(x.AgreementId);
+                    //});
+                    //agreement = await _context.Agreements
+                    //                  .Include(x => x.Clients)
+                    //                  .Include(x => x.Addresses)
+                    //                  .FirstOrDefaultAsync(a => a.Clients.ToString().Contains(search.StringSearch));
+                    break;
+                case 3:
+                    var address = await _context.Adresses.Include(x => x.Agreements)
+                                                         .Where(x => x.ToString().Contains(search.StringSearch))
+                                                         .ToListAsync();
+                    foreach (var item in address)
+                    {
+                        agreement.Add(new Agreement
+                        {
+                            Account = item.Agreements.Account,
+                            Id = item.Agreements.Id
+                        });
+                    }
+                    //agreement = await _context.Agreements
+                    //                 .FirstOrDefaultAsync(a => a.Addresses.ToString().Contains(search.StringSearch));
+                    break;
+                //case 4:
+                //    agreement = await _context.Agreements
+                //                     .Include(x => x.Clients)
+                //                     .Include(x => x.Addresses)
+                //                     .FirstOrDefaultAsync(a => a.Clients));
+                //    break;
+                default:
+                    break;
+            }
+
 
             if (agreement == null)
             {
@@ -116,6 +253,8 @@ namespace Siscom.Agua.Api.Controllers
             return NoContent();
         }
 
+        
+
         // POST: api/Agreements
         [HttpPost]
         public async Task<IActionResult> PostAgreement([FromBody] AgreementVM agreementvm)
@@ -124,7 +263,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             TypeCommercialBusiness cBusiness = null;
             Agreement NewAgreement = new Agreement();
             if (agreementvm.TypeCommertialBusinessId == 0)
@@ -145,21 +284,21 @@ namespace Siscom.Agua.Api.Controllers
             var diam = await _context.Diameters.FindAsync(agreementvm.DiameterId);
             //var sservice = await _context.Services.FindAsync(agreementvm.ServiceId);
 
-            if(service != null && intake != null && use != null 
-                               && consume != null && regime != null 
+            if (service != null && intake != null && use != null
+                               && consume != null && regime != null
                                && cBusiness != null && sService != null
-                               && period != null && diam != null 
+                               && period != null && diam != null
                                && agreementvm.ServicesId.Count > 0
                                && agreementvm.Adresses.Count > 0
                                && agreementvm.Clients.Count > 0)
             {
-                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+
+                try
                 {
-                    try
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        //_context.Database.EnlistTransaction(transaction);
                         NewAgreement.Account = agreementvm.Account;
-                        NewAgreement.AccountDate = DateTime.Now;
+                        NewAgreement.AccountDate = TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Now);
                         NewAgreement.Derivatives = agreementvm.Derivatives;
                         NewAgreement.TypeService = service;
                         NewAgreement.TypeIntake = intake;
@@ -209,13 +348,12 @@ namespace Siscom.Agua.Api.Controllers
                                     TypeNumber = item.TypeNumber
                                 });
                             }
-                            //await _context.Clients.AddAsync(nc);
                             NewAgreement.Clients.Add(nc);
                         }
 
                         await _context.Agreements.AddAsync(NewAgreement);
                         await _context.SaveChangesAsync();
-                        
+
                         foreach (var aservice in agreementvm.ServicesId)
                         {
                             await _context.AgreementServices.AddAsync(new AgreementService
@@ -229,17 +367,36 @@ namespace Siscom.Agua.Api.Controllers
                             });
                             await _context.SaveChangesAsync();
                         }
-                        transaction.Complete();
+
+                        AgreementLog agreementLog = new AgreementLog()
+                        {
+                            Agreement = NewAgreement,
+                            AgreementLogDate = DateTime.Now,
+                            User = await userManager.FindByIdAsync(agreementvm.UserId),
+                            Description = "Nuevo Contrato",
+                            Observation = ""
+                        };
+                        await _context.AgreementLogs.AddAsync(agreementLog);
+
+                        scope.Complete();
                     }
-                    catch (Exception ex)
-                    {
-                        throw;
-                    }
+                }
+                catch (Exception e)
+                {
+                    SystemLog systemLog = new SystemLog();
+                    systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                    systemLog.DateLog = DateTime.Now;
+                    systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                    systemLog.Parameter = JsonConvert.SerializeObject(agreementvm);
+                    CustomSystemLog helper = new CustomSystemLog(_context);
+                    helper.AddLog(systemLog);
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
                 }
             }
             else
             {
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Se ha enviado mal los datos favor de verificar" });
             }
 
 
@@ -267,8 +424,58 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
+        [HttpPost("AddMeter")]
+        public async Task<IActionResult> AddMeter([FromBody] MeterVM meterVM)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            Meter meter = new Meter();
+            var agreement = await _context.Agreements.FindAsync(meterVM.AgreementId);
+            if (agreement != null)
+            {
+                try
+                {
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        meter.Agreement = agreement;
+                        meter.Brand = meterVM.Brand;
+                        meter.Consumption = meterVM.Consumption;
+                        meter.DeinstallDate = meter.DeinstallDate;
+                        meter.InstallDate = meterVM.InstallDate;
+                        meter.IsActive = meterVM.IsActive;
+                        meter.Model = meterVM.Model;
+                        meter.Serial = meterVM.Serial;
+                        meter.Wheels = meterVM.Wheels;
+
+                        await _context.Meters.AddAsync(meter);
+                        await _context.SaveChangesAsync();
+
+                        scope.Complete();
+                    }
+                }
+                catch (Exception e)
+                {
+                    SystemLog systemLog = new SystemLog();
+                    systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                    systemLog.DateLog = DateTime.Now;
+                    systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                    systemLog.Parameter = JsonConvert.SerializeObject(meterVM);
+                    CustomSystemLog helper = new CustomSystemLog(_context);
+                    helper.AddLog(systemLog);
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+                }
+            }
+            else
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Se ha enviado mal los datos favor de verificar" });
+            }
+            return Ok(meter);
+        }
+
         [HttpGet("GetData")]
-        //[Route("Agreements/GetData")]
         public async Task<IActionResult> GetInitialAgreements()
         {
             return Ok(new AgreementDataVM()
@@ -300,11 +507,19 @@ namespace Siscom.Agua.Api.Controllers
                                                         IdType = n.CodeName,
                                                         Description = n.Description
                                                     }).ToListAsync(),
-                Services = await _context.Services.Select(s => new ServiceVM
-                {
-                    Id = s.Id,
-                    Name = s.Name
-                }).ToListAsync()
+                TypeAgreemnets = await _context.Types.Where(x => x.GroupType.Id == 4)
+                                                .Select(n => new TypeAgreemnet()
+                                                {
+                                                    IdType = n.CodeName,
+                                                    Description = n.Description
+                                                }).ToListAsync(),
+                Services = await _context.Services
+                                        .Where(s => s.InAgreement == true && s.IsActive == true)
+                                        .Select(s => new ServiceVM
+                                        {
+                                            Id = s.Id,
+                                            Name = s.Name
+                                        }).ToListAsync()
             });
         }
 
