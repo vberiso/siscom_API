@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,9 @@ using Siscom.Agua.DAL.Models;
 namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
+    [Produces("application/json")]
     [ApiController]
+    [Authorize]
     public class AgreementsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -140,7 +143,7 @@ namespace Siscom.Agua.Api.Controllers
         {
             var agreement = _context.Agreements
                                     .Include(x => x.Clients)
-                                    .Where(a => a.Account == AcountNumber);
+                                    .Where(a => a.Account == AcountNumber).FirstOrDefault();
             if (agreement == null)
             {
                 return NotFound();
@@ -148,7 +151,25 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
-
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns></returns>
+        ///  /// <remarks>
+        /// Types request:
+        ///
+        /// Type: {
+        ///     1 => Search by Account
+        ///     2 => Search by Name of Client
+        ///     3 => Search by Address of Client
+        ///     4 => Search by RFC of Client
+        /// }
+        /// StringSearch:{
+        ///     String for type
+        /// }
+        ///
+        /// </remarks>
         [HttpGet("FindAgreementParam")]
         public async Task<IActionResult> FindAgreementParam([FromBody] SearchAgreementVM search)
         {
@@ -175,14 +196,6 @@ namespace Siscom.Agua.Api.Controllers
                             Id = item.Agreement.Id
                         });
                     }
-                    //client.ForEach(x =>
-                    //{
-                    //    x.Agreement = _context.Agreements.Find(x.AgreementId);
-                    //});
-                    //agreement = await _context.Agreements
-                    //                  .Include(x => x.Clients)
-                    //                  .Include(x => x.Addresses)
-                    //                  .FirstOrDefaultAsync(a => a.Clients.ToString().Contains(search.StringSearch));
                     break;
                 case 3:
                     var address = await _context.Adresses.Include(x => x.Agreements)
@@ -196,21 +209,26 @@ namespace Siscom.Agua.Api.Controllers
                             Id = item.Agreements.Id
                         });
                     }
-                    //agreement = await _context.Agreements
-                    //                 .FirstOrDefaultAsync(a => a.Addresses.ToString().Contains(search.StringSearch));
                     break;
-                //case 4:
-                //    agreement = await _context.Agreements
-                //                     .Include(x => x.Clients)
-                //                     .Include(x => x.Addresses)
-                //                     .FirstOrDefaultAsync(a => a.Clients));
-                //    break;
+                case 4:
+                    var clientrfc = await _context.Clients.Include(x => x.Agreement)
+                                                        .Where(x => x.RFC.Contains(search.StringSearch))
+                                                        .ToListAsync();
+                    foreach (var item in clientrfc)
+                    {
+                        agreement.Add(new Agreement
+                        {
+                            Account = item.Agreement.Account,
+                            Id = item.Agreement.Id
+                        });
+                    }
+                    break;
                 default:
                     break;
             }
 
 
-            if (agreement == null)
+            if (agreement == null || agreement.Count == 0)
             {
                 return NotFound();
             }
@@ -263,6 +281,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+            int x = 0;
+            int.TryParse(agreementvm.Account, out x);
 
             TypeCommercialBusiness cBusiness = null;
             Agreement NewAgreement = new Agreement();
@@ -282,8 +302,72 @@ namespace Siscom.Agua.Api.Controllers
             var sService = await _context.TypeStateServices.FindAsync(agreementvm.TypeStateServiceId);
             var period = await _context.TypePeriods.FindAsync(agreementvm.TypePeriodId);
             var diam = await _context.Diameters.FindAsync(agreementvm.DiameterId);
-            //var sservice = await _context.Services.FindAsync(agreementvm.ServiceId);
 
+            if(service == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, 
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de servicio')]" });
+            }
+            if (intake == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de toma')]" });
+            }
+            if (use == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de uso')]" });
+            }
+            if (consume == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de consumo')]" });
+            }
+            if (regime == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de regimen')]" });
+            }
+            if (cBusiness == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de negocio comercial')]" });
+            }
+            if (sService == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo estado del servicio')]" });
+            }
+            if (period == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de periodo')]" });
+            }
+            if (diam == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de diametro')]" });
+            }
+            if (agreementvm.ServicesId.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe agregar por lo menos un servio al contrato')]" });
+            }
+            if (agreementvm.Adresses.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe agregar por lo menos una dirección al contrato')]" });
+            }
+            if (agreementvm.Clients.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe agregar por lo menos un cliente al contrato')]" });
+            }
+            if((await _context.Types.Where(z => z.CodeName == agreementvm.TypeAgreement).ToListAsync()) == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe verificar el tipo de contrato (Principal / Derivado)')]" });
+            }
             if (service != null && intake != null && use != null
                                && consume != null && regime != null
                                && cBusiness != null && sService != null
@@ -291,6 +375,7 @@ namespace Siscom.Agua.Api.Controllers
                                && agreementvm.ServicesId.Count > 0
                                && agreementvm.Adresses.Count > 0
                                && agreementvm.Clients.Count > 0)
+
             {
 
                 try
@@ -300,6 +385,7 @@ namespace Siscom.Agua.Api.Controllers
                         NewAgreement.Account = agreementvm.Account;
                         NewAgreement.AccountDate = TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Now);
                         NewAgreement.Derivatives = agreementvm.Derivatives;
+                        NewAgreement.TypeAgreement = agreementvm.TypeAgreement;
                         NewAgreement.TypeService = service;
                         NewAgreement.TypeIntake = intake;
                         NewAgreement.TypeUse = use;
@@ -378,6 +464,8 @@ namespace Siscom.Agua.Api.Controllers
                         };
                         await _context.AgreementLogs.AddAsync(agreementLog);
 
+                        //if()
+
                         scope.Complete();
                     }
                 }
@@ -385,20 +473,15 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     SystemLog systemLog = new SystemLog();
                     systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                    systemLog.DateLog = DateTime.Now;
+                    systemLog.DateLog = TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Now);
                     systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                     systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
                     systemLog.Parameter = JsonConvert.SerializeObject(agreementvm);
                     CustomSystemLog helper = new CustomSystemLog(_context);
                     helper.AddLog(systemLog);
-                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el contrato" });
                 }
             }
-            else
-            {
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Se ha enviado mal los datos favor de verificar" });
-            }
-
 
             return CreatedAtAction("GetAgreement", new { id = NewAgreement.Id }, NewAgreement);
         }

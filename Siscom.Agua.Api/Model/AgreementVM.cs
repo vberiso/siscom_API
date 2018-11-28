@@ -17,7 +17,6 @@ namespace Siscom.Agua.Api.Model
 
         public int Id { get; set; }
         public string Account { get; set; }
-        //public DateTime AccountDate { get; set; }
         public int Derivatives { get; set; }
 
         public int TypeServiceId { get; set; }

@@ -4,6 +4,27 @@
         <name>Siscom.Agua.Api</name>
     </assembly>
     <members>
+        <member name="M:Siscom.Agua.Api.Controllers.AgreementsController.FindAgreementParam(Siscom.Agua.Api.Model.SearchAgreementVM)">
+             <summary>
+            
+             </summary>
+             <param name="search"></param>
+             <returns></returns>
+              /// <remarks>
+             Types request:
+            
+             Type: {
+                 1 => Search by Account
+                 2 => Search by Name of Client
+                 3 => Search by Address of Client
+                 4 => Search by RFC of Client
+             }
+             StringSearch:{
+                 String for type
+             }
+            
+             </remarks>
+        </member>
         <member name="T:Siscom.Agua.Api.Controllers.BranchOfficeController">
             <summary>
             End Points BranchOffice
