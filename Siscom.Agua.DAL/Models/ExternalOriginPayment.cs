@@ -15,5 +15,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Required, StringLength(15), Column("name")]
         public string Name { get; set; }
+        [Required, Column("is_bank")]
+        public bool IsBank { get; set; }
     }
 }

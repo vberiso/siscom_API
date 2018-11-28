@@ -74,11 +74,12 @@ namespace Siscom.Agua.DAL
         /// Calculation of debt
         /// </summary> 
         public DbSet<Debt> Debts { get; set; }
+        public DbSet<DebtDetail> DebtDetails { get; set; }
         public DbSet<TypePeriod> TypePeriods { get; set; }
         public DbSet<DebtPeriod> DebtPeriods { get; set; }
         public DbSet<Meter> Meters { get; set; }
         public DbSet<Consumption> Consumptions { get; set; }
-        public DbSet<Tariff> Tariffs { get; set; }
+        public DbSet<Tariff> Tariffs { get; set; }       
 
         /// <summary> 
         /// Payment

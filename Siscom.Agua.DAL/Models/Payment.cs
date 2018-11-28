@@ -25,11 +25,15 @@ namespace Siscom.Agua.DAL.Models
         public double Tax { get; set; }
         [Column("total"), Required]
         public double Total { get; set; }
-        [Column("authorization"), StringLength(50)]
-        public string Authorization { get; set; }
+        [Column("authorization_origin_payment"), StringLength(50)]
+        public string AuthorizationOriginPayment { get; set; }
+        [Column("origin_payment_method"), StringLength(15)]
+        public string OriginPaymentMethod { get; set; }
+        [Column("transaction_folio"), StringLength(40)]
+        public string TransactionFolio { get; set; }
 
-        [Column("debt"), Required]
-        public int Debt { get; set; }
+        [Column("id_debt"), Required]
+        public int DebtId { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
         [Column("type"), StringLength(5), Required]
