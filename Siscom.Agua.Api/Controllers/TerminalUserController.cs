@@ -141,8 +141,8 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NoContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
             }
 
-            if (pterminalUser.OpenDate != DateTime.Now.Date)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Fecha incorrecta" });
+            //if (pterminalUser.OpenDate != DateTime.Now.Date)
+            //    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Fecha incorrecta" });
 
             TerminalUser terminalUser = new TerminalUser();
             terminalUser.Id = pterminalUser.Id;
