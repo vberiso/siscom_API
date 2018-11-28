@@ -15,11 +15,11 @@ namespace Siscom.Agua.DAL.Models
         [Column("name"), StringLength(50), Required]
         public string Name { get; set; }
         [Column("percentpercentage"), Required]
-        public Int16 Percentpercentage { get; set; }
+        public Int16 Percentage { get; set; }
         [Column("is_active"), Required]
-        public bool is_active { get; set; }
+        public bool IsActive { get; set; }
 
-        public TypePeriod Validity { get; set; }
+        public TypePeriod TypePeriod { get; set; }
         public ICollection<AgreementDiscount> AgreementDiscounts { get; set; }
     }
 }

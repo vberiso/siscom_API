@@ -22,6 +22,7 @@ namespace Siscom.Agua.Api.Model
         public List<TypeContact> TypeContacts { get; set; }
         public List<ServiceVM> Services { get; set; }
         public List<TypeAgreemnet> TypeAgreemnets { get; set; }
+        public List<TypeDiscount> TypeDescounts { get; set; }
     }
 
     public class TypeClient
@@ -46,5 +47,12 @@ namespace Siscom.Agua.Api.Model
     {
         public string IdType { get; set; }
         public string Description { get; set; }
+    }
+
+    public class TypeDiscount
+    {
+        public int IdType { get; set; }
+        public string Description { get; set; }
+        public Int32 Percentage { get; set; }
     }
 }

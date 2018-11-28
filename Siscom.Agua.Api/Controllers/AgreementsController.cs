@@ -144,6 +144,7 @@ namespace Siscom.Agua.Api.Controllers
             var agreement = _context.Agreements
                                     .Include(x => x.Clients)
                                     .Where(a => a.Account == AcountNumber).FirstOrDefault();
+
             if (agreement == null)
             {
                 return NotFound();
@@ -286,6 +287,8 @@ namespace Siscom.Agua.Api.Controllers
 
             TypeCommercialBusiness cBusiness = null;
             Agreement NewAgreement = new Agreement();
+            Agreement Principal = new Agreement();
+
             if (agreementvm.TypeCommertialBusinessId == 0)
             {
                 cBusiness = await _context.TypeCommertialBusinesses.FindAsync(1);
@@ -302,8 +305,9 @@ namespace Siscom.Agua.Api.Controllers
             var sService = await _context.TypeStateServices.FindAsync(agreementvm.TypeStateServiceId);
             var period = await _context.TypePeriods.FindAsync(agreementvm.TypePeriodId);
             var diam = await _context.Diameters.FindAsync(agreementvm.DiameterId);
+            var typeAgreement = await _context.Types.Where(z => z.CodeName == agreementvm.TypeAgreement).ToListAsync();
 
-            if(service == null)
+            if (service == null)
             {
                 return StatusCode((int)TypeError.Code.BadRequest, 
                                    new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de servicio')]" });
@@ -363,11 +367,12 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe agregar por lo menos un cliente al contrato')]" });
             }
-            if((await _context.Types.Where(z => z.CodeName == agreementvm.TypeAgreement).ToListAsync()) == null)
+            if(typeAgreement == null)
             {
                 return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe verificar el tipo de contrato (Principal / Derivado)')]" });
             }
+
             if (service != null && intake != null && use != null
                                && consume != null && regime != null
                                && cBusiness != null && sService != null
@@ -382,6 +387,12 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
+                        
+                        if(agreementvm.AgreementPrincipalId > 0)
+                        {
+                            Principal = await _context.Agreements.FindAsync(agreementvm.AgreementPrincipalId);
+                        }
+
                         NewAgreement.Account = agreementvm.Account;
                         NewAgreement.AccountDate = TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Now);
                         NewAgreement.Derivatives = agreementvm.Derivatives;
@@ -596,6 +607,15 @@ namespace Siscom.Agua.Api.Controllers
                                                     IdType = n.CodeName,
                                                     Description = n.Description
                                                 }).ToListAsync(),
+               
+                TypeDescounts = await _context.Discounts.Where(x => x.IsActive == true)
+                                                        .Select(d => new TypeDiscount()
+                                                        {
+                                                            IdType = d.Id,
+                                                            Description = d.Name,
+                                                            Percentage = d.Percentage
+                                                        }).ToListAsync(),
+
                 Services = await _context.Services
                                         .Where(s => s.InAgreement == true && s.IsActive == true)
                                         .Select(s => new ServiceVM

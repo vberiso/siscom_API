@@ -28,9 +28,11 @@ namespace Siscom.Agua.Api.Model
         public int TypeStateServiceId { get; set; }
         public int TypeIntakeId { get; set; }
         public int DiameterId { get; set; }
+        public int DiscountId { get; set; }
         public string TypeAgreement { get; set; }
+        public int AgreementPrincipalId { get; set; }
         public string UserId { get; set; }
-
+       
         public List<int> ServicesId { get; set; }
         public List<AdressVM> Adresses { get; set; }
         public List<ClientVM> Clients { get; set; }
