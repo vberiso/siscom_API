@@ -72,7 +72,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         /// <summary>
-        /// This will provide capability add new Transaction
+        /// This will provide capability add new Transaction XXX
         /// </summary>       
         /// <param name="pConcepts">Model PaymentConcepts
         /// </param>
@@ -111,8 +111,13 @@ namespace Siscom.Agua.Api.Controllers
             terminalUser = await _context.TerminalUsers
                                              .Include(x => x.Terminal)
                                              .Where(x => x.Id == pConcepts.Transaction.TerminalUserId).FirstOrDefaultAsync();
-        
-            if(!terminalUser.InOperation)
+
+            if (terminalUser == null)
+            {
+                return NotFound();
+            }
+
+            if (!terminalUser.InOperation)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
 
             if(terminalUser.OpenDate.Date != DateTime.Now.Date)
@@ -135,7 +140,7 @@ namespace Siscom.Agua.Api.Controllers
                         break;
                     case 2://Fondo
                         if (pConcepts.Transaction.TypeTransactionId == 2)
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });                        
                         _fondoCaja = new KeyValuePair<int, Double>(_fondoCaja.Key + 1, item.Amount);
                         break;
                     case 3://Cobro
@@ -160,17 +165,28 @@ namespace Siscom.Agua.Api.Controllers
 
             if (_open)
             {
-                if (pConcepts.Transaction.TypeTransactionId == 6)
+                double _saldo=0;
+                switch (pConcepts.Transaction.TypeTransactionId)
                 {
-                    var _saldo = _cobrado.Value - _cancelado.Value - _retirado.Value;
-                    if(pConcepts.Transaction.Amount > _saldo)
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
-                }
-                if (pConcepts.Transaction.TypeTransactionId == 7)
-                {
-                    var _saldo =_fondoCaja.Value +_cobrado.Value - _cancelado.Value - _retirado.Value;
-                    if (pConcepts.Transaction.Amount-_saldo !=0)
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de liquidación no es valido") });
+                    case 1:
+                        pConcepts.Transaction.Amount = 0;
+                        break;
+                    case 2:
+                        if (terminalUser.Terminal.CashBox > pConcepts.Transaction.Amount || pConcepts.Transaction.Amount==0)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de caja inválido") });
+                        break;
+                    case 6:
+                         _saldo = _cobrado.Value - _cancelado.Value - _retirado.Value;
+                        if (pConcepts.Transaction.Amount > _saldo)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
+                        break;
+                    case 7:
+                          _saldo = _fondoCaja.Value + _cobrado.Value - _cancelado.Value - _retirado.Value;
+                        if (pConcepts.Transaction.Amount - _saldo != 0)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de liquidación no es valido") });
+                        break;
+                    default:
+                        break;
                 }
 
                 var option = new TransactionOptions
@@ -252,7 +268,32 @@ namespace Siscom.Agua.Api.Controllers
 
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
         }
-      
+
+        /// <summary>
+        /// Get all transactions of terminalUser from day
+        /// </summary>
+        /// <param name="date">date yyyy-mm-dd</param>
+        /// <param name="terminalUserId">terminalUserId</param>
+        /// <returns></returns>
+        // GET: api/TerminalUser
+        [HttpGet("{date}/{terminalUserId}")]
+        public async Task<IActionResult> FindTransactions([FromRoute] string date, int terminalUserId)
+        {
+           var transaction = await _context.Transactions
+                                    .Include(x => x.TypeTransaction)
+                                    .Include(x => x.PayMethod)
+                                    .Include(x=> x.TransactionFolios)
+                                    .Where(x => x.TerminalUser.Id == terminalUserId &&
+                                                x.DateTransaction.Date == Convert.ToDateTime(date).Date)
+                                    .OrderBy(x => x.Id).ToListAsync();
+           if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(transaction);
+        }
+
         private bool Validate(PaymentConceptsVM pConcepts)
         {
             if (pConcepts.Transaction.PayMethodId == 0)

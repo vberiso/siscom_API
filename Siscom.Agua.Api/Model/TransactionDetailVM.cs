@@ -9,7 +9,8 @@ namespace Siscom.Agua.Api.Model
     public class TransactionDetailVM
     {
         [Required(ErrorMessage = "Concepto requerido")]
-        public string CodeConcept { get; set; }      
+        public string CodeConcept { get; set; }       
+        public string DebtId { get; set; }
         public string Description { get; set; }
         [Required(ErrorMessage = "Monto requerio")]
         public double amount { get; set; }

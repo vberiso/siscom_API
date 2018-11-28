@@ -23,7 +23,7 @@ namespace Siscom.Agua.DAL.Models
         public double Amount { get; set; }
         [Column("aplication"), StringLength(20), Required]
         public string Aplication { get; set; }
-        [Column("cancellation_folio"), StringLength(40), Required]
+        [Column("cancellation_folio"), StringLength(40)]
         public string CancellationFolio { get; set; }
         [Column("origin_payment_method"), StringLength(15)]
         public string OriginPaymentMethod { get; set; }
