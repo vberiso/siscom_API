@@ -83,6 +83,10 @@ namespace Siscom.Agua.Api.Controllers
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             bool _open = false;
+            KeyValuePair<int, double> _fondoCaja = new KeyValuePair<int, Double>(0, 0);
+            KeyValuePair<int, double> _retirado = new KeyValuePair<int, Double>(0, 0);
+            KeyValuePair<int, double> _cobrado = new KeyValuePair<int, Double>(0, 0);
+            KeyValuePair<int, double> _cancelado = new KeyValuePair<int, Double>(0, 0);
 
             if (!ModelState.IsValid)
             {
@@ -94,9 +98,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
             }
 
-            //Type Transaction
-            //1   Apertura de Caja
-            //5   Cierre de Caja
+           
             if (pConcepts.Transaction.TypeTransactionId != 1 && pConcepts.Transaction.TypeTransactionId != 5)
             {
                 if (!ValidConcept(pConcepts))
@@ -116,40 +118,62 @@ namespace Siscom.Agua.Api.Controllers
             if(terminalUser.OpenDate.Date != DateTime.Now.Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
 
-            if (await _context.Transactions.Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                                      x.TypeTransaction.Id == 5)
-                                                      .FirstOrDefaultAsync() == null)
+            var movimientosCaja = await _context.Transactions
+                                                .Include(x => x.TypeTransaction)
+                                                .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                            x.DateTransaction.Date == DateTime.Now.Date)
+                                                .OrderBy(x=> x.Id).ToListAsync();
+
+            foreach (var item in movimientosCaja)
             {
-                
-
-                if (await _context.Transactions.Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                                       x.TypeTransaction.Id == 1)
-                                                       .FirstOrDefaultAsync() != null)
-                    _open = true;
-
-                switch (pConcepts.Transaction.TypeTransactionId)
+                switch (item.TypeTransaction.Id)
                 {
-                    case 1:                       
-                            if(_open)
-                                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha aperturado" });
+                    case 1://apertura
+                        if (pConcepts.Transaction.TypeTransactionId == 1)
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha aperturado" });
+                        _open = true;
+                        break;
+                    case 2://Fondo
+                        if (pConcepts.Transaction.TypeTransactionId == 2)
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
+                        _fondoCaja = new KeyValuePair<int, Double>(_fondoCaja.Key + 1, item.Amount);
+                        break;
+                    case 3://Cobro
+                        _cobrado = new KeyValuePair<int, Double>(_cobrado.Key + 1, item.Amount);
+                        break;
+                    case 4://Cancelado
+                        _cancelado = new KeyValuePair<int, Double>(_cancelado.Key + 1, item.Amount);
+                        break;
+                    case 5://Cierre
+                        _open = false;
+                        break;
+                    case 6: //Retiro
+                        _retirado = new KeyValuePair<int, Double>(_retirado.Key + 1, item.Amount);
                         break;
                     default:
-                        if(!_open)
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
                         break;
-                }
+                }   
+            }
 
-                if (pConcepts.Transaction.TypeTransactionId == 2)
+            if (!_open && pConcepts.Transaction.TypeTransactionId == 1)
+                _open = true;
+
+            if (_open)
+            {
+                if (pConcepts.Transaction.TypeTransactionId == 6)
                 {
-                    if (await _context.Transactions.Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                                               x.TypeTransaction.Id == 2)
-                                                               .FirstOrDefaultAsync() != null)
-                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
+                    var _saldo = _cobrado.Value - _cancelado.Value - _retirado.Value;
+                    if(pConcepts.Transaction.Amount > _saldo)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
+                }
+                if (pConcepts.Transaction.TypeTransactionId == 7)
+                {
+                    var _saldo =_fondoCaja.Value +_cobrado.Value - _cancelado.Value - _retirado.Value;
+                    if (pConcepts.Transaction.Amount-_saldo !=0)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de liquidación no es valido") });
                 }
 
-                
-
-                    var option = new TransactionOptions
+                var option = new TransactionOptions
                 {
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TimeSpan.FromSeconds(60)
@@ -223,7 +247,7 @@ namespace Siscom.Agua.Api.Controllers
 
             }
             else
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha cerrado" });
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
 
 
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);

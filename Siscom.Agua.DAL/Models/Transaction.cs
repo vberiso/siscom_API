@@ -23,7 +23,9 @@ namespace Siscom.Agua.DAL.Models
         public double Amount { get; set; }
         [Column("aplication"), StringLength(20), Required]
         public string Aplication { get; set; }
-
+        [Column("cancellation_folio"), StringLength(40), Required]
+        public string CancellationFolio { get; set; }
+        
         public TerminalUser TerminalUser { get; set; }
         public TypeTransaction TypeTransaction { get; set; }
         public PayMethod PayMethod { get; set; }

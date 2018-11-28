@@ -15,5 +15,6 @@ namespace Siscom.Agua.Api.Model
         public int TypeTransactionId { get; set; }
         public int PayMethodId { get; set; }
         public int TerminalUserId { get; set; }
+        public string Cancellation { get; set; }
     }
 }
