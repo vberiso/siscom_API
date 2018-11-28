@@ -83,6 +83,7 @@ namespace Siscom.Agua.Api.Controllers
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             bool _open = false;
+            bool _liquidada = false;
             KeyValuePair<int, double> _fondoCaja = new KeyValuePair<int, Double>(0, 0);
             KeyValuePair<int, double> _retirado = new KeyValuePair<int, Double>(0, 0);
             KeyValuePair<int, double> _cobrado = new KeyValuePair<int, Double>(0, 0);
@@ -155,6 +156,9 @@ namespace Siscom.Agua.Api.Controllers
                     case 6: //Retiro
                         _retirado = new KeyValuePair<int, Double>(_retirado.Key + 1, item.Amount);
                         break;
+                    case 7: //Liquidada
+                        _liquidada = true;
+                        break;
                     default:
                         break;
                 }   
@@ -168,20 +172,46 @@ namespace Siscom.Agua.Api.Controllers
                 double _saldo=0;
                 switch (pConcepts.Transaction.TypeTransactionId)
                 {
-                    case 1:
+                    case 1://apertura
                         pConcepts.Transaction.Amount = 0;
                         break;
-                    case 2:
+                    case 2://Fondo
                         if (terminalUser.Terminal.CashBox > pConcepts.Transaction.Amount || pConcepts.Transaction.Amount==0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de caja inválido") });
                         break;
-                    case 6:
-                         _saldo = _cobrado.Value - _cancelado.Value - _retirado.Value;
+                    case 3://Cobro
+                        if (_liquidada)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja ya ha sido liquidada") });
+                        if (!pConcepts.Transaction.Sign)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+                        break;
+                    case 4://Cancelado
+                        if (_liquidada)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja ya ha sido liquidada") });
+                        if (pConcepts.Transaction.Sign)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+                        break;
+                    case 5://Cierre
+                        if (!_liquidada)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja debe ser liquidada previamente") });
+                        break;
+                    case 6://Retiro
+                        if (_liquidada)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja ya ha sido liquidada") });
+                        if (pConcepts.Transaction.Sign)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
+                        _saldo = _cobrado.Value - _cancelado.Value - _retirado.Value;
                         if (pConcepts.Transaction.Amount > _saldo)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
                         break;
                     case 7:
-                          _saldo = _fondoCaja.Value + _cobrado.Value - _cancelado.Value - _retirado.Value;
+                        if (_liquidada)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja ya ha sido liquidada") });
+                        if (pConcepts.Transaction.Sign)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de liquidación incorrecta") });
+
+                        _saldo = _fondoCaja.Value + _cobrado.Value - _cancelado.Value - _retirado.Value;
                         if (pConcepts.Transaction.Amount - _saldo != 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de liquidación no es valido") });
                         break;
