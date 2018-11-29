@@ -35,6 +35,7 @@
     <Compile Remove="Migrations\20181126170227_Payment.cs" />
     <Compile Remove="Migrations\20181126180816_AgreementLog.cs" />
     <Compile Remove="Migrations\20181126181036_AgreementLog.cs" />
+    <Compile Remove="Migrations\20181129000944_changeidentityAnyTables.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,7 +14,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("name"), StringLength(50), Required]
         public string Name { get; set; }
-        [Column("percentpercentage"), Required]
+        [Column("percentage"), Required]
         public Int16 Percentage { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
