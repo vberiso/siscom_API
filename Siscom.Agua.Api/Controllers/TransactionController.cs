@@ -152,12 +152,16 @@ namespace Siscom.Agua.Api.Controllers
                         break;
                     case 5://Cierre
                         _open = false;
+                        if (pConcepts.Transaction.TypeTransactionId == 5)
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido cerrada" });
                         break;
                     case 6: //Retiro
                         _retirado = new KeyValuePair<int, Double>(_retirado.Key + 1, item.Amount);
                         break;
                     case 7: //Liquidada
                         _liquidada = true;
+                        if (pConcepts.Transaction.TypeTransactionId == 7)
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido liquidada" });
                         break;
                     default:
                         break;
@@ -177,27 +181,27 @@ namespace Siscom.Agua.Api.Controllers
                         break;
                     case 2://Fondo
                         if (terminalUser.Terminal.CashBox > pConcepts.Transaction.Amount || pConcepts.Transaction.Amount==0)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de caja inválido") });
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de terminal inválido") });
                         break;
                     case 3://Cobro
                         if (_liquidada)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja ya ha sido liquidada") });
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal ya ha sido liquidada") });
                         if (!pConcepts.Transaction.Sign)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
                         break;
                     case 4://Cancelado
                         if (_liquidada)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja ya ha sido liquidada") });
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal ya ha sido liquidada") });
                         if (pConcepts.Transaction.Sign)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
                         break;
                     case 5://Cierre
                         if (!_liquidada)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja debe ser liquidada previamente") });
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal debe ser liquidada previamente") });
                         break;
                     case 6://Retiro
                         if (_liquidada)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja ya ha sido liquidada") });
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal ya ha sido liquidada") });
                         if (pConcepts.Transaction.Sign)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
 
@@ -206,8 +210,6 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
                         break;
                     case 7:
-                        if (_liquidada)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La caja ya ha sido liquidada") });
                         if (pConcepts.Transaction.Sign)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de liquidación incorrecta") });
 
@@ -237,6 +239,8 @@ namespace Siscom.Agua.Api.Controllers
                         transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pConcepts.Transaction.TypeTransactionId).ConfigureAwait(false);
                         transaction.PayMethod = await _context.PayMethods.FindAsync(pConcepts.Transaction.PayMethodId).ConfigureAwait(false);
                         transaction.Folio = Guid.NewGuid().ToString("D");
+                        transaction.CancellationFolio = pConcepts.Transaction.Cancellation;
+                        transaction.OriginPaymentMethod = pConcepts.Transaction.OriginPaymentMethod;
                         _context.Transactions.Add(transaction);
                         await _context.SaveChangesAsync();
 
@@ -255,7 +259,7 @@ namespace Siscom.Agua.Api.Controllers
                         }
                         await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
-                        if (pConcepts.Transaction.TypeTransactionId != 1 && pConcepts.Transaction.TypeTransactionId != 2 && pConcepts.Transaction.TypeTransactionId != 5)
+                        if (pConcepts.Transaction.TypeTransactionId == 3 || pConcepts.Transaction.TypeTransactionId != 4)
                         {
                             Folio folio = new Folio();
                             folio = await _context.Folios
