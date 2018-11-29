@@ -10,7 +10,7 @@ namespace Siscom.Agua.DAL.Models
     public  class Meter
     {
         [Key]
-        [Column("id_meter"), DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("id_meter"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Column("brand"), StringLength(50), Required]
         public string Brand { get; set; }

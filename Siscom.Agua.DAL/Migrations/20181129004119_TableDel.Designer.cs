@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181129004119_TableDel")]
+    partial class TableDel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -481,41 +483,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Client");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Consumption", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_consumption")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("ConsumptionDate")
-                        .HasColumnName("consumption_date");
-
-                    b.Property<double>("CurrentConsumption")
-                        .HasColumnName("current_consumption");
-
-                    b.Property<int?>("DebtId");
-
-                    b.Property<int?>("MeterId");
-
-                    b.Property<double>("PreviousConsumption")
-                        .HasColumnName("previous_consumption");
-
-                    b.Property<double>("consumption")
-                        .HasColumnName("consumption");
-
-                    b.Property<bool>("is_active")
-                        .HasColumnName("is_active");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DebtId");
-
-                    b.HasIndex("MeterId");
-
-                    b.ToTable("Consumption");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Contact", b =>
                 {
                     b.Property<int>("Id")
@@ -664,35 +631,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Debt");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_debt_detail")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<double>("Amount")
-                        .HasColumnName("amount");
-
-                    b.Property<int?>("DebtId");
-
-                    b.Property<bool>("HaveTax")
-                        .HasColumnName("have_tax");
-
-                    b.Property<double>("OnAccount")
-                        .HasColumnName("on_account");
-
-                    b.Property<int?>("ServiceId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DebtId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("Debt_Detail");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtPeriod", b =>
                 {
                     b.Property<int>("Id")
@@ -726,27 +664,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("TypePeriodId");
 
                     b.ToTable("Debt_Period");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Derivative", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_derivative")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AgreementDerivative");
-
-                    b.Property<int?>("AgreementId");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnName("is_active");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgreementId");
-
-                    b.ToTable("Derivative");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Diameter", b =>
@@ -830,7 +747,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 11, 28, 18, 47, 16, 84, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 11, 28, 18, 41, 18, 781, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -884,57 +801,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Group_Type");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Meter", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_meter")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("AgreementId");
-
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasColumnName("brand")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("Consumption")
-                        .HasColumnName("consumption")
-                        .HasMaxLength(10);
-
-                    b.Property<DateTime>("DeinstallDate")
-                        .HasColumnName("deinstall_date")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime>("InstallDate")
-                        .HasColumnName("install_date")
-                        .HasColumnType("date");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Model")
-                        .IsRequired()
-                        .HasColumnName("model")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("Serial")
-                        .IsRequired()
-                        .HasColumnName("serial")
-                        .HasMaxLength(20);
-
-                    b.Property<string>("Wheels")
-                        .IsRequired()
-                        .HasColumnName("wheels")
-                        .HasMaxLength(1);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgreementId");
-
-                    b.ToTable("Meter");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.OriginPayment", b =>
@@ -1791,17 +1657,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Consumption", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Debt", "Debt")
-                        .WithMany()
-                        .HasForeignKey("DebtId");
-
-                    b.HasOne("Siscom.Agua.DAL.Models.Meter", "Meter")
-                        .WithMany()
-                        .HasForeignKey("MeterId");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Contact", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Client", "Client")
@@ -1827,29 +1682,11 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasForeignKey("DebtPeriodId");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Debt", "Debt")
-                        .WithMany()
-                        .HasForeignKey("DebtId");
-
-                    b.HasOne("Siscom.Agua.DAL.Models.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtPeriod", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.TypePeriod", "TypePeriod")
                         .WithMany()
                         .HasForeignKey("TypePeriodId");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Derivative", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
-                        .WithMany()
-                        .HasForeignKey("AgreementId");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Discount", b =>
@@ -1864,13 +1701,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.BranchOffice", "BranchOffice")
                         .WithMany()
                         .HasForeignKey("BranchOfficeId");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Meter", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
-                        .WithMany()
-                        .HasForeignKey("AgreementId");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Payment", b =>

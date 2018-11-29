@@ -10,7 +10,7 @@ namespace Siscom.Agua.DAL.Models
     public class Derivative
     {
         [Key]
-        [Column("id_derivative"), DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("id_derivative"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }

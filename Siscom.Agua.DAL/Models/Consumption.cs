@@ -10,7 +10,7 @@ namespace Siscom.Agua.DAL.Models
     public class Consumption
     {
         [Key]
-        [Column("id_consumption"), DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("id_consumption"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Column("consumption_date"), Required]
         public DateTime ConsumptionDate { get; set; }

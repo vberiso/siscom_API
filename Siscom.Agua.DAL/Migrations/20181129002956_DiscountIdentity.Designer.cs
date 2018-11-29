@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181129002956_DiscountIdentity")]
+    partial class DiscountIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -484,9 +486,7 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Consumption", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_consumption")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("id_consumption");
 
                     b.Property<DateTime>("ConsumptionDate")
                         .HasColumnName("consumption_date");
@@ -595,9 +595,7 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Debt", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_debt")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("id_debt");
 
                     b.Property<int?>("AgreementId");
 
@@ -667,9 +665,7 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_debt_detail")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("id_debt_detail");
 
                     b.Property<double>("Amount")
                         .HasColumnName("amount");
@@ -731,9 +727,7 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Derivative", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_derivative")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("id_derivative");
 
                     b.Property<int>("AgreementDerivative");
 
@@ -830,7 +824,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 11, 28, 18, 47, 16, 84, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 11, 28, 18, 29, 56, 44, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -889,9 +883,7 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Meter", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_meter")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("id_meter");
 
                     b.Property<int?>("AgreementId");
 

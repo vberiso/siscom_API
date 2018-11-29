@@ -10,7 +10,7 @@ namespace Siscom.Agua.DAL.Models
     public class Discount
     {
         [Key]
-        [Column("id_discount"), DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("id_discount"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Column("name"), StringLength(50), Required]
         public string Name { get; set; }

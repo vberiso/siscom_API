@@ -10,7 +10,7 @@ namespace Siscom.Agua.DAL.Models
     public class Debt
     {
         [Key]
-        [Column("id_debt"), DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("id_debt"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Column("debit_date"), Required]
         public DateTime DebitDate { get; set; }
