@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181130162213_DebtDEtailDel")]
+    partial class DebtDEtailDel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -664,28 +666,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Debt");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
-                {
-                    b.Property<int>("DebtId");
-
-                    b.Property<int>("ServiceId");
-
-                    b.Property<double>("Amount")
-                        .HasColumnName("amount");
-
-                    b.Property<bool>("HaveTax")
-                        .HasColumnName("have_tax");
-
-                    b.Property<double>("OnAccount")
-                        .HasColumnName("on_account");
-
-                    b.HasKey("DebtId", "ServiceId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("Debt_Detail");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtPeriod", b =>
                 {
                     b.Property<int>("Id")
@@ -823,7 +803,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 11, 30, 10, 29, 55, 28, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 11, 30, 10, 22, 13, 218, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -1835,19 +1815,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.DebtPeriod", "DebtPeriod")
                         .WithMany()
                         .HasForeignKey("DebtPeriodId");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Debt", "Debt")
-                        .WithMany("DebtDetails")
-                        .HasForeignKey("DebtId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Siscom.Agua.DAL.Models.Service", "Service")
-                        .WithMany("DebtDetails")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtPeriod", b =>

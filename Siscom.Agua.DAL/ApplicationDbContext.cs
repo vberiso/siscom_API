@@ -111,6 +111,7 @@ namespace Siscom.Agua.DAL
             builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
             builder.Entity<AgreementService>().HasKey(x => new { x.IdService, x.IdAgreement });
             builder.Entity<AgreementDiscount>().HasKey(x => new { x.IdDiscount, x.IdAgreement });
+            builder.Entity<DebtDetail>().HasKey(x => new { x.DebtId, x.ServiceId });
 
             builder.Entity<ViewProfile>()
                 .HasOne<View>(sc => sc.View)
@@ -141,6 +142,16 @@ namespace Siscom.Agua.DAL
               .HasOne<Discount>(x => x.Discount)
               .WithMany(y => y.AgreementDiscounts)
               .HasForeignKey(x => x.IdDiscount);
+
+            builder.Entity<DebtDetail>()
+               .HasOne<Debt>(x => x.Debt)
+               .WithMany(y => y.DebtDetails)
+               .HasForeignKey(x => x.DebtId);
+
+            builder.Entity<DebtDetail>()
+                .HasOne<Service>(x => x.Service)
+                .WithMany(y => y.DebtDetails)
+                .HasForeignKey(x => x.ServiceId);
 
             builder.Entity<Agreement>()
                .Property(x => x.StratDate)

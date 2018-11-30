@@ -23,12 +23,12 @@ namespace Siscom.Agua.DAL.Models
         public string PercentageTax { get; set; }
         [Column("tax"), Required]
         public double Tax { get; set; }
+        [Column("rounding"), Required]
+        public double Rounding { get; set; }
         [Column("total"), Required]
         public double Total { get; set; }
         [Column("authorization_origin_payment"), StringLength(50)]
-        public string AuthorizationOriginPayment { get; set; }
-        [Column("origin_payment_method"), StringLength(15)]
-        public string OriginPaymentMethod { get; set; }
+        public string AuthorizationOriginPayment { get; set; }        
         [Column("transaction_folio"), StringLength(40)]
         public string TransactionFolio { get; set; }
 
@@ -40,6 +40,7 @@ namespace Siscom.Agua.DAL.Models
         public string Type { get; set; }
 
         public OriginPayment OriginPayment { get; set; }
+        public ExternalOriginPayment ExternalOriginPayment { get; set; }
         public PayMethod PayMethod { get; set; }
     }
 }

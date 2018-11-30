@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public Service()
         {
             AgreementServices = new HashSet<AgreementService>();
+            DebtDetails = new HashSet<DebtDetail>();
         }
 
         [Key]
@@ -32,5 +33,6 @@ namespace Siscom.Agua.DAL.Models
         public bool IsActive { get; set; }
 
         public ICollection<AgreementService> AgreementServices { get; set; }
+        public ICollection<DebtDetail> DebtDetails { get; set; }
     }
 }

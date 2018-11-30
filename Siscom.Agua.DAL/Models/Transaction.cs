@@ -21,16 +21,22 @@ namespace Siscom.Agua.DAL.Models
         public bool Sign { get; set; }
         [Column("amount"), Required]
         public double Amount { get; set; }
+        [Column("tax"), Required]
+        public double Tax { get; set; }
+        [Column("rounding"), Required]
+        public double Rounding { get; set; }        
         [Column("aplication"), StringLength(20), Required]
         public string Aplication { get; set; }
         [Column("cancellation_folio"), StringLength(40)]
-        public string CancellationFolio { get; set; }
-        [Column("origin_payment_method"), StringLength(15)]
-        public string OriginPaymentMethod { get; set; }
+        public string CancellationFolio { get; set; }        
+        [Column("authorization_origin_payment"), StringLength(50)]
+        public string AuthorizationOriginPayment { get; set; }
 
         public TerminalUser TerminalUser { get; set; }
         public TypeTransaction TypeTransaction { get; set; }
         public PayMethod PayMethod { get; set; }
+        public OriginPayment OriginPayment { get; set; }
+        public ExternalOriginPayment ExternalOriginPayment { get; set; }
 
         public ICollection<TransactionFolio> TransactionFolios { get; set; }
     }

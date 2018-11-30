@@ -345,12 +345,13 @@
         </member>
         <member name="M:Siscom.Agua.Api.Controllers.TransactionController.PostTransaction(Siscom.Agua.Api.Model.PaymentConceptsVM)">
             <summary>
-            This will provide capability add new Transaction XXX
+            This will provide capability add new Transaction
             </summary>       
-            <param name="pConcepts">Model PaymentConcepts
+            <param name="pPaymentConcepts">Model PaymentConcepts
             </param>
             <returns>New TerminalUser added</returns>
         </member>
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCashBox(System.Int32,Siscom.Agua.Api.Model.TransactionVM)" -->
         <member name="M:Siscom.Agua.Api.Controllers.TransactionController.FindTransactions(System.String,System.Int32)">
             <summary>
             Get all transactions of terminalUser from day

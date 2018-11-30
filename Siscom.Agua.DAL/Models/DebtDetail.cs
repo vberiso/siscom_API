@@ -8,10 +8,7 @@ namespace Siscom.Agua.DAL.Models
 {
     [Table("Debt_Detail")]
     public class DebtDetail
-    {
-        [Key]
-        [Column("id_debt_detail"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+    {      
         [Column("amount"), Required]
         public double Amount { get; set; }
         [Column("on_account"), Required]
@@ -19,7 +16,13 @@ namespace Siscom.Agua.DAL.Models
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }
 
+        [ForeignKey("Service")]
+        public int ServiceId { get; set; }
         public Service Service { get; set; }
+
+        [ForeignKey("Debt")]
+        public int DebtId { get; set; }
         public Debt Debt { get; set; }
+
     }
 }

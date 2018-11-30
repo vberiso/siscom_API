@@ -15,6 +15,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DocumentationFile>bin\Release\netcoreapp2.1\Siscom.Agua.Api.xml</DocumentationFile>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Model\TransactionDetailVM.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Services\Settings\" />
