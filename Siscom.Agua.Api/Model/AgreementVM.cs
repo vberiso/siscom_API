@@ -19,7 +19,7 @@ namespace Siscom.Agua.Api.Model
         public int Id { get; set; }
         [Required]
         public string Account { get; set; }
-
+        [Required]
         public int Derivatives { get; set; }
         [Required]
         public int TypeServiceId { get; set; }
@@ -39,9 +39,9 @@ namespace Siscom.Agua.Api.Model
         public int TypeIntakeId { get; set; }
         [Required]
         public int DiameterId { get; set; }
-        public int DiscountId { get; set; }
         [Required]
         public string TypeAgreement { get; set; }
+        [Required]
         public int AgreementPrincipalId { get; set; }
         [Required]
         public string UserId { get; set; }
