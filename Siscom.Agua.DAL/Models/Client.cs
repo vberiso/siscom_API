@@ -19,13 +19,13 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_client"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
-        [Column("name"), StringLength(50), Required]
+        [Column("name"), StringLength(200), Required]
         public string Name { get; set; }
         [Column("last_name"), StringLength(80), Required]
         public string LastName { get; set; }
         [Column("second_last_name"), StringLength(80), Required]
         public string SecondLastName { get; set; }
-        [Column("rfc"), StringLength(13), Required]
+        [Column("rfc"), StringLength(13)]
         public string RFC { get; set; }
         [Column("curp"), StringLength(18)]
         public string CURP { get; set; }
@@ -33,7 +33,7 @@ namespace Siscom.Agua.DAL.Models
         public string INE { get; set; }
         [Column("email"), StringLength(150)]
         public string EMail { get; set; }
-        [Column("type_user"), StringLength(5)]
+        [Column("type_user"), StringLength(5), Required]
         public string TypeUser { get; set; }
    
         [ForeignKey("Agreement")]

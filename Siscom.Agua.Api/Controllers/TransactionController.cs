@@ -177,6 +177,34 @@ namespace Siscom.Agua.Api.Controllers
 
                         foreach (var debt in pPaymentConcepts.Debt)
                         {
+                            var deuda = await _context.Debts.FindAsync(debt.Id);
+                            
+
+                             if (transaction.TypeTransaction.Id == 1)
+                            {
+                                deuda.Status = "EP001";
+
+                                    await _context.Payments.AddAsync(new Payment
+                                    {
+                                        PaymentDate = transaction.DateTransaction,
+                                        BranchOffice = terminalUser.Terminal.BranchOffice.Name,
+                                        Subtotal = transaction.Amount,
+                                        PercentageTax = pPaymentConcepts.Transaction.PercentageTax,
+                                        Tax = transaction.Tax,
+                                        Total = transaction.Amount + transaction.Tax + transaction.Rounding,
+                                        AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
+                                        DebtId = debt.Id,
+                                        Status = "EP001",
+                                        Type = "",
+                                        OriginPayment = transaction.OriginPayment,
+                                        PayMethod = transaction.PayMethod,
+                                        TransactionFolio = transaction.Folio,
+                                        Rounding = transaction.Rounding,
+                                        ExternalOriginPayment = transaction.ExternalOriginPayment,
+                                    });
+                                    await _context.SaveChangesAsync();
+                                
+                            }
 
                             foreach (var detail in debt.DebtDetails)
                             {
@@ -190,35 +218,7 @@ namespace Siscom.Agua.Api.Controllers
                             }
 
                         }
-                        if (transaction.TypeTransaction.Id == 1)
-                        {
-                            foreach (var debt in pPaymentConcepts.Debt)
-                            {
-                                await _context.Payments.AddAsync(new Payment
-                                {
-                                    PaymentDate = transaction.DateTransaction,
-                                    BranchOffice = terminalUser.Terminal.BranchOffice.Name,
-                                    Subtotal = transaction.Amount,
-                                    PercentageTax = pPaymentConcepts.Transaction.PercentageTax,
-                                    Tax = transaction.Tax,
-                                    Total = transaction.Amount + transaction.Tax + transaction.Rounding,
-                                    AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
-                                    DebtId = debt.Id,
-                                    Status = "EP001",
-                                    Type = "",
-                                    OriginPayment = transaction.OriginPayment,
-                                    PayMethod = transaction.PayMethod,
-                                    TransactionFolio = transaction.Folio,
-                                    Rounding = transaction.Rounding,
-                                    ExternalOriginPayment = transaction.ExternalOriginPayment,
-                                });
-                                await _context.SaveChangesAsync();
-                            }
-                        }
-                        else {
-                            //update a pagos a EP002
-                        }
-
+                      
 
 
                         Folio folio = new Folio();
