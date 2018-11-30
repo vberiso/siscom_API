@@ -172,7 +172,7 @@ namespace Siscom.Agua.Api.Controllers
         ///
         /// </remarks>
         [HttpGet("FindAgreementParam")]
-        public async Task<IActionResult> FindAgreementParam([FromBody] SearchAgreementVM search)
+        public async Task<IActionResult> FindAgreementParam([FromQuery] SearchAgreementVM search)
         {
             if (!ModelState.IsValid)
             {
@@ -182,7 +182,8 @@ namespace Siscom.Agua.Api.Controllers
             switch (search.Type)
             {
                 case 1:
-                    agreement.Add(await _context.Agreements
+                    agreement.Add(await _context.Agreements.Include(a => a.Addresses)
+                                                           .Include(c => c.Clients)
                                       .FirstOrDefaultAsync(a => a.Account == search.StringSearch));
                     break;
                 case 2:
@@ -194,7 +195,9 @@ namespace Siscom.Agua.Api.Controllers
                         agreement.Add(new Agreement
                         {
                             Account = item.Agreement.Account,
-                            Id = item.Agreement.Id
+                            Id = item.Agreement.Id,
+                            Clients = client,
+                            Addresses = await _context.Adresses.Where(x => x.AgreementsId == item.AgreementId).ToListAsync()
                         });
                     }
                     break;
@@ -207,7 +210,9 @@ namespace Siscom.Agua.Api.Controllers
                         agreement.Add(new Agreement
                         {
                             Account = item.Agreements.Account,
-                            Id = item.Agreements.Id
+                            Id = item.Agreements.Id,
+                            Clients = await _context.Clients.Where(x => x.AgreementId == item.AgreementsId).ToListAsync(),
+                            Addresses = address
                         });
                     }
                     break;
@@ -220,7 +225,9 @@ namespace Siscom.Agua.Api.Controllers
                         agreement.Add(new Agreement
                         {
                             Account = item.Agreement.Account,
-                            Id = item.Agreement.Id
+                            Id = item.Agreement.Id,
+                            Clients = clientrfc,
+                            Addresses = await _context.Adresses.Where(x => x.AgreementsId == item.AgreementId).ToListAsync()
                         });
                     }
                     break;
@@ -282,12 +289,12 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            int x = 0;
-            int.TryParse(agreementvm.Account, out x);
+           
 
             TypeCommercialBusiness cBusiness = null;
             Agreement NewAgreement = new Agreement();
             Agreement Principal = new Agreement();
+            bool IsDerivative = false;
 
             if (agreementvm.TypeCommertialBusinessId == 0)
             {
@@ -388,7 +395,7 @@ namespace Siscom.Agua.Api.Controllers
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
                         
-                        if(agreementvm.AgreementPrincipalId > 0)
+                        if(agreementvm.AgreementPrincipalId != 0)
                         {
                             Principal = await _context.Agreements.FindAsync(agreementvm.AgreementPrincipalId);
                         }

@@ -21,64 +21,62 @@ namespace Siscom.Agua.Api.Controllers
     [Produces("application/json")]
     [ApiController]
     [Authorize]
-    public class ServicesController : ControllerBase
+    public class DiscountsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public ServicesController(ApplicationDbContext context)
+        public DiscountsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Services
+        // GET: api/Discounts
         [HttpGet]
-        public IEnumerable<Service> GetServices()
+        public IEnumerable<Discount> GetDiscounts()
         {
-            return _context.Services.Where(x => x.InAgreement != true);
+            return _context.Discounts.Include(p => p.TypePeriod);
         }
 
-        // GET: api/Services/5
+        // GET: api/Discounts/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetService([FromRoute] int id)
+        public async Task<IActionResult> GetDiscount([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var service = await _context.Services.FindAsync(id);
+            var discount = await _context.Discounts.Include(p => p.TypePeriod).SingleOrDefaultAsync(x => x.Id == id);
 
-            if (service == null)
+            if (discount == null)
             {
                 return NotFound();
             }
 
-            return Ok(service);
+            return Ok(discount);
         }
 
-        // PUT: api/Services/5
+        // PUT: api/Discounts/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutService([FromRoute] int id, [FromBody] ServiceVM serviceVM)
+        public async Task<IActionResult> PutDiscount([FromRoute] int id, [FromBody] DiscountVM discountvm)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != serviceVM.Id)
+            if (id != discountvm.Id)
             {
                 return BadRequest();
             }
-            var service = await _context.Services.FindAsync(serviceVM.Id);
+            var discount = await _context.Discounts.FindAsync(discountvm.Id);
 
-            service.Name = serviceVM.Name;
-            service.Order = serviceVM.Order;
-            service.IsService = serviceVM.IsService;
-            service.IsActive = serviceVM.IsActive;
-            service.HaveTax = serviceVM.HaveTax;
-            service.InAgreement = serviceVM.InAgreement;
+            discount.IsActive = discountvm.IsActive;
+            discount.Name = discountvm.Name;
+            discount.Percentage = discountvm.Percentage;
+            discount.TypePeriod = await _context.TypePeriods.FindAsync(discountvm.TypePeriodId);
 
-            _context.Entry(service).State = EntityState.Modified;
+            _context.Entry(discount).State = EntityState.Modified;
 
             try
             {
@@ -86,7 +84,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             catch (Exception e)
             {
-                if (!ServiceExists(id))
+                if (!DiscountExists(id))
                 {
                     return NotFound();
                 }
@@ -97,7 +95,7 @@ namespace Siscom.Agua.Api.Controllers
                     systemLog.DateLog = DateTime.Now;
                     systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                     systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                    systemLog.Parameter = JsonConvert.SerializeObject(serviceVM);
+                    systemLog.Parameter = JsonConvert.SerializeObject(discountvm);
                     CustomSystemLog helper = new CustomSystemLog(_context);
                     helper.AddLog(systemLog);
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
@@ -107,30 +105,28 @@ namespace Siscom.Agua.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Services
+        // POST: api/Discounts
         [HttpPost]
-        public async Task<IActionResult> PostService([FromBody] ServiceVM serviceVM)
+        public async Task<IActionResult> PostDiscount([FromBody] DiscountVM discountvm)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            Service service = new Service();
+            Discount discount = new Discount();
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    service.InAgreement = serviceVM.InAgreement;
-                    service.HaveTax = serviceVM.HaveTax;
-                    service.IsActive = serviceVM.IsActive;
-                    service.IsService = serviceVM.IsService;
-                    service.Name = serviceVM.Name;
-                    service.Order = serviceVM.Order;
+                    discount.IsActive = discountvm.IsActive;
+                    discount.Name = discountvm.Name;
+                    discount.Percentage = discountvm.Percentage;
+                    discount.TypePeriod = await _context.TypePeriods.FindAsync(discountvm.TypePeriodId);
 
-                    _context.Services.Add(service);
+                    _context.Discounts.Add(discount);
                     await _context.SaveChangesAsync();
                     scope.Complete();
-                }    
+                }
             }
             catch (Exception e)
             {
@@ -139,39 +135,40 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.DateLog = DateTime.Now;
                 systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                 systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                systemLog.Parameter = JsonConvert.SerializeObject(serviceVM);
+                systemLog.Parameter = JsonConvert.SerializeObject(discountvm);
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
+            
 
-            return CreatedAtAction("GetService", new { id = service.Id }, service);
+            return CreatedAtAction("GetDiscount", new { id = discount.Id }, discount);
         }
 
-        // DELETE: api/Services/5
+        // DELETE: api/Discounts/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteService([FromRoute] int id)
+        public async Task<IActionResult> DeleteDiscount([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var service = await _context.Services.FindAsync(id);
-            if (service == null)
+            var discount = await _context.Discounts.FindAsync(id);
+            if (discount == null)
             {
                 return NotFound();
             }
 
-            _context.Services.Remove(service);
+            _context.Discounts.Remove(discount);
             await _context.SaveChangesAsync();
 
-            return Ok(service);
+            return Ok(discount);
         }
 
-        private bool ServiceExists(int id)
+        private bool DiscountExists(int id)
         {
-            return _context.Services.Any(e => e.Id == id);
+            return _context.Discounts.Any(e => e.Id == id);
         }
     }
 }

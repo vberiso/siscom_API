@@ -6,19 +6,15 @@ using System.Threading.Tasks;
 
 namespace Siscom.Agua.Api.Model
 {
-    public class ServiceVM
+    public class DiscountVM
     {
         public int Id { get; set; }
-        [Required, StringLength(25)]
+        [StringLength(50), Required]
         public string Name { get; set; }
-        public Int16 Order { get; set; }
         [Required]
-        public bool IsService { get; set; }
-        [Required]
-        public bool HaveTax { get; set; }
-        [Required]
-        public bool InAgreement { get; set; }
+        public Int16 Percentage { get; set; }
         [Required]
         public bool IsActive { get; set; }
+        public int TypePeriodId { get; set; }
     }
 }
