@@ -183,6 +183,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 case 1:
                     agreement.Add(await _context.Agreements.Include(a => a.Addresses)
+                                                                .ThenInclude(s => s.Suburbs)
                                                            .Include(c => c.Clients)
                                       .FirstOrDefaultAsync(a => a.Account == search.StringSearch));
                     break;
@@ -197,7 +198,7 @@ namespace Siscom.Agua.Api.Controllers
                             Account = item.Agreement.Account,
                             Id = item.Agreement.Id,
                             Clients = client,
-                            Addresses = await _context.Adresses.Where(x => x.AgreementsId == item.AgreementId).ToListAsync()
+                            Addresses = await _context.Adresses.Include(s => s.Suburbs).Where(x => x.AgreementsId == item.AgreementId).ToListAsync()
                         });
                     }
                     break;
@@ -227,7 +228,7 @@ namespace Siscom.Agua.Api.Controllers
                             Account = item.Agreement.Account,
                             Id = item.Agreement.Id,
                             Clients = clientrfc,
-                            Addresses = await _context.Adresses.Where(x => x.AgreementsId == item.AgreementId).ToListAsync()
+                            Addresses = await _context.Adresses.Include(s => s.Suburbs).Where(x => x.AgreementsId == item.AgreementId).ToListAsync()
                         });
                     }
                     break;
@@ -397,7 +398,10 @@ namespace Siscom.Agua.Api.Controllers
                         
                         if(agreementvm.AgreementPrincipalId != 0)
                         {
-                            Principal = await _context.Agreements.FindAsync(agreementvm.AgreementPrincipalId);
+                            Principal = await _context.Agreements.Include(a => a.Addresses)
+                                                                    .ThenInclude(s => s.Suburbs)
+                                                                 .Where(x => x.Id == agreementvm.AgreementPrincipalId)
+                                                                 .FirstOrDefaultAsync();
                         }
 
                         NewAgreement.Account = agreementvm.Account;
@@ -417,6 +421,21 @@ namespace Siscom.Agua.Api.Controllers
 
                         foreach (var address in agreementvm.Adresses)
                         {
+                            var suburb = await _context.Suburbs.FindAsync(address.SuburbsId);
+                            if (Principal != null)
+                            {
+                                if (Principal.Addresses.Where(p => p.TypeAddress == "DIR01").FirstOrDefault().Suburbs.Name != suburb.Name)
+                                {
+                                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "El contrato no puede ser derivada, ya que no coincide la dirección o la colonia " });
+                                }
+                                else
+                                {
+                                    Principal.Derivatives = Principal.Derivatives + 1;
+                                    _context.Entry(Principal).State = EntityState.Modified;
+                                    await _context.SaveChangesAsync();
+                                    IsDerivative = true;
+                                }
+                            }
                             NewAgreement.Addresses.Add(new Adress
                             {
                                 Street = address.Street,
@@ -427,7 +446,7 @@ namespace Siscom.Agua.Api.Controllers
                                 Lat = address.Lat,
                                 Lon = address.Lon,
                                 TypeAddress = address.TypeAddress,
-                                Suburbs = await _context.Suburbs.FindAsync(address.SuburbsId)
+                                Suburbs = suburb
                             });
                         }
 
@@ -458,6 +477,27 @@ namespace Siscom.Agua.Api.Controllers
 
                         await _context.Agreements.AddAsync(NewAgreement);
                         await _context.SaveChangesAsync();
+                        if (IsDerivative)
+                        {
+                            Derivative derivative = new Derivative()
+                            {
+                                Agreement = Principal,
+                                AgreementDerivative = NewAgreement.Id,
+                                IsActive = true
+                            };
+                            AgreementLog agreementLogderivative = new AgreementLog()
+                            {
+                                Agreement = NewAgreement,
+                                AgreementLogDate = DateTime.Now,
+                                User = await userManager.FindByIdAsync(agreementvm.UserId),
+                                Description = "Se Agrego Derivada al Contrato con Cuenta " + Principal.Account,
+                                Observation = agreementvm.Observations
+                            };
+                            await _context.Derivatives.AddAsync(derivative);
+                            await _context.AgreementLogs.AddAsync(agreementLogderivative);
+                            await _context.SaveChangesAsync();
+                        }
+                        
 
                         foreach (var aservice in agreementvm.ServicesId)
                         {
@@ -483,7 +523,6 @@ namespace Siscom.Agua.Api.Controllers
                         };
                         await _context.AgreementLogs.AddAsync(agreementLog);
 
-                        //if()
 
                         scope.Complete();
                     }
@@ -492,7 +531,7 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     SystemLog systemLog = new SystemLog();
                     systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                    systemLog.DateLog = TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Now);
+                    systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                     systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                     systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
                     systemLog.Parameter = JsonConvert.SerializeObject(agreementvm);
@@ -561,7 +600,7 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     SystemLog systemLog = new SystemLog();
                     systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                    systemLog.DateLog = DateTime.Now;
+                    systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                     systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                     systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
                     systemLog.Parameter = JsonConvert.SerializeObject(meterVM);

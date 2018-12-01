@@ -45,7 +45,9 @@ namespace Siscom.Agua.Api.Model
         public int AgreementPrincipalId { get; set; }
         [Required]
         public string UserId { get; set; }
-       
+        [Required]
+        public string Observations { get; set; }
+
         public List<int> ServicesId { get; set; }
         public List<AdressVM> Adresses { get; set; }
         public List<ClientVM> Clients { get; set; }
