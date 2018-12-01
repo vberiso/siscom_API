@@ -88,10 +88,8 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (!Validate(pPaymentConcepts))
-            {
-                return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
-            }
+            if (!Validate(pPaymentConcepts.Transaction))
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Información incompleta" });
 
             TerminalUser terminalUser = new TerminalUser();
             terminalUser = await _context.TerminalUsers
@@ -183,7 +181,7 @@ namespace Siscom.Agua.Api.Controllers
                             transaction.Aplication = pPaymentConcepts.Transaction.Aplication;
                             transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pPaymentConcepts.Transaction.TypeTransactionId).ConfigureAwait(false);
                             transaction.PayMethod = await _context.PayMethods.FindAsync(pPaymentConcepts.Transaction.PayMethodId).ConfigureAwait(false);
-                            transaction.TerminalUser = await _context.TerminalUsers.Include(x => x.Terminal).FirstOrDefaultAsync(y => y.Id == pPaymentConcepts.Transaction.TerminalUserId).ConfigureAwait(false);
+                            transaction.TerminalUser = terminalUser;
                             transaction.CancellationFolio = pPaymentConcepts.Transaction.Cancellation;
                             transaction.Tax = pPaymentConcepts.Transaction.Tax;
                             transaction.Rounding = pPaymentConcepts.Transaction.Rounding;
@@ -201,7 +199,7 @@ namespace Siscom.Agua.Api.Controllers
 
                                 if (transaction.TypeTransaction.Id == 3)
                                 {
-                                    deuda.Status = pPaymentConcepts.Transaction.Status;
+                                    deuda.Status = pPaymentConcepts.Transaction.DebtStatus;
                                     deuda.OnAccount = debt.OnAccount;
                                     _context.Entry(deuda).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
@@ -310,7 +308,7 @@ namespace Siscom.Agua.Api.Controllers
         /// <returns>New Transaction added</returns>
         // POST: api/Transaction
         [HttpPost("{teminalUserId}")]
-        public async Task<IActionResult> PostTransactionCashBox([FromRoute] int teminalUserId, [FromBody] TransactionVM pTransaction)
+        public async Task<IActionResult> PostTransactionCashBox([FromRoute] int teminalUserId, [FromBody] TransactionCashBoxVM pTransaction)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             bool _validation = false;
@@ -324,7 +322,10 @@ namespace Siscom.Agua.Api.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }           
+            }       
+            
+            if(pTransaction.TerminalUserId ==0 ||pTransaction.TypeTransactionId== 0)
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Información incompleta" });
 
             TerminalUser terminalUser = new TerminalUser();
             terminalUser = await _context.TerminalUsers
@@ -339,12 +340,13 @@ namespace Siscom.Agua.Api.Controllers
             if (!terminalUser.InOperation)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
 
-            if(terminalUser.OpenDate.Date != DateTime.Now.Date)
+            if (terminalUser.OpenDate.Date != DateTime.Now.Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
 
             var movimientosCaja = await _context.Transactions
                                                 .Include(x => x.TypeTransaction)
                                                 .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                            x.TerminalUser.InOperation == true &&
                                                             x.DateTransaction.Date == DateTime.Now.Date)
                                                 .OrderBy(x=> x.Id).ToListAsync();
 
@@ -395,6 +397,8 @@ namespace Siscom.Agua.Api.Controllers
                     case 2://Fondo
                         if (terminalUser.Terminal.CashBox > pTransaction.Amount || pTransaction.Amount == 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de terminal inválido") });
+                        if (pTransaction.PayMethodId==0)
+                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Falta método de pago" });
                         _validation = true;
                         break;
                     case 5://Cierre
@@ -402,6 +406,9 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal debe ser liquidada previamente") });
                         pTransaction.Amount = 0;
                         _validation = true;
+                        terminalUser.InOperation = false;
+                        _context.Entry(terminalUser).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
                         break;
                     case 6://Retiro
                         if (_liquidada)
@@ -411,14 +418,17 @@ namespace Siscom.Agua.Api.Controllers
                         if (pTransaction.Amount == 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
                         _saldo = _cobrado.Value - _cancelado.Value - _retirado.Value;
+                        if (pTransaction.PayMethodId == 0)
+                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especofocar método de pago" });
                         if (pTransaction.Amount > _saldo)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
-                        _validation = true;
+                        _validation = true;                       
                         break;
                     case 7://Liquidada
                         if (pTransaction.Sign)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de liquidación incorrecta") });
-
+                        if (pTransaction.PayMethodId == 0)
+                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especofocar método de pago" });
                         _saldo = _fondoCaja.Value + _cobrado.Value - _cancelado.Value - _retirado.Value;
                         if (pTransaction.Amount - _saldo != 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de liquidación no es valido") });
@@ -448,13 +458,11 @@ namespace Siscom.Agua.Api.Controllers
                             transaction.Aplication = pTransaction.Aplication;
                             transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransaction.TypeTransactionId).ConfigureAwait(false);
                             transaction.PayMethod = await _context.PayMethods.FindAsync(pTransaction.PayMethodId).ConfigureAwait(false);
-                            transaction.TerminalUser = await _context.TerminalUsers.Include(x => x.Terminal).FirstOrDefaultAsync(y => y.Id == pTransaction.TerminalUserId).ConfigureAwait(false);
-                            transaction.CancellationFolio = pTransaction.Cancellation;
-                            transaction.Tax = pTransaction.Tax;
-                            transaction.Rounding = pTransaction.Rounding;
-                            transaction.AuthorizationOriginPayment = pTransaction.AuthorizationOriginPayment;
-                            transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pTransaction.ExternalOriginPaymentId).ConfigureAwait(false);
-                            transaction.OriginPayment = await _context.OriginPayments.FindAsync(pTransaction.OriginPaymentId).ConfigureAwait(false);
+                            transaction.TerminalUser = terminalUser;
+                            transaction.Tax =0;
+                            transaction.Rounding = 0;
+                            transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(1).ConfigureAwait(false);
+                            transaction.OriginPayment = await _context.OriginPayments.FindAsync(1).ConfigureAwait(false);
                             _context.Transactions.Add(transaction);
                             await _context.SaveChangesAsync();
 
@@ -518,13 +526,13 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(transaction);
         }
 
-        private bool Validate(PaymentConceptsVM pConcepts)
+        private bool Validate(TransactionVM ptransaction)
         {
-            if (pConcepts.Transaction.PayMethodId == 0)
+            if (ptransaction.PayMethodId == 0)
                 return false;
-            if(pConcepts.Transaction.TerminalUserId == 0)
+            if(ptransaction.TerminalUserId == 0)
                 return false;
-            if (pConcepts.Transaction.TypeTransactionId == 0)
+            if (ptransaction.TypeTransactionId == 0)
                 return false;
             return true;
         }

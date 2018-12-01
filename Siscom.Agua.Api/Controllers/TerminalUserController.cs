@@ -83,12 +83,14 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
             }
 
-            if(pterminalUser.OpenDate != DateTime.Now.Date)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Fecha incorrecta" });
+            ApplicationUser user = new ApplicationUser();
+            user= await  _context.Users.FindAsync(pterminalUser.UserId);
+
+            if (user == null)
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Usuario incorrecto" });
 
             if (await _context.TerminalUsers.Where(x => x.Terminal.Id == pterminalUser.TermianlId &&
-                                                   x.OpenDate == pterminalUser.OpenDate &&
-                                                   x.InOperation==true)
+                                                        x.InOperation==true)
                                             .FirstOrDefaultAsync() != null)
             {
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "La terminal ya se encuentra operando" });
@@ -104,7 +106,7 @@ namespace Siscom.Agua.Api.Controllers
             TerminalUser terminalUser = new TerminalUser();
             terminalUser.Terminal = await _context.Terminal.FindAsync(pterminalUser.TermianlId);
             terminalUser.User = await _context.Users.FindAsync(pterminalUser.UserId);
-            terminalUser.OpenDate = pterminalUser.OpenDate;
+            terminalUser.OpenDate = DateTime.Now.Date;
             terminalUser.InOperation = pterminalUser.InOperation;
 
             _context.TerminalUsers.Add(terminalUser);
@@ -139,16 +141,13 @@ namespace Siscom.Agua.Api.Controllers
             if (!Validate(pterminalUser))
             {
                 return StatusCode((int)TypeError.Code.NoContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
-            }
-
-            //if (pterminalUser.OpenDate != DateTime.Now.Date)
-            //    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Fecha incorrecta" });
+            }        
 
             TerminalUser terminalUser = new TerminalUser();
             terminalUser.Id = pterminalUser.Id;
             terminalUser.Terminal = await _context.Terminal.FindAsync(pterminalUser.TermianlId);
             terminalUser.User = await _context.Users.FindAsync(pterminalUser.UserId);
-            terminalUser.OpenDate = pterminalUser.OpenDate;
+            terminalUser.OpenDate = DateTime.Now.Date;
             terminalUser.InOperation = pterminalUser.InOperation;
 
             _context.Entry(terminalUser).State = EntityState.Modified;
@@ -245,9 +244,6 @@ namespace Siscom.Agua.Api.Controllers
                 return false;
             if (string.IsNullOrEmpty(pterminalUser.UserId))
                 return false;
-            if (string.IsNullOrEmpty(pterminalUser.OpenDate.ToString()))
-                return false;
-
             return true;
         }
 
