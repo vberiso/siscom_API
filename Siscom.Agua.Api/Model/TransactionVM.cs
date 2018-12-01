@@ -19,10 +19,10 @@ namespace Siscom.Agua.Api.Model
         public int PayMethodId { get; set; }
         public int TerminalUserId { get; set; }
         public string Cancellation { get; set; }
-        public string OriginPaymentMethod { get; set; }
         public string AuthorizationOriginPayment { get; set; }
         public int OriginPaymentId { get; set; }
         public int ExternalOriginPaymentId { get; set; }
         public string Type { get; set; }
+        public string Status { get; set; }
     }
 }
