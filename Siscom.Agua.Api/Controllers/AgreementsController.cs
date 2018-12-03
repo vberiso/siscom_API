@@ -246,41 +246,42 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // PUT: api/Agreements/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] Agreement agreement)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] AgreementVM agreementvm)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (id != agreement.Id)
-            {
-                return BadRequest();
-            }
+        //    if (id != agreement.Id)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Entry(agreement).State = EntityState.Modified;
+        //    //agreement
+        //    _context.Entry(agreement).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AgreementExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!AgreementExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
-        
+
 
         // POST: api/Agreements
         [HttpPost]
@@ -294,8 +295,9 @@ namespace Siscom.Agua.Api.Controllers
 
             TypeCommercialBusiness cBusiness = null;
             Agreement NewAgreement = new Agreement();
-            Agreement Principal = new Agreement();
+            Agreement Principal = null;
             bool IsDerivative = false;
+            bool HasError = false;
 
             if (agreementvm.TypeCommertialBusinessId == 0)
             {
@@ -419,23 +421,37 @@ namespace Siscom.Agua.Api.Controllers
                         NewAgreement.TypeCommertialBusiness = cBusiness;
                         NewAgreement.Diameter = diam;
 
+
+                        //
+                        if (Principal != null)
+                        {
+                            agreementvm.Adresses.ForEach(async x => {
+                                if(x.TypeAddress == "DIR01")
+                                {
+                                    var suburb = await _context.Suburbs.FindAsync(x.SuburbsId);
+                                    if (Principal.Addresses.Where(p => p.TypeAddress == "DIR01").FirstOrDefault().Suburbs.Name != suburb.Name)
+                                    {
+                                        HasError = true;
+                                    }
+                                    else
+                                    {
+                                        Principal.Derivatives = Principal.Derivatives + 1;
+                                        _context.Entry(Principal).State = EntityState.Modified;
+                                        await _context.SaveChangesAsync();
+                                        IsDerivative = true;
+                                    }
+                                }
+                            });
+
+                            if (HasError)
+                            {
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El contrato no puede ser derivada, ya que no coincide la dirección o la colonia " });
+                            }
+
+                        }
+
                         foreach (var address in agreementvm.Adresses)
                         {
-                            var suburb = await _context.Suburbs.FindAsync(address.SuburbsId);
-                            if (Principal != null)
-                            {
-                                if (Principal.Addresses.Where(p => p.TypeAddress == "DIR01").FirstOrDefault().Suburbs.Name != suburb.Name)
-                                {
-                                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "El contrato no puede ser derivada, ya que no coincide la dirección o la colonia " });
-                                }
-                                else
-                                {
-                                    Principal.Derivatives = Principal.Derivatives + 1;
-                                    _context.Entry(Principal).State = EntityState.Modified;
-                                    await _context.SaveChangesAsync();
-                                    IsDerivative = true;
-                                }
-                            }
                             NewAgreement.Addresses.Add(new Adress
                             {
                                 Street = address.Street,
@@ -446,7 +462,7 @@ namespace Siscom.Agua.Api.Controllers
                                 Lat = address.Lat,
                                 Lon = address.Lon,
                                 TypeAddress = address.TypeAddress,
-                                Suburbs = suburb
+                                Suburbs = await _context.Suburbs.FindAsync(address.SuburbsId)
                             });
                         }
 
@@ -485,6 +501,9 @@ namespace Siscom.Agua.Api.Controllers
                                 AgreementDerivative = NewAgreement.Id,
                                 IsActive = true
                             };
+                            await _context.Derivatives.AddAsync(derivative);
+                            await _context.SaveChangesAsync();
+
                             AgreementLog agreementLogderivative = new AgreementLog()
                             {
                                 Agreement = NewAgreement,
@@ -493,9 +512,9 @@ namespace Siscom.Agua.Api.Controllers
                                 Description = "Se Agrego Derivada al Contrato con Cuenta " + Principal.Account,
                                 Observation = agreementvm.Observations
                             };
-                            await _context.Derivatives.AddAsync(derivative);
+                            
                             await _context.AgreementLogs.AddAsync(agreementLogderivative);
-                            await _context.SaveChangesAsync();
+                            int a  = await _context.SaveChangesAsync();
                         }
                         
 
@@ -519,7 +538,7 @@ namespace Siscom.Agua.Api.Controllers
                             AgreementLogDate = DateTime.Now,
                             User = await userManager.FindByIdAsync(agreementvm.UserId),
                             Description = "Nuevo Contrato",
-                            Observation = ""
+                            Observation = agreementvm.Observations
                         };
                         await _context.AgreementLogs.AddAsync(agreementLog);
 

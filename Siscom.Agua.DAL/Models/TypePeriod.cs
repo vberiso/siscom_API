@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Type_Period")]
     public class TypePeriod
     {
+        public TypePeriod()
+        {
+            Agreements = new HashSet<Agreement>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_type_period")]
@@ -16,6 +21,8 @@ namespace Siscom.Agua.DAL.Models
         [Required, StringLength(15), Column("name")]
         public string Name { get; set; }
         [Column("mounth"), Required]
-        public Int16 Mounth { get; set; }        
+        public Int16 Mounth { get; set; }
+
+        public ICollection<Agreement> Agreements { get; set; }
     }
 }

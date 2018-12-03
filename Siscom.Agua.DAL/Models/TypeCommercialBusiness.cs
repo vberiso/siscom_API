@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Type_Commertial_Business")]
     public class TypeCommercialBusiness
     {
+        public TypeCommercialBusiness()
+        {
+            Agreements = new HashSet<Agreement>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_type_commertial_business")]
@@ -19,5 +24,7 @@ namespace Siscom.Agua.DAL.Models
         public int ClasificationGroup { get; set; }
         [Column("intake_acronym"), StringLength(2), Required]
         public string IntakeAcronym { get; set; }
+
+        public ICollection<Agreement> Agreements { get; set; }
     }
 }

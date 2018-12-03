@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Type_State_Service")]
     public class TypeStateService
     {
+        public TypeStateService()
+        {
+            Agreements = new HashSet<Agreement>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_type_state_service")]
@@ -16,5 +21,6 @@ namespace Siscom.Agua.DAL.Models
         [Required, StringLength(10), Column("name")]
         public string Name { get; set; }
 
+        public ICollection<Agreement> Agreements { get; set; }
     }
 }

@@ -16,5 +16,6 @@ namespace Siscom.Agua.DAL.Models
         [Required, StringLength(50), Column("name")]
         public string Name { get; set; }
 
+        public ICollection<Agreement> Agreements { get; set; }
     }
 }

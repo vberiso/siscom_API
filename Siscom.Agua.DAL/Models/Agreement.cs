@@ -30,14 +30,40 @@ namespace Siscom.Agua.DAL.Models
         [Column("type_agreement"), StringLength(5), Required]
         public string TypeAgreement { get; set; }
 
+        [ForeignKey("TypeService")]
+        public int TypeServiceId { get; set; }
         public TypeService TypeService { get; set; }
+
+        [ForeignKey("TypeUse")]
+        public int TypeUseId { get; set; }
         public TypeUse TypeUse{ get; set; }
+
+        [ForeignKey("TypeConsume")]
+        public int TypeConsumeId { get; set; }
         public TypeConsume TypeConsume { get; set; }
+
+        [ForeignKey("TypeRegime")]
+        public int TypeRegimeId { get; set; }
         public TypeRegime TypeRegime { get; set; }
+
+        [ForeignKey("TypePeriod")]
+        public int TypePeriodId { get; set; }
         public TypePeriod TypePeriod { get; set; }
+
+        [ForeignKey("TypeCommertialBusiness")]
+        public int TypeCommertialBusinessId { get; set; }
         public TypeCommercialBusiness TypeCommertialBusiness { get; set; }
+
+        [ForeignKey("TypeStateService")]
+        public int TypeStateServiceId { get; set; }
         public TypeStateService TypeStateService { get; set; }
+
+        [ForeignKey("TypeIntake")]
+        public int TypeIntakeId { get; set; }
         public TypeIntake TypeIntake { get; set; }
+
+        [ForeignKey("Diameter")]
+        public int DiameterId { get; set; }
         public Diameter Diameter { get; set; }
 
         public ICollection<Client> Clients { get; set; }

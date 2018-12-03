@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Type_Consume")]
     public class TypeConsume
     {
+        public TypeConsume()
+        {
+            Agreements = new HashSet<Agreement>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_type_consume")]
@@ -16,5 +21,6 @@ namespace Siscom.Agua.DAL.Models
         [Required, StringLength(50), Column("name")]
         public string Name { get; set; }
 
+        public ICollection<Agreement> Agreements { get; set; }
     }
 }

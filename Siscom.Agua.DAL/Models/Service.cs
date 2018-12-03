@@ -13,6 +13,7 @@ namespace Siscom.Agua.DAL.Models
         {
             AgreementServices = new HashSet<AgreementService>();
             DebtDetails = new HashSet<DebtDetail>();
+            Tariffs = new HashSet<Tariff>();
         }
 
         [Key]
@@ -34,5 +35,6 @@ namespace Siscom.Agua.DAL.Models
 
         public ICollection<AgreementService> AgreementServices { get; set; }
         public ICollection<DebtDetail> DebtDetails { get; set; }
+        public ICollection<Tariff> Tariffs { get; set; }
     }
 }

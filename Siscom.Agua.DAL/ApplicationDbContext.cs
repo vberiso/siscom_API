@@ -115,6 +115,13 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtDetail>().HasKey(x => new { x.DebtId, x.ServiceId });
             builder.Entity<Status>().HasKey(x => new { x.CodeName, x.GroupStatusId });
 
+            //builder.Entity<Adress>().HasRequired<Suburbs>(s => s.)
+
+            // builder.Entity<Adress>()
+            //    .HasOne<Suburb>(a => a.Suburbs)
+            //    .WithOne(s => s.)
+            //.HasForeignKey<int>(s => s.CurrentGradeId);
+
             builder.Entity<ViewProfile>()
                 .HasOne<View>(sc => sc.View)
                 .WithMany(s => s.ViewProfiles)

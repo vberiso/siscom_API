@@ -30,9 +30,20 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public int IsActive { get; set; }
 
+        [ForeignKey("TypeIntake")]
+        public int TypeIntakeId { get; set; }
         public TypeIntake TypeIntake { get; set; }
+
+        [ForeignKey("TypeService")]
+        public int TypeServiceId { get; set; }
         public TypeService TypeService { get; set; }
+
+        [ForeignKey("TypeUse")]
+        public int TypeUseId { get; set; }
         public TypeUse TypeUse { get; set; }
+
+        [ForeignKey("Service")]
+        public int ServiceId { get; set; }
         public Service Service { get; set; }        
     }
 }

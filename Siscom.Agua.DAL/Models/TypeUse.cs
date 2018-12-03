@@ -9,6 +9,12 @@ namespace Siscom.Agua.DAL.Models
     [Table("Type_Use")]
     public class TypeUse
     {
+        public TypeUse()
+        {
+            Agreements = new HashSet<Agreement>();
+            Tariffs = new HashSet<Tariff>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_type_use")]
@@ -17,5 +23,8 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
         [Column("intake_acronym"), StringLength(2), Required]
         public string IntakeAcronym { get; set; }
+
+        public ICollection<Agreement> Agreements { get; set; }
+        public ICollection<Tariff> Tariffs { get; set; }
     }
 }
