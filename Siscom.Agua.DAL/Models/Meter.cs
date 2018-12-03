@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Meter")]
     public  class Meter
     {
+        public Meter()
+        {
+            Consumptions = new HashSet<Consumption>();
+        }
+
         [Key]
         [Column("id_meter"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -29,6 +34,10 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
 
+        [ForeignKey("Agreement")]
+        public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
+
+        public ICollection<Consumption> Consumptions { get; set; }
     }
 }

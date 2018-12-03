@@ -13,6 +13,9 @@ namespace Siscom.Agua.DAL.Models
         {
             Clients = new HashSet<Client>();
             Addresses = new HashSet<Adress>();
+            Meters = new HashSet<Meter>();
+            Debts = new HashSet<Debt>();
+            Derivatives = new HashSet<Derivative>();
             AgreementServices = new HashSet<AgreementService>();
         }
 
@@ -23,8 +26,8 @@ namespace Siscom.Agua.DAL.Models
         public string Account { get; set; }
         [Column("account_date"), Required]
         public DateTime AccountDate { get; set; }
-        [Column("derivatives"), Required]
-        public int Derivatives { get; set; }
+        [Column("num_derivatives"), Required]
+        public int NumDerivatives { get; set; }
         [Column("start_date"), Required]
         public DateTime StratDate { get; set; }
         [Column("type_agreement"), StringLength(5), Required]
@@ -70,5 +73,8 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<Adress> Addresses { get; set; }
         public ICollection<AgreementService> AgreementServices { get; set; }
         public ICollection<AgreementDiscount> AgreementDiscounts { get; set; }
+        public ICollection<Meter> Meters { get; set; }
+        public ICollection<Debt> Debts { get; set; }
+        public ICollection<Derivative> Derivatives { get; set; }
     }
 }

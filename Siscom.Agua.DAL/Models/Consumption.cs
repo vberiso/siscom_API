@@ -23,7 +23,12 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public bool is_active { get; set; }
 
+        [ForeignKey("Debt")]
+        public int DebtId { get; set; }
         public Debt Debt { get; set; }
+
+        [ForeignKey("Meter")]
+        public int MeterId { get; set; }
         public Meter Meter { get; set; }
     }
 }

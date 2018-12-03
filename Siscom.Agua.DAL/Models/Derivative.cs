@@ -15,6 +15,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
 
+        [ForeignKey("Agreement")]
+        public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
         public int AgreementDerivative { get; set; }
     }

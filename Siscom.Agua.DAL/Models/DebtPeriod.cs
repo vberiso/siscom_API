@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Debt_Period")]
     public class DebtPeriod
     {
+        public DebtPeriod()
+        {
+            Debts = new HashSet<Debt>();
+        }
+
         [Key]
         [Column("id_debt_period"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]       
         public int Id { get; set; }
@@ -24,5 +29,7 @@ namespace Siscom.Agua.DAL.Models
         public TimeSpan RunHour { get; set; }
 
         public TypePeriod TypePeriod { get; set; }
+
+        public ICollection<Debt> Debts { get; set; }
     }
 }
