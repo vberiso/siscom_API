@@ -47,6 +47,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Discount> Discounts { get; set; }
         public DbSet<Derivative> Derivatives { get; set; }
         public DbSet<AgreementLog> AgreementLogs { get; set; }
+        public DbSet<Account> Accounts { get; set; }
 
         /// <summary> 
         /// Cash Box 
@@ -112,6 +113,7 @@ namespace Siscom.Agua.DAL
             builder.Entity<AgreementService>().HasKey(x => new { x.IdService, x.IdAgreement });
             builder.Entity<AgreementDiscount>().HasKey(x => new { x.IdDiscount, x.IdAgreement });
             builder.Entity<DebtDetail>().HasKey(x => new { x.DebtId, x.ServiceId });
+            builder.Entity<Status>().HasKey(x => new { x.CodeName, x.GroupStatusId });
 
             builder.Entity<ViewProfile>()
                 .HasOne<View>(sc => sc.View)

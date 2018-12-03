@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181203192922_StatusDEL")]
+    partial class StatusDEL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,30 +105,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Account", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_account")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("IsActive")
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Prefix")
-                        .HasColumnName("prefix");
-
-                    b.Property<int>("Secuential")
-                        .HasColumnName("secuential");
-
-                    b.Property<string>("Suffixes")
-                        .HasColumnName("suffixes");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Account");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Adress", b =>
@@ -847,7 +825,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 12, 3, 14, 1, 23, 701, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 12, 3, 13, 29, 21, 489, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -1123,25 +1101,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("CountriesId");
 
                     b.ToTable("State");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Status", b =>
-                {
-                    b.Property<string>("CodeName")
-                        .HasColumnName("id_status");
-
-                    b.Property<int>("GroupStatusId");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnName("description")
-                        .HasMaxLength(30);
-
-                    b.HasKey("CodeName", "GroupStatusId");
-
-                    b.HasIndex("GroupStatusId");
-
-                    b.ToTable("Status");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Suburb", b =>
@@ -1929,14 +1888,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.Country", "Countries")
                         .WithMany("states")
                         .HasForeignKey("CountriesId");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Status", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.GroupStatus", "GroupStatus")
-                        .WithMany()
-                        .HasForeignKey("GroupStatusId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Suburb", b =>
