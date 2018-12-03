@@ -21,8 +21,16 @@ namespace Siscom.Agua.DAL.Models
         [Column("name"), StringLength(100), Required]
         public string Name { get; set; }
 
+        [ForeignKey("Towns")]
+        public int TownsId { get; set; }
         public Town Towns { get; set; }
+
+        [ForeignKey("Regions")]
+        public int RegionsId { get; set; }
         public Region Regions { get; set; }
+
+        [ForeignKey("Clasifications")]
+        public int ClasificationsId { get; set; }
         public Clasification Clasifications { get; set; }
 
         public ICollection<Adress> Adresses { get; set; }
