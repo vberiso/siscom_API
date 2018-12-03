@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181203215541_AdressDEl")]
+    partial class AdressDEl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -127,63 +129,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Account");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Adress", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_adress")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AgreementsId");
-
-                    b.Property<string>("Indoor")
-                        .IsRequired()
-                        .HasColumnName("indoor")
-                        .HasMaxLength(10);
-
-                    b.Property<string>("Lat")
-                        .HasColumnName("lat")
-                        .HasMaxLength(20);
-
-                    b.Property<string>("Lon")
-                        .HasColumnName("Lon")
-                        .HasMaxLength(20);
-
-                    b.Property<string>("Outdoor")
-                        .IsRequired()
-                        .HasColumnName("outdoor")
-                        .HasMaxLength(15);
-
-                    b.Property<string>("Reference")
-                        .IsRequired()
-                        .HasColumnName("reference")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("Street")
-                        .IsRequired()
-                        .HasColumnName("street")
-                        .HasMaxLength(150);
-
-                    b.Property<int>("SuburbsId");
-
-                    b.Property<string>("TypeAddress")
-                        .HasColumnName("type_address")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("Zip")
-                        .IsRequired()
-                        .HasColumnName("zip")
-                        .HasMaxLength(5);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgreementsId");
-
-                    b.HasIndex("SuburbsId");
-
-                    b.ToTable("Address");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Agreement", b =>
@@ -847,7 +792,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 12, 3, 16, 2, 3, 203, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 12, 3, 15, 55, 40, 240, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -1726,19 +1671,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Adress", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreements")
-                        .WithMany("Addresses")
-                        .HasForeignKey("AgreementsId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Siscom.Agua.DAL.Models.Suburb", "Suburbs")
-                        .WithMany("Adresses")
-                        .HasForeignKey("SuburbsId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

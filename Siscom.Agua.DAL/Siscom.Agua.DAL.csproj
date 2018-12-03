@@ -40,6 +40,9 @@
     <Compile Remove="Migrations\20181203184442_StatusKey.cs" />
     <Compile Remove="Migrations\20181203192111_StatusKey.cs" />
     <Compile Remove="Migrations\20181203195946_Account.cs" />
+    <Compile Remove="Migrations\20181203205019_AgreementREquired.cs" />
+    <Compile Remove="Migrations\20181203211909_AdressFK.cs" />
+    <Compile Remove="Migrations\20181203214720_AdressDEl.cs" />
   </ItemGroup>
 
   <ItemGroup>

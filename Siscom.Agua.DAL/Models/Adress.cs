@@ -34,6 +34,8 @@ namespace Siscom.Agua.DAL.Models
         public int AgreementsId { get; set; }
         public Agreement Agreements { get; set; }
 
+        [ForeignKey("Suburbs")]
+        public int SuburbsId { get; set; }
         public Suburb Suburbs { get; set; }
 
         public override string ToString()

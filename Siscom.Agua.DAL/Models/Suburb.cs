@@ -20,5 +20,6 @@ namespace Siscom.Agua.DAL.Models
         public Region Regions { get; set; }
         public Clasification Clasifications { get; set; }
 
+        public ICollection<Adress> Adresses { get; set; }
     }
 }
