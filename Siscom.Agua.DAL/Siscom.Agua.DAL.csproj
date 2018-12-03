@@ -38,7 +38,7 @@
     <Compile Remove="Migrations\20181129000944_changeidentityAnyTables.cs" />
     <Compile Remove="Migrations\20181129002506_DiscountDel.cs" />
     <Compile Remove="Migrations\20181203212454_test.cs" />
-	<Compile Remove="Migrations\20181203184442_StatusKey.cs" />
+	  <Compile Remove="Migrations\20181203184442_StatusKey.cs" />
     <Compile Remove="Migrations\20181203192111_StatusKey.cs" />
     <Compile Remove="Migrations\20181203195946_Account.cs" />
     <Compile Remove="Migrations\20181203205019_AgreementREquired.cs" />

@@ -409,7 +409,7 @@ namespace Siscom.Agua.Api.Controllers
                         NewAgreement.Account = agreementvm.Account;
                         //NewAgreement.AccountDate = TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Now);
                         NewAgreement.AccountDate = DateTime.UtcNow.ToLocalTime();
-                        NewAgreement.Derivatives = agreementvm.Derivatives;
+                        NewAgreement.NumDerivatives = agreementvm.Derivatives;
                         NewAgreement.TypeAgreement = agreementvm.TypeAgreement;
                         NewAgreement.TypeService = service;
                         NewAgreement.TypeIntake = intake;
