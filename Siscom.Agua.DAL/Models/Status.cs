@@ -12,13 +12,14 @@ namespace Siscom.Agua.DAL.Models
         [Key]
         [Column("id_status",Order =0)]
         public string CodeName { get; set; }
-        [Key]
-        [Column(Order = 1)]
-        public int GroupStatusId { get; set; }
 
         [Column("description"), StringLength(30), Required]
         public string Description { get; set; }
 
+
+        [ForeignKey("GroupStatus")]
+        [Column(Order = 1)]
+        public int GroupStatusId { get; set; }
         public GroupStatus GroupStatus { get; set; }
     }
 }

@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("External_Origin_Payment")]
     public class ExternalOriginPayment
     {
+        public ExternalOriginPayment()
+        {
+            Payments = new HashSet<Payment>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_external_origin_payment")]
@@ -17,5 +22,7 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
         [Required, Column("is_bank")]
         public bool IsBank { get; set; }
+
+        public ICollection<Payment> Payments { get; set; }
     }
 }

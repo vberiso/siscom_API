@@ -9,10 +9,17 @@ namespace Siscom.Agua.DAL.Models
     [Table("Group_Type")]
     public class GroupType
     {
+        public GroupType()
+        {
+            Types = new HashSet<Type>();
+        }
+
         [Column("id_group_type"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
         [Column("name"), StringLength(50), Required]
         public string Name { get; set; }
+
+        public ICollection<Type> Types { get; set; }
     }
 }

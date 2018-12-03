@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public View()
         {
             Controls = new HashSet<Control>();
+            ViewProfiles = new HashSet<ViewProfile>();
         }
 
         [Column("id_view"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -23,6 +24,6 @@ namespace Siscom.Agua.DAL.Models
         public string Alias { get; set; }
 
         public ICollection<Control> Controls { get; set; }
-        public IList<ViewProfile> ViewProfiles { get; set; }
+        public ICollection<ViewProfile> ViewProfiles { get; set; }
     }
 }

@@ -42,6 +42,8 @@ namespace Siscom.Agua.DAL.Models
         public int TerminalUserId { get; set; }
         public TerminalUser TerminalUser { get; set; }
 
+        [ForeignKey("TypeTransaction")]
+        public int TypeTransactionId { get; set; }
         public TypeTransaction TypeTransaction { get; set; }
 
         [ForeignKey("PayMethod")]

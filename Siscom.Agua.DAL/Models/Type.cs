@@ -15,6 +15,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("description"), StringLength(30), Required]
         public string Description { get; set; }
 
+        [ForeignKey("GroupType")]
+        public int GroupTypeId { get; set; }
         public GroupType GroupType { get; set; }
     }
 }

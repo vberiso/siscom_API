@@ -39,8 +39,16 @@ namespace Siscom.Agua.DAL.Models
         [Column("type"), StringLength(5), Required]
         public string Type { get; set; }
 
+        [ForeignKey("OriginPayment")]
+        public int OriginPaymentId { get; set; }
         public OriginPayment OriginPayment { get; set; }
+
+        [ForeignKey("ExternalOriginPayment")]
+        public int ExternalOriginPaymentId { get; set; }
         public ExternalOriginPayment ExternalOriginPayment { get; set; }
+
+        [ForeignKey("PayMethod")]
+        public int PayMethodId { get; set; }
         public PayMethod PayMethod { get; set; }
     }
 }
