@@ -10,6 +10,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Suburb")]
     public class Suburb
     {
+        public Suburb()
+        {
+            Adresses = new HashSet<Adress>();
+        }
+
         [Column("id_suburb"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }

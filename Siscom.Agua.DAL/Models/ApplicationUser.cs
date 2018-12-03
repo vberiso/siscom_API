@@ -10,8 +10,10 @@ namespace Siscom.Agua.DAL.Models
         public ApplicationUser()
         {
             TerminalUsers = new HashSet<TerminalUser>();
+            AgreementLogs = new HashSet<AgreementLog>();
         }
 
         public ICollection<TerminalUser> TerminalUsers { get; set; }
+        public ICollection<AgreementLog> AgreementLogs { get; set; }
     }
 }

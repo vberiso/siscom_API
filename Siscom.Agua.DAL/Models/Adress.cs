@@ -13,13 +13,13 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_adress"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
-        [Column("street"), StringLength(150), Required]
+        [Column("street"), StringLength(150)]
         public string Street { get; set; }
-        [Column("outdoor"), StringLength(15), Required]
+        [Column("outdoor"), StringLength(50), Required]
         public string Outdoor { get; set; }
-        [Column("indoor"), StringLength(10), Required]
+        [Column("indoor"), StringLength(50)]
         public string Indoor { get; set; }
-        [Column("zip"), StringLength(5), Required]
+        [Column("zip"), StringLength(5)]
         public string Zip { get; set; }
         [Column("reference"), StringLength(200), Required]
         public string Reference { get; set; }

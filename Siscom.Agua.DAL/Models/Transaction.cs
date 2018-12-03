@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Transaction")]
     public class Transaction
     {
+        public Transaction()
+        {
+            TransactionFolios = new HashSet<TransactionFolio>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_transaction")]
@@ -32,7 +37,10 @@ namespace Siscom.Agua.DAL.Models
         [Column("authorization_origin_payment"), StringLength(50)]
         public string AuthorizationOriginPayment { get; set; }
 
+        [ForeignKey("TerminalUser")]
+        public int TerminalUserId { get; set; }
         public TerminalUser TerminalUser { get; set; }
+
         public TypeTransaction TypeTransaction { get; set; }
         public PayMethod PayMethod { get; set; }
         public OriginPayment OriginPayment { get; set; }

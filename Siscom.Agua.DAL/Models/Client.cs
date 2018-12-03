@@ -25,11 +25,11 @@ namespace Siscom.Agua.DAL.Models
         public string LastName { get; set; }
         [Column("second_last_name"), StringLength(80), Required]
         public string SecondLastName { get; set; }
-        [Column("rfc"), StringLength(13)]
+        [Column("rfc"), StringLength(17)]
         public string RFC { get; set; }
         [Column("curp"), StringLength(18)]
         public string CURP { get; set; }
-        [Column("ine"), StringLength(13)]
+        [Column("ine"), StringLength(20)]
         public string INE { get; set; }
         [Column("email"), StringLength(150)]
         public string EMail { get; set; }

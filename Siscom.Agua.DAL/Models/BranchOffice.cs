@@ -9,6 +9,12 @@ namespace Siscom.Agua.DAL.Models
     [Table("Branch_Office")]
     public class BranchOffice
     {
+        public BranchOffice()
+        {
+            Terminals = new HashSet<Terminal>();
+            Folios = new HashSet<Folio>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_branch_office")]
@@ -25,5 +31,8 @@ namespace Siscom.Agua.DAL.Models
         public DateTime Closing { get; set; }
         [Required, Column("dont_close")]
         public bool DontClose { get; set; }
+
+        public ICollection<Terminal> Terminals { get; set; }
+        public ICollection<Folio> Folios { get; set; }
     }
 }
