@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Pay_Method")]
     public class PayMethod
     {
+        public PayMethod()
+        {
+            Transactions = new HashSet<Transaction>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_pay_method")]
@@ -16,5 +21,6 @@ namespace Siscom.Agua.DAL.Models
         [Required, StringLength(50), Column("name")]
         public string Name { get; set; }
 
+        public ICollection<Transaction> Transactions { get; set; }
     }
 }

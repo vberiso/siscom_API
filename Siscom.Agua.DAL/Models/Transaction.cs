@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public Transaction()
         {
             TransactionFolios = new HashSet<TransactionFolio>();
+            TransactionDetails = new HashSet<TransactionDetail>();
         }
 
         [Key]
@@ -42,10 +43,15 @@ namespace Siscom.Agua.DAL.Models
         public TerminalUser TerminalUser { get; set; }
 
         public TypeTransaction TypeTransaction { get; set; }
+
+        [ForeignKey("PayMethod")]
+        public int PayMethodId { get; set; }
         public PayMethod PayMethod { get; set; }
+
         public OriginPayment OriginPayment { get; set; }
         public ExternalOriginPayment ExternalOriginPayment { get; set; }
 
         public ICollection<TransactionFolio> TransactionFolios { get; set; }
+        public ICollection<TransactionDetail> TransactionDetails { get; set; }
     }
 }

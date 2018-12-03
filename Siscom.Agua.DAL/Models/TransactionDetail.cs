@@ -20,6 +20,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("amount"), Required]
         public double amount { get; set; }
 
+        [ForeignKey("Transaction")]
+        public int TransactionId { get; set; }
         public Transaction Transaction { get; set; }
     }
 }
