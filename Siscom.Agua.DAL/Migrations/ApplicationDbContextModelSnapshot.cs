@@ -139,9 +139,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("AgreementsId");
 
                     b.Property<string>("Indoor")
-                        .IsRequired()
                         .HasColumnName("indoor")
-                        .HasMaxLength(10);
+                        .HasMaxLength(50);
 
                     b.Property<string>("Lat")
                         .HasColumnName("lat")
@@ -154,7 +153,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<string>("Outdoor")
                         .IsRequired()
                         .HasColumnName("outdoor")
-                        .HasMaxLength(15);
+                        .HasMaxLength(50);
 
                     b.Property<string>("Reference")
                         .IsRequired()
@@ -162,7 +161,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasMaxLength(200);
 
                     b.Property<string>("Street")
-                        .IsRequired()
                         .HasColumnName("street")
                         .HasMaxLength(150);
 
@@ -173,7 +171,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasMaxLength(5);
 
                     b.Property<string>("Zip")
-                        .IsRequired()
                         .HasColumnName("zip")
                         .HasMaxLength(5);
 
@@ -201,10 +198,10 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("AccountDate")
                         .HasColumnName("account_date");
 
-                    b.Property<int>("Derivatives")
-                        .HasColumnName("derivatives");
+                    b.Property<int>("DiameterId");
 
-                    b.Property<int?>("DiameterId");
+                    b.Property<int>("NumDerivatives")
+                        .HasColumnName("num_derivatives");
 
                     b.Property<DateTime>("StratDate")
                         .HasColumnName("start_date")
@@ -215,21 +212,23 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("type_agreement")
                         .HasMaxLength(5);
 
-                    b.Property<int?>("TypeCommertialBusinessId");
+                    b.Property<int>("TypeCommertialBusinessId");
 
-                    b.Property<int?>("TypeConsumeId");
+                    b.Property<int>("TypeConsumeId");
 
-                    b.Property<int?>("TypeIntakeId");
+                    b.Property<int>("TypeIntakeId");
 
-                    b.Property<int?>("TypePeriodId");
+                    b.Property<int>("TypePeriodId");
 
-                    b.Property<int?>("TypeRegimeId");
+                    b.Property<int>("TypeRegimeId");
 
-                    b.Property<int?>("TypeServiceId");
+                    b.Property<int>("TypeServiceId");
 
-                    b.Property<int?>("TypeStateServiceId");
+                    b.Property<int>("TypeStateServiceId");
 
-                    b.Property<int?>("TypeUseId");
+                    b.Property<int?>("TypeTransactionId");
+
+                    b.Property<int>("TypeUseId");
 
                     b.HasKey("Id");
 
@@ -248,6 +247,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("TypeServiceId");
 
                     b.HasIndex("TypeStateServiceId");
+
+                    b.HasIndex("TypeTransactionId");
 
                     b.HasIndex("TypeUseId");
 
@@ -472,7 +473,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("INE")
                         .HasColumnName("ine")
-                        .HasMaxLength(13);
+                        .HasMaxLength(20);
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -486,7 +487,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("RFC")
                         .HasColumnName("rfc")
-                        .HasMaxLength(13);
+                        .HasMaxLength(17);
 
                     b.Property<string>("SecondLastName")
                         .IsRequired()
@@ -623,7 +624,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_debt")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("AgreementId");
+                    b.Property<int>("AgreementId");
 
                     b.Property<double>("Amount")
                         .HasColumnName("amount");
@@ -636,7 +637,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DebitDate")
                         .HasColumnName("debit_date");
 
-                    b.Property<int?>("DebtPeriodId");
+                    b.Property<int>("DebtPeriodId");
 
                     b.Property<int>("Derivatives")
                         .HasColumnName("derivatives");
@@ -754,7 +755,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("AgreementDerivative");
 
-                    b.Property<int?>("AgreementId");
+                    b.Property<int>("AgreementId");
 
                     b.Property<bool>("IsActive")
                         .HasColumnName("is_active");
@@ -842,12 +843,12 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_folio")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("BranchOfficeId");
+                    b.Property<int>("BranchOfficeId");
 
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 12, 3, 16, 2, 3, 203, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 12, 3, 17, 51, 43, 101, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -910,7 +911,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_meter")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("AgreementId");
+                    b.Property<int>("AgreementId");
 
                     b.Property<string>("Brand")
                         .IsRequired()
@@ -990,11 +991,11 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("DebtId")
                         .HasColumnName("id_debt");
 
-                    b.Property<int?>("ExternalOriginPaymentId");
+                    b.Property<int>("ExternalOriginPaymentId");
 
-                    b.Property<int?>("OriginPaymentId");
+                    b.Property<int>("OriginPaymentId");
 
-                    b.Property<int?>("PayMethodId");
+                    b.Property<int>("PayMethodId");
 
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnName("payment_date");
@@ -1139,6 +1140,8 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.HasKey("CodeName", "GroupStatusId");
 
+                    b.HasAlternateKey("CodeName");
+
                     b.HasIndex("GroupStatusId");
 
                     b.ToTable("Status");
@@ -1151,16 +1154,16 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_suburb")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ClasificationsId");
+                    b.Property<int>("ClasificationsId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnName("name")
                         .HasMaxLength(100);
 
-                    b.Property<int?>("RegionsId");
+                    b.Property<int>("RegionsId");
 
-                    b.Property<int?>("TownsId");
+                    b.Property<int>("TownsId");
 
                     b.HasKey("Id");
 
@@ -1237,13 +1240,13 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<short>("Percentage")
                         .HasColumnName("percentage");
 
-                    b.Property<int?>("ServiceId");
+                    b.Property<int>("ServiceId");
 
-                    b.Property<int?>("TypeIntakeId");
+                    b.Property<int>("TypeIntakeId");
 
-                    b.Property<int?>("TypeServiceId");
+                    b.Property<int>("TypeServiceId");
 
-                    b.Property<int?>("TypeUseId");
+                    b.Property<int>("TypeUseId");
 
                     b.Property<DateTime>("UntilDate")
                         .HasColumnName("until_date")
@@ -1269,7 +1272,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_terminal")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("BranchOfficeId");
+                    b.Property<int>("BranchOfficeId");
 
                     b.Property<double>("CashBox")
                         .HasColumnName("cash_box");
@@ -1307,7 +1310,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("open_date")
                         .HasColumnType("date");
 
-                    b.Property<int?>("TerminalId");
+                    b.Property<int>("TerminalId");
 
                     b.Property<string>("UserId");
 
@@ -1375,7 +1378,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int?>("OriginPaymentId");
 
-                    b.Property<int?>("PayMethodId");
+                    b.Property<int>("PayMethodId");
 
                     b.Property<double>("Rounding")
                         .HasColumnName("rounding");
@@ -1386,9 +1389,9 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<double>("Tax")
                         .HasColumnName("tax");
 
-                    b.Property<int?>("TerminalUserId");
+                    b.Property<int>("TerminalUserId");
 
-                    b.Property<int?>("TypeTransactionId");
+                    b.Property<int>("TypeTransactionId");
 
                     b.HasKey("Id");
 
@@ -1420,7 +1423,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("description")
                         .HasMaxLength(30);
 
-                    b.Property<int?>("TransactionId");
+                    b.Property<int>("TransactionId");
 
                     b.Property<double>("amount")
                         .HasColumnName("amount");
@@ -1440,7 +1443,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<DateTime>("DatePrint");
 
-                    b.Property<int?>("TransactionId");
+                    b.Property<int>("TransactionId");
 
                     b.HasKey("Folio");
 
@@ -1459,7 +1462,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("description")
                         .HasMaxLength(30);
 
-                    b.Property<int?>("GroupTypeId");
+                    b.Property<int>("GroupTypeId");
 
                     b.HasKey("CodeName");
 
@@ -1746,39 +1749,52 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Diameter", "Diameter")
                         .WithMany()
-                        .HasForeignKey("DiameterId");
+                        .HasForeignKey("DiameterId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeCommercialBusiness", "TypeCommertialBusiness")
-                        .WithMany()
-                        .HasForeignKey("TypeCommertialBusinessId");
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypeCommertialBusinessId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeConsume", "TypeConsume")
-                        .WithMany()
-                        .HasForeignKey("TypeConsumeId");
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypeConsumeId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeIntake", "TypeIntake")
-                        .WithMany()
-                        .HasForeignKey("TypeIntakeId");
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypeIntakeId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypePeriod", "TypePeriod")
-                        .WithMany()
-                        .HasForeignKey("TypePeriodId");
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypePeriodId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeRegime", "TypeRegime")
-                        .WithMany()
-                        .HasForeignKey("TypeRegimeId");
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypeRegimeId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeService", "TypeService")
-                        .WithMany()
-                        .HasForeignKey("TypeServiceId");
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypeServiceId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeStateService", "TypeStateService")
-                        .WithMany()
-                        .HasForeignKey("TypeStateServiceId");
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypeStateServiceId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Siscom.Agua.DAL.Models.TypeTransaction")
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypeTransactionId");
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeUse", "TypeUse")
-                        .WithMany()
-                        .HasForeignKey("TypeUseId");
+                        .WithMany("Agreements")
+                        .HasForeignKey("TypeUseId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.AgreementDiscount", b =>
@@ -1801,7 +1817,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasForeignKey("AgreementId");
 
                     b.HasOne("Siscom.Agua.DAL.Models.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("AgreementLogs")
                         .HasForeignKey("UserId");
                 });
 
@@ -1854,12 +1870,14 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Debt", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
-                        .WithMany()
-                        .HasForeignKey("AgreementId");
+                        .WithMany("Debts")
+                        .HasForeignKey("AgreementId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.DebtPeriod", "DebtPeriod")
-                        .WithMany()
-                        .HasForeignKey("DebtPeriodId");
+                        .WithMany("Debts")
+                        .HasForeignKey("DebtPeriodId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
@@ -1885,8 +1903,9 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Derivative", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
-                        .WithMany()
-                        .HasForeignKey("AgreementId");
+                        .WithMany("Derivatives")
+                        .HasForeignKey("AgreementId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Discount", b =>
@@ -1899,30 +1918,35 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Folio", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.BranchOffice", "BranchOffice")
-                        .WithMany()
-                        .HasForeignKey("BranchOfficeId");
+                        .WithMany("Folios")
+                        .HasForeignKey("BranchOfficeId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Meter", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
-                        .WithMany()
-                        .HasForeignKey("AgreementId");
+                        .WithMany("Meters")
+                        .HasForeignKey("AgreementId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Payment", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.ExternalOriginPayment", "ExternalOriginPayment")
-                        .WithMany()
-                        .HasForeignKey("ExternalOriginPaymentId");
+                        .WithMany("Payments")
+                        .HasForeignKey("ExternalOriginPaymentId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.OriginPayment", "OriginPayment")
-                        .WithMany()
-                        .HasForeignKey("OriginPaymentId");
+                        .WithMany("Payments")
+                        .HasForeignKey("OriginPaymentId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.PayMethod", "PayMethod")
-                        .WithMany()
-                        .HasForeignKey("PayMethodId");
+                        .WithMany("Payments")
+                        .HasForeignKey("PayMethodId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.State", b =>
@@ -1935,7 +1959,7 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Status", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.GroupStatus", "GroupStatus")
-                        .WithMany()
+                        .WithMany("Statuses")
                         .HasForeignKey("GroupStatusId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -1943,49 +1967,58 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Suburb", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Clasification", "Clasifications")
-                        .WithMany()
-                        .HasForeignKey("ClasificationsId");
+                        .WithMany("Suburbs")
+                        .HasForeignKey("ClasificationsId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.Region", "Regions")
-                        .WithMany()
-                        .HasForeignKey("RegionsId");
+                        .WithMany("Suburbs")
+                        .HasForeignKey("RegionsId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.Town", "Towns")
                         .WithMany("Suburbs")
-                        .HasForeignKey("TownsId");
+                        .HasForeignKey("TownsId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Tariff", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId");
+                        .WithMany("Tariffs")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeIntake", "TypeIntake")
-                        .WithMany()
-                        .HasForeignKey("TypeIntakeId");
+                        .WithMany("Tariffs")
+                        .HasForeignKey("TypeIntakeId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeService", "TypeService")
-                        .WithMany()
-                        .HasForeignKey("TypeServiceId");
+                        .WithMany("Tariffs")
+                        .HasForeignKey("TypeServiceId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeUse", "TypeUse")
-                        .WithMany()
-                        .HasForeignKey("TypeUseId");
+                        .WithMany("Tariffs")
+                        .HasForeignKey("TypeUseId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Terminal", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.BranchOffice", "BranchOffice")
-                        .WithMany()
-                        .HasForeignKey("BranchOfficeId");
+                        .WithMany("Terminals")
+                        .HasForeignKey("BranchOfficeId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.TerminalUser", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Terminal", "Terminal")
                         .WithMany("TerminalUsers")
-                        .HasForeignKey("TerminalId");
+                        .HasForeignKey("TerminalId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.ApplicationUser", "User")
                         .WithMany("TerminalUsers")
@@ -2010,37 +2043,43 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasForeignKey("OriginPaymentId");
 
                     b.HasOne("Siscom.Agua.DAL.Models.PayMethod", "PayMethod")
-                        .WithMany()
-                        .HasForeignKey("PayMethodId");
+                        .WithMany("Transactions")
+                        .HasForeignKey("PayMethodId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TerminalUser", "TerminalUser")
-                        .WithMany()
-                        .HasForeignKey("TerminalUserId");
+                        .WithMany("Transactions")
+                        .HasForeignKey("TerminalUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Siscom.Agua.DAL.Models.TypeTransaction", "TypeTransaction")
-                        .WithMany()
-                        .HasForeignKey("TypeTransactionId");
+                        .WithMany("Transactions")
+                        .HasForeignKey("TypeTransactionId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.TransactionDetail", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Transaction", "Transaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionId");
+                        .WithMany("TransactionDetails")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.TransactionFolio", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Transaction", "Transaction")
                         .WithMany("TransactionFolios")
-                        .HasForeignKey("TransactionId");
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Type", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.GroupType", "GroupType")
-                        .WithMany()
-                        .HasForeignKey("GroupTypeId");
+                        .WithMany("Types")
+                        .HasForeignKey("GroupTypeId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.ViewProfile", b =>

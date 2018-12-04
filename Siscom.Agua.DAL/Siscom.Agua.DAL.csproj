@@ -5,46 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20181109203730_Initial.cs" />
-    <Compile Remove="Migrations\20181109203832_Initial.cs" />
-    <Compile Remove="Migrations\20181109204821_Initial.cs" />
-    <Compile Remove="Migrations\20181110000450_Security.cs" />
-    <Compile Remove="Migrations\20181112165802_Ubicacion.cs" />
-    <Compile Remove="Migrations\20181112171304_Ubicacion.cs" />
-    <Compile Remove="Migrations\20181112204745_Agreement.cs" />
-    <Compile Remove="Migrations\20181112221514_initial.cs" />
-    <Compile Remove="Migrations\20181113170414_ChangeFieldsAgreement.cs" />
-    <Compile Remove="Migrations\20181113175956_AddTableTypeUser.cs" />
-    <Compile Remove="Migrations\20181115164711_BranchOfficeHours.cs" />
-    <Compile Remove="Migrations\20181115181349_CashBox.cs" />
-    <Compile Remove="Migrations\20181115181804_CashBox.cs" />
-    <Compile Remove="Migrations\20181117180629_TerminalUserKey.cs" />
-    <Compile Remove="Migrations\20181117181452_TerminalUserKey.cs" />
-    <Compile Remove="Migrations\20181119175705_AddressTypeUser.cs" />
-    <Compile Remove="Migrations\20181119184245_ChangeKeyType.cs" />
-    <Compile Remove="Migrations\20181119185123_AddTableTypeWithChanges.cs" />
-    <Compile Remove="Migrations\20181119185524_AddTableTypeWithChanges.cs" />
-    <Compile Remove="Migrations\20181121182643_SystemLog.cs" />
-    <Compile Remove="Migrations\20181124165657_DebtPeriod.cs" />
-    <Compile Remove="Migrations\20181124170133_DebtPeriod.cs" />
-    <Compile Remove="Migrations\20181124170423_DebtPeriod.cs" />
-    <Compile Remove="Migrations\20181124170540_DebtPeriod.cs" />
-    <Compile Remove="Migrations\20181124171157_DebtPeriod.cs" />
-    <Compile Remove="Migrations\20181124175632_ServiceConcepts.cs" />
-    <Compile Remove="Migrations\20181126165914_Payment.cs" />
-    <Compile Remove="Migrations\20181126170227_Payment.cs" />
-    <Compile Remove="Migrations\20181126180816_AgreementLog.cs" />
-    <Compile Remove="Migrations\20181126181036_AgreementLog.cs" />
-    <Compile Remove="Migrations\20181129000944_changeidentityAnyTables.cs" />
-    <Compile Remove="Migrations\20181129002506_DiscountDel.cs" />
-    <Compile Remove="Migrations\20181203212454_test.cs" />
-	  <Compile Remove="Migrations\20181203184442_StatusKey.cs" />
-    <Compile Remove="Migrations\20181203192111_StatusKey.cs" />
-    <Compile Remove="Migrations\20181203195946_Account.cs" />
-    <Compile Remove="Migrations\20181203205019_AgreementREquired.cs" />
-    <Compile Remove="Migrations\20181203211909_AdressFK.cs" />
-    <Compile Remove="Migrations\20181203214720_AdressDEl.cs" />
-
+    <Compile Remove="Migrations\20181203234013_Initial.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,10 +4,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Siscom.Agua.DAL.Migrations
 {
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Account",
+                columns: table => new
+                {
+                    id_account = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    prefix = table.Column<string>(nullable: true),
+                    secuential = table.Column<int>(nullable: false),
+                    suffixes = table.Column<string>(nullable: true),
+                    is_active = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Account", x => x.id_account);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -55,8 +71,8 @@ namespace Siscom.Agua.DAL.Migrations
                     id_branch_office = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     name = table.Column<string>(maxLength: 30, nullable: false),
-                    open = table.Column<DateTime>(nullable: false),
-                    close = table.Column<DateTime>(nullable: false),
+                    opening = table.Column<DateTime>(nullable: false),
+                    closing = table.Column<DateTime>(nullable: false),
                     dont_close = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
@@ -106,12 +122,65 @@ namespace Siscom.Agua.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "External_Origin_Payment",
+                columns: table => new
+                {
+                    id_external_origin_payment = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    name = table.Column<string>(maxLength: 15, nullable: false),
+                    is_bank = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_External_Origin_Payment", x => x.id_external_origin_payment);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Group_Status",
+                columns: table => new
+                {
+                    id_group_type = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    name = table.Column<string>(maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Group_Status", x => x.id_group_type);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Group_Type",
+                columns: table => new
+                {
+                    id_group_type = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    name = table.Column<string>(maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Group_Type", x => x.id_group_type);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Origin_Payment",
+                columns: table => new
+                {
+                    id_origin_payment = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    name = table.Column<string>(maxLength: 15, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Origin_Payment", x => x.id_origin_payment);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Pay_Method",
                 columns: table => new
                 {
                     id_pay_method = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 20, nullable: false)
+                    name = table.Column<string>(maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -137,11 +206,33 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_service = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 25, nullable: false)
+                    name = table.Column<string>(maxLength: 50, nullable: false),
+                    order = table.Column<short>(nullable: false),
+                    is_service = table.Column<bool>(nullable: false),
+                    have_tax = table.Column<bool>(nullable: false),
+                    in_agreement = table.Column<bool>(nullable: false),
+                    is_active = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Service", x => x.id_service);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "System_Log",
+                columns: table => new
+                {
+                    id_system_log = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    date_log = table.Column<DateTime>(nullable: false),
+                    controller = table.Column<string>(nullable: false),
+                    description = table.Column<string>(nullable: false),
+                    parameter = table.Column<string>(nullable: false),
+                    action = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_System_Log", x => x.id_system_log);
                 });
 
             migrationBuilder.CreateTable(
@@ -151,7 +242,8 @@ namespace Siscom.Agua.DAL.Migrations
                     id_type_commertial_business = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     name = table.Column<string>(maxLength: 100, nullable: false),
-                    clasification_group = table.Column<int>(nullable: false)
+                    clasification_group = table.Column<int>(nullable: false),
+                    intake_acronym = table.Column<string>(maxLength: 2, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -177,7 +269,8 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_type_intake = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 20, nullable: false)
+                    name = table.Column<string>(maxLength: 20, nullable: false),
+                    acronym = table.Column<string>(maxLength: 2, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -190,7 +283,8 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_type_period = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 15, nullable: false)
+                    name = table.Column<string>(maxLength: 15, nullable: false),
+                    mounth = table.Column<short>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -203,7 +297,8 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_type_regime = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 20, nullable: false)
+                    name = table.Column<string>(maxLength: 20, nullable: false),
+                    intake_acronym = table.Column<string>(maxLength: 2, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -242,7 +337,7 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_type_transaction = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 20, nullable: false)
+                    name = table.Column<string>(maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -255,24 +350,12 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_type_use = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 50, nullable: false)
+                    name = table.Column<string>(maxLength: 50, nullable: false),
+                    intake_acronym = table.Column<string>(maxLength: 2, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Type_Use", x => x.id_type_use);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Type_User",
-                columns: table => new
-                {
-                    id_type_user = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 25, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Type_User", x => x.id_type_user);
                 });
 
             migrationBuilder.CreateTable(
@@ -401,9 +484,12 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_folio = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    range = table.Column<string>(nullable: false),
                     initial = table.Column<int>(nullable: false),
                     secuential = table.Column<int>(nullable: false),
-                    BranchOfficeId = table.Column<int>(nullable: true)
+                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2018, 12, 3, 17, 51, 43, 101, DateTimeKind.Local)),
+                    is_active = table.Column<int>(nullable: false),
+                    BranchOfficeId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -413,7 +499,7 @@ namespace Siscom.Agua.DAL.Migrations
                         column: x => x.BranchOfficeId,
                         principalTable: "Branch_Office",
                         principalColumn: "id_branch_office",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -423,8 +509,9 @@ namespace Siscom.Agua.DAL.Migrations
                     id_terminal = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     mac_adress = table.Column<string>(maxLength: 20, nullable: false),
-                    cash_box = table.Column<decimal>(nullable: false),
-                    BranchOfficeId = table.Column<int>(nullable: true)
+                    cash_box = table.Column<double>(nullable: false),
+                    is_active = table.Column<bool>(nullable: false, defaultValue: true),
+                    BranchOfficeId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -434,7 +521,7 @@ namespace Siscom.Agua.DAL.Migrations
                         column: x => x.BranchOfficeId,
                         principalTable: "Branch_Office",
                         principalColumn: "id_branch_office",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -458,6 +545,136 @@ namespace Siscom.Agua.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Status",
+                columns: table => new
+                {
+                    id_status = table.Column<string>(nullable: false),
+                    description = table.Column<string>(maxLength: 30, nullable: false),
+                    GroupStatusId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Status", x => new { x.id_status, x.GroupStatusId });
+                    table.UniqueConstraint("AK_Status_id_status", x => x.id_status);
+                    table.ForeignKey(
+                        name: "FK_Status_Group_Status_GroupStatusId",
+                        column: x => x.GroupStatusId,
+                        principalTable: "Group_Status",
+                        principalColumn: "id_group_type",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Type",
+                columns: table => new
+                {
+                    id_type = table.Column<string>(nullable: false),
+                    description = table.Column<string>(maxLength: 30, nullable: false),
+                    GroupTypeId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Type", x => x.id_type);
+                    table.ForeignKey(
+                        name: "FK_Type_Group_Type_GroupTypeId",
+                        column: x => x.GroupTypeId,
+                        principalTable: "Group_Type",
+                        principalColumn: "id_group_type",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payment",
+                columns: table => new
+                {
+                    id_payment = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    payment_date = table.Column<DateTime>(nullable: false),
+                    branch_office = table.Column<string>(maxLength: 20, nullable: false),
+                    subtotal = table.Column<double>(nullable: false),
+                    percentage_tax = table.Column<string>(maxLength: 2, nullable: true),
+                    tax = table.Column<double>(nullable: false),
+                    rounding = table.Column<double>(nullable: false),
+                    total = table.Column<double>(nullable: false),
+                    authorization_origin_payment = table.Column<string>(maxLength: 50, nullable: true),
+                    transaction_folio = table.Column<string>(maxLength: 40, nullable: true),
+                    id_debt = table.Column<int>(nullable: false),
+                    status = table.Column<string>(maxLength: 5, nullable: false),
+                    type = table.Column<string>(maxLength: 5, nullable: false),
+                    OriginPaymentId = table.Column<int>(nullable: false),
+                    ExternalOriginPaymentId = table.Column<int>(nullable: false),
+                    PayMethodId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payment", x => x.id_payment);
+                    table.ForeignKey(
+                        name: "FK_Payment_External_Origin_Payment_ExternalOriginPaymentId",
+                        column: x => x.ExternalOriginPaymentId,
+                        principalTable: "External_Origin_Payment",
+                        principalColumn: "id_external_origin_payment",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Payment_Origin_Payment_OriginPaymentId",
+                        column: x => x.OriginPaymentId,
+                        principalTable: "Origin_Payment",
+                        principalColumn: "id_origin_payment",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Payment_Pay_Method_PayMethodId",
+                        column: x => x.PayMethodId,
+                        principalTable: "Pay_Method",
+                        principalColumn: "id_pay_method",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Debt_Period",
+                columns: table => new
+                {
+                    id_debt_period = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    period = table.Column<short>(nullable: false),
+                    start_date = table.Column<DateTime>(type: "date", nullable: false),
+                    end_date = table.Column<DateTime>(type: "date", nullable: false),
+                    run_date = table.Column<DateTime>(type: "date", nullable: false),
+                    run_hour = table.Column<TimeSpan>(type: "time", nullable: false),
+                    TypePeriodId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Debt_Period", x => x.id_debt_period);
+                    table.ForeignKey(
+                        name: "FK_Debt_Period_Type_Period_TypePeriodId",
+                        column: x => x.TypePeriodId,
+                        principalTable: "Type_Period",
+                        principalColumn: "id_type_period",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Discount",
+                columns: table => new
+                {
+                    id_discount = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    name = table.Column<string>(maxLength: 50, nullable: false),
+                    percentage = table.Column<short>(nullable: false),
+                    is_active = table.Column<bool>(nullable: false),
+                    TypePeriodId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Discount", x => x.id_discount);
+                    table.ForeignKey(
+                        name: "FK_Discount_Type_Period_TypePeriodId",
+                        column: x => x.TypePeriodId,
+                        principalTable: "Type_Period",
+                        principalColumn: "id_type_period",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Agreement",
                 columns: table => new
                 {
@@ -465,15 +682,19 @@ namespace Siscom.Agua.DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     account = table.Column<string>(maxLength: 50, nullable: false),
                     account_date = table.Column<DateTime>(nullable: false),
-                    derivatives = table.Column<int>(nullable: false),
-                    TypeServiceId = table.Column<int>(nullable: true),
-                    TypeUseId = table.Column<int>(nullable: true),
-                    TypeConsumeId = table.Column<int>(nullable: true),
-                    TypeRegimeId = table.Column<int>(nullable: true),
-                    TypePeriodId = table.Column<int>(nullable: true),
-                    TypeCommertialBusinessId = table.Column<int>(nullable: true),
-                    TypeStateServiceId = table.Column<int>(nullable: true),
-                    DiameterId = table.Column<int>(nullable: true)
+                    num_derivatives = table.Column<int>(nullable: false),
+                    start_date = table.Column<DateTime>(type: "date", nullable: false),
+                    type_agreement = table.Column<string>(maxLength: 5, nullable: false),
+                    TypeServiceId = table.Column<int>(nullable: false),
+                    TypeUseId = table.Column<int>(nullable: false),
+                    TypeConsumeId = table.Column<int>(nullable: false),
+                    TypeRegimeId = table.Column<int>(nullable: false),
+                    TypePeriodId = table.Column<int>(nullable: false),
+                    TypeCommertialBusinessId = table.Column<int>(nullable: false),
+                    TypeStateServiceId = table.Column<int>(nullable: false),
+                    TypeIntakeId = table.Column<int>(nullable: false),
+                    DiameterId = table.Column<int>(nullable: false),
+                    TypeTransactionId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -483,49 +704,109 @@ namespace Siscom.Agua.DAL.Migrations
                         column: x => x.DiameterId,
                         principalTable: "Diameter",
                         principalColumn: "id_diameter",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Agreement_Type_Commertial_Business_TypeCommertialBusinessId",
                         column: x => x.TypeCommertialBusinessId,
                         principalTable: "Type_Commertial_Business",
                         principalColumn: "id_type_commertial_business",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Agreement_Type_Consume_TypeConsumeId",
                         column: x => x.TypeConsumeId,
                         principalTable: "Type_Consume",
                         principalColumn: "id_type_consume",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Agreement_Type_Intake_TypeIntakeId",
+                        column: x => x.TypeIntakeId,
+                        principalTable: "Type_Intake",
+                        principalColumn: "id_type_intake",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Agreement_Type_Period_TypePeriodId",
                         column: x => x.TypePeriodId,
                         principalTable: "Type_Period",
                         principalColumn: "id_type_period",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Agreement_Type_Regime_TypeRegimeId",
                         column: x => x.TypeRegimeId,
                         principalTable: "Type_Regime",
                         principalColumn: "id_type_regime",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Agreement_Type_Service_TypeServiceId",
                         column: x => x.TypeServiceId,
                         principalTable: "Type_Service",
                         principalColumn: "id_type_service",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Agreement_Type_State_Service_TypeStateServiceId",
                         column: x => x.TypeStateServiceId,
                         principalTable: "Type_State_Service",
                         principalColumn: "id_type_state_service",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Agreement_Type_Transaction_TypeTransactionId",
+                        column: x => x.TypeTransactionId,
+                        principalTable: "Type_Transaction",
+                        principalColumn: "id_type_transaction",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Agreement_Type_Use_TypeUseId",
                         column: x => x.TypeUseId,
                         principalTable: "Type_Use",
                         principalColumn: "id_type_use",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tariff",
+                columns: table => new
+                {
+                    id_tariff = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    concept = table.Column<string>(maxLength: 80, nullable: false),
+                    account_number = table.Column<string>(maxLength: 20, nullable: false),
+                    have_tax = table.Column<bool>(nullable: false),
+                    percentage = table.Column<short>(nullable: false),
+                    amount = table.Column<double>(nullable: false),
+                    from_date = table.Column<DateTime>(type: "date", nullable: false),
+                    until_date = table.Column<DateTime>(type: "date", nullable: false),
+                    is_active = table.Column<int>(nullable: false),
+                    TypeIntakeId = table.Column<int>(nullable: false),
+                    TypeServiceId = table.Column<int>(nullable: false),
+                    TypeUseId = table.Column<int>(nullable: false),
+                    ServiceId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tariff", x => x.id_tariff);
+                    table.ForeignKey(
+                        name: "FK_Tariff_Service_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Service",
+                        principalColumn: "id_service",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tariff_Type_Intake_TypeIntakeId",
+                        column: x => x.TypeIntakeId,
+                        principalTable: "Type_Intake",
+                        principalColumn: "id_type_intake",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tariff_Type_Service_TypeServiceId",
+                        column: x => x.TypeServiceId,
+                        principalTable: "Type_Service",
+                        principalColumn: "id_type_service",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tariff_Type_Use_TypeUseId",
+                        column: x => x.TypeUseId,
+                        principalTable: "Type_Use",
+                        principalColumn: "id_type_use",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -577,25 +858,28 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Terminal_User",
                 columns: table => new
                 {
-                    open_date = table.Column<DateTime>(nullable: false),
-                    id_terminal = table.Column<int>(nullable: false),
-                    id_user = table.Column<string>(nullable: false)
+                    id_terminal_user = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    open_date = table.Column<DateTime>(type: "date", nullable: false),
+                    in_operation = table.Column<bool>(nullable: false, defaultValue: false),
+                    TerminalId = table.Column<int>(nullable: false),
+                    UserId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Terminal_User", x => new { x.id_terminal, x.id_user });
+                    table.PrimaryKey("PK_Terminal_User", x => x.id_terminal_user);
                     table.ForeignKey(
-                        name: "FK_Terminal_User_Terminal_id_terminal",
-                        column: x => x.id_terminal,
+                        name: "FK_Terminal_User_Terminal_TerminalId",
+                        column: x => x.TerminalId,
                         principalTable: "Terminal",
                         principalColumn: "id_terminal",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Terminal_User_AspNetUsers_id_user",
-                        column: x => x.id_user,
+                        name: "FK_Terminal_User_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -615,6 +899,62 @@ namespace Siscom.Agua.DAL.Migrations
                         column: x => x.StatesId,
                         principalTable: "State",
                         principalColumn: "id_state",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Agreement_Discount",
+                columns: table => new
+                {
+                    id_discount = table.Column<int>(nullable: false),
+                    id_agreement = table.Column<int>(nullable: false),
+                    start_date = table.Column<DateTime>(type: "date", nullable: false),
+                    end_date = table.Column<DateTime>(type: "date", nullable: false),
+                    is_active = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Agreement_Discount", x => new { x.id_discount, x.id_agreement });
+                    table.ForeignKey(
+                        name: "FK_Agreement_Discount_Agreement_id_agreement",
+                        column: x => x.id_agreement,
+                        principalTable: "Agreement",
+                        principalColumn: "id_agreement",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Agreement_Discount_Discount_id_discount",
+                        column: x => x.id_discount,
+                        principalTable: "Discount",
+                        principalColumn: "id_discount",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Agreement_Log",
+                columns: table => new
+                {
+                    id_agreement_log = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    agreement_log_date = table.Column<DateTime>(nullable: false),
+                    description = table.Column<string>(maxLength: 30, nullable: false),
+                    observation = table.Column<string>(nullable: true),
+                    UserId = table.Column<string>(nullable: true),
+                    AgreementId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Agreement_Log", x => x.id_agreement_log);
+                    table.ForeignKey(
+                        name: "FK_Agreement_Log_Agreement_AgreementId",
+                        column: x => x.AgreementId,
+                        principalTable: "Agreement",
+                        principalColumn: "id_agreement",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Agreement_Log_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -650,14 +990,14 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_client = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(maxLength: 50, nullable: false),
+                    name = table.Column<string>(maxLength: 200, nullable: false),
                     last_name = table.Column<string>(maxLength: 80, nullable: false),
                     second_last_name = table.Column<string>(maxLength: 80, nullable: false),
-                    rfc = table.Column<string>(maxLength: 13, nullable: false),
+                    rfc = table.Column<string>(maxLength: 17, nullable: true),
                     curp = table.Column<string>(maxLength: 18, nullable: true),
-                    ine = table.Column<string>(maxLength: 13, nullable: false),
+                    ine = table.Column<string>(maxLength: 20, nullable: true),
                     email = table.Column<string>(maxLength: 150, nullable: true),
-                    TypeUserId = table.Column<int>(nullable: true),
+                    type_user = table.Column<string>(maxLength: 5, nullable: false),
                     AgreementId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -669,12 +1009,93 @@ namespace Siscom.Agua.DAL.Migrations
                         principalTable: "Agreement",
                         principalColumn: "id_agreement",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Debt",
+                columns: table => new
+                {
+                    id_debt = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    debit_date = table.Column<DateTime>(nullable: false),
+                    from_date = table.Column<DateTime>(type: "date", nullable: false),
+                    until_date = table.Column<DateTime>(type: "date", nullable: false),
+                    derivatives = table.Column<int>(nullable: false),
+                    type_intake = table.Column<string>(maxLength: 50, nullable: false),
+                    type_service = table.Column<string>(maxLength: 50, nullable: false),
+                    consumption = table.Column<string>(maxLength: 10, nullable: false),
+                    discount = table.Column<string>(maxLength: 50, nullable: true),
+                    amount = table.Column<double>(nullable: false),
+                    on_account = table.Column<double>(nullable: false),
+                    year = table.Column<short>(nullable: false),
+                    type = table.Column<string>(maxLength: 5, nullable: false),
+                    status = table.Column<string>(maxLength: 5, nullable: false),
+                    DebtPeriodId = table.Column<int>(nullable: false),
+                    AgreementId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Debt", x => x.id_debt);
                     table.ForeignKey(
-                        name: "FK_Client_Type_User_TypeUserId",
-                        column: x => x.TypeUserId,
-                        principalTable: "Type_User",
-                        principalColumn: "id_type_user",
-                        onDelete: ReferentialAction.Restrict);
+                        name: "FK_Debt_Agreement_AgreementId",
+                        column: x => x.AgreementId,
+                        principalTable: "Agreement",
+                        principalColumn: "id_agreement",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Debt_Debt_Period_DebtPeriodId",
+                        column: x => x.DebtPeriodId,
+                        principalTable: "Debt_Period",
+                        principalColumn: "id_debt_period",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Derivative",
+                columns: table => new
+                {
+                    id_derivative = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    is_active = table.Column<bool>(nullable: false),
+                    AgreementId = table.Column<int>(nullable: false),
+                    AgreementDerivative = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Derivative", x => x.id_derivative);
+                    table.ForeignKey(
+                        name: "FK_Derivative_Agreement_AgreementId",
+                        column: x => x.AgreementId,
+                        principalTable: "Agreement",
+                        principalColumn: "id_agreement",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Meter",
+                columns: table => new
+                {
+                    id_meter = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    brand = table.Column<string>(maxLength: 50, nullable: false),
+                    model = table.Column<string>(maxLength: 50, nullable: false),
+                    consumption = table.Column<string>(maxLength: 10, nullable: true),
+                    install_date = table.Column<DateTime>(type: "date", nullable: false),
+                    deinstall_date = table.Column<DateTime>(type: "date", nullable: false),
+                    serial = table.Column<string>(maxLength: 20, nullable: false),
+                    wheels = table.Column<string>(maxLength: 1, nullable: false),
+                    is_active = table.Column<bool>(nullable: false),
+                    AgreementId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Meter", x => x.id_meter);
+                    table.ForeignKey(
+                        name: "FK_Meter_Agreement_AgreementId",
+                        column: x => x.AgreementId,
+                        principalTable: "Agreement",
+                        principalColumn: "id_agreement",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -683,37 +1104,54 @@ namespace Siscom.Agua.DAL.Migrations
                 {
                     id_transaction = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    folio = table.Column<string>(maxLength: 8, nullable: true),
+                    folio = table.Column<string>(maxLength: 40, nullable: true),
                     date_transaction = table.Column<DateTime>(nullable: false),
                     sign = table.Column<bool>(nullable: false),
                     amount = table.Column<double>(nullable: false),
+                    tax = table.Column<double>(nullable: false),
+                    rounding = table.Column<double>(nullable: false),
                     aplication = table.Column<string>(maxLength: 20, nullable: false),
-                    TerminalUserTermianlId = table.Column<int>(nullable: true),
-                    TerminalUserUserId = table.Column<string>(nullable: true),
-                    TypeTransactionId = table.Column<int>(nullable: true),
-                    PayMethodId = table.Column<int>(nullable: true)
+                    cancellation_folio = table.Column<string>(maxLength: 40, nullable: true),
+                    authorization_origin_payment = table.Column<string>(maxLength: 50, nullable: true),
+                    TerminalUserId = table.Column<int>(nullable: false),
+                    TypeTransactionId = table.Column<int>(nullable: false),
+                    PayMethodId = table.Column<int>(nullable: false),
+                    OriginPaymentId = table.Column<int>(nullable: true),
+                    ExternalOriginPaymentId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transaction", x => x.id_transaction);
                     table.ForeignKey(
+                        name: "FK_Transaction_External_Origin_Payment_ExternalOriginPaymentId",
+                        column: x => x.ExternalOriginPaymentId,
+                        principalTable: "External_Origin_Payment",
+                        principalColumn: "id_external_origin_payment",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Transaction_Origin_Payment_OriginPaymentId",
+                        column: x => x.OriginPaymentId,
+                        principalTable: "Origin_Payment",
+                        principalColumn: "id_origin_payment",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Transaction_Pay_Method_PayMethodId",
                         column: x => x.PayMethodId,
                         principalTable: "Pay_Method",
                         principalColumn: "id_pay_method",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Transaction_Terminal_User_TerminalUserId",
+                        column: x => x.TerminalUserId,
+                        principalTable: "Terminal_User",
+                        principalColumn: "id_terminal_user",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Transaction_Type_Transaction_TypeTransactionId",
                         column: x => x.TypeTransactionId,
                         principalTable: "Type_Transaction",
                         principalColumn: "id_type_transaction",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Transaction_Terminal_User_TerminalUserTermianlId_TerminalUserUserId",
-                        columns: x => new { x.TerminalUserTermianlId, x.TerminalUserUserId },
-                        principalTable: "Terminal_User",
-                        principalColumns: new[] { "id_terminal", "id_user" },
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -723,9 +1161,9 @@ namespace Siscom.Agua.DAL.Migrations
                     id_suburb = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     name = table.Column<string>(maxLength: 100, nullable: false),
-                    TownsId = table.Column<int>(nullable: true),
-                    RegionsId = table.Column<int>(nullable: true),
-                    ClasificationsId = table.Column<int>(nullable: true)
+                    TownsId = table.Column<int>(nullable: false),
+                    RegionsId = table.Column<int>(nullable: false),
+                    ClasificationsId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -735,19 +1173,19 @@ namespace Siscom.Agua.DAL.Migrations
                         column: x => x.ClasificationsId,
                         principalTable: "Clasification",
                         principalColumn: "id_clasification",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Suburb_Region_RegionsId",
                         column: x => x.RegionsId,
                         principalTable: "Region",
                         principalColumn: "id_region",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Suburb_Town_TownsId",
                         column: x => x.TownsId,
                         principalTable: "Town",
                         principalColumn: "id_town",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -757,7 +1195,8 @@ namespace Siscom.Agua.DAL.Migrations
                     id_contact = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     phone_number = table.Column<string>(maxLength: 50, nullable: false),
-                    is_movil = table.Column<bool>(nullable: false),
+                    type_number = table.Column<string>(nullable: false),
+                    is_active = table.Column<int>(nullable: false),
                     ClientId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -772,21 +1211,120 @@ namespace Siscom.Agua.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Debt_Detail",
+                columns: table => new
+                {
+                    amount = table.Column<double>(nullable: false),
+                    on_account = table.Column<double>(nullable: false),
+                    have_tax = table.Column<bool>(nullable: false),
+                    ServiceId = table.Column<int>(nullable: false),
+                    DebtId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Debt_Detail", x => new { x.DebtId, x.ServiceId });
+                    table.ForeignKey(
+                        name: "FK_Debt_Detail_Debt_DebtId",
+                        column: x => x.DebtId,
+                        principalTable: "Debt",
+                        principalColumn: "id_debt",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Debt_Detail_Service_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Service",
+                        principalColumn: "id_service",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Consumption",
+                columns: table => new
+                {
+                    id_consumption = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    consumption_date = table.Column<DateTime>(nullable: false),
+                    previous_consumption = table.Column<double>(nullable: false),
+                    current_consumption = table.Column<double>(nullable: false),
+                    consumption = table.Column<double>(nullable: false),
+                    is_active = table.Column<bool>(nullable: false),
+                    DebtId = table.Column<int>(nullable: true),
+                    MeterId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Consumption", x => x.id_consumption);
+                    table.ForeignKey(
+                        name: "FK_Consumption_Debt_DebtId",
+                        column: x => x.DebtId,
+                        principalTable: "Debt",
+                        principalColumn: "id_debt",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Consumption_Meter_MeterId",
+                        column: x => x.MeterId,
+                        principalTable: "Meter",
+                        principalColumn: "id_meter",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transaction_Detail",
+                columns: table => new
+                {
+                    id_transaction_detail = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    code_concept = table.Column<string>(maxLength: 10, nullable: true),
+                    description = table.Column<string>(maxLength: 30, nullable: true),
+                    amount = table.Column<double>(nullable: false),
+                    TransactionId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transaction_Detail", x => x.id_transaction_detail);
+                    table.ForeignKey(
+                        name: "FK_Transaction_Detail_Transaction_TransactionId",
+                        column: x => x.TransactionId,
+                        principalTable: "Transaction",
+                        principalColumn: "id_transaction",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transaction_Folio",
+                columns: table => new
+                {
+                    folio = table.Column<string>(nullable: false),
+                    DatePrint = table.Column<DateTime>(nullable: false),
+                    TransactionId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transaction_Folio", x => x.folio);
+                    table.ForeignKey(
+                        name: "FK_Transaction_Folio_Transaction_TransactionId",
+                        column: x => x.TransactionId,
+                        principalTable: "Transaction",
+                        principalColumn: "id_transaction",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Address",
                 columns: table => new
                 {
                     id_adress = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    street = table.Column<string>(maxLength: 150, nullable: false),
-                    outdoor = table.Column<string>(maxLength: 15, nullable: false),
-                    indoor = table.Column<string>(maxLength: 10, nullable: false),
-                    zip = table.Column<string>(maxLength: 5, nullable: false),
+                    street = table.Column<string>(maxLength: 150, nullable: true),
+                    outdoor = table.Column<string>(maxLength: 50, nullable: false),
+                    indoor = table.Column<string>(maxLength: 50, nullable: true),
+                    zip = table.Column<string>(maxLength: 5, nullable: true),
                     reference = table.Column<string>(maxLength: 200, nullable: false),
-                    lat = table.Column<string>(maxLength: 12, nullable: true),
-                    Lon = table.Column<string>(maxLength: 12, nullable: true),
-                    type_address = table.Column<byte>(nullable: false),
+                    lat = table.Column<string>(maxLength: 20, nullable: true),
+                    Lon = table.Column<string>(maxLength: 20, nullable: true),
+                    type_address = table.Column<string>(maxLength: 5, nullable: true),
                     AgreementsId = table.Column<int>(nullable: false),
-                    SuburbsId = table.Column<int>(nullable: true)
+                    SuburbsId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -802,7 +1340,7 @@ namespace Siscom.Agua.DAL.Migrations
                         column: x => x.SuburbsId,
                         principalTable: "Suburb",
                         principalColumn: "id_suburb",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -831,6 +1369,11 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "TypeConsumeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Agreement_TypeIntakeId",
+                table: "Agreement",
+                column: "TypeIntakeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Agreement_TypePeriodId",
                 table: "Agreement",
                 column: "TypePeriodId");
@@ -851,9 +1394,29 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "TypeStateServiceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Agreement_TypeTransactionId",
+                table: "Agreement",
+                column: "TypeTransactionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Agreement_TypeUseId",
                 table: "Agreement",
                 column: "TypeUseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Agreement_Discount_id_agreement",
+                table: "Agreement_Discount",
+                column: "id_agreement");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Agreement_Log_AgreementId",
+                table: "Agreement_Log",
+                column: "AgreementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Agreement_Log_UserId",
+                table: "Agreement_Log",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Agreement_Service_id_agreement",
@@ -905,9 +1468,14 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "AgreementId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Client_TypeUserId",
-                table: "Client",
-                column: "TypeUserId");
+                name: "IX_Consumption_DebtId",
+                table: "Consumption",
+                column: "DebtId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Consumption_MeterId",
+                table: "Consumption",
+                column: "MeterId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contact_ClientId",
@@ -920,20 +1488,69 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "ViewId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Debt_AgreementId",
+                table: "Debt",
+                column: "AgreementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Debt_DebtPeriodId",
+                table: "Debt",
+                column: "DebtPeriodId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Debt_Detail_ServiceId",
+                table: "Debt_Detail",
+                column: "ServiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Debt_Period_TypePeriodId",
+                table: "Debt_Period",
+                column: "TypePeriodId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Derivative_AgreementId",
+                table: "Derivative",
+                column: "AgreementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Discount_TypePeriodId",
+                table: "Discount",
+                column: "TypePeriodId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Folio_BranchOfficeId",
                 table: "Folio",
                 column: "BranchOfficeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Folio_initial",
-                table: "Folio",
-                column: "initial",
-                unique: true);
+                name: "IX_Meter_AgreementId",
+                table: "Meter",
+                column: "AgreementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payment_ExternalOriginPaymentId",
+                table: "Payment",
+                column: "ExternalOriginPaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payment_OriginPaymentId",
+                table: "Payment",
+                column: "OriginPaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payment_PayMethodId",
+                table: "Payment",
+                column: "PayMethodId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_State_CountriesId",
                 table: "State",
                 column: "CountriesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Status_GroupStatusId",
+                table: "Status",
+                column: "GroupStatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Suburb_ClasificationsId",
@@ -951,14 +1568,39 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "TownsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tariff_ServiceId",
+                table: "Tariff",
+                column: "ServiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tariff_TypeIntakeId",
+                table: "Tariff",
+                column: "TypeIntakeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tariff_TypeServiceId",
+                table: "Tariff",
+                column: "TypeServiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tariff_TypeUseId",
+                table: "Tariff",
+                column: "TypeUseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Terminal_BranchOfficeId",
                 table: "Terminal",
                 column: "BranchOfficeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Terminal_User_id_user",
+                name: "IX_Terminal_User_TerminalId",
                 table: "Terminal_User",
-                column: "id_user");
+                column: "TerminalId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Terminal_User_UserId",
+                table: "Terminal_User",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Town_StatesId",
@@ -966,9 +1608,24 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "StatesId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Transaction_ExternalOriginPaymentId",
+                table: "Transaction",
+                column: "ExternalOriginPaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transaction_OriginPaymentId",
+                table: "Transaction",
+                column: "OriginPaymentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Transaction_PayMethodId",
                 table: "Transaction",
                 column: "PayMethodId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transaction_TerminalUserId",
+                table: "Transaction",
+                column: "TerminalUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transaction_TypeTransactionId",
@@ -976,9 +1633,19 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "TypeTransactionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transaction_TerminalUserTermianlId_TerminalUserUserId",
-                table: "Transaction",
-                columns: new[] { "TerminalUserTermianlId", "TerminalUserUserId" });
+                name: "IX_Transaction_Detail_TransactionId",
+                table: "Transaction_Detail",
+                column: "TransactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transaction_Folio_TransactionId",
+                table: "Transaction_Folio",
+                column: "TransactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Type_GroupTypeId",
+                table: "Type",
+                column: "GroupTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_View_Profile_id_view",
@@ -989,7 +1656,16 @@ namespace Siscom.Agua.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Account");
+
+            migrationBuilder.DropTable(
                 name: "Address");
+
+            migrationBuilder.DropTable(
+                name: "Agreement_Discount");
+
+            migrationBuilder.DropTable(
+                name: "Agreement_Log");
 
             migrationBuilder.DropTable(
                 name: "Agreement_Service");
@@ -1010,19 +1686,43 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Consumption");
+
+            migrationBuilder.DropTable(
                 name: "Contact");
 
             migrationBuilder.DropTable(
                 name: "Control");
 
             migrationBuilder.DropTable(
+                name: "Debt_Detail");
+
+            migrationBuilder.DropTable(
+                name: "Derivative");
+
+            migrationBuilder.DropTable(
                 name: "Folio");
 
             migrationBuilder.DropTable(
-                name: "Transaction");
+                name: "Payment");
 
             migrationBuilder.DropTable(
-                name: "Type_Intake");
+                name: "Status");
+
+            migrationBuilder.DropTable(
+                name: "System_Log");
+
+            migrationBuilder.DropTable(
+                name: "Tariff");
+
+            migrationBuilder.DropTable(
+                name: "Transaction_Detail");
+
+            migrationBuilder.DropTable(
+                name: "Transaction_Folio");
+
+            migrationBuilder.DropTable(
+                name: "Type");
 
             migrationBuilder.DropTable(
                 name: "View_Profile");
@@ -1031,19 +1731,28 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Suburb");
 
             migrationBuilder.DropTable(
-                name: "Service");
+                name: "Discount");
+
+            migrationBuilder.DropTable(
+                name: "Meter");
 
             migrationBuilder.DropTable(
                 name: "Client");
 
             migrationBuilder.DropTable(
-                name: "Pay_Method");
+                name: "Debt");
 
             migrationBuilder.DropTable(
-                name: "Type_Transaction");
+                name: "Group_Status");
 
             migrationBuilder.DropTable(
-                name: "Terminal_User");
+                name: "Service");
+
+            migrationBuilder.DropTable(
+                name: "Transaction");
+
+            migrationBuilder.DropTable(
+                name: "Group_Type");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -1064,13 +1773,19 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Agreement");
 
             migrationBuilder.DropTable(
-                name: "Type_User");
+                name: "Debt_Period");
 
             migrationBuilder.DropTable(
-                name: "Terminal");
+                name: "External_Origin_Payment");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Origin_Payment");
+
+            migrationBuilder.DropTable(
+                name: "Pay_Method");
+
+            migrationBuilder.DropTable(
+                name: "Terminal_User");
 
             migrationBuilder.DropTable(
                 name: "State");
@@ -1085,7 +1800,7 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Type_Consume");
 
             migrationBuilder.DropTable(
-                name: "Type_Period");
+                name: "Type_Intake");
 
             migrationBuilder.DropTable(
                 name: "Type_Regime");
@@ -1097,13 +1812,25 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Type_State_Service");
 
             migrationBuilder.DropTable(
+                name: "Type_Transaction");
+
+            migrationBuilder.DropTable(
                 name: "Type_Use");
 
             migrationBuilder.DropTable(
-                name: "Branch_Office");
+                name: "Type_Period");
+
+            migrationBuilder.DropTable(
+                name: "Terminal");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Country");
+
+            migrationBuilder.DropTable(
+                name: "Branch_Office");
         }
     }
 }

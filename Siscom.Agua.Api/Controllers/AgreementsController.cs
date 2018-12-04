@@ -435,7 +435,7 @@ namespace Siscom.Agua.Api.Controllers
                                     }
                                     else
                                     {
-                                        Principal.Derivatives = Principal.Derivatives + 1;
+                                        Principal.NumDerivatives = Principal.NumDerivatives + 1;
                                         _context.Entry(Principal).State = EntityState.Modified;
                                         await _context.SaveChangesAsync();
                                         IsDerivative = true;

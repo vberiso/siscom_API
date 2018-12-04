@@ -13,6 +13,7 @@ namespace Siscom.Agua.DAL.Models
         {
             DebtDetails = new HashSet<DebtDetail>();
         }
+
         [Key]
         [Column("id_debt"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -52,6 +53,5 @@ namespace Siscom.Agua.DAL.Models
         public Agreement Agreement { get; set; }
 
         public ICollection<DebtDetail> DebtDetails { get; set; }
-        public ICollection<Consumption> Consumptions { get; set; }
     }
 }

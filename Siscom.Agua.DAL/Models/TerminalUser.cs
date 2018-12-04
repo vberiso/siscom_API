@@ -27,7 +27,7 @@ namespace Siscom.Agua.DAL.Models
         public Terminal Terminal { get; set; }
 
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public ApplicationUser User { get; set; }
 
         public ICollection<Transaction> Transactions { get; set; }
