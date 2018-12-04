@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181204223512_status")]
+    partial class status
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -845,7 +847,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 12, 4, 16, 37, 2, 345, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 12, 4, 16, 35, 12, 523, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -865,23 +867,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("BranchOfficeId");
 
                     b.ToTable("Folio");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.GroupStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_group_type")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnName("name")
-                        .HasMaxLength(50);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Group_Status");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.GroupType", b =>
@@ -1121,25 +1106,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("CountriesId");
 
                     b.ToTable("State");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Status", b =>
-                {
-                    b.Property<string>("CodeName")
-                        .HasColumnName("id_status");
-
-                    b.Property<int>("GroupStatusId");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnName("description")
-                        .HasMaxLength(30);
-
-                    b.HasKey("CodeName", "GroupStatusId");
-
-                    b.HasIndex("GroupStatusId");
-
-                    b.ToTable("Status");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Suburb", b =>
@@ -1937,14 +1903,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.Country", "Countries")
                         .WithMany("States")
                         .HasForeignKey("CountriesId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.Status", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.GroupStatus", "GroupStatus")
-                        .WithMany("Statuses")
-                        .HasForeignKey("GroupStatusId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
