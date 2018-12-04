@@ -195,11 +195,6 @@ namespace Siscom.Agua.DAL
 
 
             builder.Entity<Consumption>()
-                .HasOne<Debt>(a => a.Debt)
-                .WithMany(s => s.Consumptions)
-                .HasForeignKey(s => s.DebtId);
-
-            builder.Entity<Consumption>()
                 .HasOne<Meter>(a => a.Meter)
                 .WithMany(s => s.Consumptions)
                 .HasForeignKey(s => s.MeterId);
@@ -241,11 +236,6 @@ namespace Siscom.Agua.DAL
               .WithMany(s => s.Derivatives)
               .HasForeignKey(s => s.AgreementId);
 
-
-            builder.Entity<Discount>()
-             .HasOne<TypePeriod>(a => a.TypePeriod)
-             .WithMany(s => s.Discounts)
-             .HasForeignKey(s => s.TypePeriodId);
 
 
             builder.Entity<Folio>()

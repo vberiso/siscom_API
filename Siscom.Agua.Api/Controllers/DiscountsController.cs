@@ -34,7 +34,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<Discount> GetDiscounts()
         {
-            return _context.Discounts.Include(p => p.TypePeriod);
+            return _context.Discounts;
         }
 
         // GET: api/Discounts/5
@@ -46,7 +46,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var discount = await _context.Discounts.Include(p => p.TypePeriod).SingleOrDefaultAsync(x => x.Id == id);
+            var discount = await _context.Discounts.SingleOrDefaultAsync(x => x.Id == id);
 
             if (discount == null)
             {
@@ -74,7 +74,7 @@ namespace Siscom.Agua.Api.Controllers
             discount.IsActive = discountvm.IsActive;
             discount.Name = discountvm.Name;
             discount.Percentage = discountvm.Percentage;
-            discount.TypePeriod = await _context.TypePeriods.FindAsync(discountvm.TypePeriodId);
+           
 
             _context.Entry(discount).State = EntityState.Modified;
 
@@ -121,7 +121,7 @@ namespace Siscom.Agua.Api.Controllers
                     discount.IsActive = discountvm.IsActive;
                     discount.Name = discountvm.Name;
                     discount.Percentage = discountvm.Percentage;
-                    discount.TypePeriod = await _context.TypePeriods.FindAsync(discountvm.TypePeriodId);
+
 
                     _context.Discounts.Add(discount);
                     await _context.SaveChangesAsync();

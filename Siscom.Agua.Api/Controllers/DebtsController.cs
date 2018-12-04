@@ -34,7 +34,10 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var debt = await _context.Debts.FindAsync(idAgreement);
+            var debt = await _context.Debts
+                                     .Include(dd => dd.DebtDetails)
+                                     .Where(i => i.AgreementId == idAgreement)
+                                     .FirstOrDefaultAsync();
 
             if (debt == null)
             {

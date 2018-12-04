@@ -12,7 +12,6 @@ namespace Siscom.Agua.DAL.Models
         public Debt()
         {
             DebtDetails = new HashSet<DebtDetail>();
-            Consumptions = new HashSet<Consumption>();
         }
 
         [Key]
@@ -54,6 +53,6 @@ namespace Siscom.Agua.DAL.Models
         public Agreement Agreement { get; set; }
 
         public ICollection<DebtDetail> DebtDetails { get; set; }
-        public ICollection<Consumption> Consumptions { get; set; }
+       
     }
 }
