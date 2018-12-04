@@ -16,11 +16,11 @@ namespace Siscom.Agua.DAL.Models
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }
 
-        [ForeignKey("Service")]
+        //[ForeignKey("Service")]
         public int ServiceId { get; set; }
         public Service Service { get; set; }
 
-        [ForeignKey("Debt")]
+        //[ForeignKey("Debt")]
         public int DebtId { get; set; }
         public Debt Debt { get; set; }
 
