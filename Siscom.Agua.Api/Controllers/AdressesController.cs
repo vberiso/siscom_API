@@ -50,7 +50,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/Adresses/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAdress([FromRoute] int id, [FromBody] Adress adress)
+        public async Task<IActionResult> PutAdress([FromRoute] int id, [FromBody] Address adress)
         {
             if (!ModelState.IsValid)
             {
@@ -92,7 +92,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            Adress NewAdress = new Adress()
+            Address NewAdress = new Address()
             {
                 Street = adress.Street,
                 Outdoor = adress.Outdoor,

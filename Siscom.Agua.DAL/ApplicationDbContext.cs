@@ -25,7 +25,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Clasification> Clasifications { get; set; }
         public DbSet<Region> Regions { get; set; }
         public DbSet<Suburb> Suburbs { get; set; }
-        public DbSet<Adress> Adresses { get; set; }
+        public DbSet<Address> Adresses { get; set; }
 
         /// <summary>
         /// Agreement
@@ -117,15 +117,290 @@ namespace Siscom.Agua.DAL
 
             //builder.Entity<Adress>().HasRequired<Suburbs>(s => s.)
 
-            builder.Entity<DebtDetail>()
-               .HasOne<Debt>(a => a.Debt)
-               .WithMany(s => s.DebtDetails)
-               .HasForeignKey(s => s.DebtId);
+            builder.Entity<Address>()
+                   .HasOne<Agreement>(a => a.Agreements)
+                   .WithMany(s => s.Addresses)
+                   .HasForeignKey(s => s.AgreementsId);
+
+            builder.Entity<Address>()
+                    .HasOne<Suburb>(a => a.Suburbs)
+                    .WithMany(s => s.Addresses)
+                    .HasForeignKey(s => s.SuburbsId);
+
+
+            builder.Entity<Agreement>()
+                    .HasOne<TypeService>(a => a.TypeService)
+                    .WithMany(s => s.Agreements)
+                    .HasForeignKey(s => s.TypeServiceId);
+
+            builder.Entity<Agreement>()
+                   .HasOne<TypeUse>(a => a.TypeUse)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.TypeUseId);
+
+            builder.Entity<Agreement>()
+                 .HasOne<TypeConsume>(a => a.TypeConsume)
+                 .WithMany(s => s.Agreements)
+                 .HasForeignKey(s => s.TypeConsumeId);
+
+            builder.Entity<Agreement>()
+                    .HasOne<TypeRegime>(a => a.TypeRegime)
+                    .WithMany(s => s.Agreements)
+                    .HasForeignKey(s => s.TypeRegimeId);
+
+            builder.Entity<Agreement>()
+                    .HasOne<TypePeriod>(a => a.TypePeriod)
+                    .WithMany(s => s.Agreements)
+                    .HasForeignKey(s => s.TypePeriodId);
+
+            builder.Entity<Agreement>()
+                    .HasOne<TypeCommercialBusiness>(a => a.TypeCommertialBusiness)
+                    .WithMany(s => s.Agreements)
+                    .HasForeignKey(s => s.TypeCommertialBusinessId);
+
+            builder.Entity<Agreement>()
+                     .HasOne<TypeStateService>(a => a.TypeStateService)
+                     .WithMany(s => s.Agreements)
+                     .HasForeignKey(s => s.TypeStateServiceId);
+
+            builder.Entity<Agreement>()
+                     .HasOne<TypeIntake>(a => a.TypeIntake)
+                     .WithMany(s => s.Agreements)
+                     .HasForeignKey(s => s.TypeIntakeId);
+
+            builder.Entity<Agreement>()
+                    .HasOne<Diameter>(a => a.Diameter)
+                    .WithMany(s => s.Agreements)
+                    .HasForeignKey(s => s.DiameterId);
+
+
+
+            builder.Entity<AgreementLog>()
+                   .HasOne<Agreement>(a => a.Agreement)
+                   .WithMany(s => s.AgreementLogs)
+                   .HasForeignKey(s => s.AgreementId);
+
+            builder.Entity<AgreementLog>()
+                   .HasOne<ApplicationUser>(a => a.User)
+                   .WithMany(s => s.AgreementLogs)
+                   .HasForeignKey(s => s.UserId);
+
+
+
+            builder.Entity<Client>()
+                  .HasOne<Agreement>(a => a.Agreement)
+                  .WithMany(s => s.Clients)
+                  .HasForeignKey(s => s.AgreementId);
+
+
+
+            builder.Entity<Consumption>()
+                .HasOne<Debt>(a => a.Debt)
+                .WithMany(s => s.Consumptions)
+                .HasForeignKey(s => s.DebtId);
+
+            builder.Entity<Consumption>()
+                .HasOne<Meter>(a => a.Meter)
+                .WithMany(s => s.Consumptions)
+                .HasForeignKey(s => s.MeterId);
+
+
+
+            builder.Entity<Contact>()
+                   .HasOne<Client>(a => a.Client)
+                   .WithMany(s => s.Contacts)
+                   .HasForeignKey(s => s.ClienteId);
+
+
+            builder.Entity<Debt>()
+                   .HasOne<DebtPeriod>(a => a.DebtPeriod)
+                   .WithMany(s => s.Debts)
+                   .HasForeignKey(s => s.DebtPeriodId);
+
+            builder.Entity<Debt>()
+                  .HasOne<Agreement>(a => a.Agreement)
+                  .WithMany(s => s.Debts)
+                  .HasForeignKey(s => s.AgreementId);
+
+
 
             builder.Entity<DebtDetail>()
                .HasOne<Service>(a => a.Service)
                .WithMany(s => s.DebtDetails)
                .HasForeignKey(s => s.ServiceId);
+
+            builder.Entity<DebtDetail>()
+               .HasOne<Debt>(a => a.Debt)
+               .WithMany(s => s.DebtDetails)
+               .HasForeignKey(s => s.DebtId);
+
+
+
+            builder.Entity<Derivative>()
+              .HasOne<Agreement>(a => a.Agreement)
+              .WithMany(s => s.Derivatives)
+              .HasForeignKey(s => s.AgreementId);
+
+
+            builder.Entity<Discount>()
+             .HasOne<TypePeriod>(a => a.TypePeriod)
+             .WithMany(s => s.Discounts)
+             .HasForeignKey(s => s.TypePeriodId);
+
+
+            builder.Entity<Folio>()
+             .HasOne<BranchOffice>(a => a.BranchOffice)
+             .WithMany(s => s.Folios)
+             .HasForeignKey(s => s.BranchOfficeId);
+
+
+            builder.Entity<Meter>()
+            .HasOne<Agreement>(a => a.Agreement)
+            .WithMany(s => s.Meters)
+            .HasForeignKey(s => s.AgreementId);
+
+
+
+            builder.Entity<Payment>()
+           .HasOne<OriginPayment>(a => a.OriginPayment)
+           .WithMany(s => s.Payments)
+           .HasForeignKey(s => s.OriginPaymentId);
+
+            builder.Entity<Payment>()
+          .HasOne<ExternalOriginPayment>(a => a.ExternalOriginPayment)
+          .WithMany(s => s.Payments)
+          .HasForeignKey(s => s.ExternalOriginPaymentId);
+
+            builder.Entity<Payment>()
+         .HasOne<PayMethod>(a => a.PayMethod)
+         .WithMany(s => s.Payments)
+         .HasForeignKey(s => s.PayMethodId);
+
+
+            builder.Entity<State>()
+        .HasOne<Country>(a => a.Countries)
+        .WithMany(s => s.States)
+        .HasForeignKey(s => s.CountriesId);
+
+
+            builder.Entity<Status>()
+        .HasOne<GroupStatus>(a => a.GroupStatus)
+        .WithMany(s => s.Statuses)
+        .HasForeignKey(s => s.GroupStatusId);
+
+
+
+            builder.Entity<Suburb>()
+       .HasOne<Town>(a => a.Towns)
+       .WithMany(s => s.Suburbs)
+       .HasForeignKey(s => s.TownsId);
+
+            builder.Entity<Suburb>()
+      .HasOne<Region>(a => a.Regions)
+      .WithMany(s => s.Suburbs)
+      .HasForeignKey(s => s.RegionsId);
+
+            builder.Entity<Suburb>()
+     .HasOne<Clasification>(a => a.Clasifications)
+     .WithMany(s => s.Suburbs)
+     .HasForeignKey(s => s.ClasificationsId);
+
+
+
+            builder.Entity<Tariff>()
+    .HasOne<TypeIntake>(a => a.TypeIntake)
+    .WithMany(s => s.Tariffs)
+    .HasForeignKey(s => s.TypeIntakeId);
+
+            builder.Entity<Tariff>()
+   .HasOne<TypeService>(a => a.TypeService)
+   .WithMany(s => s.Tariffs)
+   .HasForeignKey(s => s.TypeServiceId);
+
+            builder.Entity<Tariff>()
+ .HasOne<TypeUse>(a => a.TypeUse)
+ .WithMany(s => s.Tariffs)
+ .HasForeignKey(s => s.TypeUseId);
+
+
+            builder.Entity<Tariff>()
+ .HasOne<Service>(a => a.Service)
+ .WithMany(s => s.Tariffs)
+ .HasForeignKey(s => s.ServiceId);
+
+
+            builder.Entity<Terminal>()
+               .HasOne<BranchOffice>(a => a.BranchOffice)
+               .WithMany(s => s.Terminals)
+               .HasForeignKey(s => s.BranchOfficeId);
+
+
+
+            builder.Entity<TerminalUser>()
+              .HasOne<Terminal>(a => a.Terminal)
+              .WithMany(s => s.TerminalUsers)
+              .HasForeignKey(s => s.TerminalId);
+
+            builder.Entity<TerminalUser>()
+             .HasOne<ApplicationUser>(a => a.User)
+             .WithMany(s => s.TerminalUsers)
+             .HasForeignKey(s => s.UserId);
+
+
+            builder.Entity<Town>()
+           .HasOne<State>(a => a.States)
+           .WithMany(s => s.Towns)
+           .HasForeignKey(s => s.StateId);
+
+
+
+            builder.Entity<Transaction>()
+         .HasOne<TerminalUser>(a => a.TerminalUser)
+         .WithMany(s => s.Transactions)
+         .HasForeignKey(s => s.TerminalUserId);
+
+            builder.Entity<Transaction>()
+         .HasOne<TypeTransaction>(a => a.TypeTransaction)
+         .WithMany(s => s.Transactions)
+         .HasForeignKey(s => s.TypeTransactionId);
+
+            builder.Entity<Transaction>()
+        .HasOne<PayMethod>(a => a.PayMethod)
+        .WithMany(s => s.Transactions)
+        .HasForeignKey(s => s.PayMethodId);
+
+            builder.Entity<Transaction>()
+       .HasOne<OriginPayment>(a => a.OriginPayment)
+       .WithMany(s => s.Transactions)
+       .HasForeignKey(s => s.OriginPaymentId);
+
+            builder.Entity<Transaction>()
+       .HasOne<ExternalOriginPayment>(a => a.ExternalOriginPayment)
+       .WithMany(s => s.Transactions)
+       .HasForeignKey(s => s.ExternalOriginPaymentId);
+
+
+
+            builder.Entity<TransactionDetail>()
+      .HasOne<Transaction>(a => a.Transaction)
+      .WithMany(s => s.TransactionDetails)
+      .HasForeignKey(s => s.TransactionId);
+
+
+
+            builder.Entity<TransactionFolio>()
+      .HasOne<Transaction>(a => a.Transaction)
+      .WithMany(s => s.TransactionFolios)
+      .HasForeignKey(s => s.TransactionId);
+
+
+            builder.Entity<Type>()
+     .HasOne<GroupType>(a => a.GroupType)
+     .WithMany(s => s.Types)
+     .HasForeignKey(s => s.GroupTypeId);
+
+            
+
 
             builder.Entity<ViewProfile>()
                 .HasOne<View>(sc => sc.View)
@@ -137,6 +412,9 @@ namespace Siscom.Agua.DAL
                .WithMany(s => s.ViewProfiles)
                .HasForeignKey(sc => sc.RoleId);
 
+
+
+
             builder.Entity<AgreementService>()
                 .HasOne<Service>(x => x.Service)
                 .WithMany(y => y.AgreementServices)
@@ -146,6 +424,8 @@ namespace Siscom.Agua.DAL
                 .HasOne<Agreement>(x => x.Agreement)
                 .WithMany(y => y.AgreementServices)
                 .HasForeignKey(x => x.IdAgreement);
+
+
 
             builder.Entity<AgreementDiscount>()
                .HasOne<Agreement>(x => x.Agreement)
@@ -157,16 +437,7 @@ namespace Siscom.Agua.DAL
               .WithMany(y => y.AgreementDiscounts)
               .HasForeignKey(x => x.IdDiscount);
 
-            builder.Entity<DebtDetail>()
-               .HasOne<Debt>(x => x.Debt)
-               .WithMany(y => y.DebtDetails)
-               .HasForeignKey(x => x.DebtId);
-
-            builder.Entity<DebtDetail>()
-                .HasOne<Service>(x => x.Service)
-                .WithMany(y => y.DebtDetails)
-                .HasForeignKey(x => x.ServiceId);
-
+     
             builder.Entity<Agreement>()
                .Property(x => x.StratDate)
                .HasColumnType("date");

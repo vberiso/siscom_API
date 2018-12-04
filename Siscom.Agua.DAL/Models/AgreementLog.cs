@@ -20,7 +20,10 @@ namespace Siscom.Agua.DAL.Models
         [Column("observation")]
         public string Observation { get; set; }
 
+        public string UserId { get; set; }
         public ApplicationUser User { get; set; }
+
+        public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
     }
 }

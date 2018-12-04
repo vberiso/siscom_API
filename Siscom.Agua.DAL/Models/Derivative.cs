@@ -13,11 +13,12 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_derivative"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Column("is_active"), Required]
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; }       
 
-        [ForeignKey("Agreement")]
+        //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
+
         public int AgreementDerivative { get; set; }
     }
    

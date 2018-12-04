@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public TypePeriod()
         {
             Agreements = new HashSet<Agreement>();
+            Discounts = new HashSet<Discount>();
         }
 
         [Key]
@@ -24,5 +25,6 @@ namespace Siscom.Agua.DAL.Models
         public Int16 Mounth { get; set; }
 
         public ICollection<Agreement> Agreements { get; set; }
+        public ICollection<Discount> Discounts { get; set; }
     }
 }

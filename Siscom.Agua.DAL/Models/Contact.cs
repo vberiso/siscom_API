@@ -19,6 +19,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public int IsActive { get; set; }
 
+        public int ClienteId { get; set; }
         public Client Client { get; set; }
     }
 }

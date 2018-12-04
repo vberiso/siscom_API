@@ -452,7 +452,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         foreach (var address in agreementvm.Adresses)
                         {
-                            NewAgreement.Addresses.Add(new Adress
+                            NewAgreement.Addresses.Add(new Address
                             {
                                 Street = address.Street,
                                 Outdoor = address.Outdoor,

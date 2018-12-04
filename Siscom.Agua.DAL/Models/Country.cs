@@ -11,7 +11,7 @@ namespace Siscom.Agua.DAL.Models
     {
         public Country()
         {
-            states = new HashSet<State>();
+            States = new HashSet<State>();
         }
 
         [Column("id_country"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -22,6 +22,6 @@ namespace Siscom.Agua.DAL.Models
         [Column("abbreviation"), StringLength(3), Required]
         public string Abbreviation { get; set; }
 
-        public ICollection<State> states { get; set; }
+        public ICollection<State> States { get; set; }
     }
 }

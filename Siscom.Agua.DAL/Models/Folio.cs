@@ -24,7 +24,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public int IsActive { get; set; }
 
-        [ForeignKey("BranchOffice")]
+        //[ForeignKey("BranchOffice")]
         public int BranchOfficeId { get; set; }
         public BranchOffice BranchOffice { get; set; }
     }

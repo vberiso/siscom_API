@@ -22,11 +22,11 @@ namespace Siscom.Agua.DAL.Models
         [Column("in_operation"), Required]
         public bool InOperation { get; set; }
 
-        [ForeignKey("Terminal")]
+        //[ForeignKey("Terminal")]
         public int TerminalId { get; set; }
         public Terminal Terminal { get; set; }
 
-        [ForeignKey("User")]
+        //[ForeignKey("User")]
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
 

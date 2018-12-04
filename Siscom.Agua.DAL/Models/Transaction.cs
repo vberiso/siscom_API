@@ -38,19 +38,22 @@ namespace Siscom.Agua.DAL.Models
         [Column("authorization_origin_payment"), StringLength(50)]
         public string AuthorizationOriginPayment { get; set; }
 
-        [ForeignKey("TerminalUser")]
+        //[ForeignKey("TerminalUser")]
         public int TerminalUserId { get; set; }
         public TerminalUser TerminalUser { get; set; }
 
-        [ForeignKey("TypeTransaction")]
+        //[ForeignKey("TypeTransaction")]
         public int TypeTransactionId { get; set; }
         public TypeTransaction TypeTransaction { get; set; }
 
-        [ForeignKey("PayMethod")]
+        //[ForeignKey("PayMethod")]
         public int PayMethodId { get; set; }
         public PayMethod PayMethod { get; set; }
 
+        public int OriginPaymentId { get; set; }
         public OriginPayment OriginPayment { get; set; }
+
+        public int ExternalOriginPaymentId { get; set; }
         public ExternalOriginPayment ExternalOriginPayment { get; set; }
 
         public ICollection<TransactionFolio> TransactionFolios { get; set; }

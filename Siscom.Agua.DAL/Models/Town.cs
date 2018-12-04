@@ -20,7 +20,8 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("name"), StringLength(30), Required]
         public string Name { get; set; }
-        
+
+        public int StateId { get; set; }
         public State States { get; set; }
 
         public ICollection<Suburb> Suburbs { get; set; }

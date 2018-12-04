@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public Debt()
         {
             DebtDetails = new HashSet<DebtDetail>();
+            Consumptions = new HashSet<Consumption>();
         }
 
         [Key]
@@ -44,14 +45,15 @@ namespace Siscom.Agua.DAL.Models
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
 
-        [ForeignKey("DebtPeriod")]
+        //[ForeignKey("DebtPeriod")]
         public int DebtPeriodId { get; set; }
         public DebtPeriod DebtPeriod { get; set; }
 
-        [ForeignKey("Agreement")]
+        //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
 
         public ICollection<DebtDetail> DebtDetails { get; set; }
+        public ICollection<Consumption> Consumptions { get; set; }
     }
 }

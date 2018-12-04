@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public OriginPayment()
         {
             Payments = new HashSet<Payment>();
+            Transactions = new HashSet<Transaction>();
         }
 
         [Key]
@@ -22,5 +23,6 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
 
         public ICollection<Payment> Payments { get; set; }
+        public ICollection<Transaction> Transactions { get; set; }
     }
 }

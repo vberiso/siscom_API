@@ -36,7 +36,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("type_user"), StringLength(5), Required]
         public string TypeUser { get; set; }
    
-        [ForeignKey("Agreement")]
+        //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
 

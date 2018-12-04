@@ -8,9 +8,9 @@ using System.Text;
 namespace Siscom.Agua.DAL.Models
 {
     [Table("Address")]
-    public class Adress
+    public class Address
     {
-        [Column("id_adress"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id_address"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
         [Column("street"), StringLength(150)]
@@ -30,11 +30,11 @@ namespace Siscom.Agua.DAL.Models
         [Column("type_address"), StringLength(5)]
         public string TypeAddress { get; set; }
 
-        [ForeignKey("Agreements")]
+        //[ForeignKey("Agreements")]
         public int AgreementsId { get; set; }
         public Agreement Agreements { get; set; }
 
-        [ForeignKey("Suburbs")]
+        //[ForeignKey("Suburbs")]
         public int SuburbsId { get; set; }
         public Suburb Suburbs { get; set; }
 

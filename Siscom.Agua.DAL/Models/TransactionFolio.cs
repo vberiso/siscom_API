@@ -14,7 +14,7 @@ namespace Siscom.Agua.DAL.Models
         public string Folio { get; set; }
         public DateTime DatePrint { get; set; }
 
-        [ForeignKey("Transaction")]
+        //[ForeignKey("Transaction")]
         public int TransactionId { get; set; }
         public Transaction Transaction { get; set; }
     }

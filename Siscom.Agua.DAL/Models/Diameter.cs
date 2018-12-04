@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Diameter")]
     public class Diameter
     {
+        public Diameter()
+        {
+            Agreements = new HashSet<Agreement>();
+        }
+
         [Key]
         [Column("id_diameter"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]        
         public int Id { get; set; }
@@ -16,5 +21,7 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
         [Required, StringLength(20), Column("description")]
         public string Description { get; set; }
+
+        public ICollection<Agreement> Agreements { get; set; }
     }
 }

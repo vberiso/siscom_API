@@ -19,7 +19,9 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
 
+        public int TypePeriodId { get; set; }
         public TypePeriod TypePeriod { get; set; }
+
         public ICollection<AgreementDiscount> AgreementDiscounts { get; set; }
     }
 }
