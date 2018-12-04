@@ -17,7 +17,6 @@ namespace Siscom.Agua.DAL.Models
         public string Description { get; set; }
 
 
-        //[ForeignKey("GroupStatus")]
         [Column(Order = 1)]
         public int GroupStatusId { get; set; }
         public GroupStatus GroupStatus { get; set; }

@@ -845,7 +845,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 12, 4, 13, 8, 30, 136, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 12, 4, 16, 5, 0, 728, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");

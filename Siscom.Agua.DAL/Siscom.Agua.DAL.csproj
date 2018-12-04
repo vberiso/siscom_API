@@ -3,12 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <Compile Remove="Migrations\20181204184940_Initial.cs" />
-    <Compile Remove="Migrations\20181204185945_Initial.cs" />
+    <Compile Remove="Migrations\" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.4" />

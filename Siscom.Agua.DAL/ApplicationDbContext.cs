@@ -109,6 +109,8 @@ namespace Siscom.Agua.DAL
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            
+
             builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
             builder.Entity<AgreementService>().HasKey(x => new { x.IdService, x.IdAgreement });
             builder.Entity<AgreementDiscount>().HasKey(x => new { x.IdDiscount, x.IdAgreement });
@@ -207,16 +209,23 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.ClienteId);
 
 
-            builder.Entity<Debt>()
-                   .HasOne<DebtPeriod>(a => a.DebtPeriod)
-                   .WithMany(s => s.Debts)
-                   .HasForeignKey(s => s.DebtPeriodId);
+            //builder.Entity<Debt>()
+            //       .HasOne<DebtPeriod>(a => a.DebtPeriod)
+            //       .WithMany(s => s.Debts)
+            //       .HasForeignKey(s => s.DebtPeriodId);
 
             builder.Entity<Debt>()
-                  .HasOne<Agreement>(a => a.Agreement)
-                  .WithMany(s => s.Debts)
-                  .HasForeignKey(s => s.AgreementId);
+                    .HasMany(a => a.DebtDetails)
+                    .WithOne(s => s.Debt);
 
+            //builder.Entity<Debt>()
+            //      .HasOne<Agreement>(a => a.Agreement)
+            //      .WithMany(s => s.Debts)
+            //      .HasForeignKey(s => s.AgreementId);
+
+            builder.Entity<Agreement>()
+                   .HasMany(a => a.Debts)
+                   .WithOne(s => s.Agreement);
 
 
             builder.Entity<DebtDetail>()
@@ -273,10 +282,10 @@ namespace Siscom.Agua.DAL
         .HasForeignKey(s => s.CountriesId);
 
 
-            builder.Entity<Status>()
-        .HasOne<GroupStatus>(a => a.GroupStatus)
-        .WithMany(s => s.Statuses)
-        .HasForeignKey(s => s.GroupStatusId);
+        //    builder.Entity<Status>()
+        //.HasOne<GroupStatus>(a => a.GroupStatus)
+        //.WithMany(s => s.Statuses)
+        //.HasForeignKey(s => s.GroupStatusId);
 
 
 

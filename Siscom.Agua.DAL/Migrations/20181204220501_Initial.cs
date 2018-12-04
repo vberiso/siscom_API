@@ -503,7 +503,7 @@ namespace Siscom.Agua.DAL.Migrations
                     range = table.Column<string>(nullable: false),
                     initial = table.Column<int>(nullable: false),
                     secuential = table.Column<int>(nullable: false),
-                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2018, 12, 4, 13, 8, 30, 136, DateTimeKind.Local)),
+                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2018, 12, 4, 16, 5, 0, 728, DateTimeKind.Local)),
                     is_active = table.Column<int>(nullable: false),
                     BranchOfficeId = table.Column<int>(nullable: false)
                 },
