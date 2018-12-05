@@ -22,13 +22,9 @@ namespace Siscom.Agua.DAL.Models
         [Required, StringLength(50), Column("name")]
         public string Name { get; set; }
         [Required, Column("order")]
-        public Int16 Order { get; set; }
-        [Required, Column("is_service")]
-        public bool IsService { get; set; }
-        [Required, Column("have_tax")]
-        public bool HaveTax { get; set; }
-        [Required, Column("in_agreement")]
-        public bool InAgreement { get; set; }
+        public Int16 Order { get; set; }       
+        [Required, Column("is_commercial")]
+        public bool IsCommercial { get; set; }      
         [Required, Column("is_active")]
         public bool IsActive { get; set; }
 

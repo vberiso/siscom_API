@@ -728,7 +728,7 @@ namespace Siscom.Agua.Api.Controllers
                                                         }).ToListAsync(),
 
                 Services = await _context.Services
-                                        .Where(s => s.InAgreement == true && s.IsActive == true)
+                                        .Where(s => s.IsActive == true)
                                         .Select(s => new ServiceVM
                                         {
                                             Id = s.Id,

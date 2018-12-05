@@ -34,7 +34,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<Service> GetServices()
         {
-            return _context.Services.Where(x => x.InAgreement != true);
+            return _context.Services;
         }
 
         // GET: api/Services/5
@@ -73,10 +73,10 @@ namespace Siscom.Agua.Api.Controllers
 
             service.Name = serviceVM.Name;
             service.Order = serviceVM.Order;
-            service.IsService = serviceVM.IsService;
+            //service.IsService = serviceVM.IsService;
             service.IsActive = serviceVM.IsActive;
-            service.HaveTax = serviceVM.HaveTax;
-            service.InAgreement = serviceVM.InAgreement;
+            //service.HaveTax = serviceVM.HaveTax;
+            //service.InAgreement = serviceVM.InAgreement;
 
             _context.Entry(service).State = EntityState.Modified;
 
@@ -120,10 +120,10 @@ namespace Siscom.Agua.Api.Controllers
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    service.InAgreement = serviceVM.InAgreement;
-                    service.HaveTax = serviceVM.HaveTax;
+                    //service.InAgreement = serviceVM.InAgreement;
+                    //service.HaveTax = serviceVM.HaveTax;
                     service.IsActive = serviceVM.IsActive;
-                    service.IsService = serviceVM.IsService;
+                    //service.IsService = serviceVM.IsService;
                     service.Name = serviceVM.Name;
                     service.Order = serviceVM.Order;
 

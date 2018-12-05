@@ -80,7 +80,9 @@ namespace Siscom.Agua.DAL
         public DbSet<DebtPeriod> DebtPeriods { get; set; }
         public DbSet<Meter> Meters { get; set; }
         public DbSet<Consumption> Consumptions { get; set; }
-        public DbSet<Tariff> Tariffs { get; set; }       
+        public DbSet<Tariff> Tariffs { get; set; }
+        public DbSet<TariffProduct> TariffProducts { get; set; }
+        public DbSet<Product> Products { get; set; }
 
         /// <summary> 
         /// Payment
