@@ -115,7 +115,7 @@ namespace Siscom.Agua.Api.Controllers
                            .FirstOrDefaultAsync() != null)
 
             {
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El estado de la terminal no permite la transacción" });
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
             }
 
             var tmp = await _context.Transactions
@@ -155,7 +155,7 @@ namespace Siscom.Agua.Api.Controllers
                             return NotFound();
                         }
                         if(cancelacion.Amount != pPaymentConcepts.Transaction.Amount)
-                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
                         _validation = true;
                         break;    
                     default:
@@ -199,6 +199,9 @@ namespace Siscom.Agua.Api.Controllers
 
                                 if (transaction.TypeTransaction.Id == 3)
                                 {
+                                    if (debt.OnAccount + debt.OnAccount > deuda.Amount)
+                                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
+
                                     deuda.Status = pPaymentConcepts.Transaction.DebtStatus;
                                     deuda.OnAccount = debt.OnAccount;
                                     _context.Entry(deuda).State = EntityState.Modified;
@@ -226,9 +229,13 @@ namespace Siscom.Agua.Api.Controllers
 
                                 }
                                 else
-                                {
+                                {                                   
+                                    if (deuda.OnAccount - debt.OnAccount < 0)
+                                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
+
                                     deuda.Status = "ED001";
-                                    deuda.OnAccount = 0;
+                                    deuda.OnAccount = deuda.OnAccount - debt.OnAccount;
+
                                     _context.Entry(deuda).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
 
@@ -243,16 +250,29 @@ namespace Siscom.Agua.Api.Controllers
                                 foreach (var detail in debt.DebtDetails)
                                 {
                                     TransactionDetail transactionDetail = new TransactionDetail();
-                                    transactionDetail.CodeConcept = detail.ServiceId.ToString();
+                                    transactionDetail.CodeConcept = detail.CodeConcept;
                                     transactionDetail.amount = detail.OnAccount;
-                                    transactionDetail.Description = _context.Services.Find(detail.ServiceId).Name;
+                                    transactionDetail.Description = detail.NameConcept;
                                     transactionDetail.Transaction = transaction;
                                     _context.TransactionDetails.Add(transactionDetail);
                                     await _context.SaveChangesAsync();
 
                                     var conceptos = await _context.DebtDetails.Where(x => x.DebtId == debt.Id &&
-                                                                                          x.ServiceId == detail.ServiceId).FirstOrDefaultAsync();
-                                    conceptos.OnAccount = transaction.TypeTransaction.Id == 3 ? detail.OnAccount : 0;
+                                                                                          x.CodeConcept == detail.CodeConcept).FirstOrDefaultAsync();
+
+                                    if (transaction.TypeTransaction.Id == 3)
+                                    {
+                                        if(conceptos.OnAccount + detail.OnAccount > conceptos.Amount)
+                                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
+
+                                        conceptos.OnAccount = conceptos.OnAccount + detail.OnAccount;
+                                    }
+                                    else {
+                                        if (conceptos.OnAccount- detail.OnAccount < 0)
+                                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
+                                        conceptos.OnAccount = conceptos.OnAccount - detail.OnAccount;
+                                    }                                        
+
                                     _context.Entry(conceptos).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
                                 }

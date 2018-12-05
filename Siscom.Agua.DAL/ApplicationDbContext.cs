@@ -114,7 +114,6 @@ namespace Siscom.Agua.DAL
             builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
             builder.Entity<AgreementService>().HasKey(x => new { x.IdService, x.IdAgreement });
             builder.Entity<AgreementDiscount>().HasKey(x => new { x.IdDiscount, x.IdAgreement });
-            builder.Entity<DebtDetail>().HasKey(x => new { x.DebtId, x.ServiceId });
             builder.Entity<Status>().HasKey(x => new { x.CodeName, x.GroupStatusId });
 
             //builder.Entity<Adress>().HasRequired<Suburbs>(s => s.)
@@ -125,15 +124,15 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.AgreementsId);
 
             builder.Entity<Address>()
-                    .HasOne<Suburb>(a => a.Suburbs)
-                    .WithMany(s => s.Addresses)
-                    .HasForeignKey(s => s.SuburbsId);
+                   .HasOne<Suburb>(a => a.Suburbs)
+                   .WithMany(s => s.Addresses)
+                   .HasForeignKey(s => s.SuburbsId);
 
 
             builder.Entity<Agreement>()
-                    .HasOne<TypeService>(a => a.TypeService)
-                    .WithMany(s => s.Agreements)
-                    .HasForeignKey(s => s.TypeServiceId);
+                   .HasOne<TypeService>(a => a.TypeService)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.TypeServiceId);
 
             builder.Entity<Agreement>()
                    .HasOne<TypeUse>(a => a.TypeUse)
@@ -141,40 +140,39 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.TypeUseId);
 
             builder.Entity<Agreement>()
-                 .HasOne<TypeConsume>(a => a.TypeConsume)
-                 .WithMany(s => s.Agreements)
-                 .HasForeignKey(s => s.TypeConsumeId);
+                   .HasOne<TypeConsume>(a => a.TypeConsume)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.TypeConsumeId);
 
             builder.Entity<Agreement>()
-                    .HasOne<TypeRegime>(a => a.TypeRegime)
-                    .WithMany(s => s.Agreements)
-                    .HasForeignKey(s => s.TypeRegimeId);
+                   .HasOne<TypeRegime>(a => a.TypeRegime)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.TypeRegimeId);
 
             builder.Entity<Agreement>()
-                    .HasOne<TypePeriod>(a => a.TypePeriod)
-                    .WithMany(s => s.Agreements)
-                    .HasForeignKey(s => s.TypePeriodId);
+                   .HasOne<TypePeriod>(a => a.TypePeriod)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.TypePeriodId);
 
             builder.Entity<Agreement>()
-                    .HasOne<TypeCommercialBusiness>(a => a.TypeCommertialBusiness)
-                    .WithMany(s => s.Agreements)
-                    .HasForeignKey(s => s.TypeCommertialBusinessId);
+                   .HasOne<TypeCommercialBusiness>(a => a.TypeCommertialBusiness)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.TypeCommertialBusinessId);
 
             builder.Entity<Agreement>()
-                     .HasOne<TypeStateService>(a => a.TypeStateService)
-                     .WithMany(s => s.Agreements)
-                     .HasForeignKey(s => s.TypeStateServiceId);
+                   .HasOne<TypeStateService>(a => a.TypeStateService)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.TypeStateServiceId);
 
             builder.Entity<Agreement>()
-                     .HasOne<TypeIntake>(a => a.TypeIntake)
-                     .WithMany(s => s.Agreements)
-                     .HasForeignKey(s => s.TypeIntakeId);
+                   .HasOne<TypeIntake>(a => a.TypeIntake)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.TypeIntakeId);
 
             builder.Entity<Agreement>()
-                    .HasOne<Diameter>(a => a.Diameter)
-                    .WithMany(s => s.Agreements)
-                    .HasForeignKey(s => s.DiameterId);
-
+                   .HasOne<Diameter>(a => a.Diameter)
+                   .WithMany(s => s.Agreements)
+                   .HasForeignKey(s => s.DiameterId);
 
 
             builder.Entity<AgreementLog>()
@@ -190,9 +188,9 @@ namespace Siscom.Agua.DAL
 
 
             builder.Entity<Client>()
-                  .HasOne<Agreement>(a => a.Agreement)
-                  .WithMany(s => s.Clients)
-                  .HasForeignKey(s => s.AgreementId);
+                   .HasOne<Agreement>(a => a.Agreement)
+                   .WithMany(s => s.Clients)
+                   .HasForeignKey(s => s.AgreementId);
 
 
 
@@ -227,12 +225,7 @@ namespace Siscom.Agua.DAL
                    .HasMany(a => a.Debts)
                    .WithOne(s => s.Agreement);
 
-
-            builder.Entity<DebtDetail>()
-               .HasOne<Service>(a => a.Service)
-               .WithMany(s => s.DebtDetails)
-               .HasForeignKey(s => s.ServiceId);
-
+       
             builder.Entity<DebtDetail>()
                .HasOne<Debt>(a => a.Debt)
                .WithMany(s => s.DebtDetails)
@@ -305,27 +298,15 @@ namespace Siscom.Agua.DAL
      .HasForeignKey(s => s.ClasificationsId);
 
 
-
-            builder.Entity<Tariff>()
-    .HasOne<TypeIntake>(a => a.TypeIntake)
-    .WithMany(s => s.Tariffs)
-    .HasForeignKey(s => s.TypeIntakeId);
-
-            builder.Entity<Tariff>()
-   .HasOne<TypeService>(a => a.TypeService)
-   .WithMany(s => s.Tariffs)
-   .HasForeignKey(s => s.TypeServiceId);
-
-            builder.Entity<Tariff>()
- .HasOne<TypeUse>(a => a.TypeUse)
- .WithMany(s => s.Tariffs)
- .HasForeignKey(s => s.TypeUseId);
-
-
             builder.Entity<Tariff>()
  .HasOne<Service>(a => a.Service)
  .WithMany(s => s.Tariffs)
  .HasForeignKey(s => s.ServiceId);
+
+            builder.Entity<TariffProduct>()
+ .HasOne<Product>(a => a.Product)
+ .WithMany(s => s.TariffProducts)
+ .HasForeignKey(s => s.ProductId);
 
 
             builder.Entity<Terminal>()

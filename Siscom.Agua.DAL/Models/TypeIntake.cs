@@ -12,7 +12,6 @@ namespace Siscom.Agua.DAL.Models
         public TypeIntake()
         {
             Agreements = new HashSet<Agreement>();
-            Tariffs = new HashSet<Tariff>();
         }
 
         [Key]
@@ -25,6 +24,5 @@ namespace Siscom.Agua.DAL.Models
         public string Acronym { get; set; }
 
         public ICollection<Agreement> Agreements { get; set; }
-        public ICollection<Tariff> Tariffs { get; set; }
     }
 }

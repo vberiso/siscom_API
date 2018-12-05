@@ -6,17 +6,17 @@ using System.Text;
 
 namespace Siscom.Agua.DAL.Models
 {
-    [Table("Type_Use")]
-    public class TypeUse
+    [Table("Type_Classification")]
+    public class TypeClassification
     {
-        public TypeUse()
+        public TypeClassification()
         {
-            Agreements = new HashSet<Agreement>();
+            Agreements = new HashSet<Agreement>();           
         }
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id_type_use")]
+        [Column("id_type_classification")]
         public int Id { get; set; }
         [Required, StringLength(50), Column("name")]
         public string Name { get; set; }

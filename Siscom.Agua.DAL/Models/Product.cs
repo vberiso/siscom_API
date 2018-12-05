@@ -5,14 +5,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Siscom.Agua.DAL.Models
-{
-    [Table("Service")]
-    public class Service
+{   
+    [Table("Product")]
+    public class Product
     {
-        public Service()
+        public Product()
         {
-            AgreementServices = new HashSet<AgreementService>();
-            Tariffs = new HashSet<Tariff>();
+            TariffProducts = new HashSet<TariffProduct>();
         }
 
         [Key]
@@ -32,7 +31,6 @@ namespace Siscom.Agua.DAL.Models
         [Required, Column("is_active")]
         public bool IsActive { get; set; }
 
-        public ICollection<AgreementService> AgreementServices { get; set; }
-        public ICollection<Tariff> Tariffs { get; set; }
+        public ICollection<TariffProduct> TariffProducts { get; set; }
     }
 }

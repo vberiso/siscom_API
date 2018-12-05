@@ -15,10 +15,10 @@ namespace Siscom.Agua.DAL.Models
         public double OnAccount { get; set; }
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }
-
-        //[ForeignKey("Service")]
-        public int ServiceId { get; set; }
-        public Service Service { get; set; }
+        [Required, StringLength(5), Column("code_concept")]
+        public string CodeConcept { get; set; }
+        [Required, StringLength(50), Column("name_concept")]
+        public string NameConcept { get; set; }
 
         //[ForeignKey("Debt")]
         public int DebtId { get; set; }

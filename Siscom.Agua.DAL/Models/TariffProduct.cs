@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Siscom.Agua.DAL.Models
-{
-   [Table("Tariff")]
-    public class Tariff
+{ 
+    [Table("Tariff_Product")]
+    public class TariffProduct
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -30,8 +30,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public int IsActive { get; set; }
 
-        //[ForeignKey("Service")]
-        public int ServiceId { get; set; }
-        public Service Service { get; set; }        
+        //[ForeignKey("Product")]
+        public int ProductId { get; set; }
+        public Product Product { get; set; }
     }
 }
