@@ -48,6 +48,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Derivative> Derivatives { get; set; }
         public DbSet<AgreementLog> AgreementLogs { get; set; }
         public DbSet<Account> Accounts { get; set; }
+        public DbSet<TypeClassification> TypeClassifications { get; set; }
 
         /// <summary> 
         /// Cash Box 

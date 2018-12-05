@@ -229,34 +229,44 @@ namespace Siscom.Agua.Api.Controllers
 
                     break;
                 case 3:
-                    var address = await _context.Adresses.Include(x => x.Agreements)
-                                                         .Where(x => x.ToString().Contains(search.StringSearch))
-                                                         .ToListAsync();
-                    foreach (var item in address)
-                    {
-                        agreement.Add(new Agreement
-                        {
-                            Account = item.Agreements.Account,
-                            Id = item.Agreements.Id,
-                            Clients = await _context.Clients.Where(x => x.AgreementId == item.AgreementsId).ToListAsync(),
-                            Addresses = address
-                        });
-                    }
+                    var address = await (from ad in _context.Adresses
+                                         join a in _context.Agreements on ad.AgreementsId equals a.Id
+                                         where EF.Functions.Like(ad.ToString(), "%" + search.StringSearch + "%")
+                                         orderby ad.AgreementsId
+                                         let vclient = _context.Clients
+                                                             .Where(x => x.AgreementId == a.Id)
+                                                             .FirstOrDefault()
+                                         select new
+                                         {
+                                             AgreementId = a.Id,
+                                             Account = a.Account,
+                                             Nombre = string.Format("{0} {1} {2}", vclient.Name, vclient.SecondLastName, vclient.LastName),
+                                             RFC = vclient.RFC,
+                                             Address = string.Format("{0} {1}, {2}", ad.Street, ad.Outdoor, ad.Suburbs.Name)
+                                         }
+                                   ).ToListAsync();
+                    if (address.Count > 0)
+                        return Ok(address);
                     break;
                 case 4:
-                    var clientrfc = await _context.Clients.Include(x => x.Agreement)
-                                                        .Where(x => x.RFC.Contains(search.StringSearch))
-                                                        .ToListAsync();
-                    foreach (var item in clientrfc)
-                    {
-                        agreement.Add(new Agreement
-                        {
-                            Account = item.Agreement.Account,
-                            Id = item.Agreement.Id,
-                            Clients = clientrfc,
-                            Addresses = await _context.Adresses.Include(s => s.Suburbs).Where(x => x.AgreementsId == item.AgreementId).ToListAsync()
-                        });
-                    }
+                    var rfc = await (from c in _context.Clients
+                                     join a in _context.Agreements on c.AgreementId equals a.Id
+                                     where EF.Functions.Like(c.RFC, "%" + search.StringSearch + "%")
+                                     orderby c.TypeUser
+                                     let vaddress = _context.Adresses
+                                                            .Where(x => x.AgreementsId == c.AgreementId)
+                                                            .FirstOrDefault()
+                                     select new
+                                     {
+                                         AgreementId = a.Id,
+                                         Account = a.Account,
+                                         Nombre = c.ToString(),
+                                         RFC = c.RFC,
+                                         Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name)
+                                     }
+                                   ).ToListAsync();
+                    if (rfc.Count > 0)
+                        return Ok(rfc);
                     break;
                 default:
                     break;
