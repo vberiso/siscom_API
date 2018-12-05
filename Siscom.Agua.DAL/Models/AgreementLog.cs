@@ -15,7 +15,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("agreement_log_date"), Required]
         public DateTime AgreementLogDate { get; set; }
-        [Column("description"), StringLength(30), Required]
+        [Column("description"), StringLength(80), Required]
         public string Description { get; set; }
         [Column("observation")]
         public string Observation { get; set; }

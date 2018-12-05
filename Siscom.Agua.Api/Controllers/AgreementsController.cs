@@ -35,10 +35,11 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/Agreements
         [HttpGet]
-        public IEnumerable<Agreement> GetAgreements()
+        public async Task<IEnumerable<Agreement>> GetAgreements()
         {
-            return _context.Agreements.Include(a => a.Addresses)
-                                    .Include(c => c.Clients);
+            var b  =  await _context.Agreements.Include(a => a.Addresses)
+                                    .Include(c => c.Clients).ToListAsync();
+            return b;
         }
 
 
@@ -178,6 +179,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+            search.StringSearch.Replace("%20", " ");
             List<Agreement> agreement = new List<Agreement>();
             switch (search.Type)
             {
@@ -188,19 +190,36 @@ namespace Siscom.Agua.Api.Controllers
                                       .FirstOrDefaultAsync(a => a.Account == search.StringSearch));
                     break;
                 case 2:
-                    var client = await _context.Clients.Include(x => x.Agreement)
-                                                       .Where(x => x.ToString().Contains(search.StringSearch))
-                                                       .ToListAsync();
-                    foreach (var item in client)
+                    try
                     {
-                        agreement.Add(new Agreement
-                        {
-                            Account = item.Agreement.Account,
-                            Id = item.Agreement.Id,
-                            Clients = client,
-                            Addresses = await _context.Adresses.Include(s => s.Suburbs).Where(x => x.AgreementsId == item.AgreementId).ToListAsync()
-                        });
+                        var client = await (from c in _context.Clients
+                                            join a in _context.Agreements on c.AgreementId equals a.Id
+                                            where EF.Functions.Like(c.ToString(), "%" + search.StringSearch + "%")
+                                            orderby c.TypeUser
+                                            //select c
+                                            select new
+                                            {
+                                                AgreementId = a.Id,
+                                                Account = a.Account,
+                                                Nombre = c.ToString(),
+                                                RFC = c.RFC,
+                                                Address = (_context.Adresses
+                                                                            .Where(x => x.AgreementsId == c.AgreementId)
+                                                                            .FirstOrDefault().ToString())
+                                            }
+                                       ).ToListAsync();
+                        if (client != null)
+                            return Ok(client);
+
                     }
+                    catch (Exception e)
+                    {
+
+                        throw;
+                    }
+                   
+                   
+                    
                     break;
                 case 3:
                     var address = await _context.Adresses.Include(x => x.Agreements)
@@ -397,7 +416,12 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        
+                        if(await _context.Agreements.Where(x => x.Account == agreementvm.Account).FirstOrDefaultAsync() != null)
+                        {
+                            return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "El número de cuenta ya fue asignado a otro contrato, Favor de verificar " });
+                        }
+
                         if(agreementvm.AgreementPrincipalId != 0)
                         {
                             Principal = await _context.Agreements.Include(a => a.Addresses)
@@ -425,10 +449,28 @@ namespace Siscom.Agua.Api.Controllers
                         //
                         if (Principal != null)
                         {
-                            agreementvm.Adresses.ForEach(async x => {
-                                if(x.TypeAddress == "DIR01")
+                            //agreementvm.Adresses.ForEach(async x => {
+                            //    if(x.TypeAddress == "DIR01")
+                            //    {
+                            //        var suburb = await _context.Suburbs.FindAsync(x.SuburbsId);
+                            //        if (Principal.Addresses.Where(p => p.TypeAddress == "DIR01").FirstOrDefault().Suburbs.Name != suburb.Name)
+                            //        {
+                            //            HasError = true;
+                            //        }
+                            //        else
+                            //        {
+                            //            Principal.NumDerivatives = Principal.NumDerivatives + 1;
+                            //            _context.Entry(Principal).State = EntityState.Modified;
+                            //            await _context.SaveChangesAsync();
+                            //            IsDerivative = true;
+                            //        }
+                            //    }
+                            //});
+                            foreach (var item in agreementvm.Adresses)
+                            {
+                                if(item.TypeAddress == "DIR01")
                                 {
-                                    var suburb = await _context.Suburbs.FindAsync(x.SuburbsId);
+                                    var suburb = await _context.Suburbs.FindAsync(item.SuburbsId);
                                     if (Principal.Addresses.Where(p => p.TypeAddress == "DIR01").FirstOrDefault().Suburbs.Name != suburb.Name)
                                     {
                                         HasError = true;
@@ -441,7 +483,7 @@ namespace Siscom.Agua.Api.Controllers
                                         IsDerivative = true;
                                     }
                                 }
-                            });
+                            }
 
                             if (HasError)
                             {
@@ -498,16 +540,20 @@ namespace Siscom.Agua.Api.Controllers
                             Derivative derivative = new Derivative()
                             {
                                 Agreement = Principal,
+                                AgreementId = Principal.Id,
                                 AgreementDerivative = NewAgreement.Id,
                                 IsActive = true
                             };
+                            //_context.Derivatives.Attach(derivative);
                             await _context.Derivatives.AddAsync(derivative);
                             await _context.SaveChangesAsync();
 
                             AgreementLog agreementLogderivative = new AgreementLog()
                             {
                                 Agreement = NewAgreement,
-                                AgreementLogDate = DateTime.Now,
+                                AgreementLogDate = DateTime.UtcNow.ToLocalTime(),
+                                AgreementId = NewAgreement.Id,
+                                UserId = agreementvm.UserId,
                                 User = await userManager.FindByIdAsync(agreementvm.UserId),
                                 Description = "Se Agrego Derivada al Contrato con Cuenta " + Principal.Account,
                                 Observation = agreementvm.Observations
@@ -523,7 +569,7 @@ namespace Siscom.Agua.Api.Controllers
                             await _context.AgreementServices.AddAsync(new AgreementService
                             {
                                 Agreement = NewAgreement,
-                                DateAgreement = DateTime.Now,
+                                DateAgreement = DateTime.UtcNow.ToLocalTime(),
                                 IdAgreement = NewAgreement.Id,
                                 IdService = aservice,
                                 IsActive = true,
@@ -531,16 +577,19 @@ namespace Siscom.Agua.Api.Controllers
                             });
                             await _context.SaveChangesAsync();
                         }
-
-                        AgreementLog agreementLog = new AgreementLog()
+                        if (!IsDerivative)
                         {
-                            Agreement = NewAgreement,
-                            AgreementLogDate = DateTime.Now,
-                            User = await userManager.FindByIdAsync(agreementvm.UserId),
-                            Description = "Nuevo Contrato",
-                            Observation = agreementvm.Observations
-                        };
-                        await _context.AgreementLogs.AddAsync(agreementLog);
+                            AgreementLog agreementLog = new AgreementLog()
+                            {
+                                Agreement = NewAgreement,
+                                AgreementLogDate = DateTime.UtcNow.ToLocalTime(),
+                                User = await userManager.FindByIdAsync(agreementvm.UserId),
+                                Description = "Nuevo Contrato",
+                                Observation = agreementvm.Observations
+                            };
+                            await _context.AgreementLogs.AddAsync(agreementLog);
+                        }
+                       
 
 
                         scope.Complete();
