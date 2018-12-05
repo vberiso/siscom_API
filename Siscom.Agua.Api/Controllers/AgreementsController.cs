@@ -184,42 +184,49 @@ namespace Siscom.Agua.Api.Controllers
             switch (search.Type)
             {
                 case 1:
-                    agreement.Add(await _context.Agreements.Include(a => a.Addresses)
-                                                                .ThenInclude(s => s.Suburbs)
-                                                           .Include(c => c.Clients)
-                                      .FirstOrDefaultAsync(a => a.Account == search.StringSearch));
+                    var account = await (from ac in _context.Agreements
+                                        where ac.Account == search.StringSearch
+                                        orderby ac.Account
+                                        let vclient = _context.Clients
+                                                               .Where(x => x.AgreementId == ac.Id)
+                                                               .FirstOrDefault()
+                                        let vaddress = _context.Adresses
+                                                               .Where(x => x.AgreementsId == ac.Id)
+                                                               .FirstOrDefault()
+                                        select new
+                                        {
+                                            AgreementId = ac.Id,
+                                            Account = ac.Account,
+                                            Nombre = vclient.ToString(),
+                                            RFC = vclient.RFC,
+                                            Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name)
+                                        }
+                                   ).ToListAsync();
+
+                    if (account.Count != 0)
+                        return Ok(account);
                     break;
                 case 2:
-                    try
-                    {
-                        var client = await (from c in _context.Clients
-                                            join a in _context.Agreements on c.AgreementId equals a.Id
-                                            where EF.Functions.Like(c.ToString(), "%" + search.StringSearch + "%")
-                                            orderby c.TypeUser
-                                            //select c
-                                            select new
-                                            {
-                                                AgreementId = a.Id,
-                                                Account = a.Account,
-                                                Nombre = c.ToString(),
-                                                RFC = c.RFC,
-                                                Address = (_context.Adresses
-                                                                            .Where(x => x.AgreementsId == c.AgreementId)
-                                                                            .FirstOrDefault().ToString())
-                                            }
-                                       ).ToListAsync();
-                        if (client != null)
-                            return Ok(client);
 
-                    }
-                    catch (Exception e)
-                    {
+                    var client = await (from c in _context.Clients
+                                        join a in _context.Agreements on c.AgreementId equals a.Id
+                                        where EF.Functions.Like(c.ToString(), "%" + search.StringSearch + "%")
+                                        orderby c.TypeUser
+                                        let vaddress = _context.Adresses
+                                                               .Where(x => x.AgreementsId == c.AgreementId)
+                                                               .FirstOrDefault()
+                                        select new
+                                        {
+                                            AgreementId = a.Id,
+                                            Account = a.Account,
+                                            Nombre = c.ToString(),
+                                            RFC = c.RFC,
+                                            Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name)
+                                        }
+                                   ).ToListAsync();
+                    if (client.Count > 0)
+                        return Ok(client);
 
-                        throw;
-                    }
-                   
-                   
-                    
                     break;
                 case 3:
                     var address = await _context.Adresses.Include(x => x.Agreements)
@@ -428,6 +435,11 @@ namespace Siscom.Agua.Api.Controllers
                                                                     .ThenInclude(s => s.Suburbs)
                                                                  .Where(x => x.Id == agreementvm.AgreementPrincipalId)
                                                                  .FirstOrDefaultAsync();
+                            if(Principal.TypeAgreement == "AGR02")
+                            {
+                                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "El número de cuenta es un contrato derivado, no se puede asignar esta asignación, Favor de verificar " });
+                            }
                         }
 
                         NewAgreement.Account = agreementvm.Account;
@@ -449,23 +461,7 @@ namespace Siscom.Agua.Api.Controllers
                         //
                         if (Principal != null)
                         {
-                            //agreementvm.Adresses.ForEach(async x => {
-                            //    if(x.TypeAddress == "DIR01")
-                            //    {
-                            //        var suburb = await _context.Suburbs.FindAsync(x.SuburbsId);
-                            //        if (Principal.Addresses.Where(p => p.TypeAddress == "DIR01").FirstOrDefault().Suburbs.Name != suburb.Name)
-                            //        {
-                            //            HasError = true;
-                            //        }
-                            //        else
-                            //        {
-                            //            Principal.NumDerivatives = Principal.NumDerivatives + 1;
-                            //            _context.Entry(Principal).State = EntityState.Modified;
-                            //            await _context.SaveChangesAsync();
-                            //            IsDerivative = true;
-                            //        }
-                            //    }
-                            //});
+
                             foreach (var item in agreementvm.Adresses)
                             {
                                 if(item.TypeAddress == "DIR01")
