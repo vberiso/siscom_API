@@ -33,14 +33,14 @@ namespace Siscom.Agua.Api.Controllers
             this.userManager = userManager;
         }
 
-        // GET: api/Agreements
-        [HttpGet]
-        public async Task<IEnumerable<Agreement>> GetAgreements()
-        {
-            var b  =  await _context.Agreements.Include(a => a.Addresses)
-                                    .Include(c => c.Clients).ToListAsync();
-            return b;
-        }
+        //// GET: api/Agreements
+        //[HttpGet]
+        //public async Task<IEnumerable<Agreement>> GetAgreements()
+        //{
+        //    var b  =  await _context.Agreements.Include(a => a.Addresses)
+        //                            .Include(c => c.Clients).ToListAsync();
+        //    return b;
+        //}
 
 
         // GET: api/Agreements/5
@@ -69,6 +69,8 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ags => ags.AgreementServices)
                                         .ThenInclude(x => x.Service)
+                                      .Include(ad => ad.AgreementDiscounts)
+                                        .ThenInclude(d => d.Discount)
                                       .FirstOrDefaultAsync(a => a.Id == id);
 
             agreement.Addresses.ToList().ForEach(x =>
@@ -116,6 +118,8 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ags => ags.AgreementServices)
                                         .ThenInclude(x => x.Service)
+                                      .Include(ad => ad.AgreementDiscounts)
+                                      .ThenInclude(d => d.Discount)
                                       .FirstOrDefaultAsync(a => a.Account == AcountNumber);
 
             agreement.Addresses.ToList().ForEach(x =>
@@ -207,10 +211,10 @@ namespace Siscom.Agua.Api.Controllers
                         return Ok(account);
                     break;
                 case 2:
-
+                    search.StringSearch.ToUpper();
                     var client = await (from c in _context.Clients
                                         join a in _context.Agreements on c.AgreementId equals a.Id
-                                        where EF.Functions.Like(c.ToString(), "%" + search.StringSearch + "%")
+                                        where EF.Functions.Like(c.ToString().ToUpper(), "%" + search.StringSearch + "%")
                                         orderby c.TypeUser
                                         let vaddress = _context.Adresses
                                                                .Where(x => x.AgreementsId == c.AgreementId)
@@ -281,41 +285,41 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
-        // PUT: api/Agreements/5
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] AgreementVM agreementvm)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        //PUT: api/Agreements/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] AgreementVM agreementvm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    if (id != agreement.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+            if (id != agreement.Id)
+            {
+                return BadRequest();
+            }
 
-        //    //agreement
-        //    _context.Entry(agreement).State = EntityState.Modified;
+            //agreement
+            _context.Entry(agreement).State = EntityState.Modified;
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!AgreementExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!AgreementExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
 
 
 
