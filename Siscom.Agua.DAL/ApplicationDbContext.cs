@@ -111,16 +111,14 @@ namespace Siscom.Agua.DAL
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
-        {
+        {            
+
+            
+           
+           
             
 
-            builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
-            builder.Entity<AgreementService>().HasKey(x => new { x.IdService, x.IdAgreement });
-            builder.Entity<AgreementDiscount>().HasKey(x => new { x.IdDiscount, x.IdAgreement });
-            builder.Entity<Status>().HasKey(x => new { x.CodeName, x.GroupStatusId });
-
-            //builder.Entity<Adress>().HasRequired<Suburbs>(s => s.)
-
+            #region Address
             builder.Entity<Address>()
                    .HasOne<Agreement>(a => a.Agreements)
                    .WithMany(s => s.Addresses)
@@ -129,9 +127,10 @@ namespace Siscom.Agua.DAL
             builder.Entity<Address>()
                    .HasOne<Suburb>(a => a.Suburbs)
                    .WithMany(s => s.Addresses)
-                   .HasForeignKey(s => s.SuburbsId);
+                   .HasForeignKey(s => s.SuburbsId);          
+            #endregion
 
-
+            #region Agreement
             builder.Entity<Agreement>()
                    .HasOne<TypeService>(a => a.TypeService)
                    .WithMany(s => s.Agreements)
@@ -177,7 +176,38 @@ namespace Siscom.Agua.DAL
                    .WithMany(s => s.Agreements)
                    .HasForeignKey(s => s.DiameterId);
 
+            builder.Entity<Agreement>()
+                  .HasMany(a => a.Debts)
+                  .WithOne(s => s.Agreement);
 
+            builder.Entity<Agreement>()
+                 .Property(x => x.StratDate)
+                 .HasColumnType("date");
+            #endregion
+
+            #region AgreementDiscount
+            builder.Entity<AgreementDiscount>().HasKey(x => new { x.IdDiscount, x.IdAgreement });
+
+            builder.Entity<AgreementDiscount>()
+                   .HasOne<Agreement>(x => x.Agreement)
+                   .WithMany(y => y.AgreementDiscounts)
+                   .HasForeignKey(x => x.IdAgreement);
+
+            builder.Entity<AgreementDiscount>()
+                   .HasOne<Discount>(x => x.Discount)
+                   .WithMany(y => y.AgreementDiscounts)
+                   .HasForeignKey(x => x.IdDiscount);
+
+            builder.Entity<AgreementDiscount>()
+                 .Property(x => x.StartDate)
+                 .HasColumnType("date");
+
+            builder.Entity<AgreementDiscount>()
+                   .Property(x => x.EndDate)
+                   .HasColumnType("date");
+            #endregion
+
+            #region AgreementLog
             builder.Entity<AgreementLog>()
                    .HasOne<Agreement>(a => a.Agreement)
                    .WithMany(s => s.AgreementLogs)
@@ -187,277 +217,61 @@ namespace Siscom.Agua.DAL
                    .HasOne<ApplicationUser>(a => a.User)
                    .WithMany(s => s.AgreementLogs)
                    .HasForeignKey(s => s.UserId);
+            #endregion
 
+            #region AgreementService
+            builder.Entity<AgreementService>().HasKey(x => new { x.IdService, x.IdAgreement });
 
+            builder.Entity<AgreementService>()
+                   .HasOne<Service>(x => x.Service)
+                   .WithMany(y => y.AgreementServices)
+                   .HasForeignKey(x => x.IdService);
 
+            builder.Entity<AgreementService>()
+                   .HasOne<Agreement>(x => x.Agreement)
+                   .WithMany(y => y.AgreementServices)
+                   .HasForeignKey(x => x.IdAgreement);
+            #endregion
+
+            #region Client
             builder.Entity<Client>()
                    .HasOne<Agreement>(a => a.Agreement)
                    .WithMany(s => s.Clients)
                    .HasForeignKey(s => s.AgreementId);
+            #endregion
 
-
-
+            #region Consumption
             builder.Entity<Consumption>()
-                .HasOne<Meter>(a => a.Meter)
-                .WithMany(s => s.Consumptions)
-                .HasForeignKey(s => s.MeterId);
+                   .HasOne<Meter>(a => a.Meter)
+                   .WithMany(s => s.Consumptions)
+                   .HasForeignKey(s => s.MeterId);
+            #endregion
 
-
-
+            #region Contact
             builder.Entity<Contact>()
                    .HasOne<Client>(a => a.Client)
                    .WithMany(s => s.Contacts)
                    .HasForeignKey(s => s.ClienteId);
+            #endregion
 
-
-            //builder.Entity<Debt>()
-            //       .HasOne<DebtPeriod>(a => a.DebtPeriod)
-            //       .WithMany(s => s.Debts)
-            //       .HasForeignKey(s => s.DebtPeriodId);
+            #region Debt
+            builder.Entity<Debt>()
+                   .HasMany(a => a.DebtDetails)
+                   .WithOne(s => s.Debt);
 
             builder.Entity<Debt>()
-                    .HasMany(a => a.DebtDetails)
-                    .WithOne(s => s.Debt);
-
-            //builder.Entity<Debt>()
-            //      .HasOne<Agreement>(a => a.Agreement)
-            //      .WithMany(s => s.Debts)
-            //      .HasForeignKey(s => s.AgreementId);
-
-            builder.Entity<Agreement>()
-                   .HasMany(a => a.Debts)
-                   .WithOne(s => s.Agreement);
-
-       
-            builder.Entity<DebtDetail>()
-               .HasOne<Debt>(a => a.Debt)
-               .WithMany(s => s.DebtDetails)
-               .HasForeignKey(s => s.DebtId);
-
-
-
-            builder.Entity<Derivative>()
-              .HasOne<Agreement>(a => a.Agreement)
-              .WithMany(s => s.Derivatives)
-              .HasForeignKey(s => s.AgreementId);
-
-
-
-            builder.Entity<Folio>()
-             .HasOne<BranchOffice>(a => a.BranchOffice)
-             .WithMany(s => s.Folios)
-             .HasForeignKey(s => s.BranchOfficeId);
-
-
-            builder.Entity<Meter>()
-            .HasOne<Agreement>(a => a.Agreement)
-            .WithMany(s => s.Meters)
-            .HasForeignKey(s => s.AgreementId);
-
-
-
-            builder.Entity<Payment>()
-           .HasOne<OriginPayment>(a => a.OriginPayment)
-           .WithMany(s => s.Payments)
-           .HasForeignKey(s => s.OriginPaymentId);
-
-            builder.Entity<Payment>()
-          .HasOne<ExternalOriginPayment>(a => a.ExternalOriginPayment)
-          .WithMany(s => s.Payments)
-          .HasForeignKey(s => s.ExternalOriginPaymentId);
-
-            builder.Entity<Payment>()
-         .HasOne<PayMethod>(a => a.PayMethod)
-         .WithMany(s => s.Payments)
-         .HasForeignKey(s => s.PayMethodId);
-
-
-            builder.Entity<State>()
-        .HasOne<Country>(a => a.Countries)
-        .WithMany(s => s.States)
-        .HasForeignKey(s => s.CountriesId);
-
-
-        //    builder.Entity<Status>()
-        //.HasOne<GroupStatus>(a => a.GroupStatus)
-        //.WithMany(s => s.Statuses)
-        //.HasForeignKey(s => s.GroupStatusId);
-
-
-
-            builder.Entity<Suburb>()
-       .HasOne<Town>(a => a.Towns)
-       .WithMany(s => s.Suburbs)
-       .HasForeignKey(s => s.TownsId);
-
-            builder.Entity<Suburb>()
-      .HasOne<Region>(a => a.Regions)
-      .WithMany(s => s.Suburbs)
-      .HasForeignKey(s => s.RegionsId);
-
-            builder.Entity<Suburb>()
-     .HasOne<Clasification>(a => a.Clasifications)
-     .WithMany(s => s.Suburbs)
-     .HasForeignKey(s => s.ClasificationsId);
-
-
-            builder.Entity<Tariff>()
- .HasOne<Service>(a => a.Service)
- .WithMany(s => s.Tariffs)
- .HasForeignKey(s => s.ServiceId);
-
-            builder.Entity<TariffProduct>()
- .HasOne<Product>(a => a.Product)
- .WithMany(s => s.TariffProducts)
- .HasForeignKey(s => s.ProductId);
-
-
-            builder.Entity<Terminal>()
-               .HasOne<BranchOffice>(a => a.BranchOffice)
-               .WithMany(s => s.Terminals)
-               .HasForeignKey(s => s.BranchOfficeId);
-
-
-
-            builder.Entity<TerminalUser>()
-              .HasOne<Terminal>(a => a.Terminal)
-              .WithMany(s => s.TerminalUsers)
-              .HasForeignKey(s => s.TerminalId);
-
-            builder.Entity<TerminalUser>()
-             .HasOne<ApplicationUser>(a => a.User)
-             .WithMany(s => s.TerminalUsers)
-             .HasForeignKey(s => s.UserId);
-
-
-            builder.Entity<Town>()
-           .HasOne<State>(a => a.States)
-           .WithMany(s => s.Towns)
-           .HasForeignKey(s => s.StateId);
-
-
-
-            builder.Entity<Transaction>()
-         .HasOne<TerminalUser>(a => a.TerminalUser)
-         .WithMany(s => s.Transactions)
-         .HasForeignKey(s => s.TerminalUserId);
-
-            builder.Entity<Transaction>()
-         .HasOne<TypeTransaction>(a => a.TypeTransaction)
-         .WithMany(s => s.Transactions)
-         .HasForeignKey(s => s.TypeTransactionId);
-
-            builder.Entity<Transaction>()
-        .HasOne<PayMethod>(a => a.PayMethod)
-        .WithMany(s => s.Transactions)
-        .HasForeignKey(s => s.PayMethodId);
-
-            builder.Entity<Transaction>()
-       .HasOne<OriginPayment>(a => a.OriginPayment)
-       .WithMany(s => s.Transactions)
-       .HasForeignKey(s => s.OriginPaymentId);
-
-            builder.Entity<Transaction>()
-       .HasOne<ExternalOriginPayment>(a => a.ExternalOriginPayment)
-       .WithMany(s => s.Transactions)
-       .HasForeignKey(s => s.ExternalOriginPaymentId);
-
-
-
-            builder.Entity<TransactionDetail>()
-      .HasOne<Transaction>(a => a.Transaction)
-      .WithMany(s => s.TransactionDetails)
-      .HasForeignKey(s => s.TransactionId);
-
-
-
-            builder.Entity<TransactionFolio>()
-      .HasOne<Transaction>(a => a.Transaction)
-      .WithMany(s => s.TransactionFolios)
-      .HasForeignKey(s => s.TransactionId);
-
-
-            builder.Entity<Type>()
-     .HasOne<GroupType>(a => a.GroupType)
-     .WithMany(s => s.Types)
-     .HasForeignKey(s => s.GroupTypeId);
-
-            
-
-
-            builder.Entity<ViewProfile>()
-                .HasOne<View>(sc => sc.View)
-                .WithMany(s => s.ViewProfiles)
-                .HasForeignKey(sc => sc.ViewId);
-
-            builder.Entity<ViewProfile>()
-               .HasOne<ApplicationRol>(sc => sc.ApplicationRol)
-               .WithMany(s => s.ViewProfiles)
-               .HasForeignKey(sc => sc.RoleId);
-
-
-
-
-            builder.Entity<AgreementService>()
-                .HasOne<Service>(x => x.Service)
-                .WithMany(y => y.AgreementServices)
-                .HasForeignKey(x => x.IdService);
-
-            builder.Entity<AgreementService>()
-                .HasOne<Agreement>(x => x.Agreement)
-                .WithMany(y => y.AgreementServices)
-                .HasForeignKey(x => x.IdAgreement);
-
-
-
-            builder.Entity<AgreementDiscount>()
-               .HasOne<Agreement>(x => x.Agreement)
-               .WithMany(y => y.AgreementDiscounts)
-               .HasForeignKey(x => x.IdAgreement);
-
-            builder.Entity<AgreementDiscount>()
-              .HasOne<Discount>(x => x.Discount)
-              .WithMany(y => y.AgreementDiscounts)
-              .HasForeignKey(x => x.IdDiscount);
-
-     
-            builder.Entity<Agreement>()
-               .Property(x => x.StratDate)
+              .Property(x => x.FromDate)
+              .HasColumnType("date");
+
+            builder.Entity<Debt>()
+               .Property(x => x.UntilDate)
                .HasColumnType("date");
+            #endregion
 
-            builder.Entity<AgreementDiscount>()
-                .Property(x => x.StartDate)
-                .HasColumnType("date");
-
-            builder.Entity<AgreementDiscount>()
-                .Property(x => x.EndDate)
-                .HasColumnType("date");
-
-            /// <summary> 
-            /// Cash Box 
-            /// </summary> 
-            builder.Entity<TerminalUser>()
-                .Property(x => x.InOperation)
-                .HasDefaultValue(false);
-
-            builder.Entity<TerminalUser>()
-                .Property(x => x.OpenDate)
-                .HasColumnType("date");
-
-            builder.Entity<Terminal>()
-                .Property(x => x.IsActive)
-                .HasDefaultValue(true);
-
-            builder.Entity<Folio>()
-                .Property(x => x.DateCurrent)
-                .HasDefaultValue(System.DateTime.Now);
-
-            /// <summary> 
-            /// Calculation of debt
-            /// </summary> 
+            #region DebtPeriod
             builder.Entity<DebtPeriod>()
-                .Property(x => x.StartDate)
-                .HasColumnType("date");
+               .Property(x => x.StartDate)
+               .HasColumnType("date");
 
             builder.Entity<DebtPeriod>()
                 .Property(x => x.EndDate)
@@ -470,14 +284,39 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtPeriod>()
                 .Property(x => x.RunHour)
                 .HasColumnType("time");
+            #endregion
 
-            builder.Entity<Debt>()
-               .Property(x => x.FromDate)
-               .HasColumnType("date");
+            #region DebtDetail
+            builder.Entity<DebtDetail>()
+                   .HasOne<Debt>(a => a.Debt)
+                   .WithMany(s => s.DebtDetails)
+                   .HasForeignKey(s => s.DebtId);
+            #endregion
 
-            builder.Entity<Debt>()
-               .Property(x => x.UntilDate)
-               .HasColumnType("date");
+            #region Derivative
+            builder.Entity<Derivative>()
+                   .HasOne<Agreement>(a => a.Agreement)
+                   .WithMany(s => s.Derivatives)
+                   .HasForeignKey(s => s.AgreementId);
+            #endregion
+
+            #region Folio
+            builder.Entity<Folio>()
+                   .HasOne<BranchOffice>(a => a.BranchOffice)
+                   .WithMany(s => s.Folios)
+                   .HasForeignKey(s => s.BranchOfficeId);
+
+            builder.Entity<Folio>()
+               .Property(x => x.DateCurrent)
+               .HasDefaultValue(System.DateTime.Now);
+
+            #endregion
+
+            #region Meter
+            builder.Entity<Meter>()
+                   .HasOne<Agreement>(a => a.Agreement)
+                   .WithMany(s => s.Meters)
+                   .HasForeignKey(s => s.AgreementId);
 
             builder.Entity<Meter>()
                .Property(x => x.InstallDate)
@@ -486,14 +325,174 @@ namespace Siscom.Agua.DAL
             builder.Entity<Meter>()
                .Property(x => x.DeinstallDate)
                .HasColumnType("date");
+            #endregion
+
+            #region Payment
+            builder.Entity<Payment>()
+                   .HasOne<OriginPayment>(a => a.OriginPayment)
+                   .WithMany(s => s.Payments)
+                   .HasForeignKey(s => s.OriginPaymentId);
+
+            builder.Entity<Payment>()
+                   .HasOne<ExternalOriginPayment>(a => a.ExternalOriginPayment)
+                   .WithMany(s => s.Payments)
+                   .HasForeignKey(s => s.ExternalOriginPaymentId);
+
+            builder.Entity<Payment>()
+                   .HasOne<PayMethod>(a => a.PayMethod)
+                   .WithMany(s => s.Payments)
+                   .HasForeignKey(s => s.PayMethodId);
+            #endregion
+
+            #region State
+            builder.Entity<State>()
+                   .HasOne<Country>(a => a.Countries)
+                   .WithMany(s => s.States)
+                   .HasForeignKey(s => s.CountriesId);
+            #endregion
+
+            #region Status
+            builder.Entity<Status>().HasKey(x => new { x.CodeName, x.GroupStatusId });
+            #endregion
+
+            #region Suburb
+            builder.Entity<Suburb>()
+                   .HasOne<Town>(a => a.Towns)
+                   .WithMany(s => s.Suburbs)
+                   .HasForeignKey(s => s.TownsId);
+
+            builder.Entity<Suburb>()
+                   .HasOne<Region>(a => a.Regions)
+                   .WithMany(s => s.Suburbs)
+                   .HasForeignKey(s => s.RegionsId);
+
+            builder.Entity<Suburb>()
+                   .HasOne<Clasification>(a => a.Clasifications)
+                   .WithMany(s => s.Suburbs)
+                   .HasForeignKey(s => s.ClasificationsId);
+            #endregion
+
+            #region Tariff
+            builder.Entity<Tariff>()
+                   .HasOne<Service>(a => a.Service)
+                   .WithMany(s => s.Tariffs)
+                   .HasForeignKey(s => s.ServiceId);
 
             builder.Entity<Tariff>()
-              .Property(x => x.FromDate)
-              .HasColumnType("date");
+             .Property(x => x.FromDate)
+             .HasColumnType("date");
 
             builder.Entity<Tariff>()
               .Property(x => x.UntilDate)
               .HasColumnType("date");
+            #endregion
+
+            #region TariffProduct
+            builder.Entity<TariffProduct>()
+                   .HasOne<Product>(a => a.Product)
+                   .WithMany(s => s.TariffProducts)
+                   .HasForeignKey(s => s.ProductId);
+            #endregion
+
+            #region Terminal
+            builder.Entity<Terminal>()
+                   .HasOne<BranchOffice>(a => a.BranchOffice)
+                   .WithMany(s => s.Terminals)
+                   .HasForeignKey(s => s.BranchOfficeId);
+
+            builder.Entity<Terminal>()
+               .Property(x => x.IsActive)
+               .HasDefaultValue(true);
+            #endregion
+
+            #region TerminalUser
+            builder.Entity<TerminalUser>()
+                   .HasOne<Terminal>(a => a.Terminal)
+                   .WithMany(s => s.TerminalUsers)
+                   .HasForeignKey(s => s.TerminalId);
+
+            builder.Entity<TerminalUser>()
+                   .HasOne<ApplicationUser>(a => a.User)
+                   .WithMany(s => s.TerminalUsers)
+                   .HasForeignKey(s => s.UserId);
+
+            builder.Entity<TerminalUser>()
+               .Property(x => x.InOperation)
+               .HasDefaultValue(false);
+
+            builder.Entity<TerminalUser>()
+                .Property(x => x.OpenDate)
+                .HasColumnType("date");
+            #endregion
+
+            #region Town
+            builder.Entity<Town>()
+                   .HasOne<State>(a => a.States)
+                   .WithMany(s => s.Towns)
+                   .HasForeignKey(s => s.StateId);
+            #endregion
+
+            #region Transaction
+            builder.Entity<Transaction>()
+                   .HasOne<TerminalUser>(a => a.TerminalUser)
+                   .WithMany(s => s.Transactions)
+                   .HasForeignKey(s => s.TerminalUserId);
+
+            builder.Entity<Transaction>()
+                   .HasOne<TypeTransaction>(a => a.TypeTransaction)
+                   .WithMany(s => s.Transactions)
+                   .HasForeignKey(s => s.TypeTransactionId);
+
+            builder.Entity<Transaction>()
+                   .HasOne<PayMethod>(a => a.PayMethod)
+                   .WithMany(s => s.Transactions)
+                   .HasForeignKey(s => s.PayMethodId);
+
+            builder.Entity<Transaction>()
+                   .HasOne<OriginPayment>(a => a.OriginPayment)
+                   .WithMany(s => s.Transactions)
+                   .HasForeignKey(s => s.OriginPaymentId);
+
+            builder.Entity<Transaction>()
+                   .HasOne<ExternalOriginPayment>(a => a.ExternalOriginPayment)
+                   .WithMany(s => s.Transactions)
+                   .HasForeignKey(s => s.ExternalOriginPaymentId);
+            #endregion
+
+            #region TransactionDetail
+            builder.Entity<TransactionDetail>()
+                   .HasOne<Transaction>(a => a.Transaction)
+                   .WithMany(s => s.TransactionDetails)
+                   .HasForeignKey(s => s.TransactionId);
+            #endregion
+
+            #region TransactionFolio
+            builder.Entity<TransactionFolio>()
+                   .HasOne<Transaction>(a => a.Transaction)
+                   .WithMany(s => s.TransactionFolios)
+                   .HasForeignKey(s => s.TransactionId);
+            #endregion
+
+            #region Type
+            builder.Entity<Type>()
+                   .HasOne<GroupType>(a => a.GroupType)
+                   .WithMany(s => s.Types)
+                   .HasForeignKey(s => s.GroupTypeId);
+            #endregion
+
+            #region ViewProfile
+            builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
+
+            builder.Entity<ViewProfile>()
+                   .HasOne<View>(sc => sc.View)
+                   .WithMany(s => s.ViewProfiles)
+                   .HasForeignKey(sc => sc.ViewId);
+           
+            builder.Entity<ViewProfile>()
+                   .HasOne<ApplicationRol>(sc => sc.ApplicationRol)
+                   .WithMany(s => s.ViewProfiles)
+                   .HasForeignKey(sc => sc.RoleId);
+            #endregion
 
             base.OnModelCreating(builder);
         }
