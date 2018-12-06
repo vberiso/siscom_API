@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Siscom.Agua.DAL.Models
@@ -12,6 +14,13 @@ namespace Siscom.Agua.DAL.Models
             TerminalUsers = new HashSet<TerminalUser>();
             AgreementLogs = new HashSet<AgreementLog>();
         }
+
+        [Column("name"), StringLength(50), Required]
+        public string Name { get; set; }
+        [Column("middle_name"), StringLength(50), Required]
+        public string LastName { get; set; }
+        [Column("last_name"), StringLength(50), Required]
+        public string SecondLastName { get; set; }
 
         public ICollection<TerminalUser> TerminalUsers { get; set; }
         public ICollection<AgreementLog> AgreementLogs { get; set; }

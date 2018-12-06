@@ -139,17 +139,18 @@ namespace Siscom.Agua.Api.Controllers
                     case 4://Cancelado                       
                         if (pPaymentConcepts.Transaction.Sign)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
                         if (pPaymentConcepts.Transaction.Amount == 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
+
                         if(String.IsNullOrEmpty(pPaymentConcepts.Transaction.Cancellation))
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación")});
 
                         var cancelacion = await _context.Transactions.Where(x => x.Folio == pPaymentConcepts.Transaction.Cancellation).FirstAsync();
                         if (cancelacion == null)
-                        {
-                            return NotFound();
-                        }
-                        if(cancelacion.Amount != pPaymentConcepts.Transaction.Amount)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
+
+                        if (cancelacion.Amount != pPaymentConcepts.Transaction.Amount)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
                         _validation = true;
                         break;    

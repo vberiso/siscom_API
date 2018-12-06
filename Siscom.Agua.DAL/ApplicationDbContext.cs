@@ -79,6 +79,7 @@ namespace Siscom.Agua.DAL
         /// </summary> 
         public DbSet<Debt> Debts { get; set; }
         public DbSet<DebtDetail> DebtDetails { get; set; }
+        public DbSet<DebtStatus> DebtStatuses { get; set; }
         public DbSet<TypePeriod> TypePeriods { get; set; }
         public DbSet<DebtPeriod> DebtPeriods { get; set; }
         public DbSet<Meter> Meters { get; set; }
@@ -283,6 +284,13 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtDetail>()
                    .HasOne<Debt>(a => a.Debt)
                    .WithMany(s => s.DebtDetails)
+                   .HasForeignKey(s => s.DebtId);
+            #endregion
+
+            #region DebtStatus
+            builder.Entity<DebtStatus>()
+                   .HasOne<Debt>(a => a.Debt)
+                   .WithMany(s => s.DebtStatuses)
                    .HasForeignKey(s => s.DebtId);
             #endregion
 
