@@ -253,10 +253,6 @@ namespace Siscom.Agua.DAL
 
             #region Debt
             builder.Entity<Debt>()
-                   .HasMany(a => a.DebtDetails)
-                   .WithOne(s => s.Debt);
-
-            builder.Entity<Debt>()
               .Property(x => x.FromDate)
               .HasColumnType("date");
 

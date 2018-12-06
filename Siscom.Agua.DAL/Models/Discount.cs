@@ -18,8 +18,8 @@ namespace Siscom.Agua.DAL.Models
         public Int16 Percentage { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
-        [Column("TypePeriodId"), Required]
-        public int TypePeriodId { get; set; }
+        [Column("month"), Required]
+        public Int16 Month { get; set; }
 
         public ICollection<AgreementDiscount> AgreementDiscounts { get; set; }
     }
