@@ -111,12 +111,7 @@ namespace Siscom.Agua.DAL
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
-        {            
-
-            
-           
-           
-            
+        {                    
 
             #region Address
             builder.Entity<Address>()
