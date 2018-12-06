@@ -286,40 +286,40 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         //PUT: api/Agreements/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] AgreementVM agreementvm)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] AgreementVM agreementvm)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (id != agreement.Id)
-            {
-                return BadRequest();
-            }
+        //    if (id != agreement.Id)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            //agreement
-            _context.Entry(agreement).State = EntityState.Modified;
+        //    //agreement
+        //    _context.Entry(agreement).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AgreementExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!AgreementExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
 
 
