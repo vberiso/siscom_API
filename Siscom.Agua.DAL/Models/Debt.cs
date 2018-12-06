@@ -44,7 +44,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
         [Column("DebtPeriodId")]
-        public int DebtPeriodId { get; set; }       
+        public int? DebtPeriodId { get; set; }       
 
         //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }
