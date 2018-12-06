@@ -118,15 +118,10 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
             }
 
-            var tmp = await _context.Transactions
-                              .Include(x => x.TypeTransaction)
+          
+            if (await _context.Transactions                             
                               .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                          x.DateTransaction.Date == DateTime.Now.Date &&
-                                          x.TypeTransaction.Id == 1).FirstOrDefaultAsync();
-            if (await _context.Transactions
-                              .Include(x => x.TypeTransaction)
-                              .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                          x.DateTransaction.Date == DateTime.Now.Date &&
+                                          x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString() &&
                                           x.TypeTransaction.Id == 1)
                               .FirstOrDefaultAsync() != null)
 
@@ -258,7 +253,7 @@ namespace Siscom.Agua.Api.Controllers
                                     await _context.SaveChangesAsync();
 
                                     var conceptos = await _context.DebtDetails.Where(x => x.DebtId == debt.Id &&
-                                                                                          x.CodeConcept == detail.CodeConcept).FirstOrDefaultAsync();
+                                                                                          x.Id == detail.Id).FirstOrDefaultAsync();
 
                                     if (transaction.TypeTransaction.Id == 3)
                                     {
@@ -311,10 +306,10 @@ namespace Siscom.Agua.Api.Controllers
                     }
                 }
                 else
-                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Acción no permitida" });
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
             }
             else {
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
             }
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
         }
