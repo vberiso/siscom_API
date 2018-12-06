@@ -15,7 +15,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("code_concept"), StringLength(10)]
         public string CodeConcept { get; set; }
-        [Column("description"), StringLength(30)]
+        [Column("description"), StringLength(50)]
         public string Description { get; set; }
         [Column("amount"), Required]
         public double amount { get; set; }

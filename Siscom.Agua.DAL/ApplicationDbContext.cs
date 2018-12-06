@@ -49,6 +49,8 @@ namespace Siscom.Agua.DAL
         public DbSet<AgreementLog> AgreementLogs { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<TypeClassification> TypeClassifications { get; set; }
+        public DbSet<Prepaid> Prepaids { get; set; }
+        public DbSet<PrepaidDetail> PrepaidDetails { get; set; }
 
         /// <summary> 
         /// Cash Box 
@@ -337,6 +339,20 @@ namespace Siscom.Agua.DAL
                    .HasOne<PayMethod>(a => a.PayMethod)
                    .WithMany(s => s.Payments)
                    .HasForeignKey(s => s.PayMethodId);
+            #endregion
+
+            #region Prepaid
+            builder.Entity<Prepaid>()
+                   .HasOne<Agreement>(a => a.Agreement)
+                   .WithMany(s => s.Prepaids)
+                   .HasForeignKey(s => s.AgreementId);
+            #endregion
+
+            #region Prepaid
+            builder.Entity<PrepaidDetail>()
+                   .HasOne<Prepaid>(a => a.Prepaid)
+                   .WithMany(s => s.PrepaidDetails)
+                   .HasForeignKey(s => s.PrepaidId);
             #endregion
 
             #region State

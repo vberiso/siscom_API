@@ -17,6 +17,7 @@ namespace Siscom.Agua.DAL.Models
             Debts = new HashSet<Debt>();
             Derivatives = new HashSet<Derivative>();
             AgreementServices = new HashSet<AgreementService>();
+            Prepaids = new HashSet<Prepaid>();
         }
 
         [Column("id_agreement"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -77,5 +78,6 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<Debt> Debts { get; set; }
         public ICollection<Derivative> Derivatives { get; set; }
         public ICollection<AgreementLog> AgreementLogs { get; set; }
+        public ICollection<Prepaid> Prepaids { get; set; }
     }
 }
