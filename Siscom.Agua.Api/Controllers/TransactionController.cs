@@ -83,6 +83,7 @@ namespace Siscom.Agua.Api.Controllers
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             bool _validation=false;
+            DebtStatus status;
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -94,6 +95,7 @@ namespace Siscom.Agua.Api.Controllers
             TerminalUser terminalUser = new TerminalUser();
             terminalUser = await _context.TerminalUsers
                                              .Include(x => x.Terminal)
+                                             .Include(x => x.User)
                                              .Where(x => x.Id == pPaymentConcepts.Transaction.TerminalUserId).FirstOrDefaultAsync();
 
             if (terminalUser == null)
@@ -152,6 +154,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         if (cancelacion.Amount != pPaymentConcepts.Transaction.Amount)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+
                         _validation = true;
                         break;    
                     default:
@@ -203,6 +206,18 @@ namespace Siscom.Agua.Api.Controllers
                                     _context.Entry(deuda).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
 
+
+                                    status = new DebtStatus()
+                                    {
+                                        id_status = deuda.Status,
+                                        DebtStatusDate = transaction.DateTransaction,
+                                        User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
+                                        DebtId = debt.Id
+                                    };
+                                    _context.DebtStatuses.Add(status);
+                                    await _context.SaveChangesAsync();
+
+
                                     await _context.Payments.AddAsync(new Payment
                                     {
                                         PaymentDate = transaction.DateTransaction,
@@ -229,13 +244,46 @@ namespace Siscom.Agua.Api.Controllers
                                     if (deuda.OnAccount - debt.OnAccount < 0)
                                         return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
 
-                                    deuda.Status = "ED001";
+                                    var statusDebt = await _context.DebtStatuses.Where(x => x.DebtId == debt.Id).OrderByDescending(x =>x.Id).ToListAsync();
+                                    string statusAnterior = String.Empty;
+                                    bool status_encontrado = false;
+                                    int contador = 0;
+
+                                    foreach (var item in statusDebt)
+                                    {
+                                        if (!status_encontrado)
+                                        {
+                                            if (contador ==0 && item.id_status != "ED005" && item.id_status != "ED004")
+                                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La cancelación no procede. La deuda ha cambiado") });
+                                            if (item.id_status != "ED005")
+                                            {
+                                                statusAnterior = item.id_status;
+                                                status_encontrado = true;
+                                            }
+                                            contador += 1;
+                                        }
+                                        else
+                                            break;
+                                    }
+                                    
+
+                                    deuda.Status = statusAnterior;
                                     deuda.OnAccount = deuda.OnAccount - debt.OnAccount;
 
                                     _context.Entry(deuda).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
 
-                                    var payment = await _context.Payments.Where(x => x.AuthorizationOriginPayment == transaction.Folio &&
+                                   status = new DebtStatus()
+                                    {
+                                        id_status = deuda.Status,
+                                        DebtStatusDate = transaction.DateTransaction,
+                                        User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
+                                        DebtId = debt.Id
+                                    };
+                                    _context.DebtStatuses.Add(status);
+                                    await _context.SaveChangesAsync();
+
+                                    var payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
                                                                                      x.DebtId == debt.Id).FirstOrDefaultAsync();
                                     payment.Status = "EP002";
                                     _context.Entry(payment).State = EntityState.Modified;
