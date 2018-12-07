@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Siscom.Agua.DAL.Models;
+using System.Linq;
 
 namespace Siscom.Agua.DAL
 {
@@ -113,6 +114,12 @@ namespace Siscom.Agua.DAL
             _configuration = configuration;
         }
 
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            
+            OnBeforeSaving();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
         protected override void OnModelCreating(ModelBuilder builder)
         {                    
 
@@ -510,6 +517,27 @@ namespace Siscom.Agua.DAL
             #endregion
 
             base.OnModelCreating(builder);
+        }
+
+        private void OnBeforeSaving()
+        {
+            var changes = from e in this.ChangeTracker.Entries()
+                          where e.State != EntityState.Unchanged
+                          select e;
+            foreach (var change in changes)
+            {
+                if(change.State == EntityState.Added)
+                {
+
+                }
+                else if(change.State == EntityState.Modified)
+                {
+                    //var item = change.Cast<IEntity>().Entity;
+                    //var item = change.
+                    //var originalValues = this.Entry(i)
+                }
+            }
+
         }
     }
 }

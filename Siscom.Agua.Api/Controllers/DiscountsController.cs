@@ -74,7 +74,7 @@ namespace Siscom.Agua.Api.Controllers
             discount.IsActive = discountvm.IsActive;
             discount.Name = discountvm.Name;
             discount.Percentage = discountvm.Percentage;
-           
+            discount.Month = discountvm.Mouths;
 
             _context.Entry(discount).State = EntityState.Modified;
 
@@ -121,7 +121,7 @@ namespace Siscom.Agua.Api.Controllers
                     discount.IsActive = discountvm.IsActive;
                     discount.Name = discountvm.Name;
                     discount.Percentage = discountvm.Percentage;
-
+                    discount.Month = discountvm.Mouths;
 
                     _context.Discounts.Add(discount);
                     await _context.SaveChangesAsync();

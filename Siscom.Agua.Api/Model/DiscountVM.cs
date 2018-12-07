@@ -15,6 +15,6 @@ namespace Siscom.Agua.Api.Model
         public Int16 Percentage { get; set; }
         [Required]
         public bool IsActive { get; set; }
-        public int TypePeriodId { get; set; }
+        public Int16 Mouths { get; set; }
     }
 }

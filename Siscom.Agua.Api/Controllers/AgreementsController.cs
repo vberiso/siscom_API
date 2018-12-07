@@ -51,7 +51,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            
+            var currentUserName = this.User.Claims.ToList()[1].Value;
             var agreement = await _context.Agreements
                                       .Include(x => x.Clients)
                                         .ThenInclude(contact => contact.Contacts)
@@ -452,7 +453,7 @@ namespace Siscom.Agua.Api.Controllers
                             if(Principal.TypeAgreement == "AGR02")
                             {
                                 return StatusCode((int)TypeError.Code.BadRequest,
-                                   new { Error = "El número de cuenta es un contrato derivado, no se puede asignar esta asignación, Favor de verificar " });
+                                   new { Error = "El número de cuenta es un contrato derivado, no se puede realizar esta operación, Favor de verificar " });
                             }
                         }
 
