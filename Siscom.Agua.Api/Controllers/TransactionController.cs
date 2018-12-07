@@ -161,6 +161,28 @@ namespace Siscom.Agua.Api.Controllers
                         _validation = false;
                         break;
                 }
+                double sumDebt = 0;
+                double sumDetail = 0;
+
+                pPaymentConcepts.Debt.ToList().ForEach(x =>
+                {
+                    sumDebt += x.OnAccount;
+
+                    x.DebtDetails.ToList().ForEach(y =>
+                    {
+                        sumDetail += y.OnAccount;
+                    });
+                    if (sumDetail != x.Amount)                   
+                        _validation = false;                   
+                       
+                });
+
+                if(pPaymentConcepts.Transaction.Amount != sumDebt)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+
+                if (!_validation)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+
                 if (_validation)
                 {
                     var option = new TransactionOptions
@@ -173,6 +195,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                         {
+                            //Transacción en caja
                             transaction.Folio = Guid.NewGuid().ToString("D");
                             transaction.DateTransaction = DateTime.Now;
                             transaction.Sign = pPaymentConcepts.Transaction.Sign;
@@ -194,11 +217,13 @@ namespace Siscom.Agua.Api.Controllers
 
                             foreach (var debt in pPaymentConcepts.Debt)
                             {
+                                //Recibo a pagar
                                 var deuda = await _context.Debts.FindAsync(debt.Id);
 
+                                //PAGO
                                 if (transaction.TypeTransaction.Id == 3)
                                 {
-                                    if (debt.OnAccount + debt.OnAccount > deuda.Amount)
+                                    if (deuda.OnAccount  + debt.OnAccount> deuda.Amount)
                                         return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
 
                                     deuda.Status = pPaymentConcepts.Transaction.DebtStatus;
@@ -206,7 +231,7 @@ namespace Siscom.Agua.Api.Controllers
                                     _context.Entry(deuda).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
 
-
+                                    //Ingreso de status de recibo
                                     status = new DebtStatus()
                                     {
                                         id_status = deuda.Status,
@@ -217,7 +242,7 @@ namespace Siscom.Agua.Api.Controllers
                                     _context.DebtStatuses.Add(status);
                                     await _context.SaveChangesAsync();
 
-
+                                    //Inserta pago
                                     await _context.Payments.AddAsync(new Payment
                                     {
                                         PaymentDate = transaction.DateTransaction,
@@ -239,11 +264,12 @@ namespace Siscom.Agua.Api.Controllers
                                     await _context.SaveChangesAsync();
 
                                 }
-                                else
+                                else //Cancelación
                                 {                                   
                                     if (deuda.OnAccount - debt.OnAccount < 0)
                                         return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
 
+                                    //Se obtiene estado anterior
                                     var statusDebt = await _context.DebtStatuses.Where(x => x.DebtId == debt.Id).OrderByDescending(x =>x.Id).ToListAsync();
                                     string statusAnterior = String.Empty;
                                     bool status_encontrado = false;
@@ -265,8 +291,8 @@ namespace Siscom.Agua.Api.Controllers
                                         else
                                             break;
                                     }
-                                    
 
+                                    //se modifica estado de deuda
                                     deuda.Status = statusAnterior;
                                     deuda.OnAccount = deuda.OnAccount - debt.OnAccount;
 
@@ -283,6 +309,7 @@ namespace Siscom.Agua.Api.Controllers
                                     _context.DebtStatuses.Add(status);
                                     await _context.SaveChangesAsync();
 
+                                    //se modifica estado de pago
                                     var payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
                                                                                      x.DebtId == debt.Id).FirstOrDefaultAsync();
                                     payment.Status = "EP002";
@@ -290,9 +317,10 @@ namespace Siscom.Agua.Api.Controllers
                                     await _context.SaveChangesAsync();
                                 }
 
-
+                                //Conceptos
                                 foreach (var detail in debt.DebtDetails)
                                 {
+                                    //Ingro de detalle de transacción
                                     TransactionDetail transactionDetail = new TransactionDetail();
                                     transactionDetail.CodeConcept = detail.CodeConcept;
                                     transactionDetail.amount = detail.OnAccount;
@@ -322,6 +350,7 @@ namespace Siscom.Agua.Api.Controllers
                                 }
                             }
 
+                            //Toma folio
                             Folio folio = new Folio();
                             folio = await _context.Folios
                                                   .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&

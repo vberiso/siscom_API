@@ -12,15 +12,11 @@ namespace Siscom.Agua.DAL.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_tariff")]
-        public int Id { get; set; }
-        [Column("concept"), StringLength(80), Required]
-        public string Concept { get; set; }
+        public int Id { get; set; }      
         [Column("account_number"), StringLength(20), Required]
         public string AccountNumber { get; set; }
         [Required, Column("have_tax")]
-        public bool HaveTax { get; set; }
-        [Column("percentage"), Required]
-        public Int16 Percentage { get; set; }
+        public bool HaveTax { get; set; }       
         [Column("amount"), Required]
         public double Amount { get; set; }
         [Column("from_date"), Required]
