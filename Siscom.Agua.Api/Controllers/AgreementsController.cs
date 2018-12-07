@@ -204,7 +204,8 @@ namespace Siscom.Agua.Api.Controllers
                                             Account = ac.Account,
                                             Nombre = vclient.ToString(),
                                             RFC = vclient.RFC,
-                                            Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name)
+                                            Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
+                                            WithDiscount = (ac.AgreementDiscounts.Count > 0 ) ? true : false
                                         }
                                    ).ToListAsync();
 
@@ -226,7 +227,8 @@ namespace Siscom.Agua.Api.Controllers
                                             Account = a.Account,
                                             Nombre = c.ToString(),
                                             RFC = c.RFC,
-                                            Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name)
+                                            Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
+                                            WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false
                                         }
                                    ).ToListAsync();
                     if (client.Count > 0)
@@ -247,7 +249,8 @@ namespace Siscom.Agua.Api.Controllers
                                              Account = a.Account,
                                              Nombre = string.Format("{0} {1} {2}", vclient.Name, vclient.SecondLastName, vclient.LastName),
                                              RFC = vclient.RFC,
-                                             Address = string.Format("{0} {1}, {2}", ad.Street, ad.Outdoor, ad.Suburbs.Name)
+                                             Address = string.Format("{0} {1}, {2}", ad.Street, ad.Outdoor, ad.Suburbs.Name),
+                                             WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false
                                          }
                                    ).ToListAsync();
                     if (address.Count > 0)
@@ -267,7 +270,8 @@ namespace Siscom.Agua.Api.Controllers
                                          Account = a.Account,
                                          Nombre = c.ToString(),
                                          RFC = c.RFC,
-                                         Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name)
+                                         Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
+                                         WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false
                                      }
                                    ).ToListAsync();
                     if (rfc.Count > 0)
