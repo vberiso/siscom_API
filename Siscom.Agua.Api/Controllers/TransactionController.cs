@@ -411,7 +411,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .Include(x => x.TypeTransaction)
                                                 .Where(x => x.TerminalUser.Id == terminalUser.Id &&
                                                             x.TerminalUser.InOperation == true &&
-                                                            x.DateTransaction.Date == DateTime.Now.Date)
+                                                            x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString())
                                                 .OrderBy(x=> x.Id).ToListAsync();
 
             foreach (var item in movimientosCaja)
@@ -440,9 +440,7 @@ namespace Siscom.Agua.Api.Controllers
                         _liquidada = true;
                         if (pTransaction.TypeTransactionId == 7)
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido liquidada" });
-                        break;
-                    default:
-                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Opción incorrecta" });                       
+                        break;             
                 }   
             }
 
@@ -492,15 +490,15 @@ namespace Siscom.Agua.Api.Controllers
                         if (pTransaction.Sign)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de liquidación incorrecta") });
                         if (pTransaction.PayMethodId == 0)
-                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especofocar método de pago" });
-                        _saldo = _fondoCaja.Value + _cobrado.Value - _cancelado.Value - _retirado.Value;
+                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especificar método de pago" });
+                        _saldo =( _fondoCaja.Value + _cobrado.Value) - _cancelado.Value - _retirado.Value;
                         if (pTransaction.Amount - _saldo != 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de liquidación no es valido") });
                         _validation = true;
                         break;
                     default:
                         _validation = false;
-                        break;
+                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Opción incorrecta" });                      
                 }
 
                 if (_validation)
