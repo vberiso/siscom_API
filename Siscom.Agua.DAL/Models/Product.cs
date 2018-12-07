@@ -18,7 +18,7 @@ namespace Siscom.Agua.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_product")]
         public int Id { get; set; }
-        [Required, StringLength(50), Column("name")]
+        [Required, StringLength(150), Column("name")]
         public string Name { get; set; }
         [Required, Column("order")]
         public Int16 Order { get; set; }
