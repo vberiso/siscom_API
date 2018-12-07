@@ -30,7 +30,9 @@ namespace Siscom.Agua.DAL.Models
         [Column("tax"), Required]
         public double Tax { get; set; }
         [Column("rounding"), Required]
-        public double Rounding { get; set; }        
+        public double Rounding { get; set; }
+        [Column("total"), Required]
+        public double Total { get; set; }
         [Column("aplication"), StringLength(20), Required]
         public string Aplication { get; set; }
         [Column("cancellation_folio"), StringLength(40)]

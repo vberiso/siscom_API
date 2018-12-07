@@ -161,6 +161,8 @@ namespace Siscom.Agua.Api.Controllers
                         _validation = false;
                         break;
                 }
+
+                //Validación de montos a cuenta
                 double sumDebt = 0;
                 double sumDetail = 0;
 
@@ -624,6 +626,12 @@ namespace Siscom.Agua.Api.Controllers
             if(ptransaction.TerminalUserId == 0)
                 return false;
             if (ptransaction.TypeTransactionId == 0)
+                return false;
+            if (ptransaction.ExternalOriginPaymentId == 0)
+                return false;
+            if (ptransaction.OriginPaymentId == 0)
+                return false;
+            if (String.IsNullOrEmpty(ptransaction.DebtStatus))
                 return false;
             return true;
         }

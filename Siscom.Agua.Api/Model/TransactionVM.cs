@@ -14,6 +14,7 @@ namespace Siscom.Agua.Api.Model
         public double Tax { get; set; }
         public string PercentageTax { get; set; }
         public double Rounding { get; set; }
+        public double Total { get; set; }
         public string Aplication { get; set; }
         public int TypeTransactionId { get; set; }
         public int PayMethodId { get; set; }
