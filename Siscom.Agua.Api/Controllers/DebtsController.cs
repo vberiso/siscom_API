@@ -34,10 +34,9 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var debt = await _context.Debts
-                                     .Include(dd => dd.DebtDetails)
-                                     .Where(i => i.AgreementId == idAgreement)
-                                     .FirstOrDefaultAsync();
+            var debt = await _context.Debts.Include(dd => dd.DebtDetails)
+                        .Where(gs => _context.Statuses
+                                .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == idAgreement).ToListAsync(); 
 
             if (debt == null)
             {
