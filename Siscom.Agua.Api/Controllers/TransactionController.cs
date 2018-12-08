@@ -256,7 +256,7 @@ namespace Siscom.Agua.Api.Controllers
                                         AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
                                         DebtId = debt.Id,
                                         Status = "EP001",
-                                        Type = "",
+                                        Type = pPaymentConcepts.Transaction.Type,
                                         OriginPayment = transaction.OriginPayment,
                                         PayMethod = transaction.PayMethod,
                                         TransactionFolio = transaction.Folio,
@@ -389,6 +389,248 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
             }
             else {
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+            }
+            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+        }
+
+        /// <summary>
+        /// This will provide capability add new Transaction
+        /// </summary>       
+        /// <param name="AgreementId">Id Agreement
+        /// <param name="pTransactionVM">Model TransactionVM
+        /// </param>
+        /// <returns>New TerminalUser added</returns>
+        // POST: api/Transaction
+        [HttpPost("Prepaid/{AgreementId}")]
+        public async Task<IActionResult> PostTransactionPrepaid([FromRoute] int AgreementId, [FromBody] TransactionVM pTransactionVM)
+        {
+            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            bool _validation = false;
+            Prepaid prepaid;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!Validate(pTransactionVM))
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Información incompleta" });
+
+            TerminalUser terminalUser = new TerminalUser();
+            terminalUser = await _context.TerminalUsers
+                                             .Include(x => x.Terminal)
+                                             .Include(x => x.User)
+                                             .Where(x => x.Id == pTransactionVM.TerminalUserId).FirstOrDefaultAsync();
+
+            if (terminalUser == null)
+            {
+                return NotFound();
+            }
+
+            if (!terminalUser.InOperation)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
+
+            if (terminalUser.OpenDate.Date != DateTime.Now.Date)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
+
+            if (await _context.Transactions
+                           .Include(x => x.TypeTransaction)
+                           .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                       x.DateTransaction.Date == DateTime.Now.Date &&
+                                       x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7)
+                           .FirstOrDefaultAsync() != null)
+
+            {
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
+            }
+
+
+            if (await _context.Transactions
+                              .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                          x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString() &&
+                                          x.TypeTransaction.Id == 1)
+                              .FirstOrDefaultAsync() != null)
+
+            {
+
+                switch (pTransactionVM.TypeTransactionId)
+                {
+                    case 3://Cobro                      
+                        if (!pTransactionVM.Sign)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+                        if (pTransactionVM.Amount == 0)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
+
+                        if (await _context.Debts.Include(dd => dd.DebtDetails)
+                                          .Where(gs => _context.Statuses
+                                          .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == AgreementId)
+                                          .FirstOrDefaultAsync() != null)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Improcedente anticipo. La cuenta tiene adeudo") });
+
+                        _validation = true;
+                        break;
+                    case 4://Cancelado                       
+                        if (pTransactionVM.Sign)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
+                        if (pTransactionVM.Amount == 0)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
+
+                        if (String.IsNullOrEmpty(pTransactionVM.Cancellation))
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación") });
+
+                        var cancelacion = await _context.Transactions.Where(x => x.Folio == pTransactionVM.Cancellation).FirstAsync();
+                        if (cancelacion == null)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
+
+                        if (cancelacion.Amount != pTransactionVM.Amount)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });                     
+
+                        _validation = true;
+                        break;
+                    default:
+                        _validation = false;
+                        break;
+                }
+
+                if (_validation)
+                {
+                    var option = new TransactionOptions
+                    {
+                        IsolationLevel = IsolationLevel.ReadCommitted,
+                        Timeout = TimeSpan.FromSeconds(60)
+                    };
+
+                    try
+                    {
+                        using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                        {
+                            //Transacción en caja
+                            transaction.Folio = Guid.NewGuid().ToString("D");
+                            transaction.DateTransaction = DateTime.Now;
+                            transaction.Sign = pTransactionVM.Sign;
+                            transaction.Amount = pTransactionVM.Amount;
+                            transaction.Aplication = pTransactionVM.Aplication;
+                            transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransactionVM.TypeTransactionId).ConfigureAwait(false);
+                            transaction.PayMethod = await _context.PayMethods.FindAsync(pTransactionVM.PayMethodId).ConfigureAwait(false);
+                            transaction.TerminalUser = terminalUser;
+                            transaction.CancellationFolio = pTransactionVM.Cancellation;
+                            transaction.Tax = pTransactionVM.Tax;
+                            transaction.Rounding = pTransactionVM.Rounding;
+                            transaction.AuthorizationOriginPayment = pTransactionVM.AuthorizationOriginPayment;
+                            transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pTransactionVM.ExternalOriginPaymentId).ConfigureAwait(false);
+                            transaction.OriginPayment = await _context.OriginPayments.FindAsync(pTransactionVM.OriginPaymentId).ConfigureAwait(false);
+                            transaction.Total = pTransactionVM.Total;
+                            _context.Transactions.Add(transaction);
+                            await _context.SaveChangesAsync();
+
+                            await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+
+                            TransactionDetail transactionDetail = new TransactionDetail();
+                            transactionDetail.CodeConcept = "ANT01";
+                            transactionDetail.amount = transaction.Amount;
+                            transactionDetail.Description = "PAGO ANTICIPADO";
+                            transactionDetail.Transaction = transaction;
+                            _context.TransactionDetails.Add(transactionDetail);
+                            await _context.SaveChangesAsync();
+
+                            //PAGO
+                            if (transaction.TypeTransaction.Id == 3)
+                            {
+                                prepaid = new Prepaid();
+                                prepaid.PrepaidDate = transaction.DateTransaction;
+                                prepaid.Amount = transaction.Amount;
+                                prepaid.Accredited = 0;
+                                prepaid.Status = "ANT01";
+                                prepaid.AgreementId = AgreementId;
+                                _context.Prepaids.Add(prepaid);
+                                await _context.SaveChangesAsync();
+
+                                //Inserta pago
+                                await _context.Payments.AddAsync(new Payment
+                                {
+                                    PaymentDate = transaction.DateTransaction,
+                                    BranchOffice = terminalUser.Terminal.BranchOffice.Name,
+                                    Subtotal = transaction.Amount,
+                                    PercentageTax = pTransactionVM.PercentageTax,
+                                    Tax = transaction.Tax,
+                                    Total = transaction.Amount + transaction.Tax + transaction.Rounding,
+                                    AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
+                                    DebtId = prepaid.Id,
+                                    Status = "EP001",
+                                    Type = pTransactionVM.Type,
+                                    OriginPayment = transaction.OriginPayment,
+                                    PayMethod = transaction.PayMethod,
+                                    TransactionFolio = transaction.Folio,
+                                    Rounding = transaction.Rounding,
+                                    ExternalOriginPayment = transaction.ExternalOriginPayment,
+                                });
+                                await _context.SaveChangesAsync();
+
+                               
+
+                            }
+                            else //Cancelación
+                            {
+                                //se modifica estado de pago
+                                var payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio).FirstOrDefaultAsync();
+
+                                prepaid = await _context.Prepaids.Where(x => x.Id == payment.DebtId).FirstAsync();
+
+                                if (prepaid == null)
+                                    return NotFound();
+                                else {
+                                    if(prepaid.Status != "ANT01")
+                                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago no se puede cancelar porque el ya ha sido debengado el anticipo") });
+                                }                           
+
+                                payment.Status = "EP002";
+                                _context.Entry(payment).State = EntityState.Modified;
+                                await _context.SaveChangesAsync();
+
+                                prepaid.Status = "ANT04";
+                                _context.Entry(prepaid).State = EntityState.Modified;
+                                await _context.SaveChangesAsync();
+                            }
+
+                            //Toma folio
+                            Folio folio = new Folio();
+                            folio = await _context.Folios
+                                                  .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
+                                                               x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
+
+                            TransactionFolio transactionFolio = new TransactionFolio();
+                            transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
+                            transactionFolio.DatePrint = DateTime.Now;
+                            transactionFolio.Transaction = transaction;
+                            _context.TransactionFolios.Add(transactionFolio);
+                            await _context.SaveChangesAsync();
+
+                            folio.Secuential += 1;
+                            _context.Entry(folio).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+
+                            scope.Complete();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        SystemLog systemLog = new SystemLog();
+                        systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                        systemLog.DateLog = DateTime.Now;
+                        systemLog.Controller = "TransactionController";
+                        systemLog.Action = "PostTransaction";
+                        systemLog.Parameter = JsonConvert.SerializeObject(pTransactionVM);
+                        CustomSystemLog helper = new CustomSystemLog(_context);
+                        helper.AddLog(systemLog);
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+                    }
+                }
+                else
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
+            }
+            else
+            {
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
             }
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
@@ -631,7 +873,7 @@ namespace Siscom.Agua.Api.Controllers
                 return false;
             if (ptransaction.OriginPaymentId == 0)
                 return false;
-            if (String.IsNullOrEmpty(ptransaction.DebtStatus))
+            if (String.IsNullOrEmpty(ptransaction.DebtStatus) & ptransaction.Type !="PAY02")
                 return false;
             return true;
         }
