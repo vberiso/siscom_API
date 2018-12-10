@@ -52,6 +52,8 @@ namespace Siscom.Agua.DAL
         public DbSet<TypeClassification> TypeClassifications { get; set; }
         public DbSet<Prepaid> Prepaids { get; set; }
         public DbSet<PrepaidDetail> PrepaidDetails { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<NotificationDetail> NotificationDetails { get; set; }
 
         /// <summary> 
         /// Cash Box 
@@ -261,6 +263,11 @@ namespace Siscom.Agua.DAL
 
             #region Debt
             builder.Entity<Debt>()
+                .HasOne<Agreement>(a => a.Agreement)
+                .WithMany(s => s.Debts)
+                .HasForeignKey(s => s.AgreementId);
+
+            builder.Entity<Debt>()
               .Property(x => x.FromDate)
               .HasColumnType("date");
 
@@ -333,6 +340,20 @@ namespace Siscom.Agua.DAL
             builder.Entity<Meter>()
                .Property(x => x.DeinstallDate)
                .HasColumnType("date");
+            #endregion
+
+            #region Notification
+            builder.Entity<Notification>()
+                   .HasOne<Agreement>(a => a.Agreement)
+                   .WithMany(s => s.Notifications)
+                   .HasForeignKey(s => s.AgreementId);
+            #endregion
+
+            #region NotificationDetail
+            builder.Entity<NotificationDetail>()
+                   .HasOne<Notification>(a => a.Notification)
+                   .WithMany(s => s.NotificationDetails)
+                   .HasForeignKey(s => s.NotificationId);
             #endregion
 
             #region Payment
