@@ -166,24 +166,24 @@ namespace Siscom.Agua.Api.Controllers
                 double sumDebt = 0;
                 double sumDetail = 0;
 
-                pPaymentConcepts.Debt.ToList().ForEach(x =>
-                {
-                    sumDebt += x.OnAccount;
+                //pPaymentConcepts.Debt.ToList().ForEach(x =>
+                //{
+                //    sumDebt += x.OnAccount;
 
-                    x.DebtDetails.ToList().ForEach(y =>
-                    {
-                        sumDetail += y.OnAccount;
-                    });
-                    if (sumDetail != x.Amount)                   
-                        _validation = false;                   
+                //    x.DebtDetails.ToList().ForEach(y =>
+                //    {
+                //        sumDetail += y.OnAccount;
+                //    });
+                //    if (sumDetail != x.Amount)                   
+                //        _validation = false;                   
                        
-                });
+                //});
 
-                if(pPaymentConcepts.Transaction.Amount != sumDebt)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                //if(pPaymentConcepts.Transaction.Amount != sumDebt)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
-                if (!_validation)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                //if (!_validation)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
                 if (_validation)
                 {
