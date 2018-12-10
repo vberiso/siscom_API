@@ -27,6 +27,8 @@ namespace Siscom.Agua.DAL.Models
         public bool IsCommercial { get; set; }      
         [Required, Column("is_active")]
         public bool IsActive { get; set; }
+        [Required, Column("in_agreement")]
+        public bool InAgreement { get; set; }
 
         public ICollection<AgreementService> AgreementServices { get; set; }
         public ICollection<Tariff> Tariffs { get; set; }

@@ -29,9 +29,21 @@ namespace Siscom.Agua.DAL.Models
         public DateTime UntilDate { get; set; }
         [Column("is_active"), Required]
         public int IsActive { get; set; }
+        [Column("start_consume")]
+        public double StartConsume { get; set; }
+        [Column("end_consume")]
+        public double EndConsume { get; set; }
+        [Required, Column("have_consume")]
+        public bool HaveConsume { get; set; }
 
         //[ForeignKey("Service")]
         public int ServiceId { get; set; }
-        public Service Service { get; set; }        
+        public Service Service { get; set; }
+
+        public int TypeIntakeId { get; set; }
+        public TypeIntake TypeIntake { get; set; }
+
+        public int TypeConsumeId { get; set; }
+        public TypeConsume TypeConsume { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public TypeConsume()
         {
             Agreements = new HashSet<Agreement>();
+            Tariffs = new HashSet<Tariff>();
         }
 
         [Key]
@@ -20,7 +21,10 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Required, StringLength(50), Column("name")]
         public string Name { get; set; }
+        [Column("acronym"), StringLength(2), Required]
+        public string Acronym { get; set; }
 
         public ICollection<Agreement> Agreements { get; set; }
+        public ICollection<Tariff> Tariffs { get; set; }
     }
 }

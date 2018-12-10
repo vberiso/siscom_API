@@ -9,6 +9,7 @@
     <Compile Remove="Migrations\20181205224906_TypeClasif.cs" />
     <Compile Remove="Migrations\20181206214156_DebtStatus.cs" />
     <Compile Remove="Migrations\20181206215248_DebtStatus.cs" />
+    <Compile Remove="Migrations\20181210190901_Tariff.cs" />
   </ItemGroup>
   
   <ItemGroup>

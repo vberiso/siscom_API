@@ -35,7 +35,9 @@ namespace Siscom.Agua.DAL.Models
         public string EMail { get; set; }
         [Column("type_user"), StringLength(5), Required]
         public string TypeUser { get; set; }
-   
+        [Required, Column("is_active")]
+        public bool IsActive { get; set; }
+
         //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }

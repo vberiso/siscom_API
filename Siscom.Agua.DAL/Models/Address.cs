@@ -29,6 +29,8 @@ namespace Siscom.Agua.DAL.Models
         public string Lon { get; set; }
         [Column("type_address"), StringLength(5)]
         public string TypeAddress { get; set; }
+        [Required, Column("is_active")]
+        public bool IsActive { get; set; }
 
         //[ForeignKey("Agreements")]
         public int AgreementsId { get; set; }

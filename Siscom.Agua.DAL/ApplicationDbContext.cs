@@ -103,6 +103,7 @@ namespace Siscom.Agua.DAL
         /// System
         /// </summary>
         public DbSet<SystemLog> SystemLogs { get; set; }
+        public DbSet<SystemParameters> SystemParameters { get; set; }
 
         public ApplicationDbContext()
         {
@@ -415,11 +416,25 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.ClasificationsId);
             #endregion
 
+            #region SystemParameters
+           
+            #endregion
+
             #region Tariff
             builder.Entity<Tariff>()
                    .HasOne<Service>(a => a.Service)
                    .WithMany(s => s.Tariffs)
                    .HasForeignKey(s => s.ServiceId);
+
+            builder.Entity<Tariff>()
+                   .HasOne<TypeIntake>(a => a.TypeIntake)
+                   .WithMany(s => s.Tariffs)
+                   .HasForeignKey(s => s.TypeIntakeId);
+
+            builder.Entity<Tariff>()
+                  .HasOne<TypeConsume>(a => a.TypeConsume)
+                  .WithMany(s => s.Tariffs)
+                  .HasForeignKey(s => s.TypeConsumeId);
 
             builder.Entity<Tariff>()
              .Property(x => x.FromDate)
