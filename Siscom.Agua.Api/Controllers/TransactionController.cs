@@ -212,6 +212,7 @@ namespace Siscom.Agua.Api.Controllers
                             transaction.AuthorizationOriginPayment = pPaymentConcepts.Transaction.AuthorizationOriginPayment;
                             transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pPaymentConcepts.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
                             transaction.OriginPayment = await _context.OriginPayments.FindAsync(pPaymentConcepts.Transaction.OriginPaymentId).ConfigureAwait(false);
+                            transaction.Total = pPaymentConcepts.Transaction.Total;
                             _context.Transactions.Add(transaction);
                             await _context.SaveChangesAsync();
 
