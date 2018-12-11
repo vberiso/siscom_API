@@ -90,6 +90,8 @@ namespace Siscom.Agua.DAL
         public DbSet<Tariff> Tariffs { get; set; }
         public DbSet<TariffProduct> TariffProducts { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<DebtDiscount> DebtDiscounts { get; set; }
+        public DbSet<DebtPrepaid> DebtPrepaids { get; set; }
 
         /// <summary> 
         /// Payment
@@ -300,6 +302,20 @@ namespace Siscom.Agua.DAL
                    .HasOne<Debt>(a => a.Debt)
                    .WithMany(s => s.DebtDetails)
                    .HasForeignKey(s => s.DebtId);
+            #endregion
+
+            #region DebtDiscount
+            builder.Entity<DebtDiscount>()
+                   .HasOne<Debt>(a => a.Debt)
+                   .WithMany(s => s.DebtDiscounts)
+                   .HasForeignKey(s => s.DebtId);
+            #endregion
+
+            #region DebtPrepaid           
+            builder.Entity<DebtPrepaid>()
+                  .HasOne<PrepaidDetail>(a => a.PrepaidDetail)
+                  .WithMany(s => s.DebtPrepaids)
+                  .HasForeignKey(s => s.PrepaidDetailId);
             #endregion
 
             #region DebtStatus

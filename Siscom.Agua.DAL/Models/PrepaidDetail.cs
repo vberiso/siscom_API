@@ -8,7 +8,13 @@ namespace Siscom.Agua.DAL.Models
 {  
     [Table("Prepaid_Detail")]
     public class PrepaidDetail
-    {      
+    {
+        public PrepaidDetail()
+        {
+          
+            DebtPrepaids = new HashSet<DebtPrepaid>();
+        }
+
         [Key]
         [Column("id_drepaid_detail"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -21,5 +27,7 @@ namespace Siscom.Agua.DAL.Models
 
         public int PrepaidId { get; set; }
         public Prepaid Prepaid { get; set; }
+
+        public ICollection<DebtPrepaid> DebtPrepaids { get; set; }
     }
 }
