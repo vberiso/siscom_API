@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 using Siscom.Agua.DAL.Models;
+using System;
 using System.Linq;
+using System.Text;
 
 namespace Siscom.Agua.DAL
 {
@@ -71,7 +74,7 @@ namespace Siscom.Agua.DAL
         /// <summary> 
         /// Groups
         /// </summary> 
-        public DbSet<Type> Types { get; set; }
+        public DbSet<Models.Type> Types { get; set; }
         public DbSet<GroupType> GroupTypes { get; set; }
         public DbSet<GroupStatus> GroupStatuses { get; set; }
         public DbSet<Status> Statuses { get; set; }
@@ -119,12 +122,18 @@ namespace Siscom.Agua.DAL
             _configuration = configuration;
         }
 
-        public override int SaveChanges(bool acceptAllChangesOnSuccess)
-        {
+        //public override int SaveChanges()
+        //{
+        //    OnBeforeSaving();
+        //    return base.SaveChanges();
+        //}
+
+        //public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        //{
             
-            OnBeforeSaving();
-            return base.SaveChanges(acceptAllChangesOnSuccess);
-        }
+        //    OnBeforeSaving();
+        //    return base.SaveChanges(acceptAllChangesOnSuccess);
+        //}
         protected override void OnModelCreating(ModelBuilder builder)
         {                    
 
@@ -185,6 +194,11 @@ namespace Siscom.Agua.DAL
                    .HasOne<Diameter>(a => a.Diameter)
                    .WithMany(s => s.Agreements)
                    .HasForeignKey(s => s.DiameterId);
+
+            builder.Entity<Agreement>()
+                  .HasOne<TypeClassification>(a => a.TypeClassification)
+                  .WithMany(s => s.Agreements)
+                  .HasForeignKey(s => s.TypeClassificationId);
 
             builder.Entity<Agreement>()
                   .HasMany(a => a.Debts)
@@ -548,7 +562,7 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region Type
-            builder.Entity<Type>()
+            builder.Entity<Models.Type>()
                    .HasOne<GroupType>(a => a.GroupType)
                    .WithMany(s => s.Types)
                    .HasForeignKey(s => s.GroupTypeId);
@@ -576,20 +590,54 @@ namespace Siscom.Agua.DAL
             var changes = from e in this.ChangeTracker.Entries()
                           where e.State != EntityState.Unchanged
                           select e;
+            var now = DateTime.UtcNow.ToLocalTime();
+            StringBuilder data = new StringBuilder();
             foreach (var change in changes)
             {
-                if(change.State == EntityState.Added)
+                var entityName = change.Entity.GetType().Name;
+
+                if (change.State == EntityState.Added)
                 {
 
                 }
-                else if(change.State == EntityState.Modified)
+                else if (change.State == EntityState.Modified)
                 {
                     //var item = change.Cast<IEntity>().Entity;
                     //var item = change.
                     //var originalValues = this.Entry(i)
+                    //foreach (var o in change.Properties)
+                    //{
+                    //    //var properties = change.Property(o);
+                    //}
+                    var primaryKey = GetPrimaryKeyValue(change).ToString();
+                    foreach (var prop in change.OriginalValues.Properties)
+                    {
+                        var originalValue = change.OriginalValues[prop].ToString();
+                        var currentValue = change.CurrentValues[prop].ToString();
+                        if(originalValue != currentValue)
+                        {
+                            data.Append("[PropertyName] = " + prop + " >")
+                                .Append("[OldValue] = " + originalValue + " >")
+                                .Append("[NewValue] = " + currentValue);
+                            
+                        }
+                    }
                 }
             }
 
         }
+
+        private object GetPrimaryKeyValue(EntityEntry change)
+        {
+            var objectStateEntry = change.Metadata.FindPrimaryKey().Properties.Select(p => change.Property(p.Name));
+            return objectStateEntry.Single();
+            //return objectStateEntry.EntityKey.EntityKeyValues[0].Value;
+        }
+
+        //object GetPrimaryKeyValue(DbEntityEntry entry)
+        //{
+        //    var objectStateEntry = ((IObjectContextAdapter)this).ObjectContext.ObjectStateManager.GetObjectStateEntry(entry.Entity);
+        //    return objectStateEntry.EntityKey.EntityKeyValues[0].Value;
+        //}
     }
 }

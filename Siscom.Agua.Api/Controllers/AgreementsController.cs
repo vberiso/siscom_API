@@ -53,37 +53,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             
             var currentUserName = this.User.Claims.ToList()[1].Value;
-            var agreement = await _context.Agreements
-                                      .Include(x => x.Clients)
-                                        .ThenInclude(contact => contact.Contacts)
-                                      .Include(x => x.Addresses)
-                                        .ThenInclude(s => s.Suburbs)
-                                      .Include(ts => ts.TypeService)
-                                      .Include(tu => tu.TypeUse)
-                                      .Include(tc => tc.TypeConsume)
-                                      .Include(tr => tr.TypeRegime)
-                                      .Include(tp => tp.TypePeriod)
-                                      .Include(tcb => tcb.TypeCommertialBusiness)
-                                      .Include(tss => tss.TypeStateService)
-                                      .Include(ti => ti.TypeIntake)
-                                      .Include(di => di.Diameter)
-                                      .Include(tss => tss.TypeStateService)
-                                      .Include(ags => ags.AgreementServices)
-                                        .ThenInclude(x => x.Service)
-                                      .Include(ad => ad.AgreementDiscounts)
-                                        .ThenInclude(d => d.Discount)
-                                      .FirstOrDefaultAsync(a => a.Id == id);
-
-            agreement.Addresses.ToList().ForEach(x =>
-            {
-                x.Suburbs = _context.Suburbs.Include(r => r.Regions)
-                                            .Include(c => c.Clasifications)
-                                            .Include(t => t.Towns)
-                                                .ThenInclude(s => s.States)
-                                                .ThenInclude(c => c.Countries)
-                                            .Where(i => i.Id == x.Suburbs.Id)
-                                            .SingleOrDefault();
-            });
+            var agreement = await GetAgreementData(id);
 
 
             if (agreement == null)
@@ -205,7 +175,9 @@ namespace Siscom.Agua.Api.Controllers
                                             Nombre = vclient.ToString(),
                                             RFC = vclient.RFC,
                                             Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
-                                            WithDiscount = (ac.AgreementDiscounts.Count > 0 ) ? true : false
+                                            WithDiscount = (ac.AgreementDiscounts.Count > 0 ) ? true : false,
+                                            idStus = ac.TypeStateServiceId,
+                                            Status = ac.TypeStateService.Name
                                         }
                                    ).ToListAsync();
 
@@ -214,6 +186,11 @@ namespace Siscom.Agua.Api.Controllers
                     break;
                 case 2:
                     search.StringSearch.ToUpper();
+                    if(search.StringSearch.Length < 5)
+                    {
+                        return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "No se pudo completar su busqueda, favor de ingresar un minimo de 5 caracteres para poder continuar" });
+                    }
                     var client = await (from c in _context.Clients
                                         join a in _context.Agreements on c.AgreementId equals a.Id
                                         where EF.Functions.Like(c.ToString().ToUpper(), "%" + search.StringSearch + "%")
@@ -228,7 +205,9 @@ namespace Siscom.Agua.Api.Controllers
                                             Nombre = c.ToString(),
                                             RFC = c.RFC,
                                             Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
-                                            WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false
+                                            WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false,
+                                            idStus = a.TypeStateServiceId,
+                                            Status = a.TypeStateService.Name
                                         }
                                    ).ToListAsync();
                     if (client.Count > 0)
@@ -250,7 +229,9 @@ namespace Siscom.Agua.Api.Controllers
                                              Nombre = string.Format("{0} {1} {2}", vclient.Name, vclient.SecondLastName, vclient.LastName),
                                              RFC = vclient.RFC,
                                              Address = string.Format("{0} {1}, {2}", ad.Street, ad.Outdoor, ad.Suburbs.Name),
-                                             WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false
+                                             WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false,
+                                             idStus = a.TypeStateServiceId,
+                                             Status = a.TypeStateService.Name
                                          }
                                    ).ToListAsync();
                     if (address.Count > 0)
@@ -271,7 +252,9 @@ namespace Siscom.Agua.Api.Controllers
                                          Nombre = c.ToString(),
                                          RFC = c.RFC,
                                          Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
-                                         WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false
+                                         WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false,
+                                         idStus = a.TypeStateServiceId,
+                                         Status = a.TypeStateService.Name
                                      }
                                    ).ToListAsync();
                     if (rfc.Count > 0)
@@ -291,40 +274,235 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         //PUT: api/Agreements/5
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] AgreementVM agreementvm)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] AgreementVM agreementvm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    if (id != agreement.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+            if (id != agreementvm.Id)
+            {
+                return BadRequest();
+            }
 
-        //    //agreement
-        //    _context.Entry(agreement).State = EntityState.Modified;
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    Agreement agreement = await GetAgreementDataUpdate(agreementvm.Id);
+                    agreementvm.Adresses.ToList().ForEach(x =>
+                    {
+                        Address ad = _context.Adresses.Where(a => a.Id == x.Id).SingleOrDefault();
+                        if (ad != null)
+                        {
+                            ad.Indoor = x.Indoor;
+                            ad.Outdoor = x.Outdoor;
+                            ad.Street = x.Street;
+                            ad.Lat = x.Lat;
+                            ad.Lon = x.Lon;
+                            ad.Reference = x.Reference;
+                            ad.TypeAddress = x.TypeAddress;
+                            ad.Zip = x.Zip;
+                            ad.SuburbsId = x.SuburbsId;
+                            _context.Entry(ad).State = EntityState.Modified;
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            agreement.Addresses.Add(new Address
+                            {
+                                Agreements = agreement,
+                                AgreementsId = agreement.Id,
+                                Street = x.Street,
+                                Indoor = x.Indoor,
+                                Outdoor = x.Outdoor,
+                                Suburbs = _context.Suburbs.Find(x.SuburbsId),
+                                IsActive = true,
+                                Lat = x.Lat,
+                                Lon = x.Lon,
+                                Reference = x.Reference,
+                                TypeAddress = x.TypeAddress,
+                                Zip = x.Zip
+                            });
+                        }
+                    });
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!AgreementExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+                    agreementvm.Clients.ToList().ForEach(x =>
+                    {
+                        Client c = _context.Clients.Where(cl => cl.Id == x.Id).SingleOrDefault();
 
-        //    return NoContent();
-        //}
+                        if (c != null)
+                        {
+                            c.Name = x.Name;
+                            c.SecondLastName = x.SecondLastName;
+                            c.LastName = x.LastName;
+                            c.INE = x.INE;
+                            c.RFC = x.RFC;
+                            c.IsActive = true;
+                            c.TypeUser = x.TypeUser;
+                            c.CURP = (x.CURP == "") ? (c.CURP != "") ? c.CURP : "" : x.CURP;
+                            c.EMail = x.EMail;
+                            c.Contacts.ToList().ForEach(co =>
+                            {
+                                Contact con = _context.Contacts.Find(co.Id);
+                                con.IsActive = co.IsActive;
+                                con.PhoneNumber = co.PhoneNumber;
+                                con.TypeNumber = co.TypeNumber;
+                                _context.Entry(con).State = EntityState.Modified;
+                                _context.SaveChanges();
+                            });
+                            _context.Entry(c).State = EntityState.Modified;
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            var newclient = new Client
+                            {
+                                Agreement = agreement,
+                                AgreementId = agreement.Id,
+                                CURP = (x.CURP == "") ? (x.IsMale == true) ? "XEXX010101HNEXXXA4" : "XEXX010101HNEXXXA8" : x.CURP,
+                                INE = x.INE,
+                                RFC = (x.RFC == "") ? "XAXX010101000" : x.RFC,
+                                IsActive = true,
+                                Name = x.Name,
+                                LastName = x.LastName,
+                                SecondLastName = x.SecondLastName,
+                                EMail = x.EMail,
+                                TypeUser = x.TypeUser
+                            };
+
+                            x.Contacts.ToList().ForEach(co =>
+                            {
+                                newclient.Contacts.Add(new Contact
+                                {
+                                    IsActive = 1,
+                                    PhoneNumber = co.PhoneNumber,
+                                    TypeNumber = co.TypeNumber
+                                });
+                            });
+                            agreement.Clients.Add(newclient);
+                        }
+                    });
+
+                    var services = _context.AgreementServices.Where(xx => xx.IdAgreement == agreement.Id).ToList();
+                    var ids = (from s in services
+                               select s.IdService).ToList();
+
+                    services.ForEach(x =>
+                    {
+                        if(agreementvm.ServicesId.Contains(x.IdService))
+                        {
+                            x.IsActive = true;
+                            _context.Entry(x).State = EntityState.Modified;
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            x.IsActive = false;
+                            _context.Entry(x).State = EntityState.Modified;
+                            _context.SaveChanges();
+                        }
+
+                    });
+
+                    //var comparelist = ids.Except(agreementvm.ServicesId).ToList();
+                    var comparelist = agreementvm.ServicesId.Except(ids).ToList();
+
+                    comparelist.ForEach(x =>
+                    {
+                        _context.AgreementServices.AddAsync(new AgreementService
+                        {
+                            Agreement = agreement,
+                            DateAgreement = DateTime.UtcNow.ToLocalTime(),
+                            IdAgreement = agreement.Id,
+                            IdService = x,
+                            IsActive = true,
+                            Service = _context.Services.Find(x)
+                        });
+                        _context.SaveChanges();
+                    });
+
+                    var service = await _context.TypeServices.FindAsync(agreementvm.TypeServiceId);
+                    var intake = await _context.TypeIntakes.FindAsync(agreementvm.TypeIntakeId);
+                    var use = await _context.TypeUses.FindAsync(agreementvm.TypeUseId);
+                    var consume = await _context.TypeConsumes.FindAsync(agreementvm.TypeConsumeId);
+                    var regime = await _context.TypeRegimes.FindAsync(agreementvm.TypeRegimeId);
+                    var sService = await _context.TypeStateServices.FindAsync(agreementvm.TypeStateServiceId);
+                    var period = await _context.TypePeriods.FindAsync(agreementvm.TypePeriodId);
+                    var diam = await _context.Diameters.FindAsync(agreementvm.DiameterId);
+                    var typeAgreement = await _context.Types.Where(z => z.CodeName == agreementvm.TypeAgreement).ToListAsync();
+
+                    agreement.TypeService = service;
+                    agreement.TypeServiceId = service.Id;
+                    agreement.TypeIntake = intake;
+                    agreement.TypeIntakeId = intake.Id;
+                    agreement.TypeUse = use;
+                    agreement.TypeUseId = use.Id;
+                    agreement.TypeConsume = consume;
+                    agreement.TypeConsumeId = consume.Id;
+                    agreement.TypeRegime = regime;
+                    agreement.TypeRegimeId = regime.Id;
+                    agreement.TypeStateService = sService;
+                    agreement.TypeStateServiceId = sService.Id;
+                    agreement.TypePeriod = period;
+                    agreement.TypePeriodId = period.Id;
+                    agreement.Diameter = diam;
+                    agreement.DiameterId = diam.Id;
+
+                    AgreementLog log = new AgreementLog();
+                    log.Agreement = agreement;
+                    log.AgreementId = agreement.Id;
+                    log.AgreementLogDate = DateTime.UtcNow.ToLocalTime();
+                    log.Description = "Actualización de Datos";
+                    log.Observation = agreementvm.Observations;
+                    log.User = await userManager.FindByIdAsync(agreementvm.UserId);
+                    log.UserId = agreementvm.UserId;
+
+                    _context.AgreementLogs.Add(log);
+                    _context.SaveChanges();
+
+
+                    _context.Entry(agreement).State = EntityState.Modified;
+                    _context.SaveChanges();
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(agreementvm);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el contrato" });
+            }
+            
+            //agreement
+            //_context.Entry(agreementvm).State = EntityState.Modified;
+
+            //try
+            //{
+            //    await _context.SaveChangesAsync();
+            //}
+            //catch (DbUpdateConcurrencyException)
+            //{
+            //    if (!AgreementExists(id))
+            //    {
+            //        return NotFound();
+            //    }
+            //    else
+            //    {
+            //        throw;
+            //    }
+            //}
+
+            return NoContent();
+        }
 
 
 
@@ -361,7 +539,7 @@ namespace Siscom.Agua.Api.Controllers
             var period = await _context.TypePeriods.FindAsync(agreementvm.TypePeriodId);
             var diam = await _context.Diameters.FindAsync(agreementvm.DiameterId);
             var typeAgreement = await _context.Types.Where(z => z.CodeName == agreementvm.TypeAgreement).ToListAsync();
-
+            var typeClas = await _context.TypeClassifications.FindAsync(agreementvm.TypeClasificationId);
             if (service == null)
             {
                 return StatusCode((int)TypeError.Code.BadRequest, 
@@ -428,10 +606,16 @@ namespace Siscom.Agua.Api.Controllers
                                    new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe verificar el tipo de contrato (Principal / Derivado)')]" });
             }
 
+            if (typeClas == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de Tipo de clasificación')]" });
+            }
+
             if (service != null && intake != null && use != null
                                && consume != null && regime != null
                                && cBusiness != null && sService != null
-                               && period != null && diam != null
+                               && period != null && diam != null && typeClas != null
                                && agreementvm.ServicesId.Count > 0
                                && agreementvm.Adresses.Count > 0
                                && agreementvm.Clients.Count > 0)
@@ -475,7 +659,7 @@ namespace Siscom.Agua.Api.Controllers
                         NewAgreement.TypePeriod = period;
                         NewAgreement.TypeCommertialBusiness = cBusiness;
                         NewAgreement.Diameter = diam;
-
+                        NewAgreement.TypeClassification = typeClas;
 
                         //
                         if (Principal != null)
@@ -627,6 +811,42 @@ namespace Siscom.Agua.Api.Controllers
             return CreatedAtAction("GetAgreement", new { id = NewAgreement.Id }, NewAgreement);
         }
 
+        [HttpPost("AddDiscount")]
+        public async Task<IActionResult> AddDiscount([FromBody]  AgreementDiscounttVM agreementDiscountt)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            Agreement agreement = await GetAgreementDataUpdate(agreementDiscountt.AgreementId);
+            Discount discount = await _context.Discounts.FindAsync(agreementDiscountt.DiscountId);
+
+
+            if (agreement == null || discount == null)
+            { 
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = "El número de contrato o El tipo de descuento no se no se encuentran, favor de verificar" });
+            }
+
+            if(agreement.TypeIntake.Acronym != "HA")
+            {
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
+            }
+
+            if(agreement.TypeStateService.Id != 1)
+            {
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
+            }
+
+            if(agreement.AgreementDiscounts.Count > 1)
+            {
+                //if(agreement.AgreementDiscounts.)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asigamr mas de un descuento, favor de verificar" });
+            }
+            
+            return Ok();
+        }
+
         // DELETE: api/Agreements/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAgreement([FromRoute] int id)
@@ -713,6 +933,7 @@ namespace Siscom.Agua.Api.Controllers
                 TypeStateService = await _context.TypeStateServices.ToListAsync(),
                 TypePeriod = await _context.TypePeriods.ToListAsync(),
                 Diameter = await _context.Diameters.ToListAsync(),
+                TypeClassifications = await _context.TypeClassifications.ToListAsync(),
                 TypeAddresses = await _context.Types.Where(x => x.GroupType.Id == 1)
                                                     .Select(n => new TypeAddress()
                                                     {
@@ -747,7 +968,7 @@ namespace Siscom.Agua.Api.Controllers
                                                         }).ToListAsync(),
 
                 Services = await _context.Services
-                                        .Where(s => s.IsActive == true)
+                                        .Where(s => s.IsActive == true && s.InAgreement == true)
                                         .Select(s => new ServiceVM
                                         {
                                             Id = s.Id,
@@ -756,6 +977,83 @@ namespace Siscom.Agua.Api.Controllers
             });
         }
 
+        private async Task<Agreement> GetAgreementData(int id)
+        {
+            var agreemet = await _context.Agreements
+                                      .Include(x => x.Clients)
+                                        .ThenInclude(contact => contact.Contacts)
+                                      .Include(x => x.Addresses)
+                                        .ThenInclude(s => s.Suburbs)
+                                      .Include(ts => ts.TypeService)
+                                      .Include(tu => tu.TypeUse)
+                                      .Include(tc => tc.TypeConsume)
+                                      .Include(tr => tr.TypeRegime)
+                                      .Include(tp => tp.TypePeriod)
+                                      .Include(tcb => tcb.TypeCommertialBusiness)
+                                      .Include(tss => tss.TypeStateService)
+                                      .Include(ti => ti.TypeIntake)
+                                      .Include(di => di.Diameter)
+                                      .Include(tss => tss.TypeStateService)
+                                      .Include(ags => ags.AgreementServices)
+                                        .ThenInclude(x => x.Service)
+                                      .Include(ad => ad.AgreementDiscounts)
+                                        .ThenInclude(d => d.Discount)
+                                      .FirstOrDefaultAsync(a => a.Id == id);
+
+            agreemet.Addresses.ToList().ForEach(x =>
+            {
+                x.Suburbs = _context.Suburbs.Include(r => r.Regions)
+                                            .Include(c => c.Clasifications)
+                                            .Include(t => t.Towns)
+                                                .ThenInclude(s => s.States)
+                                                .ThenInclude(c => c.Countries)
+                                            .Where(i => i.Id == x.Suburbs.Id)
+                                            .SingleOrDefault();
+            });
+            var service = agreemet.AgreementServices.Where(x => x.IsActive == false);
+            agreemet.AgreementServices = agreemet.AgreementServices.Except(service).ToList();
+
+            return agreemet;
+        }
+
+        private async Task<Agreement> GetAgreementDataUpdate(int id)
+        {
+            var agreemet = await _context.Agreements
+                                      .Include(x => x.Clients)
+                                        .ThenInclude(contact => contact.Contacts)
+                                      .Include(x => x.Addresses)
+                                        .ThenInclude(s => s.Suburbs)
+                                      .Include(ts => ts.TypeService)
+                                      .Include(tu => tu.TypeUse)
+                                      .Include(tc => tc.TypeConsume)
+                                      .Include(tr => tr.TypeRegime)
+                                      .Include(tp => tp.TypePeriod)
+                                      .Include(tcb => tcb.TypeCommertialBusiness)
+                                      .Include(tss => tss.TypeStateService)
+                                      .Include(ti => ti.TypeIntake)
+                                      .Include(di => di.Diameter)
+                                      .Include(tss => tss.TypeStateService)
+                                      .Include(ags => ags.AgreementServices)
+                                        .ThenInclude(x => x.Service)
+                                      .Include(ad => ad.AgreementDiscounts)
+                                        .ThenInclude(d => d.Discount)
+                                      .FirstOrDefaultAsync(a => a.Id == id);
+
+            agreemet.Addresses.ToList().ForEach(x =>
+            {
+                x.Suburbs = _context.Suburbs.Include(r => r.Regions)
+                                            .Include(c => c.Clasifications)
+                                            .Include(t => t.Towns)
+                                                .ThenInclude(s => s.States)
+                                                .ThenInclude(c => c.Countries)
+                                            .Where(i => i.Id == x.Suburbs.Id)
+                                            .SingleOrDefault();
+            });
+            //var service = agreemet.AgreementServices.Where(x => x.IsActive == false);
+            //agreemet.AgreementServices = agreemet.AgreementServices.Except(service).ToList();
+
+            return agreemet;
+        }
         private bool AgreementExists(int id)
         {
             return _context.Agreements.Any(e => e.Id == id);

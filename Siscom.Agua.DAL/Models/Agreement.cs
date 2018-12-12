@@ -71,6 +71,9 @@ namespace Siscom.Agua.DAL.Models
         public int DiameterId { get; set; }
         public Diameter Diameter { get; set; }
 
+        public int TypeClassificationId { get; set; }
+        public TypeClassification TypeClassification { get; set; }
+
         public ICollection<Client> Clients { get; set; }
         public ICollection<Address> Addresses { get; set; }
         public ICollection<AgreementService> AgreementServices { get; set; }

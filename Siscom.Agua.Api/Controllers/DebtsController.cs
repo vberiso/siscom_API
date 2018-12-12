@@ -38,6 +38,7 @@ namespace Siscom.Agua.Api.Controllers
                         .Where(gs => _context.Statuses
                                 .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == idAgreement).OrderBy(x => x.DebitDate).ToListAsync(); 
 
+
             if (debt == null)
             {
                 return NotFound();

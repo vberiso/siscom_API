@@ -10,6 +10,7 @@ namespace Siscom.Agua.Api.Model
         public int Id { get; set; }
         public string PhoneNumber { get; set; }
         public string TypeNumber { get; set; }
+        public int IsActive { get; set; }
         public int ClientId { get; set; }
     }
 }

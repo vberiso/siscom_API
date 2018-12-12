@@ -401,5 +401,30 @@
             <param name="id">Mandatory</param>
             <returns></returns>
         </member>
+        <member name="T:Siscom.Agua.Api.Helpers.ObjectUtils">
+            -----------------------------------------------------------------------
+            <summary>  
+            This utility class contains a rich sets of utility methods that perform operations 
+            on objects during runtime such as copying of property and field values
+            between 2 objects, deep cloning of objects, etc.  
+            </summary>
+            -----------------------------------------------------------------------
+        </member>
+        <member name="M:Siscom.Agua.Api.Helpers.ObjectUtils.IsALike(System.Object,System.Object)">
+            ------------------------------------------------------------------------
+            <summary>
+            Deep Comparison two objects if they are alike. The objects are consider alike if 
+            they are:
+            <list type="ordered">
+               <item>of the same <see cref="T:System.Type"/>,</item>
+               <item>have the same number of methods, properties and fields</item>
+               <item>the public and private properties and fields values reflect each other's. </item>
+            </list>
+            </summary>
+            <param name="original"></param>
+            <param name="comparedToObject"></param>
+            <returns></returns>
+            ------------------------------------------------------------------------
+        </member>
     </members>
 </doc>

@@ -38,6 +38,8 @@ namespace Siscom.Agua.Api.Model
         [Required]
         public int TypeIntakeId { get; set; }
         [Required]
+        public int TypeClasificationId { get; set; }
+        [Required]
         public int DiameterId { get; set; }
         [Required]
         public string TypeAgreement { get; set; }
