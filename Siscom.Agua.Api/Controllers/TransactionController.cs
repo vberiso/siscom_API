@@ -166,24 +166,28 @@ namespace Siscom.Agua.Api.Controllers
                 double sumDebt = 0;
                 double sumDetail = 0;
 
-                //pPaymentConcepts.Debt.ToList().ForEach(x =>
-                //{
-                //    sumDebt += x.OnAccount;
+                pPaymentConcepts.Debt.ToList().ForEach(x =>
+                {
+                sumDebt += x.OnAccount;
 
-                //    x.DebtDetails.ToList().ForEach(y =>
-                //    {
-                //        sumDetail += y.OnAccount;
-                //    });
-                //    if (sumDetail != x.Amount)                   
-                //        _validation = false;                   
-                       
-                //});
+                sumDetail = 0;
+                x.DebtDetails.ToList().ForEach(y =>
+                {
+                    sumDetail += y.OnAccount;
+                });
+                if (Math.Truncate(sumDetail * 100) / 100 != Math.Truncate(x.OnAccount * 100) / 100)
+                    _validation = false;
 
-                //if(pPaymentConcepts.Transaction.Amount != sumDebt)
-                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                var w = Math.Truncate(sumDetail * 100) / 100;
+                var z = Math.Truncate(x.OnAccount * 100) / 100;
 
-                //if (!_validation)
-                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                });
+
+                if (pPaymentConcepts.Transaction.Amount != sumDebt)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+
+                if (!_validation)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
                 if (_validation)
                 {
@@ -237,24 +241,24 @@ namespace Siscom.Agua.Api.Controllers
                                     //Ingreso de status de recibo
                                     status = new DebtStatus()
                                     {
-                                        id_status = deuda.Status,
+                                        id_status = debt.Status,
                                         DebtStatusDate = transaction.DateTransaction,
                                         User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
                                         DebtId = debt.Id
                                     };
                                     _context.DebtStatuses.Add(status);
                                     await _context.SaveChangesAsync();
-
+                                    
                                     //Inserta pago
                                     await _context.Payments.AddAsync(new Payment
                                     {
                                         PaymentDate = transaction.DateTransaction,
                                         BranchOffice = terminalUser.Terminal.BranchOffice.Name,
-                                        Subtotal = deuda.OnAccount,
-                                        PercentageTax =deuda.PercentageTax,
-                                        Tax = deuda.Tax,
-                                        Rounding = deuda.Rounding,
-                                        Total = deuda.OnAccount + deuda.Tax + deuda.Rounding,
+                                        Subtotal = debt.OnAccount,
+                                        PercentageTax = debt.PercentageTax,
+                                        Tax = debt.Tax,
+                                        Rounding = Math.Truncate(debt.Rounding * 100) / 100,
+                                        Total = debt.OnAccount + debt.Tax + Math.Truncate((Convert.ToDouble(debt.Rounding)) * 100) / 100,
                                         AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
                                         DebtId = debt.Id,
                                         Status = "EP001",
