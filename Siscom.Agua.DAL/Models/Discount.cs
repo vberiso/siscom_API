@@ -20,6 +20,13 @@ namespace Siscom.Agua.DAL.Models
         public bool IsActive { get; set; }
         [Column("month"), Required]
         public Int16 Month { get; set; }
+        [Column("start_date"), Required]
+        public DateTime StartDate { get; set; }
+        [Column("end_date"), Required]
+
+        public DateTime EndDate { get; set; }
+        [Required, Column("in_agreement")]
+        public bool InAgreement { get; set; }
 
         public ICollection<AgreementDiscount> AgreementDiscounts { get; set; }
     }

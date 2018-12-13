@@ -82,6 +82,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> PostTransaction([FromBody] PaymentConceptsVM pPaymentConcepts)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            Payment payment = new Payment();
             bool _validation=false;
             DebtStatus status;
             if (!ModelState.IsValid)
@@ -220,14 +221,59 @@ namespace Siscom.Agua.Api.Controllers
                             _context.Transactions.Add(transaction);
                             await _context.SaveChangesAsync();
 
+                            foreach (var tDetail in pPaymentConcepts.Transaction.transactionDetails)
+                            {
+                                //Ingro de detalle de transacción
+                                TransactionDetail transactionDetail = new TransactionDetail();
+                                transactionDetail.CodeConcept = tDetail.CodeConcept;
+                                transactionDetail.amount = tDetail.amount;
+                                transactionDetail.Description = tDetail.Description;
+                                transactionDetail.Transaction = transaction;
+                                _context.TransactionDetails.Add(transactionDetail);
+                                await _context.SaveChangesAsync();                               
+                            }
+
+
                             await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
+                            //PAGOS
+                            if (transaction.TypeTransaction.Id == 3)
+                            {
+                                payment.PaymentDate = transaction.DateTransaction;
+                                payment.BranchOffice = terminalUser.Terminal.BranchOffice.Name;
+                                payment.Subtotal = transaction.Amount;
+                                payment.PercentageTax = pPaymentConcepts.Transaction.PercentageTax;
+                                payment.Tax = transaction.Tax;
+                                payment.Rounding = Math.Truncate(transaction.Rounding * 100) / 100;
+                                payment.Total = transaction.Total;
+                                payment.AuthorizationOriginPayment = transaction.AuthorizationOriginPayment;
+                                payment.AgreementId = pPaymentConcepts.Transaction.AgreementId;
+                                payment.Status = "EP001";
+                                payment.Type = pPaymentConcepts.Transaction.Type;
+                                payment.OriginPayment = transaction.OriginPayment;
+                                payment.PayMethod = transaction.PayMethod;
+                                payment.TransactionFolio = transaction.Folio;
+                                payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
+                                _context.Payments.Add(payment);
+                                await _context.SaveChangesAsync();
+                            }
+                            else {
+                                //se modifica estado de pago
+                                payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
+                                                                                 x.AgreementId == pPaymentConcepts.Transaction.AgreementId).FirstOrDefaultAsync();
+                                payment.Status = "EP002";
+                                _context.Entry(payment).State = EntityState.Modified;
+                                await _context.SaveChangesAsync();
+                            }
+
+
+                            //Movimientos a deuda
                             foreach (var debt in pPaymentConcepts.Debt)
                             {
                                 //Recibo a pagar
                                 var deuda = await _context.Debts.FindAsync(debt.Id);
 
-                                //PAGO
+                                //Pago deuda
                                 if (transaction.TypeTransaction.Id == 3)
                                 {
                                     if (deuda.OnAccount  + debt.OnAccount> deuda.Amount)
@@ -247,28 +293,7 @@ namespace Siscom.Agua.Api.Controllers
                                         DebtId = debt.Id
                                     };
                                     _context.DebtStatuses.Add(status);
-                                    await _context.SaveChangesAsync();
-                                    
-                                    //Inserta pago
-                                    await _context.Payments.AddAsync(new Payment
-                                    {
-                                        PaymentDate = transaction.DateTransaction,
-                                        BranchOffice = terminalUser.Terminal.BranchOffice.Name,
-                                        Subtotal = debt.OnAccount,
-                                        PercentageTax = debt.PercentageTax,
-                                        Tax = debt.Tax,
-                                        Rounding = Math.Truncate(debt.Rounding * 100) / 100,
-                                        Total = debt.OnAccount + debt.Tax + Math.Truncate((Convert.ToDouble(debt.Rounding)) * 100) / 100,
-                                        AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
-                                        AgreementId = debt.AgreementId,
-                                        Status = "EP001",
-                                        Type = pPaymentConcepts.Transaction.Type,
-                                        OriginPayment = transaction.OriginPayment,
-                                        PayMethod = transaction.PayMethod,
-                                        TransactionFolio = transaction.Folio,                                       
-                                        ExternalOriginPayment = transaction.ExternalOriginPayment,
-                                    });
-                                    await _context.SaveChangesAsync();
+                                    await _context.SaveChangesAsync();                                    
 
                                 }
                                 else //Cancelación
@@ -314,48 +339,45 @@ namespace Siscom.Agua.Api.Controllers
                                         DebtId = debt.Id
                                     };
                                     _context.DebtStatuses.Add(status);
-                                    await _context.SaveChangesAsync();
-
-                                    //se modifica estado de pago
-                                    var payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
-                                                                                     x.AgreementId == debt.AgreementId).FirstOrDefaultAsync();
-                                    payment.Status = "EP002";
-                                    _context.Entry(payment).State = EntityState.Modified;
-                                    await _context.SaveChangesAsync();
+                                    await _context.SaveChangesAsync();                                    
                                 }
 
                                 //Conceptos
                                 foreach (var detail in debt.DebtDetails)
                                 {
-                                    //Ingro de detalle de transacción
-                                    TransactionDetail transactionDetail = new TransactionDetail();
-                                    transactionDetail.CodeConcept = detail.CodeConcept;
-                                    transactionDetail.amount = detail.OnAccount;
-                                    transactionDetail.Description = detail.NameConcept;
-                                    transactionDetail.Transaction = transaction;
-                                    _context.TransactionDetails.Add(transactionDetail);
-                                    await _context.SaveChangesAsync();
-
                                     var conceptos = await _context.DebtDetails.Where(x => x.DebtId == debt.Id &&
-                                                                                          x.Id == detail.Id).FirstOrDefaultAsync();
+                                                                                     x.Id == detail.Id).FirstOrDefaultAsync();
 
+                                    //Pago a conceptos
                                     if (transaction.TypeTransaction.Id == 3)
                                     {
-                                        if(conceptos.OnAccount + detail.OnAccount > conceptos.Amount)
+                                        if (conceptos.OnAccount + detail.OnAccount > conceptos.Amount)
                                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
 
                                         conceptos.OnAccount = conceptos.OnAccount + detail.OnAccount;
                                     }
-                                    else {
-                                        if (conceptos.OnAccount- detail.OnAccount < 0)
+                                    else
+                                    {
+                                        if (conceptos.OnAccount - detail.OnAccount < 0)
                                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
                                         conceptos.OnAccount = conceptos.OnAccount - detail.OnAccount;
-                                    }                                        
+                                    }
 
                                     _context.Entry(conceptos).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
+
+                                    PaymentDetail paymentDetail = new PaymentDetail();
+                                    paymentDetail.CodeConcept = detail.CodeConcept;
+                                    paymentDetail.amount = detail.OnAccount;
+                                    paymentDetail.Description = detail.NameConcept;
+                                    paymentDetail.DebtId = debt.Id;
+                                    paymentDetail.PrepaidId = 0;
+                                    paymentDetail.PrepaidId = payment.Id;
+                                    _context.PaymentDetails.Add(paymentDetail);
+                                    await _context.SaveChangesAsync();
                                 }
                             }
+
 
                             //Toma folio
                             Folio folio = new Folio();

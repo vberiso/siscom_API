@@ -19,6 +19,12 @@ namespace Siscom.Agua.DAL.Models
         public string Description { get; set; }
         [Column("observation")]
         public string Observation { get; set; }
+        [Column("visible"), Required]
+        public bool Visible { get; set; }
+        [Column("old_value"), Required]
+        public string OldValue { get; set; }
+        [Column("new_value"), Required]
+        public string NewValue { get; set; }
 
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }

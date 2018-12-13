@@ -48,16 +48,6 @@ namespace Siscom.Agua.DAL.Models
         [Column("DebtPeriodId")]
         public int? DebtPeriodId { get; set; }
 
-        [NotMapped]
-        public string PercentageTax { get; set; }
-        [NotMapped]
-        public double Tax { get; set; }
-        [NotMapped]
-        public double Rounding { get; set; }
-        [NotMapped]
-        public double Total { get; set; }
-
-
         //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
