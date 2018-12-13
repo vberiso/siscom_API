@@ -86,6 +86,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ti => ti.TypeIntake)
                                       .Include(di => di.Diameter)
+                                      .Include(tc => tc.TypeClassification)
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ags => ags.AgreementServices)
                                         .ThenInclude(x => x.Service)
@@ -338,20 +339,20 @@ namespace Siscom.Agua.Api.Controllers
                             c.Name = x.Name;
                             c.SecondLastName = x.SecondLastName;
                             c.LastName = x.LastName;
-                            c.INE = x.INE;
+                            c.INE = (x.INE == "") ? (c.INE != null) ? c.INE : "" : x.INE; 
                             c.RFC = x.RFC;
                             c.IsActive = true;
                             c.TypeUser = x.TypeUser;
-                            c.CURP = (x.CURP == "") ? (c.CURP != "") ? c.CURP : "" : x.CURP;
+                            c.CURP = (x.CURP == "") ? (c.CURP != null) ? c.CURP : "" : x.CURP;
                             c.EMail = x.EMail;
-                            c.Contacts.ToList().ForEach(co =>
+                            x.Contacts.ToList().ForEach(co =>
                             {
                                 Contact con = _context.Contacts.Find(co.Id);
                                 con.IsActive = co.IsActive;
                                 con.PhoneNumber = co.PhoneNumber;
                                 con.TypeNumber = co.TypeNumber;
-                                _context.Entry(con).State = EntityState.Modified;
-                                _context.SaveChanges();
+                                //_context.Entry(con).State = EntityState.Modified;
+                                //_context.SaveChanges();
                             });
                             _context.Entry(c).State = EntityState.Modified;
                             _context.SaveChanges();
@@ -838,7 +839,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
             }
 
-            if(agreement.AgreementDiscounts.Count > 1)
+            if(agreement.AgreementDiscounts.Count > 1)//suspendido
             {
                 //if(agreement.AgreementDiscounts.)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asigamr mas de un descuento, favor de verificar" });
@@ -993,6 +994,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ti => ti.TypeIntake)
                                       .Include(di => di.Diameter)
+                                      .Include(tc => tc.TypeClassification)
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ags => ags.AgreementServices)
                                         .ThenInclude(x => x.Service)
@@ -1032,6 +1034,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ti => ti.TypeIntake)
                                       .Include(di => di.Diameter)
+                                      .Include(tc => tc.TypeClassification)
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ags => ags.AgreementServices)
                                         .ThenInclude(x => x.Service)
