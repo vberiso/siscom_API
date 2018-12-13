@@ -282,7 +282,7 @@ namespace Siscom.Agua.Api.Controllers
                                 //Pago deuda
                                 if (transaction.TypeTransaction.Id == 3)
                                 {
-                                    if (deuda.OnAccount  + debt.OnAccount> deuda.Amount)
+                                    if (debt.OnAccount- deuda.OnAccount > deuda.Amount)
                                         return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
 
                                     deuda.Status = pPaymentConcepts.Transaction.DebtStatus;
@@ -357,7 +357,7 @@ namespace Siscom.Agua.Api.Controllers
                                     //Pago a conceptos
                                     if (transaction.TypeTransaction.Id == 3)
                                     {
-                                        if (conceptos.OnAccount + detail.OnAccount > conceptos.Amount)
+                                        if (detail.OnAccount - conceptos.OnAccount > conceptos.Amount)
                                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
 
                                         conceptos.OnAccount = conceptos.OnAccount + detail.OnAccount;
