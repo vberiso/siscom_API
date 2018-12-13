@@ -169,18 +169,15 @@ namespace Siscom.Agua.Api.Controllers
 
                 pPaymentConcepts.Debt.ToList().ForEach(x =>
                 {
-                sumDebt += x.OnAccount;
+                    sumDebt += x.OnAccount;
 
-                sumDetail = 0;
-                x.DebtDetails.ToList().ForEach(y =>
-                {
-                    sumDetail += y.OnAccount;
-                });
-                if (Math.Truncate(sumDetail * 100) / 100 != Math.Truncate(x.OnAccount * 100) / 100)
-                    _validation = false;
-
-                var w = Math.Truncate(sumDetail * 100) / 100;
-                var z = Math.Truncate(x.OnAccount * 100) / 100;
+                    sumDetail = 0;
+                    x.DebtDetails.ToList().ForEach(y =>
+                    {
+                        sumDetail += y.OnAccount;
+                    });
+                    if (Math.Truncate(sumDetail * 100) / 100 != Math.Truncate(x.OnAccount * 100) / 100)
+                        _validation = false;
 
                 });
 
@@ -223,7 +220,7 @@ namespace Siscom.Agua.Api.Controllers
 
                             foreach (var tDetail in pPaymentConcepts.Transaction.transactionDetails)
                             {
-                                //Ingro de detalle de transacción
+                                //Ingreso de detalle de transacción
                                 TransactionDetail transactionDetail = new TransactionDetail();
                                 transactionDetail.CodeConcept = tDetail.CodeConcept;
                                 transactionDetail.amount = tDetail.amount;
@@ -232,7 +229,6 @@ namespace Siscom.Agua.Api.Controllers
                                 _context.TransactionDetails.Add(transactionDetail);
                                 await _context.SaveChangesAsync();                               
                             }
-
 
                             await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
@@ -372,7 +368,7 @@ namespace Siscom.Agua.Api.Controllers
                                     paymentDetail.Description = detail.NameConcept;
                                     paymentDetail.DebtId = debt.Id;
                                     paymentDetail.PrepaidId = 0;
-                                    paymentDetail.PrepaidId = payment.Id;
+                                    paymentDetail.PaymentId = payment.Id;
                                     _context.PaymentDetails.Add(paymentDetail);
                                     await _context.SaveChangesAsync();
                                 }
@@ -559,7 +555,7 @@ namespace Siscom.Agua.Api.Controllers
                             transactionDetail.Description = "PAGO ANTICIPADO";
                             transactionDetail.Transaction = transaction;
                             _context.TransactionDetails.Add(transactionDetail);
-                            await _context.SaveChangesAsync();
+                            await _context.SaveChangesAsync();                           
 
                             //PAGO
                             if (transaction.TypeTransaction.Id == 3)
@@ -574,27 +570,34 @@ namespace Siscom.Agua.Api.Controllers
                                 await _context.SaveChangesAsync();
 
                                 //Inserta pago
-                                await _context.Payments.AddAsync(new Payment
-                                {
-                                    PaymentDate = transaction.DateTransaction,
-                                    BranchOffice = terminalUser.Terminal.BranchOffice.Name,
-                                    Subtotal = transaction.Amount,
-                                    PercentageTax = pTransactionVM.PercentageTax,
-                                    Tax = transaction.Tax,
-                                    Total = transaction.Amount + transaction.Tax + transaction.Rounding,
-                                    AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
-                                    AgreementId = prepaid.AgreementId,
-                                    Status = "EP001",
-                                    Type = pTransactionVM.Type,
-                                    OriginPayment = transaction.OriginPayment,
-                                    PayMethod = transaction.PayMethod,
-                                    TransactionFolio = transaction.Folio,
-                                    Rounding = transaction.Rounding,
-                                    ExternalOriginPayment = transaction.ExternalOriginPayment,
-                                });
+                                Payment payment = new Payment();
+                                payment.PaymentDate = transaction.DateTransaction;
+                                payment.BranchOffice = terminalUser.Terminal.BranchOffice.Name;
+                                payment.Subtotal = transaction.Amount;
+                                payment.PercentageTax = pTransactionVM.PercentageTax;
+                                payment.Tax = transaction.Tax;
+                                payment.Total = transaction.Amount + transaction.Tax + transaction.Rounding;
+                                payment.AuthorizationOriginPayment = transaction.AuthorizationOriginPayment;
+                                payment.AgreementId = prepaid.AgreementId;
+                                payment.Status = "EP001";
+                                payment.Type = pTransactionVM.Type;
+                                payment.OriginPayment = transaction.OriginPayment;
+                                payment.PayMethod = transaction.PayMethod;
+                                payment.TransactionFolio = transaction.Folio;
+                                payment.Rounding = transaction.Rounding;
+                                payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
+                                
                                 await _context.SaveChangesAsync();
 
-                               
+                                PaymentDetail paymentDetail = new PaymentDetail();
+                                paymentDetail.CodeConcept = "ANT01";
+                                paymentDetail.amount = transaction.Amount;
+                                paymentDetail.Description = "PAGO ANTICIPADO";
+                                paymentDetail.DebtId =0;
+                                paymentDetail.PrepaidId = prepaid.Id;
+                                paymentDetail.PaymentId = payment.Id;
+                                _context.PaymentDetails.Add(paymentDetail);
+                                await _context.SaveChangesAsync();
 
                             }
                             else //Cancelación
