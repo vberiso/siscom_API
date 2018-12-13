@@ -181,7 +181,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 });
 
-                if (pPaymentConcepts.Transaction.Amount != sumDebt)
+                if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumDebt * 100) / 100)
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
                 if (!_validation)
