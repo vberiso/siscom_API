@@ -482,26 +482,6 @@ namespace Siscom.Agua.Api.Controllers
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el contrato" });
             }
-            
-            //agreement
-            //_context.Entry(agreementvm).State = EntityState.Modified;
-
-            //try
-            //{
-            //    await _context.SaveChangesAsync();
-            //}
-            //catch (DbUpdateConcurrencyException)
-            //{
-            //    if (!AgreementExists(id))
-            //    {
-            //        return NotFound();
-            //    }
-            //    else
-            //    {
-            //        throw;
-            //    }
-            //}
-
             return NoContent();
         }
 
@@ -834,7 +814,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
             }
 
-            if(agreement.TypeStateService.Id != 1)
+            if(agreement.TypeStateService.Id != 1 && agreement.TypeStateService.Id != 3)
             {
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
             }
@@ -844,6 +824,11 @@ namespace Siscom.Agua.Api.Controllers
                 //if(agreement.AgreementDiscounts.)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asigamr mas de un descuento, favor de verificar" });
             }
+
+            AgreementDiscount agreementDiscount = new AgreementDiscount();
+            agreementDiscount.Agreement = agreement;
+            agreementDiscount.Discount = discount;
+            agreementDiscount.StartDate = DateTime.UtcNow.ToLocalTime();
             
             return Ok();
         }

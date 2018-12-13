@@ -211,7 +211,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             //Transacción en caja
                             transaction.Folio = Guid.NewGuid().ToString("D");
-                            transaction.DateTransaction = DateTime.Now;
+                            transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
                             transaction.Sign = pPaymentConcepts.Transaction.Sign;
                             transaction.Amount = pPaymentConcepts.Transaction.Amount;
                             transaction.Aplication = pPaymentConcepts.Transaction.Aplication;
@@ -393,7 +393,7 @@ namespace Siscom.Agua.Api.Controllers
 
                             TransactionFolio transactionFolio = new TransactionFolio();
                             transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
-                            transactionFolio.DatePrint = DateTime.Now;
+                            transactionFolio.DatePrint = DateTime.UtcNow.ToLocalTime();
                             transactionFolio.Transaction = transaction;
                             _context.TransactionFolios.Add(transactionFolio);
                             await _context.SaveChangesAsync();
@@ -409,7 +409,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         SystemLog systemLog = new SystemLog();
                         systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                        systemLog.DateLog = DateTime.Now;
+                        systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                         systemLog.Controller = "TransactionController";
                         systemLog.Action = "PostTransaction";
                         systemLog.Parameter = JsonConvert.SerializeObject(pPaymentConcepts);
@@ -540,7 +540,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             //Transacción en caja
                             transaction.Folio = Guid.NewGuid().ToString("D");
-                            transaction.DateTransaction = DateTime.Now;
+                            transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
                             transaction.Sign = pTransactionVM.Sign;
                             transaction.Amount = pTransactionVM.Amount;
                             transaction.Aplication = pTransactionVM.Aplication;
@@ -641,7 +641,7 @@ namespace Siscom.Agua.Api.Controllers
 
                             TransactionFolio transactionFolio = new TransactionFolio();
                             transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
-                            transactionFolio.DatePrint = DateTime.Now;
+                            transactionFolio.DatePrint = DateTime.UtcNow.ToLocalTime();
                             transactionFolio.Transaction = transaction;
                             _context.TransactionFolios.Add(transactionFolio);
                             await _context.SaveChangesAsync();
@@ -657,7 +657,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         SystemLog systemLog = new SystemLog();
                         systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                        systemLog.DateLog = DateTime.Now;
+                        systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                         systemLog.Controller = "TransactionController";
                         systemLog.Action = "PostTransaction";
                         systemLog.Parameter = JsonConvert.SerializeObject(pTransactionVM);
@@ -827,7 +827,7 @@ namespace Siscom.Agua.Api.Controllers
                         using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                         {
                             transaction.Folio = Guid.NewGuid().ToString("D");
-                            transaction.DateTransaction = DateTime.Now;
+                            transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
                             transaction.Sign = pTransaction.Sign;
                             transaction.Amount = pTransaction.Amount;
                             transaction.Aplication = pTransaction.Aplication;
@@ -858,7 +858,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         SystemLog systemLog = new SystemLog();
                         systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                        systemLog.DateLog = DateTime.Now;
+                        systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                         systemLog.Controller = "TransactionController";
                         systemLog.Action = "PostTransaction";
                         systemLog.Parameter = JsonConvert.SerializeObject(pTransaction);
