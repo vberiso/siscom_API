@@ -260,7 +260,7 @@ namespace Siscom.Agua.Api.Controllers
                                         Rounding = Math.Truncate(debt.Rounding * 100) / 100,
                                         Total = debt.OnAccount + debt.Tax + Math.Truncate((Convert.ToDouble(debt.Rounding)) * 100) / 100,
                                         AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
-                                        DebtId = debt.Id,
+                                        AgreementId = debt.AgreementId,
                                         Status = "EP001",
                                         Type = pPaymentConcepts.Transaction.Type,
                                         OriginPayment = transaction.OriginPayment,
@@ -318,7 +318,7 @@ namespace Siscom.Agua.Api.Controllers
 
                                     //se modifica estado de pago
                                     var payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
-                                                                                     x.DebtId == debt.Id).FirstOrDefaultAsync();
+                                                                                     x.AgreementId == debt.AgreementId).FirstOrDefaultAsync();
                                     payment.Status = "EP002";
                                     _context.Entry(payment).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
@@ -561,7 +561,7 @@ namespace Siscom.Agua.Api.Controllers
                                     Tax = transaction.Tax,
                                     Total = transaction.Amount + transaction.Tax + transaction.Rounding,
                                     AuthorizationOriginPayment = transaction.AuthorizationOriginPayment,
-                                    DebtId = prepaid.Id,
+                                    AgreementId = prepaid.AgreementId,
                                     Status = "EP001",
                                     Type = pTransactionVM.Type,
                                     OriginPayment = transaction.OriginPayment,
@@ -580,7 +580,7 @@ namespace Siscom.Agua.Api.Controllers
                                 //se modifica estado de pago
                                 var payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio).FirstOrDefaultAsync();
 
-                                prepaid = await _context.Prepaids.Where(x => x.Id == payment.DebtId).FirstAsync();
+                                prepaid = await _context.Prepaids.Where(x => x.Id == payment.AgreementId).FirstAsync();
 
                                 if (prepaid == null)
                                     return NotFound();

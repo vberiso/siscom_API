@@ -12,6 +12,8 @@
     <Compile Remove="Migrations\20181210190901_Tariff.cs" />
     <Compile Remove="Migrations\20181211185236_PrepaidDetail.cs" />
     <Compile Remove="Migrations\20181211211854_XX.cs" />
+    <Compile Remove="Migrations\20181213164128_PaymentDetail.cs" />
+    <Compile Remove="Migrations\20181213164314_PaymentDetail.cs" />
   </ItemGroup>
   
   <ItemGroup>

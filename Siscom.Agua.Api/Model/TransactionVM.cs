@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Siscom.Agua.DAL.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,5 +26,7 @@ namespace Siscom.Agua.Api.Model
         public int ExternalOriginPaymentId { get; set; }
         public string Type { get; set; }
         public string DebtStatus { get; set; }
+
+        public List<TransactionDetail> transactionDetails { get; set; }
     }
 }

@@ -102,7 +102,7 @@ namespace Siscom.Agua.DAL
         public DbSet<OriginPayment> OriginPayments { get; set; }
         public DbSet<ExternalOriginPayment> ExternalOriginPayments { get; set; }
         public DbSet<Payment> Payments { get; set; }
-
+        public DbSet<PaymentDetail> PaymentDetails { get; set; }
 
         /// <summary>
         /// System
@@ -404,6 +404,13 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.PayMethodId);
             #endregion
 
+            #region PaymentDetail
+            builder.Entity<PaymentDetail>()
+                   .HasOne<Payment>(a => a.Payment)
+                   .WithMany(s => s.PaymentDetails)
+                   .HasForeignKey(s => s.PaymentId);
+            #endregion
+
             #region Prepaid
             builder.Entity<Prepaid>()
                    .HasOne<Agreement>(a => a.Agreement)
@@ -411,7 +418,7 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.AgreementId);
             #endregion
 
-            #region Prepaid
+            #region PrepaidDetail
             builder.Entity<PrepaidDetail>()
                    .HasOne<Prepaid>(a => a.Prepaid)
                    .WithMany(s => s.PrepaidDetails)

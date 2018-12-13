@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Payment")]
     public class Payment
     {
+        public Payment()
+        {
+            PaymentDetails = new HashSet<PaymentDetail>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_payment")]
@@ -32,8 +37,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("transaction_folio"), StringLength(40)]
         public string TransactionFolio { get; set; }
 
-        [Column("id_debt"), Required]
-        public int DebtId { get; set; }
+        [Column("id_agreement"), Required]
+        public int AgreementId { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
         [Column("type"), StringLength(5), Required]
@@ -50,5 +55,7 @@ namespace Siscom.Agua.DAL.Models
         //[ForeignKey("PayMethod")]
         public int PayMethodId { get; set; }
         public PayMethod PayMethod { get; set; }
+
+        public ICollection<PaymentDetail> PaymentDetails { get; set; }
     }
 }
