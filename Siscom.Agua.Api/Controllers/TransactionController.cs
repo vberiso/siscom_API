@@ -164,8 +164,18 @@ namespace Siscom.Agua.Api.Controllers
                 }
 
                 //Validación de montos a cuenta
-                //double sumDebt = 0;
-                //double sumDetail = 0;
+                double sumDebt = 0;
+                double sumDetail = 0;
+                double sumTDetail = 0;
+
+
+                pPaymentConcepts.Transaction.transactionDetails.ToList().ForEach(x =>
+                {
+                    sumTDetail += x.amount;                   
+                });
+                if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumTDetail * 100) / 100)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de transacción no coinciden") });
+
 
                 //pPaymentConcepts.Debt.ToList().ForEach(x =>
                 //{
@@ -181,11 +191,11 @@ namespace Siscom.Agua.Api.Controllers
 
                 //});
 
-                if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumDebt * 100) / 100)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                //if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumDebt * 100) / 100)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
-                if (!_validation)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                //if (!_validation)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
                 if (_validation)
                 {
