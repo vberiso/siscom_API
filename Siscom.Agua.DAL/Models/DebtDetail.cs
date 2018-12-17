@@ -13,12 +13,12 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_debt_detail"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Column("amount"), Required]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
         [Column("on_account"), Required]
-        public double OnAccount { get; set; }
+        public decimal OnAccount { get; set; }
         [NotMapped]
         [Column("on_payment"), Required]
-        public double OnPayment { get; set; }
+        public decimal OnPayment { get; set; }
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }
         [Required, StringLength(5), Column("code_concept")]

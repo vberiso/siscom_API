@@ -269,6 +269,19 @@ namespace Siscom.Agua.DAL
                    .HasOne<Meter>(a => a.Meter)
                    .WithMany(s => s.Consumptions)
                    .HasForeignKey(s => s.MeterId);
+
+            builder.Entity<Consumption>()
+                   .Property(p => p.PreviousConsumption)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Consumption>()
+                   .Property(p => p.CurrentConsumption)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Consumption>()
+                   .Property(p => p.consumption)
+                   .HasColumnType("decimal(18, 2)");
+
             #endregion
 
             #region Contact
@@ -280,17 +293,40 @@ namespace Siscom.Agua.DAL
 
             #region Debt
             builder.Entity<Debt>()
-                .HasOne<Agreement>(a => a.Agreement)
-                .WithMany(s => s.Debts)
-                .HasForeignKey(s => s.AgreementId);
+                   .HasOne<Agreement>(a => a.Agreement)
+                   .WithMany(s => s.Debts)
+                   .HasForeignKey(s => s.AgreementId);
 
             builder.Entity<Debt>()
-              .Property(x => x.FromDate)
-              .HasColumnType("date");
+                   .Property(x => x.FromDate)
+                   .HasColumnType("date");
 
             builder.Entity<Debt>()
-               .Property(x => x.UntilDate)
-               .HasColumnType("date");
+                   .Property(x => x.UntilDate)
+                   .HasColumnType("date");
+
+            builder.Entity<Debt>()
+                   .Property(p => p.Amount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Debt>()
+                   .Property(p => p.OnAccount)
+                   .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region DebtDetail
+            builder.Entity<DebtDetail>()
+                   .HasOne<Debt>(a => a.Debt)
+                   .WithMany(s => s.DebtDetails)
+                   .HasForeignKey(s => s.DebtId);
+
+            builder.Entity<DebtDetail>()
+                   .Property(p => p.Amount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DebtDetail>()
+                   .Property(p => p.OnAccount)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region DebtPeriod
@@ -311,18 +347,19 @@ namespace Siscom.Agua.DAL
                 .HasColumnType("time");
             #endregion
 
-            #region DebtDetail
-            builder.Entity<DebtDetail>()
-                   .HasOne<Debt>(a => a.Debt)
-                   .WithMany(s => s.DebtDetails)
-                   .HasForeignKey(s => s.DebtId);
-            #endregion
-
             #region DebtDiscount
             builder.Entity<DebtDiscount>()
                    .HasOne<Debt>(a => a.Debt)
                    .WithMany(s => s.DebtDiscounts)
                    .HasForeignKey(s => s.DebtId);
+
+            builder.Entity<DebtDiscount>()
+                   .Property(p => p.OriginalAmount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DebtDiscount>()
+                   .Property(p => p.DiscountAmount)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region DebtPrepaid           
@@ -330,6 +367,14 @@ namespace Siscom.Agua.DAL
                   .HasOne<PrepaidDetail>(a => a.PrepaidDetail)
                   .WithMany(s => s.DebtPrepaids)
                   .HasForeignKey(s => s.PrepaidDetailId);
+
+            builder.Entity<DebtPrepaid>()
+                  .Property(p => p.OriginalAmount)
+                  .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DebtPrepaid>()
+                  .Property(p => p.PaymentAmount)
+                  .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region DebtStatus
@@ -378,6 +423,22 @@ namespace Siscom.Agua.DAL
                    .HasOne<Agreement>(a => a.Agreement)
                    .WithMany(s => s.Notifications)
                    .HasForeignKey(s => s.AgreementId);
+
+            builder.Entity<Notification>()
+                  .Property(p => p.Subtotal)
+                  .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Notification>()
+                 .Property(p => p.Tax)
+                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Notification>()
+                 .Property(p => p.Rounding)
+                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Notification>()
+                 .Property(p => p.Total)
+                 .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region NotificationDetail
@@ -402,6 +463,22 @@ namespace Siscom.Agua.DAL
                    .HasOne<PayMethod>(a => a.PayMethod)
                    .WithMany(s => s.Payments)
                    .HasForeignKey(s => s.PayMethodId);
+
+            builder.Entity<Payment>()
+                 .Property(p => p.Subtotal)
+                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Payment>()
+                 .Property(p => p.Tax)
+                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Payment>()
+                 .Property(p => p.Rounding)
+                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Payment>()
+                .Property(p => p.Total)
+                .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region PaymentDetail
@@ -409,6 +486,10 @@ namespace Siscom.Agua.DAL
                    .HasOne<Payment>(a => a.Payment)
                    .WithMany(s => s.PaymentDetails)
                    .HasForeignKey(s => s.PaymentId);
+
+            builder.Entity<PaymentDetail>()
+               .Property(p => p.Amount)
+               .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region Prepaid
@@ -416,6 +497,14 @@ namespace Siscom.Agua.DAL
                    .HasOne<Agreement>(a => a.Agreement)
                    .WithMany(s => s.Prepaids)
                    .HasForeignKey(s => s.AgreementId);
+
+            builder.Entity<Prepaid>()
+                 .Property(p => p.Amount)
+                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Prepaid>()
+                 .Property(p => p.Accredited)
+                 .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region PrepaidDetail
@@ -423,6 +512,10 @@ namespace Siscom.Agua.DAL
                    .HasOne<Prepaid>(a => a.Prepaid)
                    .WithMany(s => s.PrepaidDetails)
                    .HasForeignKey(s => s.PrepaidId);
+
+            builder.Entity<PrepaidDetail>()
+                 .Property(p => p.Amount)
+                 .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region State
@@ -454,7 +547,10 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region SystemParameters
-           
+            builder.Entity<SystemParameters>()
+                 .Property(p => p.NumberColumn)
+                 .HasColumnType("decimal(18, 2)");
+
             #endregion
 
             #region Tariff
@@ -469,17 +565,29 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.TypeIntakeId);
 
             builder.Entity<Tariff>()
-                  .HasOne<TypeConsume>(a => a.TypeConsume)
-                  .WithMany(s => s.Tariffs)
-                  .HasForeignKey(s => s.TypeConsumeId);
+                   .HasOne<TypeConsume>(a => a.TypeConsume)
+                   .WithMany(s => s.Tariffs)
+                   .HasForeignKey(s => s.TypeConsumeId);
 
             builder.Entity<Tariff>()
-             .Property(x => x.FromDate)
-             .HasColumnType("date");
+                   .Property(x => x.FromDate)
+                   .HasColumnType("date");
 
             builder.Entity<Tariff>()
-              .Property(x => x.UntilDate)
-              .HasColumnType("date");
+                   .Property(x => x.UntilDate)
+                   .HasColumnType("date");
+
+            builder.Entity<Tariff>()
+                   .Property(p => p.Amount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Tariff>()
+                   .Property(p => p.StartConsume)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Tariff>()
+                   .Property(p => p.EndConsume)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region TariffProduct
@@ -487,6 +595,10 @@ namespace Siscom.Agua.DAL
                    .HasOne<Product>(a => a.Product)
                    .WithMany(s => s.TariffProducts)
                    .HasForeignKey(s => s.ProductId);
+
+            builder.Entity<TariffProduct>()
+                   .Property(p => p.Amount)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region Terminal
@@ -496,8 +608,12 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.BranchOfficeId);
 
             builder.Entity<Terminal>()
-               .Property(x => x.IsActive)
-               .HasDefaultValue(true);
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+
+            builder.Entity<Terminal>()
+                   .Property(p => p.CashBox)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region TerminalUser
@@ -552,6 +668,22 @@ namespace Siscom.Agua.DAL
                    .HasOne<ExternalOriginPayment>(a => a.ExternalOriginPayment)
                    .WithMany(s => s.Transactions)
                    .HasForeignKey(s => s.ExternalOriginPaymentId);
+
+            builder.Entity<Transaction>()
+                   .Property(p => p.Amount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Transaction>()
+                   .Property(p => p.Tax)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Transaction>()
+                   .Property(p => p.Rounding)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Transaction>()
+                   .Property(p => p.Total)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region TransactionDetail
@@ -559,6 +691,10 @@ namespace Siscom.Agua.DAL
                    .HasOne<Transaction>(a => a.Transaction)
                    .WithMany(s => s.TransactionDetails)
                    .HasForeignKey(s => s.TransactionId);
+
+            builder.Entity<TransactionDetail>()
+                   .Property(p => p.Amount)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region TransactionFolio

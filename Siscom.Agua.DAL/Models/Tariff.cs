@@ -22,7 +22,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("percentage"), Required]
         public Int16 Percentage { get; set; }
         [Column("amount"), Required]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
         [Column("from_date"), Required]
         public DateTime FromDate { get; set; }
         [Column("until_date"), Required]
@@ -30,9 +30,9 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public int IsActive { get; set; }
         [Column("start_consume")]
-        public double StartConsume { get; set; }
+        public decimal StartConsume { get; set; }
         [Column("end_consume")]
-        public double EndConsume { get; set; }
+        public decimal EndConsume { get; set; }
         [Required, Column("have_consume")]
         public bool HaveConsume { get; set; }
 

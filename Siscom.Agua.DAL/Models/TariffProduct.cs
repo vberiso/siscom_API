@@ -18,7 +18,7 @@ namespace Siscom.Agua.DAL.Models
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }       
         [Column("amount"), Required]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
         [Column("from_date"), Required]
         public DateTime FromDate { get; set; }
         [Column("until_date"), Required]

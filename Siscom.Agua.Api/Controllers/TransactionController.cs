@@ -234,7 +234,7 @@ namespace Siscom.Agua.Api.Controllers
                                 //Ingreso de detalle de transacción
                                 TransactionDetail transactionDetail = new TransactionDetail();
                                 transactionDetail.CodeConcept = tDetail.CodeConcept;
-                                transactionDetail.amount = tDetail.amount;
+                                transactionDetail.Amount = tDetail.Amount;
                                 transactionDetail.Description = tDetail.Description;
                                 transactionDetail.Transaction = transaction;
                                 _context.TransactionDetails.Add(transactionDetail);
@@ -375,7 +375,7 @@ namespace Siscom.Agua.Api.Controllers
 
                                     PaymentDetail paymentDetail = new PaymentDetail();
                                     paymentDetail.CodeConcept = detail.CodeConcept;
-                                    paymentDetail.amount = detail.OnPayment;
+                                    paymentDetail.Amount = detail.OnPayment;
                                     paymentDetail.Description = detail.NameConcept;
                                     paymentDetail.DebtId = debt.Id;
                                     paymentDetail.PrepaidId = 0;
@@ -562,7 +562,7 @@ namespace Siscom.Agua.Api.Controllers
 
                             TransactionDetail transactionDetail = new TransactionDetail();
                             transactionDetail.CodeConcept = "ANT01";
-                            transactionDetail.amount = transaction.Amount;
+                            transactionDetail.Amount = transaction.Amount;
                             transactionDetail.Description = "PAGO ANTICIPADO";
                             transactionDetail.Transaction = transaction;
                             _context.TransactionDetails.Add(transactionDetail);
@@ -602,7 +602,7 @@ namespace Siscom.Agua.Api.Controllers
 
                                 PaymentDetail paymentDetail = new PaymentDetail();
                                 paymentDetail.CodeConcept = "ANT01";
-                                paymentDetail.amount = transaction.Amount;
+                                paymentDetail.Amount = transaction.Amount;
                                 paymentDetail.Description = "PAGO ANTICIPADO";
                                 paymentDetail.DebtId =0;
                                 paymentDetail.PrepaidId = prepaid.Id;
@@ -692,10 +692,10 @@ namespace Siscom.Agua.Api.Controllers
             bool _validation = false;
             bool _open = false;
             bool _liquidada = false;
-            KeyValuePair<int, double> _fondoCaja = new KeyValuePair<int, Double>(0, 0);
-            KeyValuePair<int, double> _retirado = new KeyValuePair<int, Double>(0, 0);
-            KeyValuePair<int, double> _cobrado = new KeyValuePair<int, Double>(0, 0);
-            KeyValuePair<int, double> _cancelado = new KeyValuePair<int, Double>(0, 0);
+            KeyValuePair<int, decimal> _fondoCaja = new KeyValuePair<int, decimal>(0, 0);
+            KeyValuePair<int, decimal> _retirado = new KeyValuePair<int, decimal>(0, 0);
+            KeyValuePair<int, decimal> _cobrado = new KeyValuePair<int, decimal>(0, 0);
+            KeyValuePair<int, decimal> _cancelado = new KeyValuePair<int, decimal>(0, 0);
 
             if (!ModelState.IsValid)
             {
@@ -740,7 +740,7 @@ namespace Siscom.Agua.Api.Controllers
                     case 2://Fondo
                         if (pTransaction.TypeTransactionId == 2)
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });                        
-                        _fondoCaja = new KeyValuePair<int, Double>(_fondoCaja.Key + 1, item.Amount);
+                        _fondoCaja = new KeyValuePair<int, decimal>(_fondoCaja.Key + 1, item.Amount);
                         break;                    
                     case 5://Cierre
                         _open = false;
@@ -748,7 +748,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido cerrada" });
                         break;
                     case 6: //Retiro
-                        _retirado = new KeyValuePair<int, Double>(_retirado.Key + 1, item.Amount);
+                        _retirado = new KeyValuePair<int, decimal>(_retirado.Key + 1, item.Amount);
                         break;
                     case 7: //Liquidada
                         _liquidada = true;
@@ -763,7 +763,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if (_open)
             {
-                double _saldo=0;
+                decimal _saldo=0;
                 switch (pTransaction.TypeTransactionId)
                 {
                     case 1://apertura
@@ -846,7 +846,7 @@ namespace Siscom.Agua.Api.Controllers
                             {
                                 TransactionDetail transactionDetail = new TransactionDetail();
                                 transactionDetail.CodeConcept = pTransaction.TypeTransactionId.ToString();
-                                transactionDetail.amount = transaction.Amount;
+                                transactionDetail.Amount = transaction.Amount;
                                 transactionDetail.Description = _context.TypeTransactions.Find(pTransaction.TypeTransactionId).Name;
                                 transactionDetail.Transaction = transaction;
                                 _context.TransactionDetails.Add(transactionDetail);

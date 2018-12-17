@@ -18,7 +18,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("description"), StringLength(150)]
         public string Description { get; set; }
         [Column("amount"), Required]
-        public double amount { get; set; }
+        public decimal Amount { get; set; }
         [Column("id_debt"), Required]
         public int DebtId { get; set; }
         [Column("id_prepaid"), Required]

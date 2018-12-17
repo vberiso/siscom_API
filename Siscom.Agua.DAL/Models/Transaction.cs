@@ -26,13 +26,13 @@ namespace Siscom.Agua.DAL.Models
         [Column("sign"), Required]
         public bool Sign { get; set; }
         [Column("amount"), Required]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
         [Column("tax"), Required]
-        public double Tax { get; set; }
+        public decimal Tax { get; set; }
         [Column("rounding"), Required]
-        public double Rounding { get; set; }
+        public decimal Rounding { get; set; }
         [Column("total"), Required]
-        public double Total { get; set; }
+        public decimal Total { get; set; }
         [Column("aplication"), StringLength(20), Required]
         public string Aplication { get; set; }
         [Column("cancellation_folio"), StringLength(40)]

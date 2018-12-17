@@ -24,7 +24,7 @@ namespace Siscom.Agua.DAL.Models
         [Required, Column("type_column")]
         public Int16 TypeColumn { get; set; }
         [Column("number_column")]
-        public double NumberColumn { get; set; }
+        public decimal NumberColumn { get; set; }
         [Column("text_column")]
         public string TextColumn { get; set; }
         [Column("date_column")]

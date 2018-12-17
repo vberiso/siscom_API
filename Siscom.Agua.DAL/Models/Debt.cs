@@ -36,9 +36,9 @@ namespace Siscom.Agua.DAL.Models
         [Column("discount"), StringLength(50)]
         public string Discount { get; set; }
         [Column("amount"), Required]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
         [Column("on_account"), Required]
-        public double OnAccount { get; set; }
+        public decimal OnAccount { get; set; }
         [Column("year"), Required]
         public Int16 Year { get; set; }
         [Column("type"), StringLength(5), Required]

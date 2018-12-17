@@ -23,15 +23,15 @@ namespace Siscom.Agua.DAL.Models
         [Column("branch_office"), StringLength(20), Required]
         public string BranchOffice { get; set; }
         [Column("subtotal"), Required]
-        public double Subtotal { get; set; }
+        public decimal Subtotal { get; set; }
         [Column("percentage_tax"), StringLength(2)]
         public string PercentageTax { get; set; }
         [Column("tax"), Required]
-        public double Tax { get; set; }
+        public decimal Tax { get; set; }
         [Column("rounding"), Required]
-        public double Rounding { get; set; }
+        public decimal Rounding { get; set; }
         [Column("total"), Required]
-        public double Total { get; set; }
+        public decimal Total { get; set; }
         [Column("authorization_origin_payment"), StringLength(50)]
         public string AuthorizationOriginPayment { get; set; }        
         [Column("transaction_folio"), StringLength(40)]

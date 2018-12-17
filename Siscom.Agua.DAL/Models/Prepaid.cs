@@ -21,9 +21,9 @@ namespace Siscom.Agua.DAL.Models
         [Column("prepaid_date"), Required]
         public DateTime PrepaidDate { get; set; }
         [Column("amount"), Required]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
         [Column("accredited"), Required]
-        public double Accredited { get; set; }
+        public decimal Accredited { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
 

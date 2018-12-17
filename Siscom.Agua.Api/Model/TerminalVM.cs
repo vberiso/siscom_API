@@ -11,7 +11,7 @@ namespace Siscom.Agua.Api.Model
         public int Id { get; set; }
         [Required(ErrorMessage = "Mac Adress requerida")]
         public string MacAdress { get; set; }
-        public double CashBox { get; set; }
+        public decimal CashBox { get; set; }
         public bool IsActive { get; set; }
         [Required(ErrorMessage = "Sucursal requerida")]
         public int BranchOffice { get; set; }

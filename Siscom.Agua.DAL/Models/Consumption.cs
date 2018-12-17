@@ -15,11 +15,11 @@ namespace Siscom.Agua.DAL.Models
         [Column("consumption_date"), Required]
         public DateTime ConsumptionDate { get; set; }
         [Column("previous_consumption"), Required]
-        public double PreviousConsumption { get; set; }
+        public decimal PreviousConsumption { get; set; }
         [Column("current_consumption"), Required]
-        public double CurrentConsumption { get; set; }
+        public decimal CurrentConsumption { get; set; }
         [Column("consumption"), Required]
-        public double consumption { get; set; }
+        public decimal consumption { get; set; }
         [Column("is_active"), Required]
         public bool is_active { get; set; }
 

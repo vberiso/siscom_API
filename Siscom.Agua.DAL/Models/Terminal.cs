@@ -21,7 +21,7 @@ namespace Siscom.Agua.DAL.Models
         [Required, StringLength(20), Column("mac_adress")]
         public string MacAdress { get; set; }
         [Column("cash_box")]
-        public double CashBox { get; set; }
+        public decimal CashBox { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
 
