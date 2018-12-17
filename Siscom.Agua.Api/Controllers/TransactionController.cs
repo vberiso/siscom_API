@@ -169,12 +169,13 @@ namespace Siscom.Agua.Api.Controllers
                 double sumTDetail = 0;
 
 
-                pPaymentConcepts.Transaction.transactionDetails.ToList().ForEach(x =>
-                {
-                    sumTDetail += x.amount;                   
-                });
-                if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumTDetail * 100) / 100)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de transacción no coinciden") });
+              
+                //foreach (var item in pPaymentConcepts.Transaction.transactionDetails)
+                //{
+                //    sumTDetail += item.amount;
+                //}
+                //if (pPaymentConcepts.Transaction.Amount != sumTDetail)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de transacción no coinciden") });
 
 
                 //pPaymentConcepts.Debt.ToList().ForEach(x =>
@@ -357,7 +358,7 @@ namespace Siscom.Agua.Api.Controllers
                                     //Pago a conceptos
                                     if (transaction.TypeTransaction.Id == 3)
                                     {
-                                        if (detail.OnAccount - conceptos.OnAccount > conceptos.Amount)
+                                        if (detail.OnAccount - conceptos.OnAccount> conceptos.Amount)
                                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
 
                                         conceptos.OnAccount = conceptos.OnAccount + detail.OnAccount;
@@ -374,7 +375,7 @@ namespace Siscom.Agua.Api.Controllers
 
                                     PaymentDetail paymentDetail = new PaymentDetail();
                                     paymentDetail.CodeConcept = detail.CodeConcept;
-                                    paymentDetail.amount = detail.OnAccount;
+                                    paymentDetail.amount = detail.OnPayment;
                                     paymentDetail.Description = detail.NameConcept;
                                     paymentDetail.DebtId = debt.Id;
                                     paymentDetail.PrepaidId = 0;

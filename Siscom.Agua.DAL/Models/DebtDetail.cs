@@ -16,6 +16,9 @@ namespace Siscom.Agua.DAL.Models
         public double Amount { get; set; }
         [Column("on_account"), Required]
         public double OnAccount { get; set; }
+        [NotMapped]
+        [Column("on_payment"), Required]
+        public double OnPayment { get; set; }
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }
         [Required, StringLength(5), Column("code_concept")]
