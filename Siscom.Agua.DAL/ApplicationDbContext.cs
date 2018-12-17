@@ -120,6 +120,7 @@ namespace Siscom.Agua.DAL
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration) : base(options)
         {
             _configuration = configuration;
+            Database.SetCommandTimeout(150000);
         }
 
         //public override int SaveChanges()
