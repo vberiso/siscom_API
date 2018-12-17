@@ -15,6 +15,13 @@ namespace Siscom.Agua.Api.Model
         public Int16 Percentage { get; set; }
         [Required]
         public bool IsActive { get; set; }
+        [Required]
         public Int16 Mouths { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MMM/yyyy HH:mm:ss}")]
+        public DateTime? StartDate { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MMM/yyyy HH:mm:ss}")]
+        public DateTime? EndDate { get; set; }
+        [Required]
+        public bool InAgreement { get; set; }
     }
 }

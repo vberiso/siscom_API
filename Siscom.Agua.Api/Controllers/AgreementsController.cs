@@ -825,11 +825,37 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asigamr mas de un descuento, favor de verificar" });
             }
 
-            AgreementDiscount agreementDiscount = new AgreementDiscount();
-            agreementDiscount.Agreement = agreement;
-            agreementDiscount.Discount = discount;
-            agreementDiscount.StartDate = DateTime.UtcNow.ToLocalTime();
-            
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    AgreementDiscount agreementDiscount = new AgreementDiscount();
+                    agreementDiscount.Agreement = agreement;
+                    agreementDiscount.Discount = discount;
+                    agreementDiscount.IdAgreement = agreement.Id;
+                    agreementDiscount.IdDiscount = discount.Id;
+                    agreementDiscount.StartDate = DateTime.UtcNow.ToLocalTime();
+                    agreementDiscount.EndDate = DateTime.UtcNow.ToLocalTime().AddMonths(discount.Month);
+
+                    await _context.AgreementDiscounts.AddAsync(agreementDiscount);
+                    await _context.SaveChangesAsync();
+
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(agreementDiscountt);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el descuento" });
+
+            }
             return Ok();
         }
 

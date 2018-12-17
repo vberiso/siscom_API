@@ -75,6 +75,10 @@ namespace Siscom.Agua.Api.Controllers
             discount.Name = discountvm.Name;
             discount.Percentage = discountvm.Percentage;
             discount.Month = discountvm.Mouths;
+            discount.InAgreement = discountvm.InAgreement;
+            discount.StartDate = discountvm.StartDate;
+            discount.EndDate = discountvm.EndDate;
+
 
             _context.Entry(discount).State = EntityState.Modified;
 
@@ -118,10 +122,14 @@ namespace Siscom.Agua.Api.Controllers
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
+                    //if(discountvm.InAgreement)
                     discount.IsActive = discountvm.IsActive;
                     discount.Name = discountvm.Name;
                     discount.Percentage = discountvm.Percentage;
                     discount.Month = discountvm.Mouths;
+                    discount.InAgreement = discountvm.InAgreement;
+                    discount.StartDate = discountvm.StartDate;
+                    discount.EndDate = discountvm.EndDate;
 
                     _context.Discounts.Add(discount);
                     await _context.SaveChangesAsync();
