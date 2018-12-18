@@ -21,6 +21,8 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Required, StringLength(15), Column("name")]
         public string Name { get; set; }
+        [Column("is_active"), Required]
+        public bool IsActive { get; set; }
 
         public ICollection<Payment> Payments { get; set; }
         public ICollection<Transaction> Transactions { get; set; }

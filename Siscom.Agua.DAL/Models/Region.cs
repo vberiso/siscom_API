@@ -19,6 +19,8 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("name"), Required]
         public int Name { get; set; }
+        [Column("price"), Required]
+        public decimal Price { get; set; }
 
         public ICollection<Suburb> Suburbs { get; set; }
     }

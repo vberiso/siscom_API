@@ -21,6 +21,8 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
         [Required, StringLength(20), Column("description")]
         public string Description { get; set; }
+        [Column("is_active"), Required]
+        public bool IsActive { get; set; }
 
         public ICollection<Agreement> Agreements { get; set; }
     }

@@ -22,6 +22,8 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
         [Column("intake_acronym"), StringLength(2), Required]
         public string IntakeAcronym { get; set; }
+        [Column("is_active"), Required]
+        public bool IsActive { get; set; }
 
         public ICollection<Agreement> Agreements { get; set; }
     }

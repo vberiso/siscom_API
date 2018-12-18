@@ -23,6 +23,8 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
         [Required, Column("is_bank")]
         public bool IsBank { get; set; }
+        [Column("is_active"), Required]
+        public bool IsActive { get; set; }
 
         public ICollection<Payment> Payments { get; set; }
         public ICollection<Transaction> Transactions { get; set; }

@@ -95,6 +95,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Product> Products { get; set; }
         public DbSet<DebtDiscount> DebtDiscounts { get; set; }
         public DbSet<DebtPrepaid> DebtPrepaids { get; set; }
+        public DbSet<INPC> INPCs { get; set; }
 
         /// <summary> 
         /// Payment
@@ -313,6 +314,10 @@ namespace Siscom.Agua.DAL
             builder.Entity<Debt>()
                    .Property(p => p.OnAccount)
                    .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Debt>()
+                  .Property(x => x.ExpirationDate)
+                  .HasColumnType("date");
             #endregion
 
             #region DebtDetail
@@ -346,6 +351,10 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtPeriod>()
                 .Property(x => x.RunHour)
                 .HasColumnType("time");
+
+            builder.Entity<DebtPeriod>()
+                  .Property(x => x.ExpirationDate)
+                  .HasColumnType("date");
             #endregion
 
             #region DebtDiscount
@@ -392,6 +401,18 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.AgreementId);
             #endregion
 
+            #region Diameter
+            builder.Entity<Diameter>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region ExternalOriginPayment
+            builder.Entity<ExternalOriginPayment>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
             #region Folio
             builder.Entity<Folio>()
                    .HasOne<BranchOffice>(a => a.BranchOffice)
@@ -402,6 +423,16 @@ namespace Siscom.Agua.DAL
                .Property(x => x.DateCurrent)
                .HasDefaultValue(System.DateTime.Now);
 
+            #endregion
+
+            #region INPC
+            builder.Entity<INPC>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+
+            builder.Entity<INPC>()
+                  .Property(p => p.Value)
+                  .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region Meter
@@ -449,6 +480,12 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.NotificationId);
             #endregion
 
+            #region OriginPayment
+            builder.Entity<OriginPayment>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
             #region Payment
             builder.Entity<Payment>()
                    .HasOne<OriginPayment>(a => a.OriginPayment)
@@ -493,6 +530,12 @@ namespace Siscom.Agua.DAL
                .HasColumnType("decimal(18, 2)");
             #endregion
 
+            #region Region  
+            builder.Entity<PayMethod>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
             #region Prepaid
             builder.Entity<Prepaid>()
                    .HasOne<Agreement>(a => a.Agreement)
@@ -516,6 +559,12 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<PrepaidDetail>()
                  .Property(p => p.Amount)
+                 .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region Region  
+            builder.Entity<Region>()
+                 .Property(p => p.Price)
                  .HasColumnType("decimal(18, 2)");
             #endregion
 
@@ -710,6 +759,66 @@ namespace Siscom.Agua.DAL
                    .HasOne<GroupType>(a => a.GroupType)
                    .WithMany(s => s.Types)
                    .HasForeignKey(s => s.GroupTypeId);
+            #endregion
+
+            #region TypeClassification
+            builder.Entity<TypeClassification>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypeCommercialBusiness
+            builder.Entity<TypeCommercialBusiness>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypeConsume
+            builder.Entity<TypeConsume>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypeIntake
+            builder.Entity<TypeIntake>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypePeriod
+            builder.Entity<TypePeriod>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypeRegime
+            builder.Entity<TypeRegime>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypeService
+            builder.Entity<TypeService>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypeStateService
+            builder.Entity<TypeStateService>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypeTransaction
+            builder.Entity<TypeTransaction>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TypeUse
+            builder.Entity<TypeUse>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
             #endregion
 
             #region ViewProfile

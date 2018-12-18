@@ -6,23 +6,20 @@ using System.Text;
 
 namespace Siscom.Agua.DAL.Models
 {
-    [Table("Type_State_Service")]
-    public class TypeStateService
+    [Table("INPC")]
+    public class INPC
     {
-        public TypeStateService()
-        {
-            Agreements = new HashSet<Agreement>();
-        }
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id_type_state_service")]
+        [Column("id_inpc")]
         public int Id { get; set; }
-        [Required, StringLength(10), Column("name")]
-        public string Name { get; set; }
+        [Column("year"), Required]
+        public Int16 Year { get; set; }
+        [Column("month"), Required]
+        public Int16 Month { get; set; }
+        [Column("value"), Required]
+        public decimal Value { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
-
-        public ICollection<Agreement> Agreements { get; set; }
     }
 }

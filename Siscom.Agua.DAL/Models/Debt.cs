@@ -50,6 +50,8 @@ namespace Siscom.Agua.DAL.Models
         public string Status { get; set; }
         [Column("DebtPeriodId")]
         public int? DebtPeriodId { get; set; }
+        [Column("expiration_date"), Required]
+        public DateTime ExpirationDate { get; set; }
 
         //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }

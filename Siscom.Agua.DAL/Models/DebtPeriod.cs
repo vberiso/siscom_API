@@ -23,6 +23,8 @@ namespace Siscom.Agua.DAL.Models
         public DateTime RunDate { get; set; }
         [Column("run_hour"), Required]
         public TimeSpan RunHour { get; set; }
+        [Column("expiration_date"), Required]
+        public DateTime ExpirationDate { get; set; }
 
         public TypePeriod TypePeriod { get; set; }
     }
