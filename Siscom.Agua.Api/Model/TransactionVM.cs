@@ -25,7 +25,7 @@ namespace Siscom.Agua.Api.Model
         public int OriginPaymentId { get; set; }
         public int ExternalOriginPaymentId { get; set; }
         public string Type { get; set; }
-        public string DebtStatus { get; set; }
+        public string PaytStatus { get; set; }
         public int AgreementId { get; set; }
         public List<TransactionDetail> transactionDetails { get; set; }
     }

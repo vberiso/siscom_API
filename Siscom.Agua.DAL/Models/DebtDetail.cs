@@ -17,7 +17,6 @@ namespace Siscom.Agua.DAL.Models
         [Column("on_account"), Required]
         public decimal OnAccount { get; set; }
         [NotMapped]
-        [Column("on_payment"), Required]
         public decimal OnPayment { get; set; }
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }

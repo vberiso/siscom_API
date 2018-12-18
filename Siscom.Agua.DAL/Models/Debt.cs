@@ -38,16 +38,15 @@ namespace Siscom.Agua.DAL.Models
         [Column("amount"), Required]
         public decimal Amount { get; set; }
         [Column("on_account"), Required]
-        public decimal OnAccount { get; set; }
-        [NotMapped]
-        [Column("on_payment"), Required]
-        public decimal OnPayment { get; set; }
+        public decimal OnAccount { get; set; }       
         [Column("year"), Required]
         public Int16 Year { get; set; }
         [Column("type"), StringLength(5), Required]
         public string Type { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
+        [NotMapped]       
+        public decimal NewStatus { get; set; }
         [Column("DebtPeriodId")]
         public int? DebtPeriodId { get; set; }
         [Column("expiration_date"), Required]
