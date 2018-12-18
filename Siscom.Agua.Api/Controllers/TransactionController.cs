@@ -61,24 +61,33 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var transaction = await _context.Transactions
-                                            .Include(x => x.OriginPayment)
-                                            .Include(x => x.ExternalOriginPayment)
-                                            .Include(x => x.PayMethod)
-                                            .Include(x => x.TerminalUser)
-                                                 .ThenInclude( y => y.Terminal)
-                                                       .ThenInclude( z => z.BranchOffice)
-                                            .Include(x => x.TransactionDetails)
-                                            .Include(x => x.TransactionFolios)
-                                            .Include(x => x.TypeTransaction)
-                                            .FirstOrDefaultAsync(a => a.Id == id);
+            TransactionPaymentVM transactionPayment = new TransactionPaymentVM();
+            transactionPayment.Transaction =  await _context.Transactions
+                                                            .Include(x => x.OriginPayment)
+                                                            .Include(x => x.ExternalOriginPayment)
+                                                            .Include(x => x.PayMethod)
+                                                            .Include(x => x.TerminalUser)
+                                                                 .ThenInclude( y => y.Terminal)
+                                                                       .ThenInclude( z => z.BranchOffice)
+                                                            .Include(x => x.TransactionDetails)
+                                                            .Include(x => x.TransactionFolios)
+                                                            .Include(x => x.TypeTransaction)
+                                                            .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (transaction == null)
+            transactionPayment.Payments = await _context.Payments
+                                                        .Include(p => p.ExternalOriginPayment)
+                                                        .Include(p => p.OriginPayment)
+                                                        .Include(p => p.PayMethod)
+                                                        .Include(p => p.PaymentDetails)
+                                                        .Where(m => m.TransactionFolio == transactionPayment.Transaction.Folio)
+                                                        .ToListAsync();
+
+            if (transactionPayment == null)
             {
                 return NotFound();
             }
 
-            return Ok(transaction);
+            return Ok(transactionPayment);
         }
 
         /// <summary>
@@ -417,41 +426,24 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
                 //Validación de montos a cuenta
-                double sumDebt = 0;
-                double sumDetail = 0;
-                double sumTDetail = 0;
+                decimal sumPayDetail = 0;
+                decimal sumTDetail = 0;
 
-
-
-                //foreach (var item in pPaymentConcepts.Transaction.transactionDetails)
+                //foreach (var item in pCancelPayment.Transaction.transactionDetails)
                 //{
-                //    sumTDetail += item.amount;
+                //    sumTDetail += item.Amount;
                 //}
-                //if (pPaymentConcepts.Transaction.Amount != sumTDetail)
+                //if (pCancelPayment.Transaction.Amount != sumTDetail)
                 //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de transacción no coinciden") });
 
+                foreach (var item in pCancelPayment.Payment.PaymentDetails)
+                {
+                    sumPayDetail += item.Amount;
+                }
+                if (pCancelPayment.Transaction.Amount != sumPayDetail)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de pago no coinciden") });
 
-                //pPaymentConcepts.Debt.ToList().ForEach(x =>
-                //{
-                //    sumDebt += x.OnAccount;
-
-                //    sumDetail = 0;
-                //    x.DebtDetails.ToList().ForEach(y =>
-                //    {
-                //        sumDetail += y.OnAccount;
-                //    });
-                //    if (Math.Truncate(sumDetail * 100) / 100 != Math.Truncate(x.OnAccount * 100) / 100)
-                //        _validation = false;
-
-                //});
-
-                //if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumDebt * 100) / 100)
-                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
-
-                //if (!_validation)
-                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
-               
-                    var option = new TransactionOptions
+                var option = new TransactionOptions
                     {
                         IsolationLevel = IsolationLevel.ReadCommitted,
                         Timeout = TimeSpan.FromSeconds(60)
@@ -479,6 +471,13 @@ namespace Siscom.Agua.Api.Controllers
                             transaction.Total = pCancelPayment.Transaction.Total;
                             _context.Transactions.Add(transaction);
                             await _context.SaveChangesAsync();
+
+                        //se modifica estado de pago
+                        payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
+                                                                               x.AgreementId == pCancelPayment.Transaction.AgreementId).FirstOrDefaultAsync();
+                        payment.Status = "EP002";
+                        _context.Entry(payment).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
 
 
                         var debtList= pCancelPayment.Payment.PaymentDetails.Select(x => x.DebtId).Distinct();
@@ -572,14 +571,7 @@ namespace Siscom.Agua.Api.Controllers
                         }
 
 
-                            await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);                          
-                            //se modifica estado de pago
-                            payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
-                                                                                x.AgreementId == pCancelPayment.Transaction.AgreementId).FirstOrDefaultAsync();
-                            payment.Status = "EP002";
-                            _context.Entry(payment).State = EntityState.Modified;
-                            await _context.SaveChangesAsync();
-                                         
+                            await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);                                          
 
                             //Toma folio
                             Folio folio = new Folio();

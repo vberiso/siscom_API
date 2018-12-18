@@ -65,5 +65,33 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(payment);
         }
+
+        /// <summary>
+        /// This will provide details for the specific ID, of Payments which is being passed
+        /// </summary>
+        /// <param name="folio">Mandatory</param>
+        /// <returns>BranchOffice Model</returns>
+        // GET: api/Payments/5
+        [HttpGet("folio/{folio}")]
+        public async Task<IActionResult> GetPaymentFolio([FromRoute] string folio)
+        {
+            if (String.IsNullOrEmpty(folio))
+            {
+                return NotFound();
+            }
+
+            var payment = await _context.Payments
+                                        .Include(p => p.ExternalOriginPayment)
+                                        .Include(p => p.OriginPayment)
+                                        .Include(p => p.PayMethod)
+                                        .Include(p => p.PaymentDetails)
+                                        .FirstOrDefaultAsync(m => m.TransactionFolio== folio);
+            if (payment == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(payment);
+        }
     }
 }

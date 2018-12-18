@@ -152,6 +152,13 @@
             <param name="id">Mandatory</param>
             <returns>BranchOffice Model</returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.PaymentsController.GetPaymentFolio(System.String)">
+            <summary>
+            This will provide details for the specific ID, of Payments which is being passed
+            </summary>
+            <param name="folio">Mandatory</param>
+            <returns>BranchOffice Model</returns>
+        </member>
         <member name="T:Siscom.Agua.Api.Controllers.PayMethodController">
             <summary>
             End Points PayMethod
