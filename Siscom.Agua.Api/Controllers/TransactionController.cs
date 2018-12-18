@@ -103,6 +103,7 @@ namespace Siscom.Agua.Api.Controllers
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             Payment payment = new Payment();
             DebtStatus status;
+            bool _validation = true;
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -156,39 +157,39 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
 
                 //Validación de montos a cuenta
-                double sumDebt = 0;
-                double sumDetail = 0;
-                double sumTDetail = 0;
+                decimal sumDebt = 0;
+                decimal sumDetail = 0;
+                decimal sumTDetail = 0;
 
 
 
-                //foreach (var item in pPaymentConcepts.Transaction.transactionDetails)
-                //{
-                //    sumTDetail += item.amount;
-                //}
-                //if (pPaymentConcepts.Transaction.Amount != sumTDetail)
-                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de transacción no coinciden") });
+                foreach (var item in pPaymentConcepts.Transaction.transactionDetails)
+                {
+                    sumTDetail += item.Amount;
+                }
+                if (pPaymentConcepts.Transaction.Amount != sumTDetail)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de transacción no coinciden") });
 
 
-                //pPaymentConcepts.Debt.ToList().ForEach(x =>
-                //{
-                //    sumDebt += x.OnAccount;
+                pPaymentConcepts.Debt.ToList().ForEach(x =>
+                {
+                    sumDebt += x.OnAccount;
 
-                //    sumDetail = 0;
-                //    x.DebtDetails.ToList().ForEach(y =>
-                //    {
-                //        sumDetail += y.OnAccount;
-                //    });
-                //    if (Math.Truncate(sumDetail * 100) / 100 != Math.Truncate(x.OnAccount * 100) / 100)
-                //        _validation = false;
+                    sumDetail = 0;
+                    x.DebtDetails.ToList().ForEach(y =>
+                    {
+                        sumDetail += y.OnAccount;
+                    });
+                    if (Math.Truncate(sumDetail * 100) / 100 != Math.Truncate(x.OnAccount * 100) / 100)
+                        _validation = false;
 
-                //});
+                });
 
-                //if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumDebt * 100) / 100)
-                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumDebt * 100) / 100)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
-                //if (!_validation)
-                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                if (!_validation)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
 
                 var option = new TransactionOptions
