@@ -936,16 +936,16 @@ namespace Siscom.Agua.Api.Controllers
         {
             return Ok(new AgreementDataVM()
             {
-                TypeService = await _context.TypeServices.ToListAsync(),
-                TypeIntake = await _context.TypeIntakes.ToListAsync(),
-                TypeUse = await _context.TypeUses.ToListAsync(),
-                TypeConsume = await _context.TypeConsumes.ToListAsync(),
-                TypeRegime = await _context.TypeRegimes.ToListAsync(),
-                TypeCommertialBusiness = await _context.TypeCommertialBusinesses.ToListAsync(),
-                TypeStateService = await _context.TypeStateServices.ToListAsync(),
-                TypePeriod = await _context.TypePeriods.ToListAsync(),
-                Diameter = await _context.Diameters.ToListAsync(),
-                TypeClassifications = await _context.TypeClassifications.ToListAsync(),
+                TypeService = await _context.TypeServices.Where(a => a.IsActive == true).ToListAsync(),
+                TypeIntake = await _context.TypeIntakes.Where(a => a.IsActive == true).ToListAsync(),
+                TypeUse = await _context.TypeUses.Where(a => a.IsActive == true).ToListAsync(),
+                TypeConsume = await _context.TypeConsumes.Where(a => a.IsActive == true).ToListAsync(),
+                TypeRegime = await _context.TypeRegimes.Where(a => a.IsActive == true).ToListAsync(),
+                TypeCommertialBusiness = await _context.TypeCommertialBusinesses.Where(a => a.IsActive == true).ToListAsync(),
+                TypeStateService = await _context.TypeStateServices.Where(a => a.IsActive == true).ToListAsync(),
+                TypePeriod = await _context.TypePeriods.Where(a => a.IsActive == true).ToListAsync(),
+                Diameter = await _context.Diameters.Where(a => a.IsActive == true).ToListAsync(),
+                TypeClassifications = await _context.TypeClassifications.Where(a => a.IsActive == true).ToListAsync(),
                 TypeAddresses = await _context.Types.Where(x => x.GroupType.Id == 1)
                                                     .Select(n => new TypeAddress()
                                                     {
