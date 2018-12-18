@@ -61,7 +61,17 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var transaction = await _context.Transactions.FindAsync(id);
+            var transaction = await _context.Transactions
+                                            .Include(x => x.OriginPayment)
+                                            .Include(x => x.ExternalOriginPayment)
+                                            .Include(x => x.PayMethod)
+                                            .Include(x => x.TerminalUser)
+                                                 .ThenInclude( y => y.Terminal)
+                                                       .ThenInclude( z => z.BranchOffice)
+                                            .Include(x => x.TransactionDetails)
+                                            .Include(x => x.TransactionFolios)
+                                            .Include(x => x.TypeTransaction)
+                                            .FirstOrDefaultAsync(a => a.Id == id);
 
             if (transaction == null)
             {
@@ -83,7 +93,6 @@ namespace Siscom.Agua.Api.Controllers
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             Payment payment = new Payment();
-            bool _validation=false;
             DebtStatus status;
             if (!ModelState.IsValid)
             {
@@ -121,47 +130,21 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
             }
 
-          
-            if (await _context.Transactions                             
+
+            if (await _context.Transactions
                               .Where(x => x.TerminalUser.Id == terminalUser.Id &&
                                           x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString() &&
                                           x.TypeTransaction.Id == 1)
                               .FirstOrDefaultAsync() != null)
 
             {
-             
-                switch (pPaymentConcepts.Transaction.TypeTransactionId)
-                {                    
-                    case 3://Cobro                      
-                        if (!pPaymentConcepts.Transaction.Sign)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
-                        if (pPaymentConcepts.Transaction.Amount == 0)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
-                        _validation = true;
-                        break;
-                    case 4://Cancelado                       
-                        if (pPaymentConcepts.Transaction.Sign)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
 
-                        if (pPaymentConcepts.Transaction.Amount == 0)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
-
-                        if(String.IsNullOrEmpty(pPaymentConcepts.Transaction.Cancellation))
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación")});
-
-                        var cancelacion = await _context.Transactions.Where(x => x.Folio == pPaymentConcepts.Transaction.Cancellation).FirstAsync();
-                        if (cancelacion == null)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
-
-                        if (cancelacion.Amount != pPaymentConcepts.Transaction.Amount)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
-
-                        _validation = true;
-                        break;    
-                    default:
-                        _validation = false;
-                        break;
-                }
+                if (pPaymentConcepts.Transaction.TypeTransactionId != 3)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
+                if (!pPaymentConcepts.Transaction.Sign)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+                if (pPaymentConcepts.Transaction.Amount == 0)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
 
                 //Validación de montos a cuenta
                 double sumDebt = 0;
@@ -169,7 +152,7 @@ namespace Siscom.Agua.Api.Controllers
                 double sumTDetail = 0;
 
 
-              
+
                 //foreach (var item in pPaymentConcepts.Transaction.transactionDetails)
                 //{
                 //    sumTDetail += item.amount;
@@ -198,8 +181,276 @@ namespace Siscom.Agua.Api.Controllers
                 //if (!_validation)
                 //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
-                if (_validation)
+
+                var option = new TransactionOptions
                 {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TimeSpan.FromSeconds(60)
+                };
+
+                try
+                {
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        //Transacción en caja
+                        transaction.Folio = Guid.NewGuid().ToString("D");
+                        transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
+                        transaction.Sign = pPaymentConcepts.Transaction.Sign;
+                        transaction.Amount = pPaymentConcepts.Transaction.Amount;
+                        transaction.Aplication = pPaymentConcepts.Transaction.Aplication;
+                        transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pPaymentConcepts.Transaction.TypeTransactionId).ConfigureAwait(false);
+                        transaction.PayMethod = await _context.PayMethods.FindAsync(pPaymentConcepts.Transaction.PayMethodId).ConfigureAwait(false);
+                        transaction.TerminalUser = terminalUser;
+                        transaction.CancellationFolio = pPaymentConcepts.Transaction.Cancellation;
+                        transaction.Tax = pPaymentConcepts.Transaction.Tax;
+                        transaction.Rounding = pPaymentConcepts.Transaction.Rounding;
+                        transaction.AuthorizationOriginPayment = pPaymentConcepts.Transaction.AuthorizationOriginPayment;
+                        transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pPaymentConcepts.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
+                        transaction.OriginPayment = await _context.OriginPayments.FindAsync(pPaymentConcepts.Transaction.OriginPaymentId).ConfigureAwait(false);
+                        transaction.Total = pPaymentConcepts.Transaction.Total;
+                        _context.Transactions.Add(transaction);
+                        await _context.SaveChangesAsync();
+
+                        foreach (var tDetail in pPaymentConcepts.Transaction.transactionDetails)
+                        {
+                            //Ingreso de detalle de transacción
+                            TransactionDetail transactionDetail = new TransactionDetail();
+                            transactionDetail.CodeConcept = tDetail.CodeConcept;
+                            transactionDetail.Amount = tDetail.Amount;
+                            transactionDetail.Description = tDetail.Description;
+                            transactionDetail.Transaction = transaction;
+                            _context.TransactionDetails.Add(transactionDetail);
+                            await _context.SaveChangesAsync();
+                        }
+
+                        await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+
+                        //PAGOS                           
+                        payment.PaymentDate = transaction.DateTransaction;
+                        payment.BranchOffice = terminalUser.Terminal.BranchOffice.Name;
+                        payment.Subtotal = transaction.Amount;
+                        payment.PercentageTax = pPaymentConcepts.Transaction.PercentageTax;
+                        payment.Tax = transaction.Tax;
+                        payment.Rounding = Math.Truncate(transaction.Rounding * 100) / 100;
+                        payment.Total = transaction.Total;
+                        payment.AuthorizationOriginPayment = transaction.AuthorizationOriginPayment;
+                        payment.AgreementId = pPaymentConcepts.Transaction.AgreementId;
+                        payment.Status = "EP001";
+                        payment.Type = pPaymentConcepts.Transaction.Type;
+                        payment.OriginPayment = transaction.OriginPayment;
+                        payment.PayMethod = transaction.PayMethod;
+                        payment.TransactionFolio = transaction.Folio;
+                        payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
+                        _context.Payments.Add(payment);
+                        await _context.SaveChangesAsync();
+
+                        //Movimientos a deuda
+                        foreach (var debt in pPaymentConcepts.Debt)
+                        {
+                            //Recibo a pagar
+                            var deuda = await _context.Debts.FindAsync(debt.Id);
+
+                            //Pago deuda                                
+                            if (debt.OnAccount - deuda.OnAccount > deuda.Amount)
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
+
+                            deuda.Status = pPaymentConcepts.Transaction.DebtStatus;
+                            deuda.OnAccount = debt.OnAccount;
+                            _context.Entry(deuda).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+
+                            //Ingreso de status de recibo
+                            status = new DebtStatus()
+                            {
+                                id_status = debt.Status,
+                                DebtStatusDate = transaction.DateTransaction,
+                                User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
+                                DebtId = debt.Id
+                            };
+                            _context.DebtStatuses.Add(status);
+                            await _context.SaveChangesAsync();
+
+                            //Conceptos
+                            foreach (var detail in debt.DebtDetails)
+                            {
+                                var conceptos = await _context.DebtDetails.Where(x => x.DebtId == debt.Id &&
+                                                                                 x.Id == detail.Id).FirstOrDefaultAsync();
+
+                                //Pago a conceptos                                   
+                                if (detail.OnAccount - conceptos.OnAccount > conceptos.Amount)
+                                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
+
+                                conceptos.OnAccount = conceptos.OnAccount + detail.OnAccount;
+                                _context.Entry(conceptos).State = EntityState.Modified;
+                                await _context.SaveChangesAsync();
+
+                                PaymentDetail paymentDetail = new PaymentDetail();
+                                paymentDetail.CodeConcept = detail.CodeConcept;
+                                paymentDetail.Amount = detail.OnPayment;
+                                paymentDetail.Description = detail.NameConcept;
+                                paymentDetail.DebtId = debt.Id;
+                                paymentDetail.PrepaidId = 0;
+                                paymentDetail.PaymentId = payment.Id;
+                                _context.PaymentDetails.Add(paymentDetail);
+                                await _context.SaveChangesAsync();
+                            }
+                        }
+
+
+                        //Toma folio
+                        Folio folio = new Folio();
+                        folio = await _context.Folios
+                                              .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
+                                                           x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
+
+                        TransactionFolio transactionFolio = new TransactionFolio();
+                        transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
+                        transactionFolio.DatePrint = DateTime.UtcNow.ToLocalTime();
+                        transactionFolio.Transaction = transaction;
+                        _context.TransactionFolios.Add(transactionFolio);
+                        await _context.SaveChangesAsync();
+
+                        folio.Secuential += 1;
+                        _context.Entry(folio).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+
+                        scope.Complete();
+                    }
+                }
+                catch (Exception e)
+                {
+                    SystemLog systemLog = new SystemLog();
+                    systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                    systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                    systemLog.Controller = "TransactionController";
+                    systemLog.Action = "PostTransaction";
+                    systemLog.Parameter = JsonConvert.SerializeObject(pPaymentConcepts);
+                    CustomSystemLog helper = new CustomSystemLog(_context);
+                    helper.AddLog(systemLog);
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+                }
+
+            }
+            else {
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+            }
+            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+        }
+
+        /// <summary>
+        /// This will provide capability add new Transaction
+        /// </summary>       
+        /// <param name="TransactionId">Id Transaction
+        /// <param name="pCancelPayment">Model PaymentConcepts
+        /// </param>
+        /// <returns>Transaction</returns>
+        // POST: api/Transaction/Cancel
+        [HttpPost("Cancel/{TransactionId}")]
+        public async Task<IActionResult> PostTransactionCancel([FromRoute] int TransactionId, [FromBody] CancelPaymentVM pCancelPayment)
+        {
+            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            Payment payment = new Payment();
+            bool _validation = false;
+            DebtStatus status;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (pCancelPayment.Transaction.TypeTransactionId != 4)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
+
+            if (!Validate(pCancelPayment.Transaction))
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Información incompleta" });
+
+            TerminalUser terminalUser = new TerminalUser();
+            terminalUser = await _context.TerminalUsers
+                                             .Include(x => x.Terminal)
+                                             .Include(x => x.User)
+                                             .Where(x => x.Id == pCancelPayment.Transaction.TerminalUserId).FirstOrDefaultAsync();
+
+            if (terminalUser == null)
+            {
+                return NotFound();
+            }
+
+            if (!terminalUser.InOperation)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
+
+            if (terminalUser.OpenDate.Date != DateTime.Now.Date)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
+
+            if (await _context.Transactions
+                           .Include(x => x.TypeTransaction)
+                           .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                       x.DateTransaction.Date == DateTime.Now.Date &&
+                                       x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7)
+                           .FirstOrDefaultAsync() != null)
+
+            {
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
+            }
+
+
+            if (await _context.Transactions
+                              .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                          x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString() &&
+                                          x.TypeTransaction.Id == 1)
+                              .FirstOrDefaultAsync() != null)
+
+            {            
+                                  
+            if (pCancelPayment.Transaction.Sign)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
+            if (pCancelPayment.Transaction.Amount == 0)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
+
+            if (String.IsNullOrEmpty(pCancelPayment.Transaction.Cancellation))
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación") });
+
+            var cancelacion = await _context.Transactions.Where(x => x.Folio == pCancelPayment.Transaction.Cancellation).FirstAsync();
+            if (cancelacion == null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
+
+            if (cancelacion.Amount != pCancelPayment.Transaction.Amount)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+
+                //Validación de montos a cuenta
+                double sumDebt = 0;
+                double sumDetail = 0;
+                double sumTDetail = 0;
+
+
+
+                //foreach (var item in pPaymentConcepts.Transaction.transactionDetails)
+                //{
+                //    sumTDetail += item.amount;
+                //}
+                //if (pPaymentConcepts.Transaction.Amount != sumTDetail)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de transacción no coinciden") });
+
+
+                //pPaymentConcepts.Debt.ToList().ForEach(x =>
+                //{
+                //    sumDebt += x.OnAccount;
+
+                //    sumDetail = 0;
+                //    x.DebtDetails.ToList().ForEach(y =>
+                //    {
+                //        sumDetail += y.OnAccount;
+                //    });
+                //    if (Math.Truncate(sumDetail * 100) / 100 != Math.Truncate(x.OnAccount * 100) / 100)
+                //        _validation = false;
+
+                //});
+
+                //if (Math.Truncate(pPaymentConcepts.Transaction.Amount * 100) / 100 != Math.Truncate(sumDebt * 100) / 100)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+
+                //if (!_validation)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+               
                     var option = new TransactionOptions
                     {
                         IsolationLevel = IsolationLevel.ReadCommitted,
@@ -213,178 +464,122 @@ namespace Siscom.Agua.Api.Controllers
                             //Transacción en caja
                             transaction.Folio = Guid.NewGuid().ToString("D");
                             transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
-                            transaction.Sign = pPaymentConcepts.Transaction.Sign;
-                            transaction.Amount = pPaymentConcepts.Transaction.Amount;
-                            transaction.Aplication = pPaymentConcepts.Transaction.Aplication;
-                            transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pPaymentConcepts.Transaction.TypeTransactionId).ConfigureAwait(false);
-                            transaction.PayMethod = await _context.PayMethods.FindAsync(pPaymentConcepts.Transaction.PayMethodId).ConfigureAwait(false);
+                            transaction.Sign = pCancelPayment.Transaction.Sign;
+                            transaction.Amount = pCancelPayment.Transaction.Amount;
+                            transaction.Aplication = pCancelPayment.Transaction.Aplication;
+                            transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pCancelPayment.Transaction.TypeTransactionId).ConfigureAwait(false);
+                            transaction.PayMethod = await _context.PayMethods.FindAsync(pCancelPayment.Transaction.PayMethodId).ConfigureAwait(false);
                             transaction.TerminalUser = terminalUser;
-                            transaction.CancellationFolio = pPaymentConcepts.Transaction.Cancellation;
-                            transaction.Tax = pPaymentConcepts.Transaction.Tax;
-                            transaction.Rounding = pPaymentConcepts.Transaction.Rounding;
-                            transaction.AuthorizationOriginPayment = pPaymentConcepts.Transaction.AuthorizationOriginPayment;
-                            transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pPaymentConcepts.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
-                            transaction.OriginPayment = await _context.OriginPayments.FindAsync(pPaymentConcepts.Transaction.OriginPaymentId).ConfigureAwait(false);
-                            transaction.Total = pPaymentConcepts.Transaction.Total;
+                            transaction.CancellationFolio = pCancelPayment.Transaction.Cancellation;
+                            transaction.Tax = pCancelPayment.Transaction.Tax;
+                            transaction.Rounding = pCancelPayment.Transaction.Rounding;
+                            transaction.AuthorizationOriginPayment = pCancelPayment.Transaction.AuthorizationOriginPayment;
+                            transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pCancelPayment.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
+                            transaction.OriginPayment = await _context.OriginPayments.FindAsync(pCancelPayment.Transaction.OriginPaymentId).ConfigureAwait(false);
+                            transaction.Total = pCancelPayment.Transaction.Total;
                             _context.Transactions.Add(transaction);
                             await _context.SaveChangesAsync();
 
-                            foreach (var tDetail in pPaymentConcepts.Transaction.transactionDetails)
+
+                        var debtList= pCancelPayment.Payment.PaymentDetails.Select(x => x.DebtId).Distinct();
+
+                        if (debtList != null)
+                        {
+                            foreach (var item in debtList)
                             {
-                                //Ingreso de detalle de transacción
-                                TransactionDetail transactionDetail = new TransactionDetail();
-                                transactionDetail.CodeConcept = tDetail.CodeConcept;
-                                transactionDetail.Amount = tDetail.Amount;
-                                transactionDetail.Description = tDetail.Description;
-                                transactionDetail.Transaction = transaction;
-                                _context.TransactionDetails.Add(transactionDetail);
-                                await _context.SaveChangesAsync();                               
-                            }
+                                Debt debt = new Debt();
+                                debt= await _context.Debts.FindAsync(item);
+                                decimal sumPaymentDetails = 0;
 
-                            await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+                                //Status anterior
+                                var statusDebt = await _context.DebtStatuses.Where(x => x.DebtId == debt.Id).OrderByDescending(x => x.Id).ToListAsync();
+                                string statusAnterior = String.Empty;
+                                bool status_encontrado = false;
+                                int contador = 0;
 
-                            //PAGOS
-                            if (transaction.TypeTransaction.Id == 3)
-                            {
-                                payment.PaymentDate = transaction.DateTransaction;
-                                payment.BranchOffice = terminalUser.Terminal.BranchOffice.Name;
-                                payment.Subtotal = transaction.Amount;
-                                payment.PercentageTax = pPaymentConcepts.Transaction.PercentageTax;
-                                payment.Tax = transaction.Tax;
-                                payment.Rounding = Math.Truncate(transaction.Rounding * 100) / 100;
-                                payment.Total = transaction.Total;
-                                payment.AuthorizationOriginPayment = transaction.AuthorizationOriginPayment;
-                                payment.AgreementId = pPaymentConcepts.Transaction.AgreementId;
-                                payment.Status = "EP001";
-                                payment.Type = pPaymentConcepts.Transaction.Type;
-                                payment.OriginPayment = transaction.OriginPayment;
-                                payment.PayMethod = transaction.PayMethod;
-                                payment.TransactionFolio = transaction.Folio;
-                                payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
-                                _context.Payments.Add(payment);
-                                await _context.SaveChangesAsync();
-                            }
-                            else {
-                                //se modifica estado de pago
-                                payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
-                                                                                 x.AgreementId == pPaymentConcepts.Transaction.AgreementId).FirstOrDefaultAsync();
-                                payment.Status = "EP002";
-                                _context.Entry(payment).State = EntityState.Modified;
-                                await _context.SaveChangesAsync();
-                            }
-
-
-                            //Movimientos a deuda
-                            foreach (var debt in pPaymentConcepts.Debt)
-                            {
-                                //Recibo a pagar
-                                var deuda = await _context.Debts.FindAsync(debt.Id);
-
-                                //Pago deuda
-                                if (transaction.TypeTransaction.Id == 3)
+                                foreach (var subitem in statusDebt)
                                 {
-                                    if (debt.OnAccount- deuda.OnAccount > deuda.Amount)
-                                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
-
-                                    deuda.Status = pPaymentConcepts.Transaction.DebtStatus;
-                                    deuda.OnAccount = debt.OnAccount;
-                                    _context.Entry(deuda).State = EntityState.Modified;
-                                    await _context.SaveChangesAsync();
-
-                                    //Ingreso de status de recibo
-                                    status = new DebtStatus()
+                                    if (!status_encontrado)
                                     {
-                                        id_status = debt.Status,
-                                        DebtStatusDate = transaction.DateTransaction,
-                                        User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
-                                        DebtId = debt.Id
-                                    };
-                                    _context.DebtStatuses.Add(status);
-                                    await _context.SaveChangesAsync();                                    
-
-                                }
-                                else //Cancelación
-                                {                                   
-                                    if (deuda.OnAccount - debt.OnAccount < 0)
-                                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
-
-                                    //Se obtiene estado anterior
-                                    var statusDebt = await _context.DebtStatuses.Where(x => x.DebtId == debt.Id).OrderByDescending(x =>x.Id).ToListAsync();
-                                    string statusAnterior = String.Empty;
-                                    bool status_encontrado = false;
-                                    int contador = 0;
-
-                                    foreach (var item in statusDebt)
-                                    {
-                                        if (!status_encontrado)
+                                        if (contador == 0 && subitem.id_status != "ED005" && subitem.id_status != "ED004")
+                                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La cancelación no procede. La deuda ha cambiado") });
+                                        if (subitem.id_status != "ED005")
                                         {
-                                            if (contador ==0 && item.id_status != "ED005" && item.id_status != "ED004")
-                                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La cancelación no procede. La deuda ha cambiado") });
-                                            if (item.id_status != "ED005")
-                                            {
-                                                statusAnterior = item.id_status;
-                                                status_encontrado = true;
-                                            }
-                                            contador += 1;
+                                            statusAnterior = subitem.id_status;
+                                            status_encontrado = true;
                                         }
-                                        else
-                                            break;
-                                    }
-
-                                    //se modifica estado de deuda
-                                    deuda.Status = statusAnterior;
-                                    deuda.OnAccount = deuda.OnAccount - debt.OnAccount;
-
-                                    _context.Entry(deuda).State = EntityState.Modified;
-                                    await _context.SaveChangesAsync();
-
-                                   status = new DebtStatus()
-                                    {
-                                        id_status = deuda.Status,
-                                        DebtStatusDate = transaction.DateTransaction,
-                                        User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
-                                        DebtId = debt.Id
-                                    };
-                                    _context.DebtStatuses.Add(status);
-                                    await _context.SaveChangesAsync();                                    
-                                }
-
-                                //Conceptos
-                                foreach (var detail in debt.DebtDetails)
-                                {
-                                    var conceptos = await _context.DebtDetails.Where(x => x.DebtId == debt.Id &&
-                                                                                     x.Id == detail.Id).FirstOrDefaultAsync();
-
-                                    //Pago a conceptos
-                                    if (transaction.TypeTransaction.Id == 3)
-                                    {
-                                        if (detail.OnAccount - conceptos.OnAccount> conceptos.Amount)
-                                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
-
-                                        conceptos.OnAccount = conceptos.OnAccount + detail.OnAccount;
+                                        contador += 1;
                                     }
                                     else
-                                    {
-                                        if (conceptos.OnAccount - detail.OnAccount < 0)
-                                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
-                                        conceptos.OnAccount = conceptos.OnAccount - detail.OnAccount;
-                                    }
-
-                                    _context.Entry(conceptos).State = EntityState.Modified;
-                                    await _context.SaveChangesAsync();
-
-                                    PaymentDetail paymentDetail = new PaymentDetail();
-                                    paymentDetail.CodeConcept = detail.CodeConcept;
-                                    paymentDetail.Amount = detail.OnPayment;
-                                    paymentDetail.Description = detail.NameConcept;
-                                    paymentDetail.DebtId = debt.Id;
-                                    paymentDetail.PrepaidId = 0;
-                                    paymentDetail.PaymentId = payment.Id;
-                                    _context.PaymentDetails.Add(paymentDetail);
-                                    await _context.SaveChangesAsync();
+                                        break;
                                 }
-                            }
 
+                                pCancelPayment.Payment.PaymentDetails.ToList().ForEach(x => 
+                                {
+                                    if (x.DebtId == item)
+                                    sumPaymentDetails += x.Amount;
+                                });
+
+                                debt.Status = statusAnterior;
+                                debt.OnAccount = debt.OnAccount - sumPaymentDetails;
+
+                                _context.Entry(debt).State = EntityState.Modified;
+                                await _context.SaveChangesAsync();
+
+                                status = new DebtStatus()
+                                {
+                                    id_status = debt.Status,
+                                    DebtStatusDate = transaction.DateTransaction,
+                                    User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
+                                    DebtId = debt.Id
+                                };
+                                _context.DebtStatuses.Add(status);
+                                await _context.SaveChangesAsync();                               
+                            }
+                        }
+                        else
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No esposible revertir deuda.") });
+                     
+
+                        foreach (var pay in pCancelPayment.Payment.PaymentDetails)
+                        {
+                            TransactionDetail transactionDetail = new TransactionDetail();
+                            transactionDetail.CodeConcept = pay.CodeConcept;
+                            transactionDetail.Amount = pay.Amount;
+                            transactionDetail.Description = pay.Description;
+                            transactionDetail.Transaction = transaction;
+                            _context.TransactionDetails.Add(transactionDetail);
+                            await _context.SaveChangesAsync();
+
+                            PaymentDetail paymentDetail = new PaymentDetail();
+                            paymentDetail.CodeConcept = pay.CodeConcept;
+                            paymentDetail.Amount = pay.Amount;
+                            paymentDetail.Description = pay.Description;
+                            paymentDetail.DebtId =pay.DebtId;
+                            paymentDetail.PrepaidId = 0;
+                            paymentDetail.PaymentId = payment.Id;
+                            _context.PaymentDetails.Add(paymentDetail);
+                            await _context.SaveChangesAsync();
+
+                            DebtDetail debtDetail = new DebtDetail();
+                            debtDetail = await _context.DebtDetails.Where(x => x.DebtId == pay.DebtId &&
+                                                                               x.CodeConcept == pay.CodeConcept).FirstAsync();
+
+                            if (pay.Amount - debtDetail.OnAccount < 0)
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: pay.Description) });
+
+                            debtDetail.OnAccount -= pay.Amount;
+                        }
+
+
+                            await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);                          
+                            //se modifica estado de pago
+                            payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio &&
+                                                                                x.AgreementId == pCancelPayment.Transaction.AgreementId).FirstOrDefaultAsync();
+                            payment.Status = "EP002";
+                            _context.Entry(payment).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+                                         
 
                             //Toma folio
                             Folio folio = new Folio();
@@ -413,16 +608,15 @@ namespace Siscom.Agua.Api.Controllers
                         systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                         systemLog.Controller = "TransactionController";
                         systemLog.Action = "PostTransaction";
-                        systemLog.Parameter = JsonConvert.SerializeObject(pPaymentConcepts);
+                        systemLog.Parameter = JsonConvert.SerializeObject(pCancelPayment);
                         CustomSystemLog helper = new CustomSystemLog(_context);
                         helper.AddLog(systemLog);
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
                     }
-                }
-                else
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
+               
             }
-            else {
+            else
+            {
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
             }
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
