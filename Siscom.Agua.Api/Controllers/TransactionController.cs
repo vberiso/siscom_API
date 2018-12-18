@@ -171,25 +171,25 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de transacción no coinciden") });
 
 
-                pPaymentConcepts.Debt.ToList().ForEach(x =>
-                {
-                    sumDebt += x.OnPayment;
+                //pPaymentConcepts.Debt.ToList().ForEach(x =>
+                //{
+                //    sumDebt += x.OnPayment;
 
-                    sumDetail = 0;
-                    x.DebtDetails.ToList().ForEach(y =>
-                    {
-                        sumDetail += y.OnPayment;
-                    });
-                    if (sumDetail != x.OnPayment)
-                        _validation = false;
+                //    sumDetail = 0;
+                //    x.DebtDetails.ToList().ForEach(y =>
+                //    {
+                //        sumDetail += y.OnPayment;
+                //    });
+                //    if (sumDetail != x.OnPayment)
+                //        _validation = false;
 
-                });
+                //});
 
-                if (pPaymentConcepts.Transaction.Amount != sumDebt)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                //if (pPaymentConcepts.Transaction.Amount != sumDebt)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
-                if (!_validation)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                //if (!_validation)
+                //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
 
                 var option = new TransactionOptions
@@ -264,7 +264,7 @@ namespace Siscom.Agua.Api.Controllers
                             if (debt.OnAccount - deuda.OnAccount > deuda.Amount)
                                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta de deuda inválido") });
 
-                            deuda.Status = pPaymentConcepts.Transaction.DebtStatus;
+                            deuda.Status = debt.NewStatus;
                             deuda.OnAccount = debt.OnAccount;
                             _context.Entry(deuda).State = EntityState.Modified;
                             await _context.SaveChangesAsync();
@@ -1100,9 +1100,7 @@ namespace Siscom.Agua.Api.Controllers
             if (ptransaction.ExternalOriginPaymentId == 0)
                 return false;
             if (ptransaction.OriginPaymentId == 0)
-                return false;
-            if (String.IsNullOrEmpty(ptransaction.DebtStatus) & ptransaction.Type !="PAY02")
-                return false;
+                return false;            
             return true;
         }
     }
