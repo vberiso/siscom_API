@@ -176,6 +176,13 @@ namespace Siscom.Agua.Api.Controllers
                     });
                     if (x.OnAccount != _sumDebtDetail)
                         _validation = false;
+                    if (x.NewStatus == "ED005")
+                    {
+                        if (x.Amount != x.OnAccount)
+                            _validation = false;
+                        if (_sumDebtDetail != x.Amount)
+                            _validation = false;
+                    }
 
                     _sumDebt += _sumPayDebtDetail;
                 }

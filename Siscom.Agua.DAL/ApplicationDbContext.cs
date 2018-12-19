@@ -57,6 +57,7 @@ namespace Siscom.Agua.DAL
         public DbSet<PrepaidDetail> PrepaidDetails { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<NotificationDetail> NotificationDetails { get; set; }
+        public DbSet<AgreementDetail> AgreementDetails { get; set; }
 
         /// <summary> 
         /// Cash Box 
@@ -209,6 +210,14 @@ namespace Siscom.Agua.DAL
             builder.Entity<Agreement>()
                  .Property(x => x.StratDate)
                  .HasColumnType("date");
+            #endregion
+
+            #region AgreementDetail
+            builder.Entity<AgreementDetail>()
+                  .HasOne<Agreement>(a => a.Agreement)
+                  .WithMany(s => s.AgreementDetails)
+                  .HasForeignKey(s => s.AgreementId);         
+
             #endregion
 
             #region AgreementDiscount
