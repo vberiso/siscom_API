@@ -97,26 +97,26 @@ namespace Siscom.Agua.Api.Controllers
             return CreatedAtAction("GetTypeUse", new { id = typeUse.Id }, typeUse);
         }
 
-        //// DELETE: api/TypeUses/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteTypeUse([FromRoute] int id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // DELETE: api/TypeUses/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTypeUse([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    var typeUse = await _context.TypeUses.FindAsync(id);
-        //    if (typeUse == null)
-        //    {
-        //        return NotFound();
-        //    }
+            var typeUse = await _context.TypeUses.FindAsync(id);
+            if (typeUse == null)
+            {
+                return NotFound();
+            }
 
-        //    _context.TypeUses.Remove(typeUse);
-        //    await _context.SaveChangesAsync();
+            _context.TypeUses.Remove(typeUse);
+            await _context.SaveChangesAsync();
 
-        //    return Ok(typeUse);
-        //}
+            return Ok(typeUse);
+        }
 
         private bool TypeUseExists(int id)
         {
