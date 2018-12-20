@@ -144,7 +144,7 @@ namespace Siscom.Agua.Api.Controllers
             if (!terminalUser.InOperation)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
 
-            if (terminalUser.OpenDate.Date != DateTime.Now.Date)
+            if (terminalUser.OpenDate.Date != DateTime.UtcNow.ToLocalTime().Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
 
             if (await _context.Transactions
@@ -158,7 +158,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if (await _context.Transactions
                               .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                          x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString() &&
+                                          x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString() &&
                                           x.TypeTransaction.Id == 1)
                               .FirstOrDefaultAsync() == null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
@@ -417,13 +417,13 @@ namespace Siscom.Agua.Api.Controllers
             if (!terminalUser.InOperation)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
 
-            if (terminalUser.OpenDate.Date != DateTime.Now.Date)
+            if (terminalUser.OpenDate.Date != DateTime.UtcNow.ToLocalTime().Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
 
             if (await _context.Transactions
                            .Include(x => x.TypeTransaction)
                            .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                       x.DateTransaction.Date == DateTime.Now.Date &&
+                                       x.DateTransaction.Date == DateTime.UtcNow.ToLocalTime().Date &&
                                        x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7)
                            .FirstOrDefaultAsync() != null)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
@@ -644,13 +644,13 @@ namespace Siscom.Agua.Api.Controllers
             if (!terminalUser.InOperation)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
 
-            if (terminalUser.OpenDate.Date != DateTime.Now.Date)
+            if (terminalUser.OpenDate.Date != DateTime.UtcNow.ToLocalTime().Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
 
             if (await _context.Transactions
                            .Include(x => x.TypeTransaction)
                            .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                       x.DateTransaction.Date == DateTime.Now.Date &&
+                                       x.DateTransaction.Date == DateTime.UtcNow.ToLocalTime().Date &&
                                        x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7)
                            .FirstOrDefaultAsync() != null)
 
@@ -661,7 +661,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if (await _context.Transactions
                               .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                          x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString() &&
+                                          x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString() &&
                                           x.TypeTransaction.Id == 1)
                               .FirstOrDefaultAsync() != null)
 
@@ -898,14 +898,14 @@ namespace Siscom.Agua.Api.Controllers
             if (!terminalUser.InOperation)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
 
-            if (terminalUser.OpenDate.Date != DateTime.Now.Date)
+            if (terminalUser.OpenDate.Date != DateTime.UtcNow.ToLocalTime().Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
 
             var movimientosCaja = await _context.Transactions
                                                 .Include(x => x.TypeTransaction)
                                                 .Where(x => x.TerminalUser.Id == terminalUser.Id &&
                                                             x.TerminalUser.InOperation == true &&
-                                                            x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString())
+                                                            x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
                                                 .OrderBy(x=> x.Id).ToListAsync();
 
             foreach (var item in movimientosCaja)
