@@ -25,7 +25,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_agreement"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
-        [Column("account"), StringLength(50), Required]
+        [Column("account"), StringLength(50)]
         public string Account { get; set; }
         [Column("account_date"), Required]
         public DateTime AccountDate { get; set; }
