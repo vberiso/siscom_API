@@ -27,5 +27,7 @@ namespace Siscom.Agua.Api.Model
         public string TypeAddress { get; set; }
         [Required]
         public int SuburbsId { get; set; }
+        [Required]
+        public bool IsActive { get; set; }
     }
 }

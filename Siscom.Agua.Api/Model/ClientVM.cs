@@ -26,6 +26,8 @@ namespace Siscom.Agua.Api.Model
         [StringLength(5)]
         public string TypeUser { get; set; }
         public bool IsMale { get; set; }
+        public bool IsActive { get; set; }
+
         public List<ContactVM> Contacts { get; set; }
     }
 }

@@ -17,7 +17,6 @@ namespace Siscom.Agua.Api.Model
         }
 
         public int Id { get; set; }
-        [Required]
         public string Account { get; set; }
         [Required]
         public int Derivatives { get; set; }
