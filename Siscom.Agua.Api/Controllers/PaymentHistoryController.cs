@@ -22,11 +22,28 @@ namespace Siscom.Agua.Api.Controllers
         {
             _context = context;
         }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPaymentsByAgreement([FromRoute] int id)
         {
-            var payments = await _context.Payments.Include(pd => pd.PaymentDetails).Where(a => a.AgreementId == id).ToListAsync(); 
+            var payments = await _context.Payments
+                                         .Where(a => a.AgreementId == id)
+                                         .OrderByDescending(f => f.Status)
+                                         .ToListAsync();
+
             return new ObjectResult(payments);
+        }
+
+        [HttpGet("{debtId}")]
+        public async Task<IActionResult> GetPaymentsByDebt([FromRoute] int debtId)
+        {
+            var debts = await _context.Debts
+                                         .Include(dd => dd.DebtDetails)
+                                         .Where(d => d.Id == debtId)
+                                         .OrderByDescending(f => f.Status)
+                                         .ToListAsync();
+
+            return new ObjectResult(debts);
         }
     }
 }

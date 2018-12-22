@@ -68,7 +68,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/Adresses/5
         [HttpPut()]
-        public async Task<IActionResult> PutAdress([FromRoute] int AgreementId, [FromBody] List<AdressVM> adressvm)
+        public async Task<IActionResult> PutAdress([FromRoute] int AgreementId, [FromBody] UpdateAddress adressvm)
         {
             if (!ModelState.IsValid)
             {
@@ -79,7 +79,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    foreach (var item in adressvm)
+                    foreach (var item in adressvm.Addresses)
                     {
                         var add = _context.Adresses.Include(s => s.Suburbs).Where(i => i.Id == item.Id).FirstOrDefault();
                         if (add == null)

@@ -30,4 +30,14 @@ namespace Siscom.Agua.Api.Model
         [Required]
         public bool IsActive { get; set; }
     }
+
+    public class UpdateAddress
+    {
+        public UpdateAddress()
+        {
+            Addresses = new List<AdressVM>();
+        }
+
+        public List<AdressVM> Addresses { get; set; }
+    }
 }

@@ -30,4 +30,13 @@ namespace Siscom.Agua.Api.Model
 
         public List<ContactVM> Contacts { get; set; }
     }
+
+    public class UpdateClient
+    {
+        public UpdateClient()
+        {
+            Client = new List<ClientVM>();
+        }
+        public List<ClientVM> Client { get; set; }
+    }
 }

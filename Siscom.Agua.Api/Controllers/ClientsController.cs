@@ -58,7 +58,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/Clients/5
         [HttpPut()]
-        public async Task<IActionResult> PutClient([FromRoute] int AgreementId, [FromBody] List<ClientVM> clientvm)
+        public async Task<IActionResult> PutClient([FromRoute] int AgreementId, [FromBody] UpdateClient cliente)
         {
             if (!ModelState.IsValid)
             {
@@ -69,9 +69,9 @@ namespace Siscom.Agua.Api.Controllers
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    foreach (var item in clientvm)
+                    foreach (var item in cliente.Client)
                     {
-                        var clientBase = _context.Clients.Find(item.Id);
+                        var clientBase = await _context.Clients.Include(c => c.Contacts).Where(x => x.Id == item.Id).FirstOrDefaultAsync();
                         if(clientBase == null)
                             return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Los datos no coinciden con la información almacenada, Favor de verificar!" });
 
@@ -94,7 +94,7 @@ namespace Siscom.Agua.Api.Controllers
                         _context.Entry(clientBase).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
                     }
-                   
+                    scope.Complete();
                 }
               
             }
@@ -105,7 +105,7 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                 systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                 systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                systemLog.Parameter = JsonConvert.SerializeObject(clientvm);
+                systemLog.Parameter = JsonConvert.SerializeObject(cliente);
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar la dirección, Favor de verificar!" });
