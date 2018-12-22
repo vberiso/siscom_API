@@ -921,7 +921,13 @@ namespace Siscom.Agua.Api.Controllers
                         if (pTransaction.TypeTransactionId == 2)
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });                        
                         _fondoCaja = new KeyValuePair<int, decimal>(_fondoCaja.Key + 1, item.Amount);
-                        break;                    
+                        break;
+                    case 3://Cobrado                       
+                        _cobrado = new KeyValuePair<int, decimal>(_cobrado.Key + 1, item.Amount);
+                        break;
+                    case 4://Cancelado                        
+                        _cancelado = new KeyValuePair<int, decimal>(_cancelado.Key + 1, item.Amount);
+                        break;
                     case 5://Cierre
                         _open = false;
                         if (pTransaction.TypeTransactionId == 5)
