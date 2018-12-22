@@ -147,11 +147,12 @@ namespace Siscom.Agua.Api.Controllers
             if (terminalUser.OpenDate.Date != DateTime.UtcNow.ToLocalTime().Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
 
+
             if (await _context.Transactions
                            .Include(x => x.TypeTransaction)
                            .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                       x.DateTransaction.Date == DateTime.Now.Date &&
-                                       x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7)
+                                       x.DateTransaction.Date == DateTime.UtcNow.ToLocalTime().Date &&
+                                       (x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7))
                            .FirstOrDefaultAsync() != null)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
 
@@ -424,7 +425,7 @@ namespace Siscom.Agua.Api.Controllers
                            .Include(x => x.TypeTransaction)
                            .Where(x => x.TerminalUser.Id == terminalUser.Id &&
                                        x.DateTransaction.Date == DateTime.UtcNow.ToLocalTime().Date &&
-                                       x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7)
+                                       (x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7))
                            .FirstOrDefaultAsync() != null)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
 
@@ -574,21 +575,21 @@ namespace Siscom.Agua.Api.Controllers
                     await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
                     //Toma folio
-                    Folio folio = new Folio();
-                    folio = await _context.Folios
-                                          .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
-                                                       x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
+                    //Folio folio = new Folio();
+                    //folio = await _context.Folios
+                    //                      .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
+                    //                                   x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
 
-                    TransactionFolio transactionFolio = new TransactionFolio();
-                    transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
-                    transactionFolio.DatePrint = DateTime.UtcNow.ToLocalTime();
-                    transactionFolio.Transaction = transaction;
-                    _context.TransactionFolios.Add(transactionFolio);
-                    await _context.SaveChangesAsync();
+                    //TransactionFolio transactionFolio = new TransactionFolio();
+                    //transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
+                    //transactionFolio.DatePrint = DateTime.UtcNow.ToLocalTime();
+                    //transactionFolio.Transaction = transaction;
+                    //_context.TransactionFolios.Add(transactionFolio);
+                    //await _context.SaveChangesAsync();
 
-                    folio.Secuential += 1;
-                    _context.Entry(folio).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();
+                    //folio.Secuential += 1;
+                    //_context.Entry(folio).State = EntityState.Modified;
+                    //await _context.SaveChangesAsync();
 
                     scope.Complete();
                 }
@@ -651,7 +652,7 @@ namespace Siscom.Agua.Api.Controllers
                            .Include(x => x.TypeTransaction)
                            .Where(x => x.TerminalUser.Id == terminalUser.Id &&
                                        x.DateTransaction.Date == DateTime.UtcNow.ToLocalTime().Date &&
-                                       x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7)
+                                       (x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7))
                            .FirstOrDefaultAsync() != null)
 
             {
@@ -920,13 +921,13 @@ namespace Siscom.Agua.Api.Controllers
                     case 2://Fondo
                         if (pTransaction.TypeTransactionId == 2)
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });                        
-                        _fondoCaja = new KeyValuePair<int, decimal>(_fondoCaja.Key + 1, item.Amount);
+                        _fondoCaja = new KeyValuePair<int, decimal>(_fondoCaja.Key + 1, item.Total);
                         break;
                     case 3://Cobrado                       
-                        _cobrado = new KeyValuePair<int, decimal>(_cobrado.Key + 1, item.Amount);
+                        _cobrado = new KeyValuePair<int, decimal>(_cobrado.Key + 1, _cobrado.Value+item.Total);
                         break;
                     case 4://Cancelado                        
-                        _cancelado = new KeyValuePair<int, decimal>(_cancelado.Key + 1, item.Amount);
+                        _cancelado = new KeyValuePair<int, decimal>(_cancelado.Key + 1, _cancelado.Value+item.Total);
                         break;
                     case 5://Cierre
                         _open = false;
@@ -934,7 +935,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido cerrada" });
                         break;
                     case 6: //Retiro
-                        _retirado = new KeyValuePair<int, decimal>(_retirado.Key + 1, item.Amount);
+                        _retirado = new KeyValuePair<int, decimal>(_retirado.Key + 1, _retirado.Value+item.Amount);
                         break;
                     case 7: //Liquidada
                         _liquidada = true;
@@ -1013,6 +1014,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                         {
+                            //Transacción en caja
                             transaction.Folio = Guid.NewGuid().ToString("D");
                             transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
                             transaction.Sign = pTransaction.Sign;
@@ -1021,12 +1023,15 @@ namespace Siscom.Agua.Api.Controllers
                             transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransaction.TypeTransactionId).ConfigureAwait(false);
                             transaction.PayMethod = await _context.PayMethods.FindAsync(pTransaction.PayMethodId).ConfigureAwait(false);
                             transaction.TerminalUser = terminalUser;
-                            transaction.Tax =0;
+                            transaction.CancellationFolio = String.Empty;
+                            transaction.Tax = 0;
                             transaction.Rounding = 0;
+                            transaction.AuthorizationOriginPayment = String.Empty;
                             transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(1).ConfigureAwait(false);
                             transaction.OriginPayment = await _context.OriginPayments.FindAsync(1).ConfigureAwait(false);
+                            transaction.Total = pTransaction.Amount;
                             _context.Transactions.Add(transaction);
-                            await _context.SaveChangesAsync();
+                            await _context.SaveChangesAsync();                           
 
                             if (pTransaction.TypeTransactionId == 2 || pTransaction.TypeTransactionId == 6 || pTransaction.TypeTransactionId == 7)
                             {
