@@ -278,7 +278,7 @@ namespace Siscom.Agua.Api.Controllers
 
                                 DebtStatus debtStatus = new DebtStatus()
                                 {
-                                    id_status = debt.Status,
+                                    id_status = debtFind.Status,
                                     DebtStatusDate = transaction.DateTransaction,
                                     User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
                                     DebtId = debt.Id
