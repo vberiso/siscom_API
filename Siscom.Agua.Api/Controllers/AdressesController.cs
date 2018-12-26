@@ -28,11 +28,12 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         //GET: api/Adresses
-       [HttpGet]
-        public IEnumerable<Address> GetAdresses([FromBody] int AgreementId)
+        [HttpGet]
+        public async Task<IActionResult> GetAdresses([FromRoute] int AgreementId)
         {
-            var address = _context.Adresses
-                .Include(s => s.Suburbs);
+            var address = await _context.Adresses
+                .Include(s => s.Suburbs)
+                .Where(i => i.AgreementsId == AgreementId).ToListAsync();
             address.ToList().ForEach(X =>
             {
                 X.Suburbs = _context.Suburbs.Include(r => r.Regions)
@@ -43,8 +44,10 @@ namespace Siscom.Agua.Api.Controllers
                                             .Where(i => i.Id == X.Suburbs.Id)
                                             .SingleOrDefault();
             });
+            if(address == null)
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Los datos no coinciden con la información almacenada, Favor de verificar!" });
 
-            return address;
+            return Ok(address);
         }
 
         // GET: api/Adresses/5
