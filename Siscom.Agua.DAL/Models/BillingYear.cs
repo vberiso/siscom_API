@@ -10,6 +10,5 @@ namespace Siscom.Agua.DAL.Models
         public string name_concept { get; set; }
         public decimal amount { get; set; }
         public bool have_tax { get; set; }
-        public string error { get; set; }
     }
 }

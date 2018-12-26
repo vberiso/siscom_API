@@ -93,6 +93,21 @@ namespace Siscom.Agua.Api.Controllers
                         });
                         _context.Entry(clientBase).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
+
+                        item.Contacts.ToList().ForEach(x =>
+                        {
+                            if (!clientBase.Contacts.Any(z => z.PhoneNumber == x.PhoneNumber))
+                            {
+                                var contact = new Contact
+                                {
+                                    IsActive = 1,
+                                    PhoneNumber = x.PhoneNumber,
+                                    TypeNumber =  x.TypeNumber
+                                };
+                                clientBase.Contacts.Add(contact);
+                                _context.SaveChanges();
+                            }
+                        });
                     }
                     scope.Complete();
                 }
