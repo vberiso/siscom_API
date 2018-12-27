@@ -21,6 +21,7 @@ namespace Siscom.Agua.Api.Controllers
 
             // Referring to Node with name "Notifications"  
             FirebaseDB firebaseDBNotifications = firebaseDB.Node("Notifications");
+            FirebaseDB firebaseDBNotificationsData = firebaseDB.Node("Notifications");
             var JsonConverter = JsonConvert.SerializeObject(new MessagesNotification
             {
                 Title = "Cancelación",
@@ -28,6 +29,7 @@ namespace Siscom.Agua.Api.Controllers
             });
 
             FirebaseResponse postResponse = firebaseDBNotifications.Post(JsonConverter);
+            FirebaseResponse getResponse = firebaseDBNotificationsData.Get();
 
             return Ok();
         }

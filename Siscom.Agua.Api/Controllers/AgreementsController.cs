@@ -731,10 +731,10 @@ namespace Siscom.Agua.Api.Controllers
             Agreement agreement = await _context.Agreements
                                                 .Include(x => x.TypeIntake)
                                                 .Include(x => x.TypeStateService)
-                                                .Include(x => x.AgreementDiscounts)
+                                                //.Include(x => x.AgreementDiscounts.Where(z => z.IsActive == true))
                                                 .Where(x => x.Id == agreementDiscountt.AgreementId)
                                                 .FirstOrDefaultAsync();
-
+            agreement.AgreementDiscounts = await _context.AgreementDiscounts.Where(x => x.IsActive == true && x.IdAgreement == agreementDiscountt.AgreementId).ToListAsync();
             Discount discount = await _context.Discounts.FindAsync(agreementDiscountt.DiscountId);
 
 
@@ -753,10 +753,10 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
             }
 
-            if(agreement.AgreementDiscounts.Count > 1)//suspendido
+            if(agreement.AgreementDiscounts.Count >= 1)//suspendido
             {
                 //if(agreement.AgreementDiscounts.)
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asigamr mas de un descuento, favor de verificar" });
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asignar más de un descuento, favor de verificar" });
             }
 
             if (discount.IsActive == false)
@@ -822,7 +822,7 @@ namespace Siscom.Agua.Api.Controllers
                                                                 && x.IdDiscount == agreementDiscountt.DiscountId)
                                                        .FirstOrDefaultAsync();
                     agreementd.IsActive = agreementDiscountt.IsActive;
-                    _context.Entry(agreementd).State = EntityState.Modified;
+                    _context.Entry(agreementd).State = EntityState.Deleted;
                     _context.SaveChanges();
                     scope.Complete();
                 }
@@ -851,7 +851,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return NotFound();
             }
-            return Ok(await _context.AgreementDiscounts.Where(x => x.IdAgreement == AgreementId).ToListAsync());
+            return Ok(await _context.AgreementDiscounts.Where(x => x.IdAgreement == AgreementId && x.IsActive == true).ToListAsync());
         }
 
 

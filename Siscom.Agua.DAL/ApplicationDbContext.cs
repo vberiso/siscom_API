@@ -112,6 +112,11 @@ namespace Siscom.Agua.DAL
         public DbSet<SystemLog> SystemLogs { get; set; }
         public DbSet<SystemParameters> SystemParameters { get; set; }
 
+        /// <summary>
+        /// Notifications
+        /// </summary>
+        public DbSet<PushNotifications> PushNotifications { get; set; }
+
         public ApplicationDbContext()
         {
         }

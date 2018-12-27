@@ -60,7 +60,6 @@ namespace Siscom.Agua.Api.Controllers
                                             .Where(gs => gs.AgreementId == idAgreement)
                                             .OrderBy(x => x.DebitDate).ToListAsync();
 
-
             if (debt == null)
             {
                 return NotFound();

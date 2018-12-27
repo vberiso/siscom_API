@@ -95,6 +95,8 @@ namespace Siscom.Agua.Api.Controllers
                                 bl.name_concept = result[1].ToString();
                                 bl.have_tax = Convert.ToBoolean(result[3]);
                                 bl.amount = Convert.ToDecimal(result[2].ToString());
+                                bl.id_discount = Convert.ToInt32(result[4]);
+                                bl.discount = result[5].ToString();
                                 entities.Add(bl);
                             }
                         }
