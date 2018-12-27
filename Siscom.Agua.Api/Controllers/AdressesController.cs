@@ -84,23 +84,48 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     foreach (var item in adressvm.Addresses)
                     {
-                        var add = _context.Adresses.Include(s => s.Suburbs).Where(i => i.Id == item.Id).FirstOrDefault();
-                        if (add == null)
-                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Los datos no coinciden con la información almacenada, Favor de verificar!" });
-                        add.Indoor = item.Indoor;
-                        add.IsActive = item.IsActive;
-                        add.Lat = item.Lat;
-                        add.Lon = item.Lon;
-                        add.Outdoor = item.Outdoor;
-                        add.Reference = item.Reference;
-                        add.Street = item.Street;
-                        add.Suburbs = _context.Suburbs.Find(item.SuburbsId);
-                        add.SuburbsId = item.SuburbsId;
-                        add.TypeAddress = item.TypeAddress;
-                        add.Zip = item.Zip;
+                        if(item.Id == 0)
+                        {
+                            Address a = new Address
+                            {
+                                AgreementsId = AgreementId,
+                                Indoor = item.Indoor,
+                                IsActive = item.IsActive,
+                                Lat = item.Lat,
+                                Lon = item.Lon,
+                                Outdoor = item.Outdoor,
+                                Reference = item.Reference,
+                                Street = item.Street,
+                                SuburbsId = item.SuburbsId,
+                                TypeAddress = item.TypeAddress,
+                                Zip = item.Zip,
+                                Agreements = await _context.Agreements.FindAsync(AgreementId),
+                                Suburbs = await _context.Suburbs.FindAsync(item.SuburbsId)
+                            };
+                            await _context.Adresses.AddAsync(a);
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            var add = _context.Adresses.Include(s => s.Suburbs).Where(i => i.Id == item.Id).FirstOrDefault();
+                            if (add == null)
+                                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Los datos no coinciden con la información almacenada, Favor de verificar!" });
+                            add.Indoor = item.Indoor;
+                            add.IsActive = item.IsActive;
+                            add.Lat = item.Lat;
+                            add.Lon = item.Lon;
+                            add.Outdoor = item.Outdoor;
+                            add.Reference = item.Reference;
+                            add.Street = item.Street;
+                            add.Suburbs = _context.Suburbs.Find(item.SuburbsId);
+                            add.SuburbsId = item.SuburbsId;
+                            add.TypeAddress = item.TypeAddress;
+                            add.Zip = item.Zip;
 
-                        _context.Entry(add).State = EntityState.Modified;
-                        await _context.SaveChangesAsync();
+                            _context.Entry(add).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+                        }
+                     
                     }
                     scope.Complete();
                 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Siscom.Agua.Api.Services.FirebaseService;
+using Siscom.Agua.DAL.Models;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -14,7 +15,7 @@ namespace Siscom.Agua.Api.Controllers
     public class NotificationsController : ControllerBase
     {
         [HttpPost]
-        public async Task<IActionResult> SendNotification()
+        public async Task<IActionResult> SendNotification([FromBody] PushNotifications notification)
         {
             // Instanciating with base URL  
             FirebaseDB firebaseDB = new FirebaseDB("https://siscom-notifications.firebaseio.com/");
@@ -22,11 +23,7 @@ namespace Siscom.Agua.Api.Controllers
             // Referring to Node with name "Notifications"  
             FirebaseDB firebaseDBNotifications = firebaseDB.Node("Notifications");
             FirebaseDB firebaseDBNotificationsData = firebaseDB.Node("Notifications");
-            var JsonConverter = JsonConvert.SerializeObject(new MessagesNotification
-            {
-                Title = "Cancelación",
-                Message = "Se requiere cancelación"
-            });
+            var JsonConverter = JsonConvert.SerializeObject(notification);
 
             FirebaseResponse postResponse = firebaseDBNotifications.Post(JsonConverter);
             FirebaseResponse getResponse = firebaseDBNotificationsData.Get();
@@ -35,18 +32,18 @@ namespace Siscom.Agua.Api.Controllers
         }
     }
 
-    public class MessagesNotification
-    {
-        public string Title { get; set; }
-        public string Message { get; set; }
-        public bool IsActive { get; set; }
-    }
+    //public class MessagesNotification
+    //{
+    //    public string Title { get; set; }
+    //    public string Message { get; set; }
+    //    public bool IsActive { get; set; }
+    //}
 
-    public class DetailAjusment
-    {
-        public int AgreementId { get; set; }
-        public int DebtId { get; set; }
-        public int Porcent { get; set; }
-        public string TextDiscount { get; set; }
-    }
+    //public class DetailAjusment
+    //{
+    //    public int AgreementId { get; set; }
+    //    public int DebtId { get; set; }
+    //    public int Porcent { get; set; }
+    //    public string TextDiscount { get; set; }
+    //}
 }

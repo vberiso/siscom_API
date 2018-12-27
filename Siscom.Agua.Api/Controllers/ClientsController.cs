@@ -76,46 +76,76 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     foreach (var item in cliente.Client)
                     {
-                        var clientBase = await _context.Clients.Include(c => c.Contacts).Where(x => x.Id == item.Id).FirstOrDefaultAsync();
-                        if(clientBase == null)
-                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Los datos no coinciden con la información almacenada, Favor de verificar!" });
-
-                        clientBase.CURP = item.CURP;
-                        clientBase.EMail = item.EMail;
-                        clientBase.INE = item.INE;
-                        clientBase.IsActive = item.IsActive;
-                        clientBase.LastName = item.LastName;
-                        clientBase.Name = item.Name;
-                        clientBase.RFC = item.RFC;
-                        clientBase.SecondLastName = item.SecondLastName;
-                        clientBase.TypeUser = item.TypeUser;
-                        clientBase.Contacts.Where(z => z.IsActive == 1).ToList().ForEach(x =>
+                        if(item.Id == 0)
                         {
-                            var contact = item.Contacts.Where(i => i.Id == x.Id).FirstOrDefault();
-                            if(contact != null)
+                            Client c = new Client();
+                            c.Agreement = await _context.Agreements.FindAsync(AgreementId);
+                            c.AgreementId = AgreementId;
+                            c.CURP = item.CURP;
+                            c.EMail = item.EMail;
+                            c.INE = item.INE;
+                            c.IsActive = item.IsActive;
+                            c.LastName = item.LastName;
+                            c.Name = item.Name;
+                            c.RFC = item.RFC;
+                            c.SecondLastName = item.SecondLastName;
+                            c.TypeUser = item.TypeUser;
+                            foreach (var contac in item.Contacts)
                             {
-                                x.IsActive = contact.IsActive;
-                                x.PhoneNumber = contact.PhoneNumber;
-                                x.TypeNumber = contact.TypeNumber;
-                            }
-                        });
-                        _context.Entry(clientBase).State = EntityState.Modified;
-                        await _context.SaveChangesAsync();
-
-                        item.Contacts.ToList().ForEach(x =>
-                        {
-                            if (!clientBase.Contacts.Any(z => z.PhoneNumber == x.PhoneNumber))
-                            {
-                                var contact = new Contact
+                                var con = new Contact
                                 {
-                                    IsActive = 1,
-                                    PhoneNumber = x.PhoneNumber,
-                                    TypeNumber =  x.TypeNumber
+                                    IsActive = contac.IsActive,
+                                    PhoneNumber = contac.PhoneNumber,
+                                    TypeNumber = contac.TypeNumber
                                 };
-                                clientBase.Contacts.Add(contact);
-                                _context.SaveChanges();
+                                c.Contacts.Add(con);
                             }
-                        });
+
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            var clientBase = await _context.Clients.Include(c => c.Contacts).Where(x => x.Id == item.Id).FirstOrDefaultAsync();
+                            if (clientBase == null)
+                                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Los datos no coinciden con la información almacenada, Favor de verificar!" });
+
+                            clientBase.CURP = item.CURP;
+                            clientBase.EMail = item.EMail;
+                            clientBase.INE = item.INE;
+                            clientBase.IsActive = item.IsActive;
+                            clientBase.LastName = item.LastName;
+                            clientBase.Name = item.Name;
+                            clientBase.RFC = item.RFC;
+                            clientBase.SecondLastName = item.SecondLastName;
+                            clientBase.TypeUser = item.TypeUser;
+                            clientBase.Contacts.Where(z => z.IsActive == 1).ToList().ForEach(x =>
+                            {
+                                var contact = item.Contacts.Where(i => i.Id == x.Id).FirstOrDefault();
+                                if (contact != null)
+                                {
+                                    x.IsActive = contact.IsActive;
+                                    x.PhoneNumber = contact.PhoneNumber;
+                                    x.TypeNumber = contact.TypeNumber;
+                                }
+                            });
+                            _context.Entry(clientBase).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+
+                            item.Contacts.ToList().ForEach(x =>
+                            {
+                                if (!clientBase.Contacts.Any(z => z.PhoneNumber == x.PhoneNumber))
+                                {
+                                    var contact = new Contact
+                                    {
+                                        IsActive = 1,
+                                        PhoneNumber = x.PhoneNumber,
+                                        TypeNumber = x.TypeNumber
+                                    };
+                                    clientBase.Contacts.Add(contact);
+                                    _context.SaveChanges();
+                                }
+                            });
+                        }
                     }
                     scope.Complete();
                 }
