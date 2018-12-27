@@ -31,7 +31,7 @@ namespace Siscom.Agua.Api.Controllers
         public IEnumerable<TownVM> GetTowns(int StatesId)
         {
             return _context.Towns.Where(s => s.States.Id == StatesId).Select(x => 
-            new TownVM {Id = x.Id, Name = x.Name });
+            new TownVM {Id = x.Id, Name = x.Name }).OrderByDescending(s => s.Name);
         }
 
         // GET: api/Towns/5

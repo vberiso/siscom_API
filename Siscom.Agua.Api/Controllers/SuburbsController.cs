@@ -40,7 +40,7 @@ namespace Siscom.Agua.Api.Controllers
                                             Name = x.Name,
                                             ClasificationId = x.Clasifications.Id,
                                             RegionId = x.Regions.Id,
-                                        }).ToList();
+                                        }).ToList().OrderByDescending(x => x.Name);
                 return a;
             }
             else
