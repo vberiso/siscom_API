@@ -293,99 +293,7 @@ namespace Siscom.Agua.Api.Controllers
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     Agreement agreement = await GetAgreementDataUpdate(agreementvm.Id);
-                    //agreementvm.Adresses.ToList().ForEach(x =>
-                    //{
-                    //    Address ad = _context.Adresses.Where(a => a.Id == x.Id).SingleOrDefault();
-                    //    if (ad != null)
-                    //    {
-                    //        ad.Indoor = x.Indoor;
-                    //        ad.Outdoor = x.Outdoor;
-                    //        ad.Street = x.Street;
-                    //        ad.Lat = x.Lat;
-                    //        ad.Lon = x.Lon;
-                    //        ad.Reference = x.Reference;
-                    //        ad.TypeAddress = x.TypeAddress;
-                    //        ad.Zip = x.Zip;
-                    //        ad.SuburbsId = x.SuburbsId;
-                    //        _context.Entry(ad).State = EntityState.Modified;
-                    //        _context.SaveChanges();
-                    //    }
-                    //    else
-                    //    {
-                    //        agreement.Addresses.Add(new Address
-                    //        {
-                    //            Agreements = agreement,
-                    //            AgreementsId = agreement.Id,
-                    //            Street = x.Street,
-                    //            Indoor = x.Indoor,
-                    //            Outdoor = x.Outdoor,
-                    //            Suburbs = _context.Suburbs.Find(x.SuburbsId),
-                    //            IsActive = true,
-                    //            Lat = x.Lat,
-                    //            Lon = x.Lon,
-                    //            Reference = x.Reference,
-                    //            TypeAddress = x.TypeAddress,
-                    //            Zip = x.Zip
-                    //        });
-                    //    }
-                    //});
-
-                    //agreementvm.Clients.ToList().ForEach(x =>
-                    //{
-                    //    Client c = _context.Clients.Where(cl => cl.Id == x.Id).SingleOrDefault();
-
-                    //    if (c != null)
-                    //    {
-                    //        c.Name = x.Name;
-                    //        c.SecondLastName = x.SecondLastName;
-                    //        c.LastName = x.LastName;
-                    //        c.INE = (x.INE == "") ? (c.INE != null) ? c.INE : "" : x.INE; 
-                    //        c.RFC = x.RFC;
-                    //        c.IsActive = true;
-                    //        c.TypeUser = x.TypeUser;
-                    //        c.CURP = (x.CURP == "") ? (c.CURP != null) ? c.CURP : "" : x.CURP;
-                    //        c.EMail = x.EMail;
-                    //        x.Contacts.ToList().ForEach(co =>
-                    //        {
-                    //            Contact con = _context.Contacts.Find(co.Id);
-                    //            con.IsActive = co.IsActive;
-                    //            con.PhoneNumber = co.PhoneNumber;
-                    //            con.TypeNumber = co.TypeNumber;
-                    //            //_context.Entry(con).State = EntityState.Modified;
-                    //            //_context.SaveChanges();
-                    //        });
-                    //        _context.Entry(c).State = EntityState.Modified;
-                    //        _context.SaveChanges();
-                    //    }
-                    //    else
-                    //    {
-                    //        var newclient = new Client
-                    //        {
-                    //            Agreement = agreement,
-                    //            AgreementId = agreement.Id,
-                    //            CURP = (x.CURP == "") ? (x.IsMale == true) ? "XEXX010101HNEXXXA4" : "XEXX010101HNEXXXA8" : x.CURP,
-                    //            INE = x.INE,
-                    //            RFC = (x.RFC == "") ? "XAXX010101000" : x.RFC,
-                    //            IsActive = true,
-                    //            Name = x.Name,
-                    //            LastName = x.LastName,
-                    //            SecondLastName = x.SecondLastName,
-                    //            EMail = x.EMail,
-                    //            TypeUser = x.TypeUser
-                    //        };
-
-                    //        x.Contacts.ToList().ForEach(co =>
-                    //        {
-                    //            newclient.Contacts.Add(new Contact
-                    //            {
-                    //                IsActive = 1,
-                    //                PhoneNumber = co.PhoneNumber,
-                    //                TypeNumber = co.TypeNumber
-                    //            });
-                    //        });
-                    //        agreement.Clients.Add(newclient);
-                    //    }
-                    //});
+            
 
                     var services = _context.AgreementServices.Where(xx => xx.IdAgreement == agreement.Id).ToList();
                     var ids = (from s in services
@@ -900,7 +808,11 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPut("PutDiscount/{AgreementId}")]
         public async Task<IActionResult> PutDiscounts([FromRoute]int AgreementId, [FromBody]  AgreementDiscounttVM agreementDiscountt)
         {
-            //if()
+           
+            if (AgreementId != agreementDiscountt.AgreementId)
+            {
+                return BadRequest();
+            }
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
