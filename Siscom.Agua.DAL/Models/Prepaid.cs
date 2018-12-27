@@ -12,7 +12,6 @@ namespace Siscom.Agua.DAL.Models
         public Prepaid()
         {
             PrepaidDetails = new HashSet<PrepaidDetail>();
-            DebtPrepaids = new HashSet<DebtPrepaid>();
         }
 
         [Key]
@@ -35,6 +34,5 @@ namespace Siscom.Agua.DAL.Models
         public Agreement Agreement { get; set; }
 
         public ICollection<PrepaidDetail> PrepaidDetails { get; set; }
-        public ICollection<DebtPrepaid> DebtPrepaids { get; set; }
     }
 }
