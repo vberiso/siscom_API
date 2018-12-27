@@ -779,7 +779,7 @@ namespace Siscom.Agua.Api.Controllers
                                 payment.TransactionFolio = transaction.Folio;
                                 payment.Rounding = transaction.Rounding;
                                 payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
-                                
+                                _context.Payments.Add(payment);
                                 await _context.SaveChangesAsync();
 
                                 PaymentDetail paymentDetail = new PaymentDetail();
@@ -790,7 +790,7 @@ namespace Siscom.Agua.Api.Controllers
                                 paymentDetail.PrepaidId = prepaid.Id;
                                 paymentDetail.PaymentId = payment.Id;
                                 _context.PaymentDetails.Add(paymentDetail);
-                                await _context.SaveChangesAsync();
+                                await _context.SaveChangesAsync();                
 
                             }
                             else //Cancelación
