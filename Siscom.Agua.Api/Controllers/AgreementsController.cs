@@ -900,7 +900,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPut("PutDiscount/{AgreementId}")]
         public async Task<IActionResult> PutDiscounts([FromRoute]int AgreementId, [FromBody]  AgreementDiscounttVM agreementDiscountt)
         {
-            if()
+            //if()
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))

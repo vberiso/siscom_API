@@ -758,6 +758,8 @@ namespace Siscom.Agua.Api.Controllers
                                 prepaid.Amount = transaction.Amount;
                                 prepaid.Accredited = 0;
                                 prepaid.Status = "ANT01";
+                                prepaid.Type = pTransactionVM.Type;
+                                prepaid.Percentage = pTransactionVM.Percentage;
                                 prepaid.AgreementId = AgreementId;
                                 _context.Prepaids.Add(prepaid);
                                 await _context.SaveChangesAsync();

@@ -26,6 +26,10 @@ namespace Siscom.Agua.DAL.Models
         public decimal Accredited { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
+        [Column("type"), StringLength(5), Required]
+        public string Type { get; set; }
+        [Column("percentage"), Required]
+        public Int16 Percentage { get; set; }
 
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
