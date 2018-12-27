@@ -11,7 +11,6 @@ namespace Siscom.Agua.DAL.Models
     {
         public PayMethod()
         {
-            Transactions = new HashSet<Transaction>();
             Payments = new HashSet<Payment>();
         }
 
@@ -24,7 +23,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
 
-        public ICollection<Transaction> Transactions { get; set; }
+       
         public ICollection<Payment> Payments { get; set; }
     }
 }

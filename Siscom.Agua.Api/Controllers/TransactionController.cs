@@ -65,7 +65,7 @@ namespace Siscom.Agua.Api.Controllers
             transactionPayment.Transaction =  await _context.Transactions
                                                             .Include(x => x.OriginPayment)
                                                             .Include(x => x.ExternalOriginPayment)
-                                                            .Include(x => x.PayMethod)
+                                                            //.Include(x => x.PayMethod)
                                                             .Include(x => x.TerminalUser)
                                                                  .ThenInclude( y => y.Terminal)
                                                                        .ThenInclude( z => z.BranchOffice)
@@ -73,6 +73,7 @@ namespace Siscom.Agua.Api.Controllers
                                                             .Include(x => x.TransactionFolios)
                                                             .Include(x => x.TypeTransaction)
                                                             .FirstOrDefaultAsync(a => a.Id == id);
+            transactionPayment.Transaction.PayMethod = await _context.PayMethods.FindAsync(transactionPayment.Transaction.PayMethodId);
 
             transactionPayment.Payments = await _context.Payments
                                                         .Include(p => p.ExternalOriginPayment)
@@ -216,7 +217,7 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.Amount = pPaymentConcepts.Transaction.Amount;
                     transaction.Aplication = pPaymentConcepts.Transaction.Aplication;
                     transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pPaymentConcepts.Transaction.TypeTransactionId).ConfigureAwait(false);
-                    transaction.PayMethod = await _context.PayMethods.FindAsync(pPaymentConcepts.Transaction.PayMethodId).ConfigureAwait(false);
+                    transaction.PayMethodId = pPaymentConcepts.Transaction.PayMethodId;
                     transaction.TerminalUser = terminalUser;
                     transaction.CancellationFolio = pPaymentConcepts.Transaction.Cancellation;
                     transaction.Tax = pPaymentConcepts.Transaction.Tax;
@@ -255,7 +256,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.Status = "EP001";
                     payment.Type = pPaymentConcepts.Transaction.Type;
                     payment.OriginPayment = transaction.OriginPayment;
-                    payment.PayMethod = transaction.PayMethod;
+                    payment.PayMethod = await _context.PayMethods.FindAsync(transaction.PayMethodId);
                     payment.TransactionFolio = transaction.Folio;
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
                     _context.Payments.Add(payment);
@@ -464,7 +465,7 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.Amount = pCancelPayment.Transaction.Amount;
                     transaction.Aplication = pCancelPayment.Transaction.Aplication;
                     transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pCancelPayment.Transaction.TypeTransactionId).ConfigureAwait(false);
-                    transaction.PayMethod = await _context.PayMethods.FindAsync(pCancelPayment.Transaction.PayMethodId).ConfigureAwait(false);
+                    transaction.PayMethodId = pCancelPayment.Transaction.PayMethodId;
                     transaction.TerminalUser = terminalUser;
                     transaction.CancellationFolio = pCancelPayment.Transaction.Cancellation;
                     transaction.Tax = pCancelPayment.Transaction.Tax;
@@ -727,7 +728,7 @@ namespace Siscom.Agua.Api.Controllers
                             transaction.Amount = pTransactionVM.Amount;
                             transaction.Aplication = pTransactionVM.Aplication;
                             transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransactionVM.TypeTransactionId).ConfigureAwait(false);
-                            transaction.PayMethod = await _context.PayMethods.FindAsync(pTransactionVM.PayMethodId).ConfigureAwait(false);
+                            transaction.PayMethodId = pTransactionVM.PayMethodId;
                             transaction.TerminalUser = terminalUser;
                             transaction.CancellationFolio = pTransactionVM.Cancellation;
                             transaction.Tax = pTransactionVM.Tax;
@@ -774,7 +775,7 @@ namespace Siscom.Agua.Api.Controllers
                                 payment.Status = "EP001";
                                 payment.Type = pTransactionVM.Type;
                                 payment.OriginPayment = transaction.OriginPayment;
-                                payment.PayMethod = transaction.PayMethod;
+                                payment.PayMethod = await _context.PayMethods.FindAsync(transaction.PayMethodId);
                                 payment.TransactionFolio = transaction.Folio;
                                 payment.Rounding = transaction.Rounding;
                                 payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
@@ -1021,7 +1022,7 @@ namespace Siscom.Agua.Api.Controllers
                             transaction.Amount = pTransaction.Amount;
                             transaction.Aplication = pTransaction.Aplication;
                             transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransaction.TypeTransactionId).ConfigureAwait(false);
-                            transaction.PayMethod = await _context.PayMethods.FindAsync(pTransaction.PayMethodId).ConfigureAwait(false);
+                            transaction.PayMethodId = pTransaction.PayMethodId;
                             transaction.TerminalUser = terminalUser;
                             transaction.CancellationFolio = String.Empty;
                             transaction.Tax = 0;
@@ -1065,7 +1066,7 @@ namespace Siscom.Agua.Api.Controllers
             else
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
 
-            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+            return Ok(transaction.Id );
         }
 
         /// <summary>
@@ -1080,11 +1081,14 @@ namespace Siscom.Agua.Api.Controllers
         {
            var transaction = await _context.Transactions
                                     .Include(x => x.TypeTransaction)
-                                    .Include(x => x.PayMethod)
                                     .Include(x=> x.TransactionFolios)
                                     .Where(x => x.TerminalUser.Id == terminalUserId &&
                                                 x.DateTransaction.Date == Convert.ToDateTime(date).Date)
                                     .OrderBy(x => x.Id).ToListAsync();
+            transaction.ToList().ForEach(x =>
+            {
+                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
+            });
            if (transaction == null)
             {
                 return NotFound();

@@ -820,7 +820,13 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            Agreement agreement = await GetAgreementDataUpdate(agreementDiscountt.AgreementId);
+            Agreement agreement = await _context.Agreements
+                                                .Include(x => x.TypeIntake)
+                                                .Include(x => x.TypeStateService)
+                                                .Include(x => x.AgreementDiscounts)
+                                                .Where(x => x.Id == agreementDiscountt.AgreementId)
+                                                .FirstOrDefaultAsync();
+
             Discount discount = await _context.Discounts.FindAsync(agreementDiscountt.DiscountId);
 
 
@@ -854,6 +860,7 @@ namespace Siscom.Agua.Api.Controllers
                     agreementDiscount.Discount = discount;
                     agreementDiscount.IdAgreement = agreement.Id;
                     agreementDiscount.IdDiscount = discount.Id;
+                    agreementDiscount.IsActive = true;
                     agreementDiscount.StartDate = DateTime.UtcNow.ToLocalTime();
                     agreementDiscount.EndDate = DateTime.UtcNow.ToLocalTime().AddMonths(discount.Month);
 
@@ -878,6 +885,24 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok();
         }
+
+        [HttpPut("PutDiscount")]
+        public async Task<IActionResult> PutDiscounts([FromBody]  AgreementDiscounttVM agreementDiscountt)
+        {
+            return Ok();
+        }
+
+        [HttpGet("GetDiscounts/{AgreementId}")]
+        public async Task<IActionResult> GetDiscounts([FromRoute]  int AgreementId)
+        {
+            if (!AgreementExists(AgreementId))
+            {
+                return NotFound();
+            }
+            return Ok(await _context.AgreementDiscounts.Where(x => x.IdAgreement == AgreementId).ToListAsync());
+        }
+
+
 
         // DELETE: api/Agreements/5
         [HttpDelete("{id}")]

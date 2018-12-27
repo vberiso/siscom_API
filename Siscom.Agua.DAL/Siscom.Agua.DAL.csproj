@@ -16,6 +16,7 @@
     <Compile Remove="Migrations\20181213164314_PaymentDetail.cs" />
     <Compile Remove="Migrations\20181217183905_Decimal.cs" />
     <Compile Remove="Migrations\20181218204021_IsActive.cs" />
+    <Compile Remove="Migrations\20181226230715_RemoveConstrainTransaction.cs" />
   </ItemGroup>
   
   <ItemGroup>

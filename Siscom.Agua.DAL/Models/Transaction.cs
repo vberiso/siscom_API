@@ -50,6 +50,7 @@ namespace Siscom.Agua.DAL.Models
 
         //[ForeignKey("PayMethod")]
         public int PayMethodId { get; set; }
+        [NotMapped]
         public PayMethod PayMethod { get; set; }
 
         public int OriginPaymentId { get; set; }

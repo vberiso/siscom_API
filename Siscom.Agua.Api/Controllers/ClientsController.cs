@@ -34,7 +34,12 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<Client> GetClients([FromRoute] int AgreementId)
         {
-            return _context.Clients.Include(c => c.Contacts).Where(x => x.AgreementId == AgreementId);
+            var a = _context.Clients.Include(c => c.Contacts).Where(x => x.AgreementId == AgreementId);
+            a.ToList().ForEach(x =>
+            {
+                x.Contacts = x.Contacts.Where(p => p.IsActive == 1).ToList();
+            });
+            return a;
         }
 
         //// GET: api/Clients/5
@@ -84,12 +89,15 @@ namespace Siscom.Agua.Api.Controllers
                         clientBase.RFC = item.RFC;
                         clientBase.SecondLastName = item.SecondLastName;
                         clientBase.TypeUser = item.TypeUser;
-                        clientBase.Contacts.ToList().ForEach(x =>
+                        clientBase.Contacts.Where(z => z.IsActive == 1).ToList().ForEach(x =>
                         {
                             var contact = item.Contacts.Where(i => i.Id == x.Id).FirstOrDefault();
-                            x.IsActive = contact.IsActive;
-                            x.PhoneNumber = contact.PhoneNumber;
-                            x.TypeNumber = contact.TypeNumber;
+                            if(contact != null)
+                            {
+                                x.IsActive = contact.IsActive;
+                                x.PhoneNumber = contact.PhoneNumber;
+                                x.TypeNumber = contact.TypeNumber;
+                            }
                         });
                         _context.Entry(clientBase).State = EntityState.Modified;
                         await _context.SaveChangesAsync();

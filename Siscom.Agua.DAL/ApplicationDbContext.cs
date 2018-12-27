@@ -713,10 +713,10 @@ namespace Siscom.Agua.DAL
                    .WithMany(s => s.Transactions)
                    .HasForeignKey(s => s.TypeTransactionId);
 
-            builder.Entity<Transaction>()
-                   .HasOne<PayMethod>(a => a.PayMethod)
-                   .WithMany(s => s.Transactions)
-                   .HasForeignKey(s => s.PayMethodId);
+            //builder.Entity<Transaction>()
+            //       .HasOne<PayMethod>(a => a.PayMethod)
+            //       .WithMany(s => s.Transactions)
+            //       .HasForeignKey(s => s.PayMethodId);
 
             builder.Entity<Transaction>()
                    .HasOne<OriginPayment>(a => a.OriginPayment)
