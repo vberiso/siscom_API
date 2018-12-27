@@ -351,9 +351,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
 
-            RedirectToActionResult getTransaction = new RedirectToActionResult("GetTransaction", "Transaction", new { @id = transaction.Id });
-
-            return getTransaction;
+            return Ok(transaction.Id);
         }
 
         /// <summary>
