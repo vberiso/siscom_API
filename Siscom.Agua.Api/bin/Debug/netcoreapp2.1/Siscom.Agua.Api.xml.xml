@@ -452,5 +452,177 @@
             <returns></returns>
             ------------------------------------------------------------------------
         </member>
+        <member name="T:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB">
+            <summary>  
+            FirebasDB Class is reference of a Firebase Database  
+            </summary>  
+        </member>
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.#ctor(System.String)" -->
+        <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.RootNode">
+            <summary>  
+            Gets or sets Represents current full path of a Firebase Database resource  
+            </summary>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.Node(System.String)">
+            <summary>  
+            Adds more node to base URL  
+            </summary>  
+            <param name="node">Single node of Firebase DB</param>  
+            <returns>Instance of FirebaseDB</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.NodePath(System.String)">
+            <summary>  
+            Adds more nodes to base URL  
+            </summary>  
+            <param name="nodePath">Nodepath of Firebase DB</param>  
+            <returns>Instance of FirebaseDB</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.Get">
+            <summary>  
+            Make Get request  
+            </summary>  
+            <returns>Firebase Response</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.Put(System.String)">
+            <summary>  
+            Make Put request  
+            </summary>  
+            <param name="jsonData">JSON string to PUT</param>  
+            <returns>Firebase Response</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.Post(System.String)">
+            <summary>  
+            Make Post request  
+            </summary>  
+            <param name="jsonData">JSON string to POST</param>  
+            <returns>Firebase Response</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.Patch(System.String)">
+            <summary>  
+            Make Patch request  
+            </summary>  
+            <param name="jsonData">JSON sting to PATCH</param>  
+            <returns>Firebase Response</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.Delete">
+            <summary>  
+            Make Delete request  
+            </summary>  
+            <returns>Firebase Response</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.ToString">
+            <summary>  
+            To String  
+            </summary>  
+            <returns>Current resource URL as string</returns>  
+        </member>
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "T:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest" -->
+        <member name="F:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest.JSON_SUFFIX">
+            <summary>  
+            Suffix to be added in each resource URI  
+            </summary>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest.#ctor(System.Net.Http.HttpMethod,System.String,System.String)">
+            <summary>  
+            Initializes a new instance of the <see cref="T:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest"/> class  
+            </summary>  
+            <param name="method">HTTP Method</param>  
+            <param name="uri">URI of resource</param>  
+            <param name="jsonString">JSON string</param>  
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest.Method">
+            <summary>  
+            Gets or sets HTTP Method  
+            </summary>  
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest.JSON">
+            <summary>  
+            Gets or sets JSON string  
+            </summary>  
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest.Uri">
+            <summary>  
+            Gets or sets URI  
+            </summary>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest.Execute">
+            <summary>  
+            Executes a HTTP requests  
+            </summary>  
+            <returns>Firebase Response</returns>  
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse">
+            <summary>  
+            Firebase Response  
+            </summary>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse.#ctor">
+            <summary>  
+            Initializes a new instance of the <see cref="T:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse"/> class  
+            </summary>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse.#ctor(System.Boolean,System.String,System.Net.Http.HttpResponseMessage,System.String)">
+            <summary>  
+            Initializes a new instance of the <see cref="T:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse"/> class  
+            </summary>  
+            <param name="success">If Success</param>  
+            <param name="errorMessage">Error Message</param>  
+            <param name="httpResponse">HTTP Response</param>  
+            <param name="jsonContent">JSON Content</param>  
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse.Success">
+            <summary>  
+            Gets or sets Boolean status of Success  
+            </summary>  
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse.JSONContent">
+            <summary>  
+            Gets or sets JSON content returned by the Request  
+            </summary>  
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse.ErrorMessage">
+            <summary>  
+            Gets or sets Error Message if Any  
+            </summary>  
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseResponse.HttpResponse">
+            <summary>  
+            Gets or sets full Http Response  
+            </summary>  
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.FirebaseService.UtilityHelper">
+            <summary>  
+            Utility Helper Class  
+            </summary>  
+        </member>
+        <member name="F:Siscom.Agua.Api.Services.FirebaseService.UtilityHelper.USER_AGENT">
+            <summary>  
+            User Agent Header in HTTP Request  
+            </summary>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.UtilityHelper.ValidateURI(System.String)">
+            <summary>  
+            Validates a URI  
+            </summary>  
+            <param name="url">URI as string</param>  
+            <returns>True if valid</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.UtilityHelper.TryParseJSON(System.String,System.String@)">
+            <summary>  
+            Validates JSON string  
+            </summary>  
+            <param name="inJSON">JSON to be validatedd</param>  
+            <param name="output">Valid JSON or Error Message</param>  
+            <returns>True if valid</returns>  
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.FirebaseService.UtilityHelper.RequestHelper(System.Net.Http.HttpMethod,System.Uri,System.String)">
+            <summary>  
+            Makes Asynchronus HTTP requests  
+            </summary>  
+            <param name="method">HTTP method</param>  
+            <param name="uri">URI of resource</param>  
+            <param name="json">JSON string</param>  
+            <returns>HTTP Responce as Task</returns>  
+        </member>
     </members>
 </doc>

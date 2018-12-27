@@ -851,6 +851,17 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asigamr mas de un descuento, favor de verificar" });
             }
 
+            if (discount.IsActive == false)
+            {
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El descuento no se encuentra activo, favor de verificar" });
+            }
+
+            if (discount.EndDate.Value < DateTime.UtcNow.ToLocalTime())
+            {
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El descuento no se encuentra dentro de un periodo valido, favor de verificar" });
+            }
+          
+
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -886,9 +897,38 @@ namespace Siscom.Agua.Api.Controllers
             return Ok();
         }
 
-        [HttpPut("PutDiscount")]
-        public async Task<IActionResult> PutDiscounts([FromBody]  AgreementDiscounttVM agreementDiscountt)
+        [HttpPut("PutDiscount/{AgreementId}")]
+        public async Task<IActionResult> PutDiscounts([FromRoute]int AgreementId, [FromBody]  AgreementDiscounttVM agreementDiscountt)
         {
+            if()
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    AgreementDiscount agreementd = await _context.AgreementDiscounts
+                                                       .Where(x => x.IdAgreement == agreementDiscountt.AgreementId
+                                                                && x.IdDiscount == agreementDiscountt.DiscountId)
+                                                       .FirstOrDefaultAsync();
+                    agreementd.IsActive = agreementDiscountt.IsActive;
+                    _context.Entry(agreementd).State = EntityState.Modified;
+                    _context.SaveChanges();
+                    scope.Complete();
+                }
+            }
+            catch(Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(agreementDiscountt);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el descuento" });
+            }
+            //agreement.
+            //if()
             return Ok();
         }
 

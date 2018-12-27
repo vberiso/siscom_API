@@ -14,5 +14,7 @@ namespace Siscom.Agua.Api.Model
         public int DiscountId { get; set; }
         [Required]
         public string UserId { get; set; }
+        [Required]
+        public bool IsActive { get; set; }
     }
 }

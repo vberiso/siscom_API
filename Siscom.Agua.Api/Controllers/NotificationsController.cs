@@ -2,42 +2,49 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FireSharp;
-using FireSharp.Config;
-using FireSharp.Interfaces;
-using FireSharp.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Siscom.Agua.Api.Services.FirebaseService;
 
 namespace Siscom.Agua.Api.Controllers
 {
-    //[Route("api/[controller]")]
-    //[ApiController]
-    //public class NotificationsController : ControllerBase
-    //{
-    //    public async Task<IActionResult> SendNotification()
-    //    {
-    //        IFirebaseConfig config = new FirebaseConfig
-    //        {
-    //            AuthSecret = "AIzaSyBVvhp66KjzBwhC_uI9F_YK7vJ6AicIxkY",
-    //            BasePath = "https://siscom-notifications.firebaseio.com"
-    //        };
-    //        IFirebaseClient client = new FirebaseClient(config);
-    //        var message = new MessagesNotification
-    //        {
-    //            Title = "Titulo 1",
-    //            Message = "Mensaje de prueba"
-    //        };
+    [Route("api/[controller]")]
+    [ApiController]
+    public class NotificationsController : ControllerBase
+    {
+        [HttpPost]
+        public async Task<IActionResult> SendNotification()
+        {
+            // Instanciating with base URL  
+            FirebaseDB firebaseDB = new FirebaseDB("https://siscom-notifications.firebaseio.com/");
 
-    //        PushResponse response = await client.PushAsync("Cancelacion/push", message);
-    //        //response.Result.name;
-    //        return Ok();
-    //    }
-    //}
+            // Referring to Node with name "Notifications"  
+            FirebaseDB firebaseDBNotifications = firebaseDB.Node("Notifications");
+            var JsonConverter = JsonConvert.SerializeObject(new MessagesNotification
+            {
+                Title = "Cancelación",
+                Message = "Se requiere cancelación"
+            });
 
-    //public class MessagesNotification
-    //{
-    //    public string Title { get; set; }
-    //    public string Message { get; set; }
-    //}
+            FirebaseResponse postResponse = firebaseDBNotifications.Post(JsonConverter);
+
+            return Ok();
+        }
+    }
+
+    public class MessagesNotification
+    {
+        public string Title { get; set; }
+        public string Message { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class DetailAjusment
+    {
+        public int AgreementId { get; set; }
+        public int DebtId { get; set; }
+        public int Porcent { get; set; }
+        public string TextDiscount { get; set; }
+    }
 }
