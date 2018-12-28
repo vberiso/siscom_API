@@ -987,7 +987,7 @@ namespace Siscom.Agua.Api.Controllers
                                                     IdType = n.CodeName,
                                                     Description = n.Description
                                                 }).ToListAsync(),
-               
+
                 TypeDescounts = await _context.Discounts.Where(x => x.IsActive == true)
                                                         .Select(d => new TypeDiscount()
                                                         {
@@ -995,6 +995,12 @@ namespace Siscom.Agua.Api.Controllers
                                                             Description = d.Name,
                                                             Percentage = d.Percentage
                                                         }).ToListAsync(),
+                TypeDebts = await _context.Types.Where(x => x.GroupTypeId == 5)
+                                                .Select(n => new TypeDebt()
+                                                {
+                                                    IdType = n.CodeName,
+                                                    Description = n.Description
+                                                }).ToListAsync(),
 
                 Services = await _context.Services
                                         .Where(s => s.IsActive == true && s.InAgreement == true)

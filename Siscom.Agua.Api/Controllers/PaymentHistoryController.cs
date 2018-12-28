@@ -27,6 +27,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> GetPaymentsByAgreement([FromRoute] int id)
         {
             var payments = await _context.Payments
+                                         .Include(x => x.PaymentDetails)
                                          .Where(a => a.AgreementId == id)
                                          .OrderByDescending(f => f.Status)
                                          .ToListAsync();
