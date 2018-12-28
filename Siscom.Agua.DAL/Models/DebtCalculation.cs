@@ -18,7 +18,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("percentage")]
         public Int16 Percentage { get; set; }
         [Column("factor")]
-        public Int16 Factor { get; set; }
+        public decimal Factor { get; set; }
         [Column("times_factor")]
         public Int16 TimesFactor { get; set; }
         [Column("is_variable")]

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181228021058_stringLeghtDebDetail")]
+    partial class stringLeghtDebDetail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -789,7 +791,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("DebtId");
 
-                    b.Property<decimal>("Factor")
+                    b.Property<short>("Factor")
                         .HasColumnName("factor");
 
                     b.Property<bool>("IsVariable")
@@ -1120,7 +1122,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2018, 12, 27, 20, 20, 13, 888, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2018, 12, 27, 20, 10, 57, 926, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");

@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,38 +29,46 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> AddProduct([FromBody] BillableProduct billableProduct)
         {
             string error = string.Empty;
-            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            try
             {
-                command.CommandText = "billing_product";
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add(new SqlParameter("@id_agreement", billableProduct.AgreementId));
-                command.Parameters.Add(new SqlParameter("@id_product", billableProduct.ProductId));
-                command.Parameters.Add(new SqlParameter
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
                 {
-                    ParameterName = "@error",
-                    DbType = DbType.String,
-                    Size = 200,
-                    Direction = ParameterDirection.Output
-                });
-                this._context.Database.OpenConnection();
-                using (var result = await command.ExecuteReaderAsync())
-                {
-                    if (!result.HasRows)
+                    command.CommandText = "billing_product";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@id_agreement", billableProduct.AgreementId));
+                    command.Parameters.Add(new SqlParameter("@id_product", billableProduct.ProductId));
+                    command.Parameters.Add(new SqlParameter
                     {
-                        error = command.Parameters["@error"].Value.ToString();
+                        ParameterName = "@error",
+                        DbType = DbType.String,
+                        Size = 200,
+                        Direction = ParameterDirection.Output
+                    });
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        if (!result.HasRows)
+                        {
+                            error = command.Parameters["@error"].Value.ToString();
+                        }
                     }
-                }
-                if (!string.IsNullOrEmpty(error))
-                {
-                    return StatusCode((int)TypeError.Code.Ok, new { Success = "Se Facturo el Producto" });
-                }
-                else
-                {
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Success = "Se Facturo el Producto" });
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
+                    }
+
                 }
 
             }
+            catch (Exception e)
+            {
 
+                throw;
+            }
         }
     }
 }

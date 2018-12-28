@@ -22,7 +22,7 @@ namespace Siscom.Agua.DAL.Models
         public bool HaveTax { get; set; }
         [Required, StringLength(5), Column("code_concept")]
         public string CodeConcept { get; set; }
-        [Required, StringLength(150), Column("name_concept")]
+        [Required, StringLength(500), Column("name_concept")]
         public string NameConcept { get; set; }
 
         //[ForeignKey("Debt")]
