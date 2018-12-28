@@ -9,6 +9,6 @@ namespace Siscom.Agua.Api.Model
     public class TransactionPaymentVM
     {
         public Transaction Transaction { get; set; }
-        public List<Payment> Payments { get; set; }
+        public Payment Payment { get; set; }
     }
 }

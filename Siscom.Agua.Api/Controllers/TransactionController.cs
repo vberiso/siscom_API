@@ -75,13 +75,13 @@ namespace Siscom.Agua.Api.Controllers
                                                             .FirstOrDefaultAsync(a => a.Id == id);
             transactionPayment.Transaction.PayMethod = await _context.PayMethods.FindAsync(transactionPayment.Transaction.PayMethodId);
 
-            transactionPayment.Payments = await _context.Payments
+            transactionPayment.Payment = await _context.Payments
                                                         .Include(p => p.ExternalOriginPayment)
                                                         .Include(p => p.OriginPayment)
                                                         .Include(p => p.PayMethod)
                                                         .Include(p => p.PaymentDetails)
                                                         .Where(m => m.TransactionFolio == transactionPayment.Transaction.Folio)
-                                                        .ToListAsync();
+                                                        .FirstOrDefaultAsync();
 
             if (transactionPayment == null)
             {
