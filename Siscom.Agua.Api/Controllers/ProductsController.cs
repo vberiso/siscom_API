@@ -47,6 +47,57 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(product);
         }
 
+        /// <summary>
+        /// This will provide product by division
+        /// </summary>       
+        /// <param name="DivisionId">id Division
+        /// </param>
+        /// <returns>products</returns>
+        // POST: api/Products/Division/5
+        [HttpGet("Division/{DivisionId}")]
+        public async Task<IActionResult> GetProductDivision([FromRoute]  int DivisionId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var product = await _context.Products
+                                        .Where(x => x.DivisionId == DivisionId &&
+                                                    x.IsActive==true).ToListAsync();
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(product);
+
+        }
+
+        /// <summary>
+        /// This will provide product by division
+        /// </summary>       
+        /// <param name="ProductId">id Product
+        /// </param>
+        /// <returns>products</returns>
+        // POST: api/Products/Tariff/5
+        [HttpGet("Tariff/{ProductId}")]
+        public async Task<IActionResult> GetProductTariff([FromRoute]  int ProductId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var tariff = await _context.TariffProducts
+                                        .Where(x => x.ProductId == ProductId &&
+                                                    x.IsActive==1).SingleOrDefaultAsync();
+
+            return Ok(tariff);
+        }
+
+
         // PUT: api/Products/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct([FromRoute] int id, [FromBody] Product product)

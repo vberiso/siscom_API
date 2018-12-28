@@ -622,16 +622,34 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> PostTransactionPrepaid([FromRoute] int AgreementId, [FromBody] TransactionVM pTransactionVM)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-            bool _validation = false;
             Prepaid prepaid;
+            decimal _sumTransactionDetail = 0;
+
+
+            #region Validación
+
+            //Parametros
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
+            if (pTransactionVM.TypeTransactionId != 3)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
 
             if (!Validate(pTransactionVM))
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Información incompleta" });
 
+            if (!pTransactionVM.Sign)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
+            foreach (var item in pTransactionVM.transactionDetails)
+            {
+                _sumTransactionDetail += item.Amount;
+            }
+
+            if (pTransactionVM.Amount != _sumTransactionDetail)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pTransactionVM.Amount) });
+
+            //Terminal
             TerminalUser terminalUser = new TerminalUser();
             terminalUser = await _context.TerminalUsers
                                              .Include(x => x.Terminal)
@@ -639,9 +657,200 @@ namespace Siscom.Agua.Api.Controllers
                                              .Where(x => x.Id == pTransactionVM.TerminalUserId).FirstOrDefaultAsync();
 
             if (terminalUser == null)
-            {
                 return NotFound();
+
+            if (!terminalUser.InOperation)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
+
+            if (terminalUser.OpenDate.Date != DateTime.UtcNow.ToLocalTime().Date)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
+
+
+            if (await _context.Transactions
+                           .Include(x => x.TypeTransaction)
+                           .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                       x.DateTransaction.Date == DateTime.UtcNow.ToLocalTime().Date &&
+                                       (x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7))
+                           .FirstOrDefaultAsync() != null)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
+
+
+            if (await _context.Transactions
+                              .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                          x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString() &&
+                                          x.TypeTransaction.Id == 1)
+                              .FirstOrDefaultAsync() == null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+
+            if (await _context.Debts.Include(dd => dd.DebtDetails)
+                                          .Where(gs => _context.Statuses
+                                          .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == AgreementId)
+                                          .FirstOrDefaultAsync() != null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Improcedente anticipo. La cuenta tiene adeudo") });
+
+            #endregion
+
+
+            var option = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.FromSeconds(60)
+            };
+
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    //Transacción en caja
+                    transaction.Folio = Guid.NewGuid().ToString("D");
+                    transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
+                    transaction.Sign = pTransactionVM.Sign;
+                    transaction.Amount = pTransactionVM.Amount;
+                    transaction.Aplication = pTransactionVM.Aplication;
+                    transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransactionVM.TypeTransactionId).ConfigureAwait(false);
+                    transaction.PayMethodId = pTransactionVM.PayMethodId;
+                    transaction.TerminalUser = terminalUser;
+                    transaction.CancellationFolio = pTransactionVM.Cancellation;
+                    transaction.Tax = pTransactionVM.Tax;
+                    transaction.Rounding = pTransactionVM.Rounding;
+                    transaction.AuthorizationOriginPayment = pTransactionVM.AuthorizationOriginPayment;
+                    transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pTransactionVM.ExternalOriginPaymentId).ConfigureAwait(false);
+                    transaction.OriginPayment = await _context.OriginPayments.FindAsync(pTransactionVM.OriginPaymentId).ConfigureAwait(false);
+                    transaction.Total = pTransactionVM.Total;
+                    _context.Transactions.Add(transaction);
+                    await _context.SaveChangesAsync();
+
+                    await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+
+                    TransactionDetail transactionDetail = new TransactionDetail();
+                    transactionDetail.CodeConcept = "ANT01";
+                    transactionDetail.Amount = transaction.Amount;
+                    transactionDetail.Description = "PAGO ANTICIPADO";
+                    transactionDetail.Transaction = transaction;
+                    _context.TransactionDetails.Add(transactionDetail);
+                    await _context.SaveChangesAsync();
+
+                    prepaid = new Prepaid();
+                    prepaid.PrepaidDate = transaction.DateTransaction;
+                    prepaid.Amount = transaction.Amount;
+                    prepaid.Accredited = 0;
+                    prepaid.Status = "ANT01";
+                    prepaid.Type = pTransactionVM.Type;
+                    prepaid.Percentage = pTransactionVM.Percentage;
+                    prepaid.AgreementId = AgreementId;
+                    _context.Prepaids.Add(prepaid);
+                    await _context.SaveChangesAsync();
+
+                    //Inserta pago
+                    Payment payment = new Payment();
+                    payment.PaymentDate = transaction.DateTransaction;
+                    payment.BranchOffice = terminalUser.Terminal.BranchOffice.Name;
+                    payment.Subtotal = transaction.Amount;
+                    payment.PercentageTax = pTransactionVM.PercentageTax;
+                    payment.Tax = transaction.Tax;
+                    payment.Total = transaction.Amount + transaction.Tax + transaction.Rounding;
+                    payment.AuthorizationOriginPayment = transaction.AuthorizationOriginPayment;
+                    payment.AgreementId = prepaid.AgreementId;
+                    payment.Status = "EP001";
+                    payment.Type = pTransactionVM.Type;
+                    payment.OriginPayment = transaction.OriginPayment;
+                    payment.PayMethod = await _context.PayMethods.FindAsync(transaction.PayMethodId);
+                    payment.TransactionFolio = transaction.Folio;
+                    payment.Rounding = transaction.Rounding;
+                    payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
+                    _context.Payments.Add(payment);
+                    await _context.SaveChangesAsync();
+
+                    PaymentDetail paymentDetail = new PaymentDetail();
+                    paymentDetail.CodeConcept = "ANT01";
+                    paymentDetail.Amount = transaction.Amount;
+                    paymentDetail.Description = "PAGO ANTICIPADO";
+                    paymentDetail.DebtId = 0;
+                    paymentDetail.PrepaidId = prepaid.Id;
+                    paymentDetail.PaymentId = payment.Id;
+                    _context.PaymentDetails.Add(paymentDetail);
+                    await _context.SaveChangesAsync();
+
+                    scope.Complete();
+                }
             }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = "TransactionController";
+                systemLog.Action = "PostTransaction";
+                systemLog.Parameter = JsonConvert.SerializeObject(pTransactionVM);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+            }
+
+
+            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+        }
+
+        /// <summary>
+        /// This will provide capability add new Transaction
+        /// </summary>       
+        /// <param name="TransactionId">Id Transaction
+        /// <param name="pCancelPayment">Model PaymentConcepts
+        /// </param>
+        /// <returns>Transaction</returns>
+        // POST: api/Transaction/Cancel
+        [HttpPost("Prepaid/Cancel/{TransactionId}")]
+        public async Task<IActionResult> PostTransactionPrepaidCancel([FromRoute] int TransactionId, [FromBody] CancelPaymentVM pCancelPayment)
+        {
+            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            bool _validation = false;
+            Prepaid prepaid;
+            Payment payment = new Payment();
+            PaymentDetail paymentDetail = new PaymentDetail();
+            decimal _sumTransactionDetail = 0;
+            decimal sumPayDetail = 0;
+
+            #region Validación
+            //Parametros
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (pCancelPayment.Transaction.TypeTransactionId != 4)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
+
+            if (!Validate(pCancelPayment.Transaction))
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Información incompleta" });
+
+            if (pCancelPayment.Transaction.Sign)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
+            if (String.IsNullOrEmpty(pCancelPayment.Transaction.Cancellation))
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación") });
+
+            foreach (var item in pCancelPayment.Transaction.transactionDetails)
+            {
+                _sumTransactionDetail += item.Amount;
+            }
+
+            if (pCancelPayment.Transaction.Amount != _sumTransactionDetail)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pCancelPayment.Transaction.Amount) });
+
+            foreach (var item in pCancelPayment.Payment.PaymentDetails)
+            {
+                sumPayDetail += item.Amount;
+            }
+            if (pCancelPayment.Transaction.Amount != sumPayDetail)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de pago no coinciden") });
+
+            //Terminal
+            TerminalUser terminalUser = new TerminalUser();
+            terminalUser = await _context.TerminalUsers
+                                             .Include(x => x.Terminal)
+                                             .Include(x => x.User)
+                                             .Where(x => x.Id == pCancelPayment.Transaction.TerminalUserId).FirstOrDefaultAsync();
+
+            if (terminalUser == null)
+                return NotFound();
 
             if (!terminalUser.InOperation)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando" });
@@ -655,209 +864,115 @@ namespace Siscom.Agua.Api.Controllers
                                        x.DateTransaction.Date == DateTime.UtcNow.ToLocalTime().Date &&
                                        (x.TypeTransaction.Id == 5 || x.TypeTransaction.Id == 7))
                            .FirstOrDefaultAsync() != null)
-
-            {
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El estado de la terminal no permite la transacción" });
-            }
 
 
             if (await _context.Transactions
                               .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                          x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString() &&
+                                          x.DateTransaction.Date.ToShortDateString() == DateTime.Now.Date.ToShortDateString() &&
                                           x.TypeTransaction.Id == 1)
-                              .FirstOrDefaultAsync() != null)
-
-            {
-
-                switch (pTransactionVM.TypeTransactionId)
-                {
-                    case 3://Cobro                      
-                        if (!pTransactionVM.Sign)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
-                        if (pTransactionVM.Amount == 0)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
-
-                        if (await _context.Debts.Include(dd => dd.DebtDetails)
-                                          .Where(gs => _context.Statuses
-                                          .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == AgreementId)
-                                          .FirstOrDefaultAsync() != null)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Improcedente anticipo. La cuenta tiene adeudo") });
-
-                        _validation = true;
-                        break;
-                    case 4://Cancelado                       
-                        if (pTransactionVM.Sign)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
-
-                        if (pTransactionVM.Amount == 0)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
-
-                        if (String.IsNullOrEmpty(pTransactionVM.Cancellation))
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación") });
-
-                        var cancelacion = await _context.Transactions.Where(x => x.Folio == pTransactionVM.Cancellation).FirstAsync();
-                        if (cancelacion == null)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
-
-                        if (cancelacion.Amount != pTransactionVM.Amount)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });                     
-
-                        _validation = true;
-                        break;
-                    default:
-                        _validation = false;
-                        break;
-                }
-
-                if (_validation)
-                {
-                    var option = new TransactionOptions
-                    {
-                        IsolationLevel = IsolationLevel.ReadCommitted,
-                        Timeout = TimeSpan.FromSeconds(60)
-                    };
-
-                    try
-                    {
-                        using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                        {
-                            //Transacción en caja
-                            transaction.Folio = Guid.NewGuid().ToString("D");
-                            transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
-                            transaction.Sign = pTransactionVM.Sign;
-                            transaction.Amount = pTransactionVM.Amount;
-                            transaction.Aplication = pTransactionVM.Aplication;
-                            transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransactionVM.TypeTransactionId).ConfigureAwait(false);
-                            transaction.PayMethodId = pTransactionVM.PayMethodId;
-                            transaction.TerminalUser = terminalUser;
-                            transaction.CancellationFolio = pTransactionVM.Cancellation;
-                            transaction.Tax = pTransactionVM.Tax;
-                            transaction.Rounding = pTransactionVM.Rounding;
-                            transaction.AuthorizationOriginPayment = pTransactionVM.AuthorizationOriginPayment;
-                            transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pTransactionVM.ExternalOriginPaymentId).ConfigureAwait(false);
-                            transaction.OriginPayment = await _context.OriginPayments.FindAsync(pTransactionVM.OriginPaymentId).ConfigureAwait(false);
-                            transaction.Total = pTransactionVM.Total;
-                            _context.Transactions.Add(transaction);
-                            await _context.SaveChangesAsync();
-
-                            await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
-
-                            TransactionDetail transactionDetail = new TransactionDetail();
-                            transactionDetail.CodeConcept = "ANT01";
-                            transactionDetail.Amount = transaction.Amount;
-                            transactionDetail.Description = "PAGO ANTICIPADO";
-                            transactionDetail.Transaction = transaction;
-                            _context.TransactionDetails.Add(transactionDetail);
-                            await _context.SaveChangesAsync();                           
-
-                            //PAGO
-                            if (transaction.TypeTransaction.Id == 3)
-                            {
-                                prepaid = new Prepaid();
-                                prepaid.PrepaidDate = transaction.DateTransaction;
-                                prepaid.Amount = transaction.Amount;
-                                prepaid.Accredited = 0;
-                                prepaid.Status = "ANT01";
-                                prepaid.Type = pTransactionVM.Type;
-                                prepaid.Percentage = pTransactionVM.Percentage;
-                                prepaid.AgreementId = AgreementId;
-                                _context.Prepaids.Add(prepaid);
-                                await _context.SaveChangesAsync();
-
-                                //Inserta pago
-                                Payment payment = new Payment();
-                                payment.PaymentDate = transaction.DateTransaction;
-                                payment.BranchOffice = terminalUser.Terminal.BranchOffice.Name;
-                                payment.Subtotal = transaction.Amount;
-                                payment.PercentageTax = pTransactionVM.PercentageTax;
-                                payment.Tax = transaction.Tax;
-                                payment.Total = transaction.Amount + transaction.Tax + transaction.Rounding;
-                                payment.AuthorizationOriginPayment = transaction.AuthorizationOriginPayment;
-                                payment.AgreementId = prepaid.AgreementId;
-                                payment.Status = "EP001";
-                                payment.Type = pTransactionVM.Type;
-                                payment.OriginPayment = transaction.OriginPayment;
-                                payment.PayMethod = await _context.PayMethods.FindAsync(transaction.PayMethodId);
-                                payment.TransactionFolio = transaction.Folio;
-                                payment.Rounding = transaction.Rounding;
-                                payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
-                                _context.Payments.Add(payment);
-                                await _context.SaveChangesAsync();
-
-                                PaymentDetail paymentDetail = new PaymentDetail();
-                                paymentDetail.CodeConcept = "ANT01";
-                                paymentDetail.Amount = transaction.Amount;
-                                paymentDetail.Description = "PAGO ANTICIPADO";
-                                paymentDetail.DebtId =0;
-                                paymentDetail.PrepaidId = prepaid.Id;
-                                paymentDetail.PaymentId = payment.Id;
-                                _context.PaymentDetails.Add(paymentDetail);
-                                await _context.SaveChangesAsync();                
-
-                            }
-                            else //Cancelación
-                            {
-                                //se modifica estado de pago
-                                var payment = await _context.Payments.Where(x => x.TransactionFolio == transaction.CancellationFolio).FirstOrDefaultAsync();
-
-                                prepaid = await _context.Prepaids.Where(x => x.Id == payment.AgreementId).FirstAsync();
-
-                                if (prepaid == null)
-                                    return NotFound();
-                                else {
-                                    if(prepaid.Status != "ANT01")
-                                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago no se puede cancelar porque el ya ha sido debengado el anticipo") });
-                                }                           
-
-                                payment.Status = "EP002";
-                                _context.Entry(payment).State = EntityState.Modified;
-                                await _context.SaveChangesAsync();
-
-                                prepaid.Status = "ANT04";
-                                _context.Entry(prepaid).State = EntityState.Modified;
-                                await _context.SaveChangesAsync();
-                            }
-
-                            //Toma folio
-                            Folio folio = new Folio();
-                            folio = await _context.Folios
-                                                  .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
-                                                               x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
-
-                            TransactionFolio transactionFolio = new TransactionFolio();
-                            transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
-                            transactionFolio.DatePrint = DateTime.UtcNow.ToLocalTime();
-                            transactionFolio.Transaction = transaction;
-                            _context.TransactionFolios.Add(transactionFolio);
-                            await _context.SaveChangesAsync();
-
-                            folio.Secuential += 1;
-                            _context.Entry(folio).State = EntityState.Modified;
-                            await _context.SaveChangesAsync();
-
-                            scope.Complete();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        SystemLog systemLog = new SystemLog();
-                        systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                        systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
-                        systemLog.Controller = "TransactionController";
-                        systemLog.Action = "PostTransaction";
-                        systemLog.Parameter = JsonConvert.SerializeObject(pTransactionVM);
-                        CustomSystemLog helper = new CustomSystemLog(_context);
-                        helper.AddLog(systemLog);
-                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
-                    }
-                }
-                else
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Acción no permitida" });
-            }
-            else
-            {
+                              .FirstOrDefaultAsync() == null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+
+            //Cancelación
+            var cancelacion = await _context.Transactions.Where(x => x.Folio == pCancelPayment.Transaction.Cancellation).FirstAsync();
+            if (cancelacion == null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
+
+            if (cancelacion.Amount != pCancelPayment.Transaction.Amount)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+
+            #endregion
+
+            var option = new TransactionOptions
+            {
+                IsolationLevel = IsolationLevel.ReadCommitted,
+                Timeout = TimeSpan.FromSeconds(60)
+            };
+
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    //Transacción en caja
+                    transaction.Folio = Guid.NewGuid().ToString("D");
+                    transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
+                    transaction.Sign = pCancelPayment.Transaction.Sign;
+                    transaction.Amount = pCancelPayment.Transaction.Amount;
+                    transaction.Aplication = pCancelPayment.Transaction.Aplication;
+                    transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pCancelPayment.Transaction.TypeTransactionId).ConfigureAwait(false);
+                    transaction.PayMethodId = pCancelPayment.Transaction.PayMethodId;
+                    transaction.TerminalUser = terminalUser;
+                    transaction.CancellationFolio = pCancelPayment.Transaction.Cancellation;
+                    transaction.Tax = pCancelPayment.Transaction.Tax;
+                    transaction.Rounding = pCancelPayment.Transaction.Rounding;
+                    transaction.AuthorizationOriginPayment = pCancelPayment.Transaction.AuthorizationOriginPayment;
+                    transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pCancelPayment.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
+                    transaction.OriginPayment = await _context.OriginPayments.FindAsync(pCancelPayment.Transaction.OriginPaymentId).ConfigureAwait(false);
+                    transaction.Total = pCancelPayment.Transaction.Total;
+                    _context.Transactions.Add(transaction);
+                    await _context.SaveChangesAsync();
+
+                    await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+
+                    TransactionDetail transactionDetail = new TransactionDetail();
+                    transactionDetail.CodeConcept = "ANT01";
+                    transactionDetail.Amount = transaction.Amount;
+                    transactionDetail.Description = "CANCELACION PAGO ANTICIPADO";
+                    transactionDetail.Transaction = transaction;
+                    _context.TransactionDetails.Add(transactionDetail);
+                    await _context.SaveChangesAsync();
+
+                    //se modifica estado de pago
+                    payment = await _context.Payments
+                                            .Include(x => x.PaymentDetails)
+                                            .Where(x => x.TransactionFolio == transaction.CancellationFolio).FirstOrDefaultAsync();
+
+                    if (payment.PaymentDetails.Count > 0)
+                    {
+                        foreach (var item in payment.PaymentDetails)
+                        {
+                            paymentDetail = item;
+                        }                  
+                    }
+                    else
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se cuenta con detalle de pago para poder revertir") });                   
+
+                    prepaid = await _context.Prepaids.Where(x => x.Id == paymentDetail.PrepaidId).FirstAsync();
+
+                    if (prepaid == null)
+                        return NotFound();
+                    else
+                    {
+                        if (prepaid.Status != "ANT01")
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago no se puede cancelar porque el ya ha sido debengado el anticipo") });
+                    }
+
+                    payment.Status = "EP002";
+                    _context.Entry(payment).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    prepaid.Status = "ANT04";
+                    _context.Entry(prepaid).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    scope.Complete();
+                }
             }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = "TransactionController";
+                systemLog.Action = "PostTransaction";
+                systemLog.Parameter = JsonConvert.SerializeObject(pCancelPayment);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+            }
+
+
             return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
         }
 
