@@ -16,11 +16,11 @@ namespace Siscom.Agua.Api.Controllers
     [Produces("application/json")]
     [ApiController]
     //[Authorize]
-    public class NotificationsController : ControllerBase
+    public class PushNotificationController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public NotificationsController(ApplicationDbContext context)
+        public PushNotificationController(ApplicationDbContext context)
         {
             _context = context;
         }

@@ -16,5 +16,7 @@ namespace Siscom.Agua.Api.Model
         public string UserId { get; set; }
         [Required]
         public bool IsActive { get; set; }
+
+        public string Observation { get; set; }
     }
 }

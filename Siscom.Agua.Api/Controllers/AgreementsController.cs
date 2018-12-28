@@ -132,6 +132,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ags => ags.AgreementServices)
                                         .ThenInclude(x => x.Service)
+                                      .Include(ad => ad.AgreementDetails)
                                       .FirstOrDefaultAsync(a => a.Id == id);
 
             if (agreement == null)
@@ -305,8 +306,25 @@ namespace Siscom.Agua.Api.Controllers
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     Agreement agreement = await GetAgreementDataUpdate(agreementvm.Id);
-            
 
+                    AgreementLog log = new AgreementLog();
+                    log.Agreement = agreement;
+                    log.AgreementId = agreement.Id;
+                    log.AgreementLogDate = DateTime.UtcNow.ToLocalTime();
+                    log.Description = "Actualización de Datos";
+                    log.Observation = agreementvm.Observations;
+                    log.User = await userManager.FindByIdAsync(agreementvm.UserId);
+                    log.UserId = agreementvm.UserId;
+                    log.Visible = true;
+                    log.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                    log.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    log.OldValue = JsonConvert.SerializeObject(agreement, new JsonSerializerSettings
+                    {
+                        PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                        Formatting = Formatting.Indented,
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    });
+                   
                     var services = _context.AgreementServices.Where(xx => xx.IdAgreement == agreement.Id).ToList();
                     var ids = (from s in services
                                select s.IdService).ToList();
@@ -372,17 +390,12 @@ namespace Siscom.Agua.Api.Controllers
                     agreement.Diameter = diam;
                     agreement.DiameterId = diam.Id;
 
-                    AgreementLog log = new AgreementLog();
-                    log.Agreement = agreement;
-                    log.AgreementId = agreement.Id;
-                    log.AgreementLogDate = DateTime.UtcNow.ToLocalTime();
-                    log.Description = "Actualización de Datos";
-                    log.Observation = agreementvm.Observations;
-                    log.User = await userManager.FindByIdAsync(agreementvm.UserId);
-                    log.UserId = agreementvm.UserId;
-                    log.Visible = true;
-                    log.NewValue = "";
-                    log.OldValue = "";
+                    log.NewValue = JsonConvert.SerializeObject(agreement,new JsonSerializerSettings
+                    {
+                        PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                        Formatting = Formatting.Indented,
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    });
 
                     _context.AgreementLogs.Add(log);
                     _context.SaveChanges();
@@ -834,7 +847,25 @@ namespace Siscom.Agua.Api.Controllers
                                                                 && x.IdDiscount == agreementDiscountt.DiscountId)
                                                        .FirstOrDefaultAsync();
                     agreementd.IsActive = agreementDiscountt.IsActive;
+
+                    AgreementLog log = new AgreementLog()
+                    {
+                        Action = this.ControllerContext.RouteData.Values["action"].ToString(),
+                        Controller = this.ControllerContext.RouteData.Values["controller"].ToString(),
+                        Observation = agreementDiscountt.Observation,
+                        OldValue = JsonConvert.SerializeObject(agreementDiscountt),
+                        User = await userManager.FindByIdAsync(agreementDiscountt.UserId),
+                        UserId = agreementDiscountt.UserId,
+                        Visible = true,
+                        AgreementId = agreementDiscountt.AgreementId,
+                        Agreement = await _context.Agreements.FindAsync(agreementDiscountt.AgreementId),
+                        AgreementLogDate = DateTime.UtcNow.ToLocalTime(),
+                        Description = "Actualización de Descuentos"
+
+                    };
+                   
                     _context.Entry(agreementd).State = EntityState.Deleted;
+                    _context.AgreementLogs.Add(log);
                     _context.SaveChanges();
                     scope.Complete();
                 }
