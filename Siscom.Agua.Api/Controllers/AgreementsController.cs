@@ -859,11 +859,19 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("GetDiscounts/{AgreementId}")]
         public async Task<IActionResult> GetDiscounts([FromRoute]  int AgreementId)
         {
-            if (!AgreementExists(AgreementId))
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return BadRequest(ModelState);
             }
-            return Ok(await _context.AgreementDiscounts.Where(x => x.IdAgreement == AgreementId && x.IsActive == true).ToListAsync());
+
+
+            var discounts = await _context.AgreementDiscounts
+                                          .Include(x => x.Discount)
+                                          .Where(x => x.IdAgreement == AgreementId &&
+                                                      x.IsActive == true).ToListAsync();
+
+            return Ok(discounts);
+
         }
 
 
