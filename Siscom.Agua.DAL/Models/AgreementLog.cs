@@ -25,6 +25,10 @@ namespace Siscom.Agua.DAL.Models
         public string OldValue { get; set; }
         [Column("new_value"), Required]
         public string NewValue { get; set; }
+        [Column("action"), Required]
+        public string Action { get; set; }
+        [Column("controller"), Required]
+        public string Controller { get; set; }
 
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
