@@ -25,6 +25,12 @@ namespace Siscom.Agua.DAL.Models
         public DateTime UntilDate { get; set; }
         [Column("is_active"), Required]
         public int IsActive { get; set; }
+        [Column("percentage")]
+        public Int16 Percentage { get; set; }
+        [Column("times_factor")]
+        public Int16 TimesFactor { get; set; }
+        [Column("is_variable")]
+        public bool IsVariable { get; set; }
 
         //[ForeignKey("Product")]
         public int ProductId { get; set; }

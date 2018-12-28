@@ -97,6 +97,8 @@ namespace Siscom.Agua.DAL
         public DbSet<DebtDiscount> DebtDiscounts { get; set; }
         public DbSet<DebtPrepaid> DebtPrepaids { get; set; }
         public DbSet<INPC> INPCs { get; set; }
+        public DbSet<Division> Divisions { get; set; }
+        public DbSet<DebtCalculation> DebtCalculations { get; set; }
 
         /// <summary> 
         /// Payment
@@ -127,7 +129,7 @@ namespace Siscom.Agua.DAL
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration) : base(options)
         {
             _configuration = configuration;
-            Database.SetCommandTimeout(150000);
+            Database.SetCommandTimeout(180000);
         }
 
         //public override int SaveChanges()
@@ -542,6 +544,13 @@ namespace Siscom.Agua.DAL
             builder.Entity<PaymentDetail>()
                .Property(p => p.Amount)
                .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region Product
+            builder.Entity<Product>()
+                   .HasOne<Division>(a => a.Division)
+                   .WithMany(s => s.Products)
+                   .HasForeignKey(s => s.DivisionId);
             #endregion
 
             #region Region  

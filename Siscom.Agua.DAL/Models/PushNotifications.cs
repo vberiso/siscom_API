@@ -17,6 +17,8 @@ namespace Siscom.Agua.DAL.Models
         public int AgreementId { get; set; }
         [Column("debt_id")]
         public int DebtId { get; set; }
+        [Column("folio"), StringLength(40)]
+        public string Folio { get; set; }
         [Column("porcentage")]
         public byte Porcentage { get; set; }
         [Column("amount")]

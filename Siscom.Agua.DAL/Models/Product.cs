@@ -30,5 +30,8 @@ namespace Siscom.Agua.DAL.Models
         public bool IsActive { get; set; }
 
         public ICollection<TariffProduct> TariffProducts { get; set; }
+
+        public int DivisionId { get; set; }
+        public Division Division { get; set; }
     }
 }
