@@ -70,6 +70,7 @@ namespace Siscom.Agua.Api
             {
                 //options.ConfigureWarnings(x => x.Ignore(RelationalEventId.AmbientTransactionWarning));
                 options.UseSqlServer(Configuration.GetConnectionString("SiscmomConnection"), optionsBuilder =>
+               
                 optionsBuilder.MigrationsAssembly(assemblyNamespace))
                     .EnableSensitiveDataLogging(true)
                     .UseLoggerFactory(new LoggerFactory()

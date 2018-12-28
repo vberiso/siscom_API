@@ -8,9 +8,13 @@ using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
+using Siscom.Agua.DAL.Models;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -66,8 +70,15 @@ namespace Siscom.Agua.Api.Controllers
             }
             catch (Exception e)
             {
-
-                throw;
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(billableProduct);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para facturar el producto, favor de verificar " });
             }
         }
     }

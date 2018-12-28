@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Siscom.Agua.Api.Services.FirebaseService;
+using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
 namespace Siscom.Agua.Api.Controllers
@@ -14,41 +15,92 @@ namespace Siscom.Agua.Api.Controllers
     [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class NotificationsController : ControllerBase
     {
+        private readonly ApplicationDbContext _context;
+
+        public NotificationsController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         [HttpPost]
         public async Task<IActionResult> SendNotification([FromBody] PushNotifications notification)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             // Instanciating with base URL  
             FirebaseDB firebaseDB = new FirebaseDB("https://siscom-notifications.firebaseio.com/");
 
             // Referring to Node with name "Notifications"  
             FirebaseDB firebaseDBNotificationsCancelation = firebaseDB.Node("Notifications");
             FirebaseDB firebaseDBNotificationsDiscount = firebaseDB.Node("Discount");
-            if(notification.Type == "NOT01")
-            {
+           
+            await _context.PushNotifications.AddAsync(notification);
+            await _context.SaveChangesAsync();
 
+            var JsonConverter = JsonConvert.SerializeObject(notification);
+            if (notification.Type == "NOT01")
+            {
+                FirebaseResponse postResponse = firebaseDBNotificationsCancelation.Post(JsonConverter);
             }
             else if (notification.Type == "NOT02")
             {
-
+                FirebaseResponse getResponse = firebaseDBNotificationsDiscount.Post(JsonConverter);
             }
-            var JsonConverter = JsonConvert.SerializeObject(notification);
+           
 
-            FirebaseResponse postResponse = firebaseDBNotificationsCancelation.Post(JsonConverter);
-            FirebaseResponse getResponse = firebaseDBNotificationsDiscount.Post(JsonConverter);
+            
+           
 
             return Ok();
         }
+
+        //[HttpPost]
+        //public async Task<IActionResult> SendNotification()
+        //{
+        //    // Instanciating with base URL  
+        //    FirebaseDB firebaseDB = new FirebaseDB("https://siscom-notifications.firebaseio.com/");
+
+        //    // Referring to Node with name "Notifications"  
+        //    FirebaseDB firebaseDBNotificationsCancelation = firebaseDB.Node("Notifications");
+        //    FirebaseDB firebaseDBNotificationsDiscount = firebaseDB.Node("Discount");
+        //    //if(notification.Type == "NOT01")
+        //    //{
+        //    //    await _context.PushNotifications.AddAsync(notification);
+        //    //    await _context.SaveChangesAsync();
+        //    //}
+        //    //else if (notification.Type == "NOT02")
+        //    //{
+
+        //    //}
+        //    //notification.Reason = "se solicita descuento"
+        //    var JsonConverter = JsonConvert.SerializeObject(new MessagesNotification
+        //    {
+        //        Title = "Descuento",
+        //        Message = "Generar Descuento",
+        //        IsActive = false
+        //    });
+
+        //    FirebaseResponse postResponse = firebaseDBNotificationsCancelation.Post(JsonConverter);
+        //    //FirebaseResponse getResponse = firebaseDBNotificationsDiscount.Post(JsonConverter);
+
+        //    return Ok();
+        //}
     }
 
-    //public class MessagesNotification
-    //{
-    //    public string Title { get; set; }
-    //    public string Message { get; set; }
-    //    public bool IsActive { get; set; }
-    //}
+}
+
+public class MessagesNotification
+{
+    public string Title { get; set; }
+    public string Message { get; set; }
+    public bool IsActive { get; set; }
+}
 
     //public class DetailAjusment
     //{
@@ -57,4 +109,4 @@ namespace Siscom.Agua.Api.Controllers
     //    public int Porcent { get; set; }
     //    public string TextDiscount { get; set; }
     //}
-}
+//}
