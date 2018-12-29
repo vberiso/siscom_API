@@ -199,6 +199,22 @@
             <param name="id">Mandatory</param>
             <returns></returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ProductsController.GetProductDivision(System.Int32)">
+            <summary>
+            This will provide product by division
+            </summary>       
+            <param name="DivisionId">id Division
+            </param>
+            <returns>products</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ProductsController.GetProductTariff(System.Int32)">
+            <summary>
+            This will provide product by division
+            </summary>       
+            <param name="ProductId">id Product
+            </param>
+            <returns>products</returns>
+        </member>
         <member name="T:Siscom.Agua.Api.Controllers.RegionsController">
             <summary>
             End Points Region
@@ -378,6 +394,7 @@
         </member>
         <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCancel(System.Int32,Siscom.Agua.Api.Model.CancelPaymentVM)" -->
         <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionPrepaid(System.Int32,Siscom.Agua.Api.Model.TransactionVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionPrepaidCancel(System.Int32,Siscom.Agua.Api.Model.CancelPaymentVM)" -->
         <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCashBox(System.Int32,Siscom.Agua.Api.Model.TransactionCashBoxVM)" -->
         <member name="M:Siscom.Agua.Api.Controllers.TransactionController.FindTransactions(System.String,System.Int32)">
             <summary>
