@@ -13,5 +13,8 @@ namespace Siscom.Agua.Api.Model
 
         [Required(ErrorMessage = "Contraseña es requerida")]
         public string Password { get; set; }
+
+        //[Required(ErrorMessage = "Llave es requerida")]
+        public string Address { get; set; }
     }
 }

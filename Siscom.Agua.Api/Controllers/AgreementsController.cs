@@ -118,7 +118,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("AgreementsBasic/{id}")]
         public async Task<IActionResult> GetAgreementsBasic([FromRoute] int id)
         {
-            var agreement = _context.Agreements
+            var agreement = await _context.Agreements
                                       .Include(ts => ts.TypeService)
                                       .Include(tu => tu.TypeUse)
                                       .Include(tc => tc.TypeConsume)
@@ -134,6 +134,8 @@ namespace Siscom.Agua.Api.Controllers
                                         .ThenInclude(x => x.Service)
                                       .Include(ad => ad.AgreementDetails)
                                       .FirstOrDefaultAsync(a => a.Id == id);
+            var service = agreement.AgreementServices.Where(x => x.IsActive == false);
+            agreement.AgreementServices = agreement.AgreementServices.Except(service).ToList();
 
             if (agreement == null)
             {
@@ -324,7 +326,24 @@ namespace Siscom.Agua.Api.Controllers
                         Formatting = Formatting.Indented,
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                     });
-                   
+                   if(agreement.AgreementDetails.Count > 0)
+                    {
+                        if(agreementvm.AgreementDetails.Count > 0)
+                        {
+                            var data = agreement.AgreementDetails.FirstOrDefault();
+                            var newdata = agreementvm.AgreementDetails.FirstOrDefault();
+                            data.AgreementDetailDate = newdata.AgreementDetailDate;
+                            data.Built = newdata.Built;
+                            data.Folio = newdata.Folio;
+                            data.Ground = newdata.Ground;
+                            data.LastUpdate = newdata.LastUpdate;
+                            data.Observation = newdata.Observation;
+                            data.Register = newdata.Register;
+                            data.Sector = newdata.Sector;
+                            data.TaxableBase = newdata.TaxableBase;
+                        }
+                      
+                    }
                     var services = _context.AgreementServices.Where(xx => xx.IdAgreement == agreement.Id).ToList();
                     var ids = (from s in services
                                select s.IdService).ToList();
@@ -860,8 +879,8 @@ namespace Siscom.Agua.Api.Controllers
                         AgreementId = agreementDiscountt.AgreementId,
                         Agreement = await _context.Agreements.FindAsync(agreementDiscountt.AgreementId),
                         AgreementLogDate = DateTime.UtcNow.ToLocalTime(),
-                        Description = "Actualización de Descuentos"
-
+                        Description = "Actualización de Descuentos",
+                        NewValue = ""
                     };
                    
                     _context.Entry(agreementd).State = EntityState.Deleted;
@@ -1109,6 +1128,7 @@ namespace Siscom.Agua.Api.Controllers
                                         .ThenInclude(x => x.Service)
                                       .Include(ad => ad.AgreementDiscounts)
                                         .ThenInclude(d => d.Discount)
+                                      .Include(ad => ad.AgreementDetails)
                                       .FirstOrDefaultAsync(a => a.Id == id);
 
             agreemet.Addresses.ToList().ForEach(x =>

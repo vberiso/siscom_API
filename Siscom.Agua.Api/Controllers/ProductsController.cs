@@ -68,13 +68,50 @@ namespace Siscom.Agua.Api.Controllers
                                         .Where(x => x.DivisionId == DivisionId &&
                                                     x.IsActive==true).ToListAsync();
 
+            var subNodes = (from np in product
+                           where np.Parent == 0
+                           select np).ToList();
+            List<List<Product>> products = new List<List<Product>>();
+
+
+            var childParent = Preorder(product);
+
+
+
             if (product == null)
             {
                 return NotFound();
             }
 
-            return Ok(product);
+            var parents = childParent.OrderBy(x => x.Parent).Distinct().ToList();
 
+            return Ok(childParent);
+
+        }
+
+        private IEnumerable<Product>Preorder(IEnumerable<Product> list)
+        {
+
+            var nodesByParent = list.GroupBy(x => x.Parent)
+                                    .ToDictionary(xs => xs.Key,
+                                    xs => xs.OrderBy(x => x.Id).GetEnumerator());
+
+            var stack = new Stack<IEnumerator<Product>>();
+            stack.Push(nodesByParent[0]);
+
+            while (stack.Count > 0)
+            {
+                var nodes = stack.Peek();
+                if (nodes.MoveNext())
+                {
+                    yield return nodes.Current;
+                    IEnumerator<Product> children;
+                    if (nodesByParent.TryGetValue(nodes.Current.Id, out children))
+                        stack.Push(children);
+                }
+                else
+                    stack.Pop();
+            }
         }
 
         /// <summary>

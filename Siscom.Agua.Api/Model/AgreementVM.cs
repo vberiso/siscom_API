@@ -14,6 +14,7 @@ namespace Siscom.Agua.Api.Model
             Adresses = new List<AdressVM>();
             Clients = new List<ClientVM>();
             ServicesId = new List<int>();
+            AgreementDetails = new List<AgreementDetailVM>();
         }
 
         public int Id { get; set; }
@@ -52,5 +53,6 @@ namespace Siscom.Agua.Api.Model
         public List<int> ServicesId { get; set; }
         public List<AdressVM> Adresses { get; set; }
         public List<ClientVM> Clients { get; set; }
+        public List<AgreementDetailVM> AgreementDetails { get; set; }
     }
 }

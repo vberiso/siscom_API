@@ -1,12 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,11 +23,13 @@ namespace Siscom.Agua.Api.Controllers
     {
         private UserManager<ApplicationUser> userManager;
         private readonly AppSettings appSettings;
+        private readonly ApplicationDbContext _context;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings)
+        public AuthController(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings, ApplicationDbContext context)
         {
             this.userManager = userManager;
             this.appSettings = appSettings.Value;
+            this._context = context;
         }
 
         [HttpPost]
@@ -104,6 +110,10 @@ namespace Siscom.Agua.Api.Controllers
                         }
                     }
                 }
+                //if(await _context.Authorizations.Where(x => x.MAC == model.Address).SingleOrDefaultAsync() == null)
+                //{
+                //    return StatusCode((int)TypeError.Code.Unauthorized, new { Error = "Sin autorización para ingresar al sistema, favor de verificar " });
+                //}
             }
             return Unauthorized();
         }

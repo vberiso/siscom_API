@@ -16,6 +16,7 @@ namespace Siscom.Agua.Api.Enums
             NotFound = 404,
             NotAcceptable = 406,
             BadRequest = 400,
+            Unauthorized = 401,
             InternalServerError = 500
         }    
     }

@@ -119,6 +119,11 @@ namespace Siscom.Agua.DAL
         /// </summary>
         public DbSet<PushNotifications> PushNotifications { get; set; }
 
+        /// <summary>
+        /// Authorization
+        /// </summary>
+        public DbSet<Authorization> Authorizations { get; set; }
+
         public ApplicationDbContext()
         {
         }
