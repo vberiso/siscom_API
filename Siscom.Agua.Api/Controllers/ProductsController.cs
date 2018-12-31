@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -94,7 +96,45 @@ namespace Siscom.Agua.Api.Controllers
                                         .Where(x => x.ProductId == ProductId &&
                                                     x.IsActive==1).SingleOrDefaultAsync();
 
-            return Ok(tariff);
+            var factor = await _context.SystemParameters
+                                      .Where(x => x.Name == "FACTOR")
+                                      .SingleOrDefaultAsync();
+
+
+            var tax = await _context.SystemParameters
+                                      .Where(x => x.Name == "IVA")
+                                      .SingleOrDefaultAsync();
+
+            TariffProductVM tariffProductVM = new TariffProductVM();           
+            tariffProductVM.IdProduct = tariff.ProductId;
+
+            if (tariff.TimesFactor != 0)
+            {
+                tariffProductVM.Type = (int)TypeTariffProduct.By.Factor;
+                tariffProductVM.Amount = tariff.TimesFactor * factor.NumberColumn;
+            }
+            else if (tariff.Percentage != 0)
+            {
+                tariffProductVM.Type = (int)TypeTariffProduct.By.Percentage;
+            }
+            else if (tariff.IsVariable)
+            {
+                tariffProductVM.Type = (int)TypeTariffProduct.By.Variable;
+            }
+            else
+            {
+                tariffProductVM.Type = (int)TypeTariffProduct.By.Amount;
+                tariffProductVM.Amount = tariff.Amount;
+            }
+
+            if (tariff.HaveTax)
+            {
+                tariffProductVM.Tax = (tariffProductVM.Amount * tax.NumberColumn) / 100; 
+            }
+
+            tariffProductVM.Total = tariffProductVM.Amount + tariffProductVM.Tax;
+
+            return Ok(tariffProductVM);
         }
 
 
