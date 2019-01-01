@@ -199,6 +199,14 @@
             <param name="id">Mandatory</param>
             <returns></returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.ProductsController.GetChild(System.Int32)">
+            <summary>
+            This will provide product by division
+            </summary>       
+            <param name="Id">id Product
+            </param>
+            <returns>products</returns>
+        </member>
         <member name="M:Siscom.Agua.Api.Controllers.ProductsController.GetProductDivision(System.Int32)">
             <summary>
             This will provide product by division

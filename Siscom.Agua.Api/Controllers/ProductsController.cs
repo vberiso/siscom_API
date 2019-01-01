@@ -52,6 +52,34 @@ namespace Siscom.Agua.Api.Controllers
         /// <summary>
         /// This will provide product by division
         /// </summary>       
+        /// <param name="Id">id Product
+        /// </param>
+        /// <returns>products</returns>
+        // POST: api/Products/Division/5
+        [HttpGet("Child/{Id}")]
+        public async Task<IActionResult> GetChild([FromRoute]  int Id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var product = await _context.Products
+                                        .Where(x => x.Parent == Id &&
+                                                    x.IsActive == true).ToListAsync();         
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(product);
+
+        }
+
+        /// <summary>
+        /// This will provide product by division
+        /// </summary>       
         /// <param name="DivisionId">id Division
         /// </param>
         /// <returns>products</returns>
@@ -68,26 +96,19 @@ namespace Siscom.Agua.Api.Controllers
                                         .Where(x => x.DivisionId == DivisionId &&
                                                     x.IsActive==true).ToListAsync();
 
-            var subNodes = (from np in product
-                           where np.Parent == 0
-                           select np).ToList();
-            List<List<Product>> products = new List<List<Product>>();
-
 
             var childParent = Preorder(product);
-
-
 
             if (product == null)
             {
                 return NotFound();
-            }
-
-            var parents = childParent.OrderBy(x => x.Parent).Distinct().ToList();
+            }         
 
             return Ok(childParent);
 
         }
+
+       
 
         private IEnumerable<Product>Preorder(IEnumerable<Product> list)
         {
@@ -124,6 +145,8 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("Tariff/{ProductId}")]
         public async Task<IActionResult> GetProductTariff([FromRoute]  int ProductId)
         {
+            TariffProductVM tariffProductVM = new TariffProductVM();
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -132,6 +155,10 @@ namespace Siscom.Agua.Api.Controllers
             var tariff = await _context.TariffProducts
                                         .Where(x => x.ProductId == ProductId &&
                                                     x.IsActive==1).SingleOrDefaultAsync();
+
+            if(tariff ==null)
+                return NotFound();
+
 
             var factor = await _context.SystemParameters
                                       .Where(x => x.Name == "FACTOR")
@@ -142,7 +169,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Where(x => x.Name == "IVA")
                                       .SingleOrDefaultAsync();
 
-            TariffProductVM tariffProductVM = new TariffProductVM();           
+           
             tariffProductVM.IdProduct = tariff.ProductId;
 
             if (tariff.TimesFactor != 0)
