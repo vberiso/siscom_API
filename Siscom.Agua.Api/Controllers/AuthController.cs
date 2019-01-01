@@ -88,7 +88,8 @@ namespace Siscom.Agua.Api.Controllers
                         user = user.Id,
                         token = new JwtSecurityTokenHandler().WriteToken(token),
                         expiration = token.ValidTo,
-                        RolName = rolname
+                        RolName = rolname,
+                        Divition = user.DivitionId
                     });
                 }
                 else
