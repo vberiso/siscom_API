@@ -21,6 +21,8 @@ namespace Siscom.Agua.DAL.Models
         public string LastName { get; set; }
         [Column("last_name"), StringLength(50), Required]
         public string SecondLastName { get; set; }
+        [Column("id_divition")]
+        public int DivitionId { get; set; }
 
         public ICollection<TerminalUser> TerminalUsers { get; set; }
         public ICollection<AgreementLog> AgreementLogs { get; set; }

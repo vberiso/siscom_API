@@ -15,7 +15,13 @@ namespace Siscom.Agua.Api
         public static void Main(string[] args)
         {
             //BuildWebHost(args).Run();
-            CreateWebHostBuilder(args).Build().Run();
+            //CreateWebHostBuilder(args).Build().Run();
+            var host = new WebHostBuilder()
+                            .UseKestrel()
+                            .UseContentRoot(Directory.GetCurrentDirectory())
+                            .UseIISIntegration()
+                            .UseStartup<Startup>()
+                            .Build();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

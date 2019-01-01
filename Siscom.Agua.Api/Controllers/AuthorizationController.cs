@@ -33,10 +33,17 @@ namespace Siscom.Agua.Api.Controllers
             {
                 var auth = await _context.Authorizations.Where(x => x.MAC == address).SingleOrDefaultAsync();
                 if(auth != null)
-                    return Redirect("https://siscomayuntamientoweb.azurewebsites.net/login?Token=" + address);
+                {
+                    //return Redirect("https://siscomayuntamientoweb.azurewebsites.net/login?Token=" + address);
+                    return Redirect("https://siscomweb.azurewebsites.net/login?Token=" + address);
+                }
                 else
+                {
                     //return StatusCode((int)TypeError.Code.Unauthorized, new { Error = "Sin autorización para ingresar al sistema, favor de verificar " });
-                    return Redirect("https://siscomayuntamientoweb.azurewebsites.net/coming-soon");
+                    //return Redirect("https://siscomayuntamientoweb.azurewebsites.net/coming-soon");
+                    return Redirect("https://siscomweb.azurewebsites.net/coming-soon");
+                }
+                   
             }
             else
             {
