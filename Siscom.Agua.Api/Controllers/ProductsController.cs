@@ -118,7 +118,8 @@ namespace Siscom.Agua.Api.Controllers
                                     xs => xs.OrderBy(x => x.Id).GetEnumerator());
 
             var stack = new Stack<IEnumerator<Product>>();
-            stack.Push(nodesByParent[0]);
+            var a = nodesByParent.FirstOrDefault().Key;
+            stack.Push(nodesByParent[nodesByParent.FirstOrDefault().Key]);
 
             while (stack.Count > 0)
             {

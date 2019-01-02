@@ -33,6 +33,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> AddProduct([FromBody] BillableProduct billableProduct)
         {
             string error = string.Empty;
+            int idAgreement = 0;
             try
             {
                 using (var command = _context.Database.GetDbConnection().CreateCommand())
@@ -49,6 +50,12 @@ namespace Siscom.Agua.Api.Controllers
                         Size = 200,
                         Direction = ParameterDirection.Output
                     });
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@id_agrement_out",
+                        DbType = DbType.Int32,
+                        Direction = ParameterDirection.Output
+                    });
                     this._context.Database.OpenConnection();
                     using (var result = await command.ExecuteReaderAsync())
                     {
@@ -56,10 +63,20 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             error = command.Parameters["@error"].Value.ToString();
                         }
+                        try
+                        {
+                            idAgreement = Convert.ToInt32(command.Parameters["@id_agrement_out"].Value.ToString());
+                        }
+                        catch (Exception)
+                        {
+
+                            idAgreement = 0;
+                        }
+                       
                     }
                     if (!string.IsNullOrEmpty(error))
                     {
-                        return StatusCode((int)TypeError.Code.Ok, new { Success = "Se Facturo el Producto" });
+                        return StatusCode((int)TypeError.Code.Ok, new { Success = "Se Facturo el Producto", AgreementId = idAgreement });
                     }
                     else
                     {
