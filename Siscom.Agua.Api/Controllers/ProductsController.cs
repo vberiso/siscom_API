@@ -157,7 +157,7 @@ namespace Siscom.Agua.Api.Controllers
                                                     x.IsActive==1).SingleOrDefaultAsync();
 
             if(tariff ==null)
-                return NotFound();
+                return Ok(tariffProductVM);
 
 
             var factor = await _context.SystemParameters
