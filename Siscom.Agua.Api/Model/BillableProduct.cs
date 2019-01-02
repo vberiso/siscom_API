@@ -9,5 +9,6 @@ namespace Siscom.Agua.Api.Model
     {
         public int AgreementId { get; set; }
         public int ProductId { get; set; }
+        public decimal Value { get; set; }
     }
 }

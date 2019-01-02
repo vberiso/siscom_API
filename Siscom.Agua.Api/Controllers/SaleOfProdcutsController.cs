@@ -41,6 +41,7 @@ namespace Siscom.Agua.Api.Controllers
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add(new SqlParameter("@id_agreement", billableProduct.AgreementId));
                     command.Parameters.Add(new SqlParameter("@id_product", billableProduct.ProductId));
+                    command.Parameters.Add(new SqlParameter("@val", billableProduct.Value));
                     command.Parameters.Add(new SqlParameter
                     {
                         ParameterName = "@error",
