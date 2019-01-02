@@ -13,14 +13,14 @@ namespace Siscom.Agua.Api.Data
         public static async void Initialize(IServiceProvider serviceProvider)
         {
             //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            ////    var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            //var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             //var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
-            //string[] roleNames = { "Super", "Admin", "User", "Isabi" };
-            ////    //await context.Database.EnsureDeletedAsync();
-            ////    //await context.Database.MigrateAsync();
+            ////string[] roleNames = { "Super", "Admin", "User", "Isabi" };
+            //////    //await context.Database.EnsureDeletedAsync();
+            //////    //await context.Database.MigrateAsync();
 
-            //IdentityResult roleResult;
-            ////    IdentityResult result;
+            //////IdentityResult roleResult;
+            //IdentityResult result;
 
             //foreach (var roleName in roleNames)
             //{
@@ -102,6 +102,97 @@ namespace Siscom.Agua.Api.Data
             //        await userManager.AddToRoleAsync(user3, "Admin");
             //    }
 
+            //ApplicationUser user1 = new ApplicationUser()
+            //{
+            //    Email = "MCuetlach@gmail.com",
+            //    SecurityStamp = Guid.NewGuid().ToString(),
+            //    UserName = "MCuetlach",
+            //    Name = "Maria",
+            //    LastName = "Cuetlach",
+            //    SecondLastName = "Davalos",
+            //    DivitionId = 1
+            //};
+            //result = await userManager.CreateAsync(user1, "Sosapac2019");
+            //await userManager.AddToRoleAsync(user1, "User");
+
+            //ApplicationUser user2 = new ApplicationUser()
+            //{
+            //    Email = "IGil@gmail.com",
+            //    SecurityStamp = Guid.NewGuid().ToString(),
+            //    UserName = "LCuautle",
+            //    Name = "Leticia",
+            //    LastName = "Cuautle",
+            //    SecondLastName = ".",
+            //    DivitionId = 1
+            //};
+            //result = await userManager.CreateAsync(user2, "Presidencia2019");
+            //await userManager.AddToRoleAsync(user2, "User");
+
+            //ApplicationUser user3 = new ApplicationUser()
+            //{
+            //    Email = "LOlvera@gmail.com",
+            //    SecurityStamp = Guid.NewGuid().ToString(),
+            //    UserName = "LOlvera",
+            //    Name = "Laura ",
+            //    LastName = "Olvera  ",
+            //    SecondLastName = ".",
+            //    DivitionId = 1
+            //};
+            //result = await userManager.CreateAsync(user3, "Presidencia2019");
+            //await userManager.AddToRoleAsync(user3, "User");
+
+            //ApplicationUser user4 = new ApplicationUser()
+            //{
+            //    Email = "ACandida@gmail.com",
+            //    SecurityStamp = Guid.NewGuid().ToString(),
+            //    UserName = "ACandida",
+            //    Name = "Alicia",
+            //    LastName = "Candida",
+            //    SecondLastName = ".",
+            //    DivitionId = 1
+            //};
+            //result = await userManager.CreateAsync(user4, "Presidencia2019");
+            //await userManager.AddToRoleAsync(user4, "User");
+
+            //ApplicationUser user5 = new ApplicationUser()
+            //{
+            //    Email = "AGarcia@gmail.com",
+            //    SecurityStamp = Guid.NewGuid().ToString(),
+            //    UserName = "AGarcia",
+            //    Name = "Anahi ",
+            //    LastName = "Garcia",
+            //    SecondLastName = ".",
+            //    DivitionId = 1
+            //};
+            //result = await userManager.CreateAsync(user5, "Presidencia2019");
+            //await userManager.AddToRoleAsync(user5, "User");
+
+
+            //ApplicationUser user6 = new ApplicationUser()
+            //{
+            //    Email = "MRojas@gmail.com",
+            //    SecurityStamp = Guid.NewGuid().ToString(),
+            //    UserName = "MRojas",
+            //    Name = "Martha",
+            //    LastName = "Rojas",
+            //    SecondLastName = ".",
+            //    DivitionId = 1
+            //};
+            //result = await userManager.CreateAsync(user6, "Presidencia2019");
+            //await userManager.AddToRoleAsync(user6, "User");
+
+            //ApplicationUser user7 = new ApplicationUser()
+            //{
+            //    Email = "JSarmiento@gmail.com",
+            //    SecurityStamp = Guid.NewGuid().ToString(),
+            //    UserName = "JSarmiento",
+            //    Name = "Javier",
+            //    LastName = "Sarmiento",
+            //    SecondLastName = ".",
+            //    DivitionId = 1
+            //};
+            //result = await userManager.CreateAsync(user7, "Presidencia2019");
+            //await userManager.AddToRoleAsync(user7, "User");
         }
     }
 }
