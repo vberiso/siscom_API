@@ -54,4 +54,6 @@
     <ProjectReference Include="..\Siscom.Agua.DAL\Siscom.Agua.DAL.csproj" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+
 </Project>

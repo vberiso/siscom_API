@@ -12,15 +12,15 @@ namespace Siscom.Agua.Api.Data
     {
         public static async void Initialize(IServiceProvider serviceProvider)
         {
-            //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            //var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            //var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
-            ////string[] roleNames = { "Super", "Admin", "User", "Isabi" };
-            //////    //await context.Database.EnsureDeletedAsync();
-            //////    //await context.Database.MigrateAsync();
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
+            //string[] roleNames = { "Super", "Admin", "User", "Isabi" };
+            ////    //await context.Database.EnsureDeletedAsync();
+            ////    //await context.Database.MigrateAsync();
 
-            //////IdentityResult roleResult;
-            //IdentityResult result;
+            ////IdentityResult roleResult;
+            IdentityResult result;
 
             //foreach (var roleName in roleNames)
             //{
@@ -102,18 +102,18 @@ namespace Siscom.Agua.Api.Data
             //        await userManager.AddToRoleAsync(user3, "Admin");
             //    }
 
-            //ApplicationUser user1 = new ApplicationUser()
+            //ApplicationUser user2 = new ApplicationUser()
             //{
-            //    Email = "MCuetlach@gmail.com",
+            //    Email = "LLarios@gmail.com",
             //    SecurityStamp = Guid.NewGuid().ToString(),
-            //    UserName = "MCuetlach",
-            //    Name = "Maria",
-            //    LastName = "Cuetlach",
-            //    SecondLastName = "Davalos",
+            //    UserName = "LLarios",
+            //    Name = "Linda",
+            //    LastName = "Larios",
+            //    SecondLastName = "Castillo",
             //    DivitionId = 1
             //};
-            //result = await userManager.CreateAsync(user1, "Sosapac2019");
-            //await userManager.AddToRoleAsync(user1, "User");
+            //result = await userManager.CreateAsync(user2, "Presidencia2019");
+            //var x  = await userManager.AddToRoleAsync(user2, "User");
 
             //ApplicationUser user2 = new ApplicationUser()
             //{

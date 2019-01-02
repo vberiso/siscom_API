@@ -32,8 +32,8 @@ namespace Siscom.Agua.Api.Controllers
             _context = context;
         }
 
-        [HttpGet("DiscountAnnual/{idAgreement}")]
-        public async Task<IActionResult> AssignDiscountAnnual([FromRoute] int idAgreement)
+        [HttpGet("DiscountAnnual/{idAgreement}/{IsMunicipal}")]
+        public async Task<IActionResult> AssignDiscountAnnual([FromRoute] int idAgreement, [FromRoute] bool IsMunicipal)
         {
             string error = string.Empty;
             List<BillingYear> entities = null;
@@ -53,10 +53,14 @@ namespace Siscom.Agua.Api.Controllers
                                              .OrderBy(x => x.DebitDate)
                                              .ToListAsync();
 
-                    if (agreement.TypeIntake.Acronym != "HA")
-                    {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Las características del contrato no cuenta con lo necesario para asignar un descuento: [Tipo de Toma no es Habitacional]" });
+                    if(!IsMunicipal)
+                    { 
+                        if (agreement.TypeIntake.Acronym != "HA" )
+                        {
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = "Las características del contrato no cuenta con lo necesario para asignar un descuento: [Tipo de Toma no es Habitacional]" });
+                        }
                     }
+                   
 
                     if (debt != null)
                     {
@@ -64,11 +68,23 @@ namespace Siscom.Agua.Api.Controllers
                                         .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status)).ToList();
                         if (a.Count > 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = "Las características del contrato no cuenta con lo necesario para asignar un descuento: [El contrato tiene adeudos]" });
-                        var b = debt.Where(t => t.Type == "TIP01" && t.Year == 2018 && t.DebtPeriodId == 12).ToList();
-                        if (b.Count > 0)
-                            IsValid = true;
+                        if (!IsMunicipal)
+                        {
+                            var b = debt.Where(t => t.Type == "TIP01" && t.Year == 2018 && t.DebtPeriodId == 12).ToList();
+                            if (b.Count > 0)
+                                IsValid = true;
+                            else
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Las características del contrato no cuenta con lo necesario para asignar un descuento: [El contrato no tiene facturado el ultimo periodo]" });
+                        }
                         else
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = "Las características del contrato no cuenta con lo necesario para asignar un descuento: [El contrato no tiene facturado el ultimo periodo]" });
+                        {
+                            var b = debt.Where(t => t.Type == "TIP01" && t.Year == 2018 && t.DebtPeriodId == 1).ToList();
+                            if (b.Count > 0)
+                                IsValid = true;
+                            else
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Las características del contrato no cuenta con lo necesario para asignar un descuento: [El contrato no tiene facturado el ultimo periodo]" });
+                        }
+                       
 
                     }
                     if (IsValid)
