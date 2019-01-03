@@ -29,9 +29,13 @@ namespace Siscom.Agua.Api.Controllers
         {
             var payments = await _context.Payments
                                          .Include(x => x.PaymentDetails)
-                                         .Where(d => d.PaymentDate.Date == summaryVM.StarDate)
+                                         .Include(op => op.OriginPayment)
+                                         .Include(eop => eop.ExternalOriginPayment)
+                                         .Include(pm => pm.PayMethod)
+                                         .Where(d => d.PaymentDate.Date >= summaryVM.StarDate.Date && d.PaymentDate.Date <= summaryVM.EndDate.Date)
+                                         .OrderBy(x => x.Status)
                                          .ToListAsync();
-            return Ok();
+            return Ok(payments);
         }
     }
 }
