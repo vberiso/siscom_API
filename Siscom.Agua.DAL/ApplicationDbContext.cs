@@ -20,6 +20,11 @@ namespace Siscom.Agua.DAL
         public DbSet<View> Views { get; set; }
         public DbSet<ViewProfile> ViewProfiles { get; set; }
 
+        //public object Types(Func<object, bool> p)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
         /// <summary>
         /// Location
         /// </summary>
