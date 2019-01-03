@@ -11,7 +11,7 @@ using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.Api.Controllers
 {
-    [Route("api/TerminalUser")]
+    [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
     [Authorize]
@@ -24,13 +24,14 @@ namespace Siscom.Agua.Api.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get([FromBody] CollectionSummaryVM summaryVM)
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] CollectionSummaryVM summaryVM)
         {
             var payments = await _context.Payments
                                          .Include(x => x.PaymentDetails)
                                          .Where(d => d.PaymentDate.Date == summaryVM.StarDate)
                                          .ToListAsync();
+            return Ok();
         }
     }
 }
