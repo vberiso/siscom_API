@@ -42,6 +42,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 await _context.PushNotifications.AddAsync(discount);
                 await _context.SaveChangesAsync();
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Message= ExectSP(discount) });
             }
             catch (Exception e)
             {
@@ -58,10 +59,10 @@ namespace Siscom.Agua.Api.Controllers
            
 
 
-            if (discount.Type == "NOT01")
-            {
+            //if (discount.Type == "NOT01")
+            //{
 
-            }
+            //}
             return Ok();
         }
 

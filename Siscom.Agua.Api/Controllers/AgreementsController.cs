@@ -92,6 +92,7 @@ namespace Siscom.Agua.Api.Controllers
                                         .ThenInclude(x => x.Service)
                                       .Include(ad => ad.AgreementDiscounts)
                                       .ThenInclude(d => d.Discount)
+                                      .Include(x => x.AgreementDetails)
                                       .FirstOrDefaultAsync(a => a.Account == AcountNumber);
 
             agreement.Addresses.ToList().ForEach(x =>
@@ -997,6 +998,17 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok(meter);
         }
+
+        //[HttpGet("AgrementDetailDiscount/{AgreementId}")]
+        //public async Task<IActionResult> GetAgrementDetailDiscount([FromRoute] int AgreementId)
+        //{
+        //    var agreement = await _context.Agreements
+        //                            .Include(x => x.AgreementDetails)
+        //                            .Include(ad => ad.AgreementDiscounts)
+        //                            .Where(x => x.Id == AgreementId)
+        //                            .FirstOrDefaultAsync();
+        //    return Ok(agreement);
+        //}
 
         [HttpGet("GetData")]
         public async Task<IActionResult> GetInitialAgreements()
