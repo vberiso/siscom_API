@@ -12,15 +12,15 @@ namespace Siscom.Agua.Api.Data
     {
         public static async void Initialize(IServiceProvider serviceProvider)
         {
-            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
-            //string[] roleNames = { "Super", "Admin", "User", "Isabi" };
-            ////    //await context.Database.EnsureDeletedAsync();
-            ////    //await context.Database.MigrateAsync();
+            //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            //var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            //var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
+            ////string[] roleNames = { "Super", "Admin", "User", "Isabi" };
+            //////    //await context.Database.EnsureDeletedAsync();
+            //////    //await context.Database.MigrateAsync();
 
-            ////IdentityResult roleResult;
-            IdentityResult result;
+            //////IdentityResult roleResult;
+            //IdentityResult result;
 
             //foreach (var roleName in roleNames)
             //{
