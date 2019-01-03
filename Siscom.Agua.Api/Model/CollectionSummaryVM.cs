@@ -8,9 +8,12 @@ namespace Siscom.Agua.Api.Model
 {
     public class CollectionSummaryVM
     {
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MMM/yyyy HH:mm:ss}")]
-        public DateTime StarDate { get; set; }
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MMM/yyyy HH:mm:ss}")]
-        public DateTime EndDate { get; set; }
+        public string PaymentDate { get; set; }
+        public string Account { get; set; }
+        public decimal Total { get; set; }
+        public string BrancOffice { get; set; }
+        public string PayMethod { get; set; }
+        public string OriginPayment { get; set; }
+        public string External_Origin_Payment { get; set; }
     }
 }

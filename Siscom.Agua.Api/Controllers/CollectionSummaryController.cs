@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -24,18 +26,39 @@ namespace Siscom.Agua.Api.Controllers
             _context = context;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CollectionSummaryVM summaryVM)
+       
+        [HttpGet("{dateInicio}/{dateFin}")]
+        public async Task<IActionResult> get([FromRoute] string dateInicio, string dateFin)
         {
-            var payments = await _context.Payments
-                                         .Include(x => x.PaymentDetails)
-                                         .Include(op => op.OriginPayment)
-                                         .Include(eop => eop.ExternalOriginPayment)
-                                         .Include(pm => pm.PayMethod)
-                                         .Where(d => d.PaymentDate.Date >= summaryVM.StarDate.Date && d.PaymentDate.Date <= summaryVM.EndDate.Date)
-                                         .OrderBy(x => x.Status)
-                                         .ToListAsync();
-            return Ok(payments);
+            string error = string.Empty;
+            List<CollectionSummaryVM> entities = null;
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "collectionSummary";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fechaIni", dateInicio));
+                command.Parameters.Add(new SqlParameter("@fechaFin", dateFin));
+
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    entities = new List<CollectionSummaryVM>();
+                    var x = result.Read();
+                    while (result.Read())
+                    {
+                        var T = new CollectionSummaryVM();
+                        T.PaymentDate = result[0].ToString();
+                        T.Account = result[1].ToString();
+                        T.Total = Convert.ToDecimal(result[2].ToString());
+                        T.BrancOffice = result[3].ToString();
+                        T.PayMethod = result[4].ToString();
+                        T.OriginPayment = result[5].ToString();
+                        T.External_Origin_Payment = result[6].ToString();
+                        entities.Add(T);
+                    }
+                }
+            }
+            return Ok(entities);
         }
     }
 }
