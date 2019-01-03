@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -198,13 +200,6 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de la transacción no es el mismo que la suma del pago a detalle de deuda ") });
 
             #endregion
-
-
-            var option = new TransactionOptions
-            {
-                IsolationLevel = IsolationLevel.ReadCommitted,
-                Timeout = TimeSpan.FromSeconds(60)
-            };
 
             try
             {
@@ -448,12 +443,6 @@ namespace Siscom.Agua.Api.Controllers
 
             #endregion           
 
-            var option = new TransactionOptions
-            {
-                IsolationLevel = IsolationLevel.ReadCommitted,
-                Timeout = TimeSpan.FromSeconds(60)
-            };
-
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -691,12 +680,6 @@ namespace Siscom.Agua.Api.Controllers
             #endregion
 
 
-            var option = new TransactionOptions
-            {
-                IsolationLevel = IsolationLevel.ReadCommitted,
-                Timeout = TimeSpan.FromSeconds(60)
-            };
-
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -883,12 +866,6 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
             #endregion
-
-            var option = new TransactionOptions
-            {
-                IsolationLevel = IsolationLevel.ReadCommitted,
-                Timeout = TimeSpan.FromSeconds(60)
-            };
 
             try
             {
@@ -1121,12 +1098,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
 
                 if (_validation)
-                {
-                    var option = new TransactionOptions
-                    {
-                        IsolationLevel = IsolationLevel.ReadCommitted,
-                        Timeout = TimeSpan.FromSeconds(60)
-                    };
+                {         
 
                     try
                     {
@@ -1212,6 +1184,52 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             return Ok(transaction);
+        }
+
+        /// <summary>
+        /// Get all transactions of BranchOffice
+        /// </summary>
+        /// <param name="date">date yyyy-mm-dd</param>
+        /// <param name="BranchOfficeId">BranchOfficeId</param>
+        /// <returns></returns>
+        // GET: api/Transaction
+        [HttpGet("BranchOffice/{date}/{BranchOfficeId}")]
+        public async Task<IActionResult> FindTransactionsAllBranchOffice([FromRoute] string date, int BranchOfficeId)
+        {
+            string error = string.Empty;
+            List<TransactionBranchOfficeVM> entities = null;
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "getTransactionBranchOffice";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fecha", date));
+                command.Parameters.Add(new SqlParameter("@branch", BranchOfficeId));
+               
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    entities = new List<TransactionBranchOfficeVM>();
+                    var x = result.Read();
+                    while (result.Read())
+                    {
+                        var T = new TransactionBranchOfficeVM();
+                        T.BranchOffice = result[0].ToString();
+                        T.TerminalUserId= Convert.ToInt32(result[1]);
+                        T.Hour = result[2].ToString();
+                        T.Sign = Convert.ToInt16(result[3]);
+                        T.Amount = Convert.ToDecimal(result[4].ToString());
+                        T.Tax = Convert.ToDecimal(result[5].ToString());
+                        T.Rounding = Convert.ToDecimal(result[6].ToString());
+                        T.Total = Convert.ToDecimal(result[7].ToString());
+                        T.TypeTransaction = result[8].ToString();
+                        T.PayMethod = result[9].ToString();
+                        T.Origin_Payment = result[10].ToString();
+                        T.External_Origin_Payment = result[11].ToString();
+                        entities.Add(T);
+                    }
+                }                  
+            }
+            return Ok(entities);
         }
 
         private bool Validate(TransactionVM ptransaction)

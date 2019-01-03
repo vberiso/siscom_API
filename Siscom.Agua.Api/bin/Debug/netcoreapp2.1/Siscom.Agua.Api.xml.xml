@@ -412,6 +412,14 @@
             <param name="terminalUserId">terminalUserId</param>
             <returns></returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TransactionController.FindTransactionsAllBranchOffice(System.String,System.Int32)">
+            <summary>
+            Get all transactions of BranchOffice
+            </summary>
+            <param name="date">date yyyy-mm-dd</param>
+            <param name="BranchOfficeId">BranchOfficeId</param>
+            <returns></returns>
+        </member>
         <member name="T:Siscom.Agua.Api.Controllers.TypeTransactionController">
             <summary>
             End Points TypeTransaction
