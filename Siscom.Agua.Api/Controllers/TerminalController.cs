@@ -133,26 +133,27 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (pterminal.BranchOffice==0)
+            if (pterminal.BranchOffice == 0 || String.IsNullOrEmpty(pterminal.MacAdress))
             {
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
             }
 
-            if (!MacAdressExists(pterminal.MacAdress))
-            {
-                Terminal terminal = new Terminal();
-                terminal.MacAdress = pterminal.MacAdress;
-                terminal.IsActive = pterminal.IsActive;
-                terminal.CashBox = pterminal.CashBox;
-                terminal.BranchOffice = await _context.BranchOffices.FindAsync(pterminal.BranchOffice);
+            if (await _context.Terminal
+                          .Where(x => x.MacAdress == pterminal.MacAdress &&
+                                      x.IsActive == true)
+                         .FirstOrDefaultAsync() != null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La Terminal está activa en otra sucursal. Es necesario desactivarla para crear una nueva.") });
 
-                _context.Terminal.Add(terminal);
-                await _context.SaveChangesAsync();
+            Terminal terminal = new Terminal();
+            terminal.MacAdress = pterminal.MacAdress;
+            terminal.IsActive = pterminal.IsActive;
+            terminal.CashBox = pterminal.CashBox;
+            terminal.BranchOffice = await _context.BranchOffices.FindAsync(pterminal.BranchOffice);
 
-                return CreatedAtAction("GetTerminal", new { id = terminal.Id }, terminal);
-            }
-            else
-              return StatusCode((int)TypeError.Code.Conflict, new { Error = "La Mac Adress ya existe" });
+            _context.Terminal.Add(terminal);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetTerminal", new { id = terminal.Id }, terminal);
         }
 
         /// <summary>
@@ -210,14 +211,37 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(terminal);
         }
 
+        /// <summary>
+        /// Get the search result
+        /// </summary>
+        /// <param name="mac">MacAdress</param>
+        /// <returns></returns>
+        // GET: api/Terminal
+        [HttpGet("{mac}")]
+        public async Task<IActionResult> FindTerminalMac([FromRoute] string mac)
+        {
+            string valores = String.Empty;
+            Terminal terminal = new Terminal();
+
+            if (!String.IsNullOrEmpty(mac))
+            {
+                terminal = await _context.Terminal
+                                         .Include(x => x.BranchOffice)
+                                         .Where(x => x.MacAdress == mac &&
+                                                     x.IsActive==true).FirstOrDefaultAsync();
+            }
+
+            if (terminal == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(terminal);
+        }
+
         private bool TerminalExists(int id)
         {
             return _context.Terminal.Any(e => e.Id == id);
-        }
-
-        private bool MacAdressExists(string macAdress)
-        {
-            return _context.Terminal.Any(e => e.MacAdress == macAdress);
         }
 
         private bool Validate(TerminalVM pterminal)
