@@ -265,7 +265,10 @@ namespace Siscom.Agua.Api.Controllers
 
                         if (!String.IsNullOrEmpty(debt.NewStatus))
                         {
-                            if (debtFind.Status == "ED001" || debtFind.Status == "ED004" || debtFind.Status == "ED007")
+                            
+                            if (await _context.Statuses
+                                                      .Where(x => x.GroupStatusId == 4 &&
+                                                                  x.CodeName == debtFind.Status).FirstAsync() !=null)
                             {
                                 debtFind.Status = debt.NewStatus;
                                 debtFind.OnAccount = debt.OnAccount;
