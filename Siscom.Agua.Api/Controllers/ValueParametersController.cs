@@ -12,7 +12,6 @@ namespace Siscom.Agua.Api.Controllers
     [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
-    [Authorize]
     public class ValueParametersController : ControllerBase
     {
 

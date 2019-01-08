@@ -311,13 +311,6 @@
             <param name="pterminal">Model TerminalVM</param>
             <returns>New Terminal added</returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.DeleteTerminal(System.Int32)">
-            <summary>
-            This will provide delete for especific ID, of Terminal whitch is begin passed 
-            </summary>
-            <param name="id">Mandatory</param>
-            <returns></returns>
-        </member>
         <member name="M:Siscom.Agua.Api.Controllers.TerminalController.FindTerminalUser(System.String,System.Int32)">
             <summary>
             Get the search result

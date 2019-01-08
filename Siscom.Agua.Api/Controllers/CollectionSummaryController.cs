@@ -27,11 +27,11 @@ namespace Siscom.Agua.Api.Controllers
         }
 
        
-        [HttpGet("{dateInicio}/{dateFin}")]
-        public async Task<IActionResult> get([FromRoute] string dateInicio, string dateFin)
+        [HttpGet("IncomeReport/{dateInicio}/{dateFin}")]
+        public async Task<IActionResult> Get([FromRoute] string dateInicio, string dateFin)
         {
             string error = string.Empty;
-            List<CollectionSummaryVM> entities = null;
+            var dataTable = new DataTable();
             using (var command = _context.Database.GetDbConnection().CreateCommand())
             {
                 command.CommandText = "collectionSummary";
@@ -42,26 +42,31 @@ namespace Siscom.Agua.Api.Controllers
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
-
-                    var dataTable = new DataTable();
                     dataTable.Load(result);
-                    entities = new List<CollectionSummaryVM>();
-
-                    foreach (DataRow item in dataTable.Rows)
-                    {
-                        var T = new CollectionSummaryVM();
-                        T.PaymentDate = item[0].ToString();
-                        T.Account = item[1].ToString();
-                        T.Total = Convert.ToDecimal(item[2].ToString());
-                        T.BrancOffice = item[3].ToString();
-                        T.PayMethod = item[4].ToString();
-                        T.OriginPayment = item[5].ToString();
-                        T.External_Origin_Payment = item[6].ToString();
-                        entities.Add(T);
-                    }
                 }
             }
-            return Ok(entities);
+            return Ok(dataTable);
+        }
+
+        [HttpGet("TotalCollection/{dateInicio}/{dateFin}")]
+        public async Task<IActionResult> GetTotal([FromRoute] string dateInicio, string dateFin)
+        {
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "totalCollection";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fechaIni", dateInicio));
+                command.Parameters.Add(new SqlParameter("@fechaFin", dateFin));
+
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);
         }
     }
 }
