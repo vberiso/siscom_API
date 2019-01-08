@@ -85,8 +85,7 @@ namespace Siscom.Agua.Api.Controllers
             var movimientosCaja = await _context.Transactions
                                                 .Include(x => x.TypeTransaction)
                                                 .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                                            x.TerminalUser.InOperation == true &&
-                                                            x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
+                                                            x.TerminalUser.InOperation == true )
                                                 .OrderBy(x => x.Id).ToListAsync();
 
             foreach (var item in movimientosCaja)

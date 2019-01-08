@@ -311,13 +311,6 @@
             <param name="pterminal">Model TerminalVM</param>
             <returns>New Terminal added</returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.DeleteTerminal(System.Int32)">
-            <summary>
-            This will provide delete for especific ID, of Terminal whitch is begin passed 
-            </summary>
-            <param name="id">Mandatory</param>
-            <returns></returns>
-        </member>
         <member name="M:Siscom.Agua.Api.Controllers.TerminalController.FindTerminalUser(System.String,System.Int32)">
             <summary>
             Get the search result
@@ -418,6 +411,14 @@
             <param name="date">date yyyy-mm-dd</param>
             <param name="terminalUserId">terminalUserId</param>
             <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TransactionController.GetTransactionCashBox(System.Int32)">
+            <summary>
+            Get state operation terminal user
+            </summary>       
+            <param name="teminalUserId">Model TransactionVM
+            </param>
+            <returns>State Operation Terminaluser</returns>
         </member>
         <member name="M:Siscom.Agua.Api.Controllers.TransactionController.FindTransactionsAllBranchOffice(System.String,System.Int32)">
             <summary>
