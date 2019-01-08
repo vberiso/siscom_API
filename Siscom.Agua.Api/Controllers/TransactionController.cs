@@ -1190,6 +1190,64 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         /// <summary>
+        /// Get state operation terminal user
+        /// </summary>       
+        /// <param name="teminalUserId">Model TransactionVM
+        /// </param>
+        /// <returns>State Operation Terminaluser</returns>
+        // POST: api/Transaction
+        [HttpGet("Terminal/{teminalUserId}")]
+        public async Task<IActionResult> GetTransactionCashBox([FromRoute] int teminalUserId)
+        {
+            DAL.Models.Transaction transaction = new DAL.Models.Transaction();          
+            KeyValuePair<int, string> _typeTransaction = new KeyValuePair<int, string>(0, String.Empty);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }         
+
+            TerminalUser terminalUser = new TerminalUser();
+            terminalUser = await _context.TerminalUsers
+                                             .Include(x => x.Terminal)
+                                             .Where(x => x.Id == teminalUserId).FirstOrDefaultAsync();
+
+            if (terminalUser == null)
+            {
+                return NotFound();
+            }
+           
+
+            var movimientosCaja = await _context.Transactions
+                                                .Include(x => x.TypeTransaction)
+                                                .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                            x.TerminalUser.InOperation == true &&
+                                                            x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
+                                                .OrderBy(x => x.Id).ToListAsync();
+
+            foreach (var item in movimientosCaja)
+            {
+                switch (item.TypeTransaction.Id)
+                {
+                    case 1://apertura
+                        _typeTransaction = new KeyValuePair<int, string>(item.TypeTransaction.Id, item.TypeTransaction.Name);
+                        break;
+                    case 2://Fondo
+                        _typeTransaction = new KeyValuePair<int, string>(item.TypeTransaction.Id, item.TypeTransaction.Name);
+                        break;                   
+                    case 5://Cierre
+                        _typeTransaction = new KeyValuePair<int, string>(item.TypeTransaction.Id, item.TypeTransaction.Name);
+                        break;                   
+                    case 7: //Liquidada
+                        _typeTransaction = new KeyValuePair<int, string>(item.TypeTransaction.Id, item.TypeTransaction.Name);
+                        break;
+                }
+            } 
+
+            return Ok(_typeTransaction);
+        }
+
+        /// <summary>
         /// Get all transactions of BranchOffice
         /// </summary>
         /// <param name="date">date yyyy-mm-dd</param>
