@@ -87,15 +87,24 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("Division/{DivisionId}")]
         public async Task<IActionResult> GetProductDivision([FromRoute]  int DivisionId)
         {
+            IEnumerable<Product> product;
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.Products
-                                        .Where(x => x.DivisionId == DivisionId &&
-                                                    x.IsActive==true).ToListAsync();
-
+            if (DivisionId == 0)
+            {
+                product = await _context.Products
+                                        .Where(x => x.IsActive == true).ToListAsync();
+            }
+            else
+            {
+                product = await _context.Products
+                                            .Where(x => x.DivisionId == DivisionId &&
+                                                        x.IsActive == true).ToListAsync();
+            }
 
             var childParent = Preorder(product);
 

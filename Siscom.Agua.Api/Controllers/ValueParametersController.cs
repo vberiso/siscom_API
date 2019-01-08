@@ -64,7 +64,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> GetTransactionCashBox([FromRoute] int teminalUserId)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-            KeyValuePair<int, string> _typeTransaction = new KeyValuePair<int, string>(0, String.Empty);
+            int _typeTransaction = 0;
 
             if (!ModelState.IsValid)
             {
@@ -93,16 +93,16 @@ namespace Siscom.Agua.Api.Controllers
                 switch (item.TypeTransaction.Id)
                 {
                     case 1://apertura
-                        _typeTransaction = new KeyValuePair<int, string>(item.TypeTransaction.Id, item.TypeTransaction.Name);
+                        _typeTransaction = item.TypeTransaction.Id;
                         break;
                     case 2://Fondo
-                        _typeTransaction = new KeyValuePair<int, string>(item.TypeTransaction.Id, item.TypeTransaction.Name);
+                        _typeTransaction = item.TypeTransaction.Id;
                         break;
                     case 5://Cierre
-                        _typeTransaction = new KeyValuePair<int, string>(item.TypeTransaction.Id, item.TypeTransaction.Name);
+                        _typeTransaction = item.TypeTransaction.Id;
                         break;
                     case 7: //Liquidada
-                        _typeTransaction = new KeyValuePair<int, string>(item.TypeTransaction.Id, item.TypeTransaction.Name);
+                        _typeTransaction = item.TypeTransaction.Id;
                         break;
                 }
             }
