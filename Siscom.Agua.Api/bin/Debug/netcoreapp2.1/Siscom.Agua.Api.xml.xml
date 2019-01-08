@@ -326,6 +326,13 @@
             /// <param name="branch">BranchOffice</param>
             <returns></returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.FindTerminalMac(System.String)">
+            <summary>
+            Get the search result
+            </summary>
+            <param name="mac">MacAdress</param>
+            <returns></returns>
+        </member>
         <member name="T:Siscom.Agua.Api.Controllers.TerminalUserController">
             <summary>
             End Points TerminalUser

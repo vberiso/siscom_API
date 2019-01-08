@@ -110,16 +110,18 @@ namespace Siscom.Agua.Api.Controllers
                                 }
                                 else
                                 {
+                                    var dataTable = new DataTable();
+                                    dataTable.Load(result);
                                     entities = new List<BillingYear>();
-                                    while (result.Read())
+                                    foreach (DataRow item in dataTable.Rows)
                                     {
                                         var bl = new BillingYear();
-                                        bl.conde_concept = result[0].ToString();
-                                        bl.name_concept = result[1].ToString();
-                                        bl.have_tax = Convert.ToBoolean(result[3]);
-                                        bl.amount = Convert.ToDecimal(result[2].ToString());
-                                        bl.id_discount = Convert.ToInt32(result[4]);
-                                        bl.discount = result[5].ToString();
+                                        bl.conde_concept = item[0].ToString();
+                                        bl.name_concept = item[1].ToString();
+                                        bl.have_tax = Convert.ToBoolean(item[3]);
+                                        bl.amount = Convert.ToDecimal(item[2].ToString());
+                                        bl.id_discount = Convert.ToInt32(item[4]);
+                                        bl.discount = item[5].ToString();
                                         entities.Add(bl);
                                     }
                                 }

@@ -45,6 +45,8 @@ namespace Siscom.Agua.DAL.Models
         public string Type { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
+        [NotMapped]
+        public string DescriptionStatus { get; set; }
         [NotMapped]       
         public string NewStatus { get; set; }
         [Column("DebtPeriodId")]

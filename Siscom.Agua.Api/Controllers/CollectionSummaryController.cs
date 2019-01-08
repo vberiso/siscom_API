@@ -42,18 +42,21 @@ namespace Siscom.Agua.Api.Controllers
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
+
+                    var dataTable = new DataTable();
+                    dataTable.Load(result);
                     entities = new List<CollectionSummaryVM>();
-                    var x = result.Read();
-                    while (result.Read())
+
+                    foreach (DataRow item in dataTable.Rows)
                     {
                         var T = new CollectionSummaryVM();
-                        T.PaymentDate = result[0].ToString();
-                        T.Account = result[1].ToString();
-                        T.Total = Convert.ToDecimal(result[2].ToString());
-                        T.BrancOffice = result[3].ToString();
-                        T.PayMethod = result[4].ToString();
-                        T.OriginPayment = result[5].ToString();
-                        T.External_Origin_Payment = result[6].ToString();
+                        T.PaymentDate = item[0].ToString();
+                        T.Account = item[1].ToString();
+                        T.Total = Convert.ToDecimal(item[2].ToString());
+                        T.BrancOffice = item[3].ToString();
+                        T.PayMethod = item[4].ToString();
+                        T.OriginPayment = item[5].ToString();
+                        T.External_Origin_Payment = item[6].ToString();
                         entities.Add(T);
                     }
                 }

@@ -1190,6 +1190,34 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         /// <summary>
+        /// Get all transactions of terminalUser from day
+        /// </summary>
+        /// <param name="date">date yyyy-mm-dd</param>
+        /// <param name="terminalUserId">terminalUserId</param>
+        /// <returns></returns>
+        // GET: api/TerminalUser
+        [HttpGet("{date}/{terminalUserId}")]
+        public async Task<IActionResult> FindTransactions([FromRoute] string dateStart, string dateEnd, int branchOfficeId = 0)
+        {
+            var transaction = await _context.Transactions
+                                     .Include(x => x.TypeTransaction)
+                                     .Include(x => x.TransactionFolios)
+                                     .Where(x => x.TerminalUser.Id == terminalUserId &&
+                                                 x.DateTransaction.Date == Convert.ToDateTime(date).Date)
+                                     .OrderBy(x => x.Id).ToListAsync();
+            transaction.ToList().ForEach(x =>
+            {
+                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
+            });
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(transaction);
+        }
+
+        /// <summary>
         /// Get all transactions of BranchOffice
         /// </summary>
         /// <param name="date">date yyyy-mm-dd</param>
@@ -1211,25 +1239,27 @@ namespace Siscom.Agua.Api.Controllers
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
+                    var dataTable = new DataTable();
+                    dataTable.Load(result);
                     entities = new List<TransactionBranchOfficeVM>();
-                    var x = result.Read();
-                    while (result.Read())
+                    foreach (DataRow item in dataTable.Rows)
                     {
                         var T = new TransactionBranchOfficeVM();
-                        T.BranchOffice = result[0].ToString();
-                        T.TerminalUserId= Convert.ToInt32(result[1]);
-                        T.Hour = result[2].ToString();
-                        T.Sign = Convert.ToInt16(result[3]);
-                        T.Amount = Convert.ToDecimal(result[4].ToString());
-                        T.Tax = Convert.ToDecimal(result[5].ToString());
-                        T.Rounding = Convert.ToDecimal(result[6].ToString());
-                        T.Total = Convert.ToDecimal(result[7].ToString());
-                        T.TypeTransaction = result[8].ToString();
-                        T.PayMethod = result[9].ToString();
-                        T.Origin_Payment = result[10].ToString();
-                        T.External_Origin_Payment = result[11].ToString();
+                        T.BranchOffice = item[0].ToString();
+                        T.TerminalUserId = Convert.ToInt32(item[1].ToString());
+                        T.Hour = item[2].ToString();
+                        T.Sign = Convert.ToInt16(item[3]);
+                        T.Amount = Convert.ToDecimal(item[4].ToString());
+                        T.Tax = Convert.ToDecimal(item[5].ToString());
+                        T.Rounding = Convert.ToDecimal(item[6].ToString());
+                        T.Total = Convert.ToDecimal(item[7].ToString());
+                        T.TypeTransaction = item[8].ToString();
+                        T.PayMethod = item[9].ToString();
+                        T.Origin_Payment = item[10].ToString();
+                        T.External_Origin_Payment = item[11].ToString();
                         entities.Add(T);
                     }
+                    
                 }                  
             }
             return Ok(entities);

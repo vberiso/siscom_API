@@ -87,6 +87,7 @@ namespace Siscom.Agua.Api.Controllers
                     return Ok(new
                     {
                         user = user.Id,
+                        fullName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName),
                         token = new JwtSecurityTokenHandler().WriteToken(token),
                         expiration = token.ValidTo,
                         RolName = rolname,
@@ -114,7 +115,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 //if(await _context.Authorizations.Where(x => x.MAC == model.Address).SingleOrDefaultAsync() == null)
                 //{
-                //    return StatusCode((int)TypeError.Code.Unauthorized, new { Error = "Sin autorización para ingresar al sistema, favor de verificar " });
+                //    return StatusCode((int)TypeError.Code.Unauthorized, new { Message = "Sin autorización para ingresar al sistema, favor de verificar " });
                 //}
             }
             return Unauthorized();
@@ -141,11 +142,11 @@ namespace Siscom.Agua.Api.Controllers
             await userManager.AddToRoleAsync(user, "User");
             if (result.Succeeded)
             {
-                return StatusCode((int)TypeError.Code.Ok, new { Message = "Se genero usuario correctamente" });
+                return StatusCode((int)TypeError.Code.Ok, new { Error = "Se genero usuario correctamente" });
             }
             else
             {
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Join(" ",result.Errors) });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(" ",result.Errors) });
             }
         }
     }

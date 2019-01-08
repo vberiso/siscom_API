@@ -55,7 +55,7 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     else
                     {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Message = "Problemas para cancelar recargos [ "+ error + "]"});
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Problemas para cancelar recargos [ "+ error + "]"});
                     }
                 }
             }

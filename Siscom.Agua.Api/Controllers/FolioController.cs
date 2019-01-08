@@ -120,7 +120,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
             }
 
-            return StatusCode((int)TypeError.Code.Ok, new { Error = string.Format("Modificación realizada con éxito") });
+            return StatusCode((int)TypeError.Code.Ok, new { Message = string.Format("Modificación realizada con éxito") });
         }
 
         /// <summary>

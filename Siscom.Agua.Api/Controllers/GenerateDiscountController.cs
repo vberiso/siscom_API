@@ -42,7 +42,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 await _context.PushNotifications.AddAsync(discount);
                 await _context.SaveChangesAsync();
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Message= ExectSP(discount) });
+                return StatusCode((int)TypeError.Code.Ok, new { Message= ExectSP(discount) });
             }
             catch (Exception e)
             {
