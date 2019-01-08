@@ -118,7 +118,6 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
-
         /// <summary>
         /// This will provide capability add new Terminal
         /// </summary>
@@ -154,32 +153,6 @@ namespace Siscom.Agua.Api.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTerminal", new { id = terminal.Id }, terminal);
-        }
-
-        /// <summary>
-        /// This will provide delete for especific ID, of Terminal whitch is begin passed 
-        /// </summary>
-        /// <param name="id">Mandatory</param>
-        /// <returns></returns>
-        // DELETE: api/Terminal/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTerminal([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var terminal = await _context.Terminal.FindAsync(id);
-            if (terminal == null)
-            {
-                return NotFound();
-            }
-
-            _context.Terminal.Remove(terminal);
-            await _context.SaveChangesAsync();
-
-            return Ok(terminal);
         }
 
         /// <summary>
@@ -222,6 +195,7 @@ namespace Siscom.Agua.Api.Controllers
         {
             string valores = String.Empty;
             Terminal terminal = new Terminal();
+            TerminalUser terminalUser = new TerminalUser();
 
             if (!String.IsNullOrEmpty(mac))
             {
@@ -231,12 +205,16 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.IsActive==true).FirstOrDefaultAsync();
             }
 
-            if (terminal == null)
+            if (terminal != null)
             {
-                return NotFound();
+                terminalUser = await _context.TerminalUsers
+                                             .Where (x => x.Terminal== terminal &&
+                                                          x.InOperation== true).FirstOrDefaultAsync();
             }
+            else
+                return NotFound();
 
-            return Ok(terminal);
+            return Ok(new { terminal = terminal, terminalUser= terminalUser});
         }
 
         private bool TerminalExists(int id)

@@ -1190,34 +1190,6 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         /// <summary>
-        /// Get all transactions of terminalUser from day
-        /// </summary>
-        /// <param name="date">date yyyy-mm-dd</param>
-        /// <param name="terminalUserId">terminalUserId</param>
-        /// <returns></returns>
-        // GET: api/TerminalUser
-        [HttpGet("{date}/{terminalUserId}")]
-        public async Task<IActionResult> FindTransactions([FromRoute] string dateStart, string dateEnd, int branchOfficeId = 0)
-        {
-            var transaction = await _context.Transactions
-                                     .Include(x => x.TypeTransaction)
-                                     .Include(x => x.TransactionFolios)
-                                     .Where(x => x.TerminalUser.Id == terminalUserId &&
-                                                 x.DateTransaction.Date == Convert.ToDateTime(date).Date)
-                                     .OrderBy(x => x.Id).ToListAsync();
-            transaction.ToList().ForEach(x =>
-            {
-                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
-            });
-            if (transaction == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(transaction);
-        }
-
-        /// <summary>
         /// Get all transactions of BranchOffice
         /// </summary>
         /// <param name="date">date yyyy-mm-dd</param>
