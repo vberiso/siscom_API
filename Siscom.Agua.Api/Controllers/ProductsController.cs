@@ -155,7 +155,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("Tariff/{ProductId}")]
         public async Task<IActionResult> GetProductTariff([FromRoute]  int ProductId)
         {
-            TariffProductVM tariffProductVM = new TariffProductVM();
+           // TariffProductVM tariffProductVM = new TariffProductVM();
 
             if (!ModelState.IsValid)
             {
@@ -166,49 +166,49 @@ namespace Siscom.Agua.Api.Controllers
                                         .Where(x => x.ProductId == ProductId &&
                                                     x.IsActive==1).SingleOrDefaultAsync();
 
-            if(tariff ==null)
-                return Ok(tariffProductVM);
+            ////if(tariff ==null)
+            ////    return Ok(tariffProductVM);
 
 
-            var factor = await _context.SystemParameters
-                                      .Where(x => x.Name == "FACTOR")
-                                      .SingleOrDefaultAsync();
+            ////var factor = await _context.SystemParameters
+            ////                          .Where(x => x.Name == "FACTOR")
+            ////                          .SingleOrDefaultAsync();
 
 
-            var tax = await _context.SystemParameters
-                                      .Where(x => x.Name == "IVA")
-                                      .SingleOrDefaultAsync();
+            ////var tax = await _context.SystemParameters
+            ////                          .Where(x => x.Name == "IVA")
+            ////                          .SingleOrDefaultAsync();
 
            
-            tariffProductVM.IdProduct = tariff.ProductId;
+            ////tariffProductVM.IdProduct = tariff.ProductId;
 
-            if (tariff.TimesFactor != 0)
-            {
-                tariffProductVM.Type = (int)TypeTariffProduct.By.Factor;
-                tariffProductVM.Amount = tariff.TimesFactor * factor.NumberColumn;
-            }
-            else if (tariff.Percentage != 0)
-            {
-                tariffProductVM.Type = (int)TypeTariffProduct.By.Percentage;
-            }
-            else if (tariff.IsVariable)
-            {
-                tariffProductVM.Type = (int)TypeTariffProduct.By.Variable;
-            }
-            else
-            {
-                tariffProductVM.Type = (int)TypeTariffProduct.By.Amount;
-                tariffProductVM.Amount = tariff.Amount;
-            }
+            ////if (tariff.TimesFactor != 0)
+            ////{
+            ////    tariffProductVM.Type = (int)TypeTariffProduct.By.Factor;
+            ////    tariffProductVM.Amount = tariff.TimesFactor * factor.NumberColumn;
+            ////}
+            ////else if (tariff.Percentage != 0)
+            ////{
+            ////    tariffProductVM.Type = (int)TypeTariffProduct.By.Percentage;
+            ////}
+            ////else if (tariff.IsVariable)
+            ////{
+            ////    tariffProductVM.Type = (int)TypeTariffProduct.By.Variable;
+            ////}
+            ////else
+            ////{
+            ////    tariffProductVM.Type = (int)TypeTariffProduct.By.Amount;
+            ////    tariffProductVM.Amount = tariff.Amount;
+            ////}
 
-            if (tariff.HaveTax)
-            {
-                tariffProductVM.Tax = (tariffProductVM.Amount * tax.NumberColumn) / 100; 
-            }
+            ////if (tariff.HaveTax)
+            ////{
+            ////    tariffProductVM.Tax = (tariffProductVM.Amount * tax.NumberColumn) / 100; 
+            ////}
 
-            tariffProductVM.Total = tariffProductVM.Amount + tariffProductVM.Tax;
+            ////tariffProductVM.Total = tariffProductVM.Amount + tariffProductVM.Tax;
 
-            return Ok(tariffProductVM);
+            return Ok(tariff);
         }
 
 
