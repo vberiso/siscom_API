@@ -24,6 +24,8 @@ namespace Siscom.Agua.DAL.Models
         public decimal CashBox { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
+        [Column("serial_number"), StringLength(20)]
+        public string SerialNumber { get; set; }
 
         //[ForeignKey("BranchOffice")]
         public int BranchOfficeId { get; set; }

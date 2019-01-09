@@ -148,6 +148,7 @@ namespace Siscom.Agua.Api.Controllers
             terminal.IsActive = pterminal.IsActive;
             terminal.CashBox = pterminal.CashBox;
             terminal.BranchOffice = await _context.BranchOffices.FindAsync(pterminal.BranchOffice);
+            //Aqui serial 
 
             _context.Terminal.Add(terminal);
             await _context.SaveChangesAsync();
