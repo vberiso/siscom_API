@@ -166,8 +166,8 @@ namespace Siscom.Agua.Api.Controllers
                                         .Where(x => x.ProductId == ProductId &&
                                                     x.IsActive==1).SingleOrDefaultAsync();
 
-            ////if(tariff ==null)
-            ////    return Ok(tariffProductVM);
+            if(tariff ==null)
+                return NotFound();
 
 
             ////var factor = await _context.SystemParameters
@@ -179,7 +179,7 @@ namespace Siscom.Agua.Api.Controllers
             ////                          .Where(x => x.Name == "IVA")
             ////                          .SingleOrDefaultAsync();
 
-           
+
             ////tariffProductVM.IdProduct = tariff.ProductId;
 
             ////if (tariff.TimesFactor != 0)
