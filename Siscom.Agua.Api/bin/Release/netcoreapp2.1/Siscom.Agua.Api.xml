@@ -412,6 +412,14 @@
             <param name="terminalUserId">terminalUserId</param>
             <returns></returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TransactionController.GetTransactionCashBox(System.Int32)">
+            <summary>
+            Get state operation terminal user
+            </summary>       
+            <param name="teminalUserId">Model TransactionVM
+            </param>
+            <returns>State Operation Terminaluser</returns>
+        </member>
         <member name="M:Siscom.Agua.Api.Controllers.TransactionController.FindTransactionsAllBranchOffice(System.String,System.Int32)">
             <summary>
             Get all transactions of BranchOffice

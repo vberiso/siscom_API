@@ -201,20 +201,20 @@ namespace Siscom.Agua.Api.Controllers
             {
                 terminal = await _context.Terminal
                                          .Include(x => x.BranchOffice)
+                                         .Include(x => x.TerminalUsers)
                                          .Where(x => x.MacAdress == mac &&
-                                                     x.IsActive==true).FirstOrDefaultAsync();
+                                                     x.IsActive == true).FirstOrDefaultAsync();
+                terminal.TerminalUsers = terminal.TerminalUsers.Where(x => x.InOperation == true).ToList();
             }
 
-            if (terminal != null)
+            if (terminal == null)
             {
-                terminalUser = await _context.TerminalUsers
-                                             .Where (x => x.Terminal== terminal &&
-                                                          x.InOperation== true).FirstOrDefaultAsync();
+                return NotFound();
             }
             else
-                return NotFound();
-
-            return Ok(new { terminal = terminal, terminalUser= terminalUser});
+            {
+                return Ok(terminal);
+            }
         }
 
         private bool TerminalExists(int id)
