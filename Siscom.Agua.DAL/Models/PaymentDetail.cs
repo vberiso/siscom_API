@@ -21,10 +21,13 @@ namespace Siscom.Agua.DAL.Models
         public decimal Amount { get; set; }
         [Column("id_debt"), Required]
         public int DebtId { get; set; }
+        [NotMapped]
+        public Debt Debt { get; set; }
         [Column("id_prepaid"), Required]
         public int PrepaidId { get; set; }
+        [NotMapped]
+        public Prepaid Prepaid { get; set; }
 
-        
         public int PaymentId { get; set; }
         public Payment Payment { get; set; }
     }

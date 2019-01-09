@@ -85,6 +85,12 @@ namespace Siscom.Agua.Api.Controllers
                                                         .Where(m => m.TransactionFolio == transactionPayment.Transaction.Folio)
                                                         .FirstOrDefaultAsync();
 
+            transactionPayment.Payment.PaymentDetails.ToList().ForEach(async x =>
+            {
+                x.Debt = await _context.Debts.FindAsync(x.DebtId);
+                x.Prepaid = await _context.Prepaids.FindAsync(x.PrepaidId);
+            });
+
             if (transactionPayment == null)
             {
                 return NotFound();
