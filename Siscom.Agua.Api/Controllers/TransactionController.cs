@@ -87,8 +87,8 @@ namespace Siscom.Agua.Api.Controllers
 
             transactionPayment.Payment.PaymentDetails.ToList().ForEach(async x =>
             {
-                x.Debt = await _context.Debts.FindAsync(x.DebtId);
-                x.Prepaid = await _context.Prepaids.FindAsync(x.PrepaidId);
+                x.Debt = await _context.Debts.FindAsync(x.DebtId).ConfigureAwait(false);
+                x.Prepaid = await _context.Prepaids.FindAsync(x.PrepaidId).ConfigureAwait(false);
             });
 
             if (transactionPayment == null)

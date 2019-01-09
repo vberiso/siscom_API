@@ -148,7 +148,7 @@ namespace Siscom.Agua.Api.Controllers
             terminal.IsActive = pterminal.IsActive;
             terminal.CashBox = pterminal.CashBox;
             terminal.BranchOffice = await _context.BranchOffices.FindAsync(pterminal.BranchOffice);
-            //Aqui serial 
+            terminal.SerialNumber= System.Guid.NewGuid().ToString().Substring(0, 20).ToUpper();
 
             _context.Terminal.Add(terminal);
             await _context.SaveChangesAsync();
@@ -205,7 +205,8 @@ namespace Siscom.Agua.Api.Controllers
                                          .Include(x => x.TerminalUsers)
                                          .Where(x => x.MacAdress == mac &&
                                                      x.IsActive == true).FirstOrDefaultAsync();
-                terminal.TerminalUsers = terminal.TerminalUsers.Where(x => x.InOperation == true).ToList();
+                if (terminal != null)
+                    terminal.TerminalUsers = terminal.TerminalUsers.Where(x => x.InOperation == true).ToList();
             }
 
             if (terminal == null)
