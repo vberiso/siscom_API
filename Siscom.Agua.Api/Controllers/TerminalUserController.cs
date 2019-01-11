@@ -89,7 +89,7 @@ namespace Siscom.Agua.Api.Controllers
             if (user == null)
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Usuario incorrecto" });
 
-            if (await _context.TerminalUsers.Where(x => x.Terminal.Id == pterminalUser.TermianlId &&
+            if (await _context.TerminalUsers.Where(x => x.Terminal.Id == pterminalUser.TerminalId &&
                                                         x.InOperation==true)
                                             .FirstOrDefaultAsync() != null)
             {
@@ -104,7 +104,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             TerminalUser terminalUser = new TerminalUser();
-            terminalUser.Terminal = await _context.Terminal.FindAsync(pterminalUser.TermianlId);
+            terminalUser.Terminal = await _context.Terminal.FindAsync(pterminalUser.TerminalId);
             terminalUser.User = await _context.Users.FindAsync(pterminalUser.UserId);
             terminalUser.OpenDate = DateTime.Now.Date;
             terminalUser.InOperation = pterminalUser.InOperation;
@@ -145,7 +145,7 @@ namespace Siscom.Agua.Api.Controllers
 
             TerminalUser terminalUser = new TerminalUser();
             terminalUser.Id = pterminalUser.Id;
-            terminalUser.Terminal = await _context.Terminal.FindAsync(pterminalUser.TermianlId);
+            terminalUser.Terminal = await _context.Terminal.FindAsync(pterminalUser.TerminalId);
             terminalUser.User = await _context.Users.FindAsync(pterminalUser.UserId);
             terminalUser.OpenDate = DateTime.Now.Date;
             terminalUser.InOperation = pterminalUser.InOperation;
@@ -240,7 +240,7 @@ namespace Siscom.Agua.Api.Controllers
 
         private bool Validate(TermimalUserVM pterminalUser)
         {
-            if (pterminalUser.TermianlId == 0)
+            if (pterminalUser.TerminalId == 0)
                 return false;
             if (string.IsNullOrEmpty(pterminalUser.UserId))
                 return false;
