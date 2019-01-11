@@ -20,6 +20,7 @@ namespace Siscom.Agua.DAL.Models
             Prepaids = new HashSet<Prepaid>();
             Notifications = new HashSet<Notification>();
             AgreementDetails = new HashSet<AgreementDetail>();
+            AgreementFiles = new HashSet<AgreementFile>();
         }
 
         [Column("id_agreement"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -86,5 +87,6 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<Prepaid> Prepaids { get; set; }
         public ICollection<Notification> Notifications { get; set; }
         public ICollection<AgreementDetail> AgreementDetails { get; set; }
+        public ICollection<AgreementFile> AgreementFiles { get; set; }
     }
 }

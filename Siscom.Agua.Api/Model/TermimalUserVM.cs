@@ -11,7 +11,7 @@ namespace Siscom.Agua.Api.Model
         public int Id { get; set; }          
         public bool InOperation { get; set; }
         [Required(ErrorMessage = "Terminal requerida")]
-        public int TermianlId { get; set; }
+        public int TerminalId { get; set; }
         [Required(ErrorMessage = "Usuario requerido")]
         public string UserId { get; set; }
     }

@@ -31,6 +31,8 @@ namespace Siscom.Agua.DAL.Models
         public Int16 Sector { get; set; }
         [Column("observation")]
         public string Observation { get; set; }
+        [Column("manifest")]
+        public Boolean Manifest { get; set; }
 
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }

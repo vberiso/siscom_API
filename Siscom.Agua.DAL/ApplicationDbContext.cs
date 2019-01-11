@@ -63,6 +63,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<NotificationDetail> NotificationDetails { get; set; }
         public DbSet<AgreementDetail> AgreementDetails { get; set; }
+        public DbSet<AgreementFile> AgreementFiles { get; set; }
 
         /// <summary> 
         /// Cash Box 
@@ -233,7 +234,11 @@ namespace Siscom.Agua.DAL
             builder.Entity<AgreementDetail>()
                   .HasOne<Agreement>(a => a.Agreement)
                   .WithMany(s => s.AgreementDetails)
-                  .HasForeignKey(s => s.AgreementId);         
+                  .HasForeignKey(s => s.AgreementId);
+
+            builder.Entity<AgreementDetail>()
+                  .Property(x => x.Manifest)
+                  .HasDefaultValue(false);
 
             #endregion
 
@@ -257,6 +262,18 @@ namespace Siscom.Agua.DAL
             builder.Entity<AgreementDiscount>()
                    .Property(x => x.EndDate)
                    .HasColumnType("date");
+            #endregion
+
+            #region AgreementFile
+            builder.Entity<AgreementFile>()
+                  .HasOne<Agreement>(a => a.Agreement)
+                  .WithMany(s => s.AgreementFiles)
+                  .HasForeignKey(s => s.AgreementId);
+
+            builder.Entity<AgreementFile>()
+                  .Property(x => x.IsActive)
+                  .HasDefaultValue(true);
+
             #endregion
 
             #region AgreementLog

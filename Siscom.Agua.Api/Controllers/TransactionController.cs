@@ -1201,7 +1201,7 @@ namespace Siscom.Agua.Api.Controllers
         /// <param name="teminalUserId">Model TransactionVM
         /// </param>
         /// <returns>State Operation Terminaluser</returns>
-        // POST: api/Transaction
+        // GET: api/Transaction
         [HttpGet("Terminal/{teminalUserId}")]
         public async Task<IActionResult> GetTransactionCashBox([FromRoute] int teminalUserId)
         {
