@@ -1062,7 +1062,7 @@ namespace Siscom.Agua.Api.Controllers
                         _validation = true;
                         break;
                     case 2://Fondo
-                        if (terminalUser.Terminal.CashBox > pTransaction.Amount || pTransaction.Amount == 0)
+                        if (pTransaction.Amount > terminalUser.Terminal.CashBox || pTransaction.Amount == 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de terminal inválido") });
                         if (pTransaction.PayMethodId==0)
                             return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Falta método de pago" });
