@@ -985,9 +985,9 @@ namespace Siscom.Agua.Api.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }       
-            
-            if(pTransaction.TerminalUserId ==0 ||pTransaction.TypeTransactionId== 0)
+            }
+
+            if (pTransaction.TerminalUserId == 0 || pTransaction.TypeTransactionId == 0)
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Información incompleta" });
 
             TerminalUser terminalUser = new TerminalUser();
@@ -1011,7 +1011,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .Where(x => x.TerminalUser.Id == terminalUser.Id &&
                                                             x.TerminalUser.InOperation == true &&
                                                             x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
-                                                .OrderBy(x=> x.Id).ToListAsync();
+                                                .OrderBy(x => x.Id).ToListAsync();
 
             foreach (var item in movimientosCaja)
             {
@@ -1024,14 +1024,14 @@ namespace Siscom.Agua.Api.Controllers
                         break;
                     case 2://Fondo
                         if (pTransaction.TypeTransactionId == 2)
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });                        
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
                         _fondoCaja = new KeyValuePair<int, decimal>(_fondoCaja.Key + 1, item.Total);
                         break;
                     case 3://Cobrado                       
-                        _cobrado = new KeyValuePair<int, decimal>(_cobrado.Key + 1, _cobrado.Value+item.Total);
+                        _cobrado = new KeyValuePair<int, decimal>(_cobrado.Key + 1, _cobrado.Value + item.Total);
                         break;
                     case 4://Cancelado                        
-                        _cancelado = new KeyValuePair<int, decimal>(_cancelado.Key + 1, _cancelado.Value+item.Total);
+                        _cancelado = new KeyValuePair<int, decimal>(_cancelado.Key + 1, _cancelado.Value + item.Total);
                         break;
                     case 5://Cierre
                         _open = false;
@@ -1039,14 +1039,14 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido cerrada" });
                         break;
                     case 6: //Retiro
-                        _retirado = new KeyValuePair<int, decimal>(_retirado.Key + 1, _retirado.Value+item.Amount);
+                        _retirado = new KeyValuePair<int, decimal>(_retirado.Key + 1, _retirado.Value + item.Amount);
                         break;
                     case 7: //Liquidada
                         _liquidada = true;
                         if (pTransaction.TypeTransactionId == 7)
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido liquidada" });
-                        break;             
-                }   
+                        break;
+                }
             }
 
             if (!_open && pTransaction.TypeTransactionId == 1)
@@ -1054,7 +1054,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if (_open)
             {
-                decimal _saldo=0;
+                decimal _saldo = 0;
                 switch (pTransaction.TypeTransactionId)
                 {
                     case 1://apertura
@@ -1062,9 +1062,14 @@ namespace Siscom.Agua.Api.Controllers
                         _validation = true;
                         break;
                     case 2://Fondo
-                        if (pTransaction.Amount > terminalUser.Terminal.CashBox || pTransaction.Amount == 0)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de terminal inválido") });
-                        if (pTransaction.PayMethodId==0)
+                        if (pTransaction.Amount == 0)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar un fondo de caja") });
+                        if (terminalUser.Terminal.CashBox > 0)
+                        {
+                            if (pTransaction.Amount > terminalUser.Terminal.CashBox)
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de caja debe ser menor a: ${0}", terminalUser.Terminal.CashBox) });
+                        }
+                        if (pTransaction.PayMethodId == 0)
                             return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Falta método de pago" });
                         _validation = true;
                         break;
@@ -1089,25 +1094,25 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especofocar método de pago" });
                         if (pTransaction.Amount > _saldo)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
-                        _validation = true;                       
+                        _validation = true;
                         break;
                     case 7://Liquidada
                         if (pTransaction.Sign)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de liquidación incorrecta") });
                         if (pTransaction.PayMethodId == 0)
                             return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especificar método de pago" });
-                        _saldo =( _fondoCaja.Value + _cobrado.Value) - _cancelado.Value - _retirado.Value;
+                        _saldo = (_fondoCaja.Value + _cobrado.Value) - _cancelado.Value - _retirado.Value;
                         if (pTransaction.Amount - _saldo != 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de liquidación no es valido") });
                         _validation = true;
                         break;
                     default:
                         _validation = false;
-                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Opción incorrecta" });                      
+                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Opción incorrecta" });
                 }
 
                 if (_validation)
-                {         
+                {
 
                     try
                     {
@@ -1130,7 +1135,7 @@ namespace Siscom.Agua.Api.Controllers
                             transaction.OriginPayment = await _context.OriginPayments.FindAsync(1).ConfigureAwait(false);
                             transaction.Total = pTransaction.Amount;
                             _context.Transactions.Add(transaction);
-                            await _context.SaveChangesAsync();                           
+                            await _context.SaveChangesAsync();
 
                             if (pTransaction.TypeTransactionId == 2 || pTransaction.TypeTransactionId == 6 || pTransaction.TypeTransactionId == 7)
                             {
@@ -1164,7 +1169,7 @@ namespace Siscom.Agua.Api.Controllers
             else
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
 
-            return Ok(transaction.Id );
+            return Ok(transaction.Id);
         }
 
         /// <summary>
