@@ -271,8 +271,17 @@ namespace Siscom.Agua.DAL
                   .HasForeignKey(s => s.AgreementId);
 
             builder.Entity<AgreementFile>()
+                  .HasOne<ApplicationUser>(a => a.User)
+                  .WithMany(s => s.AgreementFiles)
+                  .HasForeignKey(s => s.UserId);
+
+            builder.Entity<AgreementFile>()
                   .Property(x => x.IsActive)
                   .HasDefaultValue(true);
+
+            builder.Entity<AgreementFile>()
+                 .Property(x => x.Size)
+                 .HasDefaultValue(0);
 
             #endregion
 

@@ -21,8 +21,17 @@ namespace Siscom.Agua.DAL.Models
         public string Type { get; set; }
         [Required, Column("is_active")]
         public bool IsActive { get; set; }
+        [Column("upload_date"),  Required]
+        public DateTime UploadDate { get; set; }
+        [Column("description"), StringLength(250)]
+        public string Description { get; set; }
+        [Column("size"), StringLength(6), Required]
+        public string Size { get; set; }
 
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
+
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }
