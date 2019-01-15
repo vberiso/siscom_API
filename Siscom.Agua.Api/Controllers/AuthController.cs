@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Settings;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 using System;
@@ -68,6 +69,7 @@ namespace Siscom.Agua.Api.Controllers
                         new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                         new Claim(JwtRegisteredClaimNames.UniqueName, string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim(JwtRegisteredClaimNames.NameId, user.Id),
                     };
 
                     foreach (var item in await userManager.GetRolesAsync(user))
@@ -80,7 +82,7 @@ namespace Siscom.Agua.Api.Controllers
                     var token = new JwtSecurityToken(
                             issuer: appSettings.ValidIssuer,
                             audience: appSettings.ValidAudience,
-                            expires: DateTime.Now.AddHours(9),
+                            expires: DateTime.UtcNow.ToLocalTime().AddHours(9),
                             claims: claims,
                             signingCredentials: new Microsoft.IdentityModel.Tokens.SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
                         );
@@ -89,7 +91,7 @@ namespace Siscom.Agua.Api.Controllers
                         user = user.Id,
                         fullName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName),
                         token = new JwtSecurityTokenHandler().WriteToken(token),
-                        expiration = token.ValidTo,
+                        expiration = token.ValidTo.ToLocalTime(),
                         RolName = rolname,
                         Divition = user.DivitionId
                     });

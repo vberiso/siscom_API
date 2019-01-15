@@ -25,7 +25,7 @@ namespace Siscom.Agua.DAL.Models
         public DateTime UploadDate { get; set; }
         [Column("description"), StringLength(250)]
         public string Description { get; set; }
-        [Column("size"), StringLength(6), Required]
+        [Column("size"), StringLength(12), Required]
         public string Size { get; set; }
 
         public int AgreementId { get; set; }

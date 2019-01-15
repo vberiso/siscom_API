@@ -665,5 +665,26 @@
             <param name="json">JSON string</param>  
             <returns>HTTP Responce as Task</returns>  
         </member>
+        <member name="M:Siscom.Agua.Api.Services.Security.AESEncryption.GenerateRandomSalt">
+            <summary>
+            Creates a random salt that will be used to encrypt your file. This method is required on FileEncrypt.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.Security.AESEncryption.FileEncrypt(System.String,System.String)">
+            <summary>
+            Encrypts a file from its path and a plain password.
+            </summary>
+            <param name="inputFile"></param>
+            <param name="password"></param>
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.Security.AESEncryption.FileDecrypt(System.String,System.String,System.String)">
+            <summary>
+            Decrypts an encrypted file with the FileEncrypt method through its path and the plain password.
+            </summary>
+            <param name="inputFile"></param>
+            <param name="outputFile"></param>
+            <param name="password"></param>
+        </member>
     </members>
 </doc>

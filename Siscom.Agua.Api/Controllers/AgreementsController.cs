@@ -8,11 +8,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
 using Siscom.Agua.Api.Services.Extension;
+using Siscom.Agua.Api.Services.Settings;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -26,11 +28,13 @@ namespace Siscom.Agua.Api.Controllers
     {
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> userManager;
+        private readonly AppSettings appSettings;
 
-        public AgreementsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public AgreementsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings)
         {
             _context = context;
             this.userManager = userManager;
+            this.appSettings = appSettings.Value;
         }
 
         //// GET: api/Agreements
@@ -92,7 +96,8 @@ namespace Siscom.Agua.Api.Controllers
                                         .ThenInclude(x => x.Service)
                                       .Include(ad => ad.AgreementDiscounts)
                                       .ThenInclude(d => d.Discount)
-                                      .Include(x => x.AgreementDetails)
+                                      .Include(ad => ad.AgreementDetails)
+                                      .Include(af => af.AgreementFiles)
                                       .FirstOrDefaultAsync(a => a.Account == AcountNumber);
 
             agreement.Addresses.ToList().ForEach(x =>
@@ -134,6 +139,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(ags => ags.AgreementServices)
                                         .ThenInclude(x => x.Service)
                                       .Include(ad => ad.AgreementDetails)
+                                      .Include(af => af.AgreementFiles)
                                       .FirstOrDefaultAsync(a => a.Id == id);
             var service = agreement.AgreementServices.Where(x => x.IsActive == false);
             agreement.AgreementServices = agreement.AgreementServices.Except(service).ToList();
@@ -1096,6 +1102,8 @@ namespace Siscom.Agua.Api.Controllers
                                         .ThenInclude(x => x.Service)
                                       .Include(ad => ad.AgreementDiscounts)
                                         .ThenInclude(d => d.Discount)
+                                      .Include(ad => ad.AgreementDetails)
+                                      .Include(af => af.AgreementFiles)
                                       .FirstOrDefaultAsync(a => a.Id == id);
 
             agreemet.Addresses.ToList().ForEach(x =>
@@ -1141,6 +1149,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(ad => ad.AgreementDiscounts)
                                         .ThenInclude(d => d.Discount)
                                       .Include(ad => ad.AgreementDetails)
+                                      .Include(af => af.AgreementFiles)
                                       .FirstOrDefaultAsync(a => a.Id == id);
 
             agreemet.Addresses.ToList().ForEach(x =>
