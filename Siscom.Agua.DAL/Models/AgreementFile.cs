@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -29,9 +30,11 @@ namespace Siscom.Agua.DAL.Models
         public string Size { get; set; }
 
         public int AgreementId { get; set; }
+        [JsonIgnore]
         public Agreement Agreement { get; set; }
 
         public string UserId { get; set; }
+        [JsonIgnore]
         public ApplicationUser User { get; set; }
     }
 }

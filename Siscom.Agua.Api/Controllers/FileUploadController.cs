@@ -40,8 +40,8 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
-        [HttpPost("{AgreementId}/{TypeFile}"), DisableRequestSizeLimit]
-        public async Task<IActionResult> FileUpload([FromRoute] int AgreementId, [FromRoute] string TypeFile, IFormFile file)
+        [HttpPost("{AgreementId}/{TypeFile}/{description}"), DisableRequestSizeLimit]
+        public async Task<IActionResult> FileUpload([FromRoute] int AgreementId, [FromRoute] string TypeFile, [FromRoute] string description, IFormFile file)
         {
             AgreementFile agreementFile = new AgreementFile();
             var currentUserName = this.User.Claims.ToList()[1].Value;
@@ -84,18 +84,20 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 fileInfo.Rename(newName);
 
+                var fileSize = FileConverterSize.SizeSuffix(file.Length);
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     agreementFile.Name = fileInfo.Name;
                     agreementFile.IsActive = true;
                     agreementFile.Type = TypeFile;
                     agreementFile.extension = new FileInfo(file.FileName).Extension;
-                    agreementFile.Size = FileConverterSize.SizeSuffix(file.Length);
+                    agreementFile.Size = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1];
                     agreementFile.UploadDate = DateTime.UtcNow.ToLocalTime();
                     agreementFile.UserId = userId;
                     agreementFile.User = await userManager.FindByIdAsync(userId);
                     agreementFile.AgreementId = agreement.Id;
                     agreementFile.Agreement = agreement;
+                    agreementFile.Description = description;
 
                     await _context.AgreementFiles.AddAsync(agreementFile);
                     await _context.SaveChangesAsync();
