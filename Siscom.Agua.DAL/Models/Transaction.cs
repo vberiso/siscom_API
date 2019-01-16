@@ -39,6 +39,8 @@ namespace Siscom.Agua.DAL.Models
         public string CancellationFolio { get; set; }        
         [Column("authorization_origin_payment"), StringLength(50)]
         public string AuthorizationOriginPayment { get; set; }
+        [Column("id_cancel_authorization")]
+        public int CancelAuthorizationId { get; set; }
 
         //[ForeignKey("TerminalUser")]
         public int TerminalUserId { get; set; }

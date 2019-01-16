@@ -77,6 +77,7 @@ namespace Siscom.Agua.DAL
         public DbSet<TypeTransaction> TypeTransactions { get; set; }
         public DbSet<TransactionFolio> TransactionFolios { get; set; }
         public DbSet<TransactionDetail> TransactionDetails { get; set; }
+        public DbSet<CancelAuthorization> CancelAuthorization { get; set; }
 
         /// <summary> 
         /// Groups
@@ -309,6 +310,10 @@ namespace Siscom.Agua.DAL
                    .HasOne<Agreement>(x => x.Agreement)
                    .WithMany(y => y.AgreementServices)
                    .HasForeignKey(x => x.IdAgreement);
+            #endregion
+
+            #region CancelAuthorization
+            
             #endregion
 
             #region Client
