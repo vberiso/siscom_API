@@ -121,7 +121,7 @@ namespace Siscom.Agua.Api.Services.Security
             AES.Key = key.GetBytes(AES.KeySize / 8);
             AES.IV = key.GetBytes(AES.BlockSize / 8);
             AES.Padding = PaddingMode.PKCS7;
-            AES.Mode = CipherMode.CFB;
+            AES.Mode = CipherMode.ECB;
 
             CryptoStream cs = new CryptoStream(fsCrypt, AES.CreateDecryptor(), CryptoStreamMode.Read);
 

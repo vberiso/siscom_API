@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
@@ -37,6 +38,57 @@ namespace Siscom.Agua.Api.Controllers
             _context = context;
             this.appSettings = appSettings.Value;
             this.userManager = userManager;
+        }
+
+
+        [HttpGet("{AgreementId}")]
+        public async Task<IActionResult> GetAllFilesByAccount([FromRoute] int AgreementId)
+        {
+            if(AgreementId == 0)
+            {
+                return BadRequest();
+            }
+            var agreement = await _context.Agreements.FindAsync(AgreementId);
+            if(agreement == null)
+            {
+                return BadRequest();
+            }
+            var agreementFile = await _context.AgreementFiles.Where(x => x.AgreementId == AgreementId).ToListAsync();
+            agreementFile.ForEach(x =>
+            {
+                string name = AESEncryptionString.DecryptString(x.Name, appSettings.IssuerName);
+                int start = name.Length - 4;
+                x.Name = name.Remove(start, 4);
+            });
+
+            return Ok(agreementFile);
+        }
+
+        [HttpGet("{Account}/{AgreementFileId}")]
+        public async Task<IActionResult> GetFileByAccount([FromRoute]string Account, [FromRoute] int AgreementFileId)
+        {
+            var AFile = await _context.AgreementFiles.FindAsync(AgreementFileId);
+            if (AFile == null)
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El archivo que selecciono no se encuentra, favor de verificar" });
+
+            string name = AESEncryptionString.DecryptString(AFile.Name, appSettings.IssuerName);
+
+            var path = Path.Combine(appSettings.FilePath, Account, AFile.Name);
+            var pathd = Path.Combine(appSettings.FilePath, Account, name.Remove(name.Length - 4, 4));
+
+            GCHandle gch = GCHandle.Alloc(appSettings.IssuerExpedient, GCHandleType.Pinned);
+            AESEncryption.FileDecrypt(path, pathd, appSettings.IssuerExpedient);
+            AESEncryption.ZeroMemory(gch.AddrOfPinnedObject(), appSettings.IssuerExpedient.Length * 2);
+            gch.Free();
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(pathd, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            System.IO.File.Delete(pathd);
+            return File(memory, GetContentType(AFile.extension), AFile.Name.Remove(name.Length - 4, 4));
         }
 
 
@@ -112,15 +164,37 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                 systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                 systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                systemLog.Parameter = string.Format("agreementId:{0}, typeFile:{1}, file:{2}", AgreementId, TypeFile, file.FileName);
+                systemLog.Parameter = string.Format("agreementId:{0}, typeFile:{1}, description:{2} file:{3}", AgreementId, TypeFile, description, file.FileName);
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo" });
             }
 
-
-
             return Ok(agreementFile);
+        }
+
+        private string GetContentType(string ext)
+        {
+            var types = GetMimeTypes();
+            return types[ext];
+        }
+
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+            {
+                {".txt", "text/plain"},
+                {".pdf", "application/pdf"},
+                {".doc", "application/vnd.ms-word"},
+                {".docx", "application/vnd.ms-word"},
+                {".xls", "application/vnd.ms-excel"},
+                {".xlsx", "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet"},  
+                {".png", "image/png"},
+                {".jpg", "image/jpeg"},
+                {".jpeg", "image/jpeg"},
+                {".gif", "image/gif"},
+                {".csv", "text/csv"}
+            };
         }
     }
 }

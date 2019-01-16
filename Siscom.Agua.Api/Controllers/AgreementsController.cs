@@ -1070,6 +1070,13 @@ namespace Siscom.Agua.Api.Controllers
                                                     Description = n.Description
                                                 }).ToListAsync(),
 
+                TypeFile = await _context.Types.Where(x => x.GroupTypeId == 9)
+                                                .Select(n => new TypeFile()
+                                                {
+                                                    IdType = n.CodeName,
+                                                    Description = n.Description
+                                                }).ToListAsync(),
+
                 Services = await _context.Services
                                         .Where(s => s.IsActive == true && s.InAgreement == true)
                                         .Select(s => new ServiceVM
