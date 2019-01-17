@@ -75,6 +75,12 @@ namespace Siscom.Agua.Api.Controllers
                                                             .Include(x => x.TransactionFolios)
                                                             .Include(x => x.TypeTransaction)
                                                             .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (transactionPayment.Transaction == null)
+            {
+                return NotFound();
+            }
+
             transactionPayment.Transaction.PayMethod = await _context.PayMethods.FindAsync(transactionPayment.Transaction.PayMethodId);
 
             transactionPayment.Payment = await _context.Payments
@@ -85,16 +91,17 @@ namespace Siscom.Agua.Api.Controllers
                                                         .Where(m => m.TransactionFolio == transactionPayment.Transaction.Folio)
                                                         .FirstOrDefaultAsync();
 
-            transactionPayment.Payment.PaymentDetails.ToList().ForEach( x =>
+            if (transactionPayment.Payment != null)
             {
-                x.Debt =  _context.Debts.Find(x.DebtId);
-                x.Prepaid =  _context.Prepaids.Find(x.PrepaidId);
-            });
 
-            if (transactionPayment == null)
-            {
-                return NotFound();
+                transactionPayment.Payment.PaymentDetails.ToList().ForEach(x =>
+               {
+                   x.Debt = _context.Debts.Find(x.DebtId);
+                   x.Prepaid = _context.Prepaids.Find(x.PrepaidId);
+               });
             }
+
+           
 
             return Ok(transactionPayment);
         }
