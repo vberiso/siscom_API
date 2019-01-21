@@ -454,6 +454,12 @@ namespace Siscom.Agua.Api.Controllers
             if (cancelacion == null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
 
+            var cancelacionPrevia = await _context.Transactions
+                                                  .Include(x => x.TransactionFolios)
+                                                  .Where(x => x.CancellationFolio == pCancelPayment.Transaction.Cancellation).FirstAsync();
+            if (cancelacion != null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago ha sido cancelado previamente. Folio:{0}", cancelacionPrevia.TransactionFolios.First().Folio) });
+
             if (cancelacion.Amount != pCancelPayment.Transaction.Amount)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
 
