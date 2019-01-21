@@ -10,8 +10,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Services.Extension;
@@ -23,7 +26,7 @@ using Siscom.Agua.DAL.Models;
 namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
-    [Produces("application/json", "application/json-patch+json", "multipart/form-data")]
+    //[Produces("application/json", "application/json-patch+json", "multipart/form-data")]
     [ApiController]
     [Authorize]
     public class FileUploadController : ControllerBase
@@ -93,13 +96,15 @@ namespace Siscom.Agua.Api.Controllers
 
 
         [HttpPost("{AgreementId}/{TypeFile}/{description}"), DisableRequestSizeLimit]
-        public async Task<IActionResult> FileUpload([FromRoute] int AgreementId, [FromRoute] string TypeFile, [FromRoute] string description, IFormFile file)
+        public async Task<IActionResult> FileUpload([FromRoute] int AgreementId, [FromRoute] string TypeFile, [FromRoute] string description)
         {
             AgreementFile agreementFile = new AgreementFile();
-            var currentUserName = this.User.Claims.ToList()[1].Value;
-            var userId = this.User.Claims.ToList()[3].Value;
+            IFormFile file = null;
             try
             {
+                file = Request.Form.Files[0];
+                var currentUserName = this.User.Claims.ToList()[1].Value;
+                var userId = this.User.Claims.ToList()[3].Value;
                 var MaxFileSize = (int)_context.SystemParameters.Where(n => n.Name == "FileMaxSize").FirstOrDefault().NumberColumn * 1024 * 1024;
                 var agreement = await _context.Agreements.FindAsync(AgreementId);
                 if (file == null || file.Length == 0)
@@ -109,37 +114,16 @@ namespace Siscom.Agua.Api.Controllers
                 if (!ACCEPTED_FILE_TYPES.Any(s => s == Path.GetExtension(file.FileName).ToLower()))
                     return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no soportado favor de verificar" });
 
-                var uploadFilesPath = Path.Combine(appSettings.FilePath, agreement.Account);
-
-                if (!Directory.Exists(uploadFilesPath))
-                    Directory.CreateDirectory(uploadFilesPath);
-  
-                var fileName = file.FileName;
-                var filePath = Path.Combine(uploadFilesPath, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                GCHandle gch = GCHandle.Alloc(appSettings.IssuerExpedient, GCHandleType.Pinned);
-                AESEncryption.FileEncrypt(filePath, appSettings.IssuerExpedient);
-                AESEncryption.ZeroMemory(gch.AddrOfPinnedObject(), appSettings.IssuerExpedient.Length * 2);
-                gch.Free();
-
-                System.IO.File.Delete(filePath);
-                FileInfo fileInfo = new FileInfo(filePath + ".aes");
-                var newName = AESEncryptionString.EncryptString(file.FileName + ".aes", appSettings.IssuerName);
-                while (newName.Contains("\\") || newName.Contains("/"))
-                {
-                    newName = AESEncryptionString.EncryptString(file.FileName + ".aes", appSettings.IssuerName);
-                }
-                fileInfo.Rename(newName);
-
                 var fileSize = FileConverterSize.SizeSuffix(file.Length);
+
+                //var upload = await UploadFileLocal(file, agreement.Account);
+                var upload = await UploadFileAzure(file, agreement.Account);
+                if (string.IsNullOrEmpty(upload))
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo al servidor, vuleva a intentarlo" });
+
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    agreementFile.Name = fileInfo.Name;
+                    agreementFile.Name = AESEncryptionString.EncryptString(upload, appSettings.IssuerName);
                     agreementFile.IsActive = true;
                     agreementFile.Type = TypeFile;
                     agreementFile.extension = new FileInfo(file.FileName).Extension;
@@ -173,6 +157,93 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreementFile);
         }
 
+        private async Task<string> UploadFileLocal(IFormFile file, string Account)
+        {
+            try
+            {
+                var uploadFilesPath = Path.Combine(appSettings.FilePath, Account);
+
+                if (!Directory.Exists(uploadFilesPath))
+                    Directory.CreateDirectory(uploadFilesPath);
+
+                var fileName = file.FileName;
+                var filePath = Path.Combine(uploadFilesPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                GCHandle gch = GCHandle.Alloc(appSettings.IssuerExpedient, GCHandleType.Pinned);
+                AESEncryption.FileEncrypt(filePath, appSettings.IssuerExpedient);
+                AESEncryption.ZeroMemory(gch.AddrOfPinnedObject(), appSettings.IssuerExpedient.Length * 2);
+                gch.Free();
+
+                System.IO.File.Delete(filePath);
+                FileInfo fileInfo = new FileInfo(filePath + ".aes");
+                var newName = AESEncryptionString.EncryptString(file.FileName + ".aes", appSettings.IssuerName);
+                while (newName.Contains("\\") || newName.Contains("/"))
+                {
+                    newName = AESEncryptionString.EncryptString(file.FileName + ".aes", appSettings.IssuerName);
+                }
+                fileInfo.Rename(newName);
+                return fileInfo.Name;
+            }
+            catch (Exception)
+            {
+                return "";
+            }
+        }
+
+        private async Task<string> UploadFileAzure(IFormFile file, string Account)
+        {
+            try
+            {
+                string storageConnection = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", appSettings.AccountName, appSettings.AccessKey);
+                CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(storageConnection);
+                CloudBlobClient cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
+                CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(Account.PadLeft(4,'0'));
+
+                if (await cloudBlobContainer.CreateIfNotExistsAsync())
+                    await cloudBlobContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
+
+                CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(file.FileName);
+                cloudBlockBlob.Properties.ContentType = file.ContentType;
+                await cloudBlockBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+                return file.FileName;
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = "SERVICE_AZURE";
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return "";
+            }
+        }
+
+        private async void DownloadFileAzure(string Account, string FileName)
+        {
+            string storageConnection = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", appSettings.AccountName, appSettings.AccessKey);
+            CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(storageConnection);
+            CloudBlobClient blobClient = cloudStorageAccount.CreateCloudBlobClient();
+
+            CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
+            CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(AESEncryptionString.DecryptString(FileName, appSettings.IssuerName));
+
+            MemoryStream memStream = new MemoryStream();
+            await blockBlob.DownloadToStreamAsync(memStream);
+            HttpContext.Response.ContentType = blockBlob.Properties.ContentType.ToString();
+            HttpContext.Response.Headers.Add("Content-Disposition", string.Format("Attachment; filename={0}", blockBlob.ToString()));
+            HttpContext.Response.Headers.Add("Content-Length", blockBlob.Properties.Length.ToString());
+            await HttpContext.Response.Body.WriteAsync(memStream.ToArray(), 0, memStream.ToArray().Length);
+            HttpContext.Response.Clear();
+        }
         private string GetContentType(string ext)
         {
             var types = GetMimeTypes();
