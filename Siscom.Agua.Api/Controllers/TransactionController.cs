@@ -572,7 +572,7 @@ namespace Siscom.Agua.Api.Controllers
                         debtDetail = await _context.DebtDetails.Where(x => x.DebtId == pay.DebtId &&
                                                                            x.CodeConcept == pay.CodeConcept).FirstAsync();
 
-                        if (pay.Amount - debtDetail.OnAccount < 0)
+                        if (debtDetail.OnAccount - pay.Amount < 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: pay.Description) });
 
                         debtDetail.OnAccount -= pay.Amount;
