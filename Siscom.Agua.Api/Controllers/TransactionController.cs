@@ -379,11 +379,8 @@ namespace Siscom.Agua.Api.Controllers
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             Payment payment = new Payment();
-            bool _validation = false;
             decimal _sumTransactionDetail = 0;
             decimal sumPayDetail = 0;
-            decimal sumTDetail = 0;
-            DebtStatus status;
 
             #region Validación
             //Parametros
@@ -409,6 +406,9 @@ namespace Siscom.Agua.Api.Controllers
 
             if (pCancelPayment.Transaction.Amount != _sumTransactionDetail)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pCancelPayment.Transaction.Amount) });
+
+            if (pCancelPayment.Payment.PaymentDate.Date != DateTime.UtcNow.ToLocalTime().Date)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No es posible cancelar pagos de otros días") });
 
             foreach (var item in pCancelPayment.Payment.PaymentDetails)
             {
@@ -461,7 +461,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago ha sido cancelado previamente. Folio:{0}", cancelacionPrevia.TransactionFolios.FirstOrDefault().Folio) });
 
             if (cancelacion.Amount != pCancelPayment.Transaction.Amount)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de cancelación no coincide con el pago") });
 
             #endregion           
 
@@ -507,25 +507,34 @@ namespace Siscom.Agua.Api.Controllers
                             //Status anterior
                             var statusDebt = await _context.DebtStatuses.Where(x => x.DebtId == debt.Id).OrderByDescending(x => x.Id).ToListAsync();
                             string statusAnterior = String.Empty;
-                            bool status_encontrado = false;
-                            int contador = 0;
 
-                            foreach (var subitem in statusDebt)
+                            if (statusDebt != null)
                             {
-                                if (!status_encontrado)
+                                if (statusDebt.Count >= 2)
                                 {
-                                    if (contador == 0 && subitem.id_status != "ED005" && subitem.id_status != "ED004")
-                                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La cancelación no procede. La deuda ha cambiado") });
-                                    if (subitem.id_status != "ED005")
+                                    for (int i = 0; i < statusDebt.Count; i++)
                                     {
-                                        statusAnterior = subitem.id_status;
-                                        status_encontrado = true;
+                                        if (i == 0)
+                                        {
+                                            if (statusDebt[i].id_status != "ED005" && statusDebt[i].id_status != "ED004")
+                                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La cancelación no procede. La deuda ha cambiado") });
+                                        }
+                                        if (i == 1)
+                                        {
+                                            if (String.IsNullOrEmpty(statusDebt[i].id_status))
+                                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se puede identificar estado de deuda. Comunicar con el administrador.") });
+                                            statusAnterior = statusDebt[i].id_status;
+                                            break;
+                                        }
+
                                     }
-                                    contador += 1;
                                 }
                                 else
-                                    break;
+                                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se puede identificar estado de deuda. Comunicar con el administrador.") });
                             }
+                            else
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se puede identificar estado de deuda. Comunicar con el administrador.") });
+
 
                             pCancelPayment.Payment.PaymentDetails.ToList().ForEach(x =>
                             {
