@@ -571,17 +571,7 @@ namespace Siscom.Agua.Api.Controllers
                         transactionDetail.Description = pay.Description;
                         transactionDetail.Transaction = transaction;
                         _context.TransactionDetails.Add(transactionDetail);
-                        await _context.SaveChangesAsync();
-
-                        PaymentDetail paymentDetail = new PaymentDetail();
-                        paymentDetail.CodeConcept = pay.CodeConcept;
-                        paymentDetail.Amount = pay.Amount;
-                        paymentDetail.Description = pay.Description;
-                        paymentDetail.DebtId = pay.DebtId;
-                        paymentDetail.PrepaidId = 0;
-                        paymentDetail.PaymentId = payment.Id;
-                        _context.PaymentDetails.Add(paymentDetail);
-                        await _context.SaveChangesAsync();
+                        await _context.SaveChangesAsync();                       
 
                         DebtDetail debtDetail = new DebtDetail();
                         debtDetail = await _context.DebtDetails.Where(x => x.DebtId == pay.DebtId &&
@@ -592,25 +582,6 @@ namespace Siscom.Agua.Api.Controllers
 
                         debtDetail.OnAccount -= pay.Amount;
                     }
-
-                    await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
-
-                    //Toma folio
-                    //Folio folio = new Folio();
-                    //folio = await _context.Folios
-                    //                      .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
-                    //                                   x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
-
-                    //TransactionFolio transactionFolio = new TransactionFolio();
-                    //transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
-                    //transactionFolio.DatePrint = DateTime.UtcNow.ToLocalTime();
-                    //transactionFolio.Transaction = transaction;
-                    //_context.TransactionFolios.Add(transactionFolio);
-                    //await _context.SaveChangesAsync();
-
-                    //folio.Secuential += 1;
-                    //_context.Entry(folio).State = EntityState.Modified;
-                    //await _context.SaveChangesAsync();
 
                     scope.Complete();
                 }
