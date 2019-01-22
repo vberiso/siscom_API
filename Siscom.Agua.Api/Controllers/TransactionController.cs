@@ -405,7 +405,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             if (pCancelPayment.Transaction.Amount != _sumTransactionDetail)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pCancelPayment.Transaction.Amount) });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción-> {0}, no coincide con el total de la transacción-> {1}", _sumTransactionDetail, pCancelPayment.Transaction.Amount) });
 
             if (pCancelPayment.Payment.PaymentDate.Date != DateTime.UtcNow.ToLocalTime().Date)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No es posible cancelar pagos de otros días") });
@@ -458,7 +458,7 @@ namespace Siscom.Agua.Api.Controllers
                                                   .Include(x => x.TransactionFolios)
                                                   .Where(x => x.CancellationFolio == pCancelPayment.Transaction.Cancellation).FirstOrDefaultAsync();
             if (cancelacionPrevia != null)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago ha sido cancelado previamente. Folio:{0}", cancelacionPrevia.TransactionFolios.FirstOrDefault().Folio) });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago ha sido cancelado previamente. Folio->{0}", cancelacionPrevia.TransactionFolios.FirstOrDefault().Folio) });
 
             if (cancelacion.Amount != pCancelPayment.Transaction.Amount)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de cancelación no coincide con el pago") });
@@ -581,8 +581,8 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: pay.Description) });
 
                         debtDetail.OnAccount -= pay.Amount;
+                        await _context.SaveChangesAsync();
                     }
-
                     scope.Complete();
                 }
             }
@@ -820,6 +820,9 @@ namespace Siscom.Agua.Api.Controllers
             if (pCancelPayment.Transaction.Amount != _sumTransactionDetail)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pCancelPayment.Transaction.Amount) });
 
+            if (pCancelPayment.Payment.PaymentDate.Date != DateTime.UtcNow.ToLocalTime().Date)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No es posible cancelar pagos de otros días") });
+
             foreach (var item in pCancelPayment.Payment.PaymentDetails)
             {
                 sumPayDetail += item.Amount;
@@ -864,8 +867,14 @@ namespace Siscom.Agua.Api.Controllers
             if (cancelacion == null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
 
+            var cancelacionPrevia = await _context.Transactions
+                                                 .Include(x => x.TransactionFolios)
+                                                 .Where(x => x.CancellationFolio == pCancelPayment.Transaction.Cancellation).FirstOrDefaultAsync();
+            if (cancelacionPrevia != null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago ha sido cancelado previamente. Folio->{0}", cancelacionPrevia.TransactionFolios.FirstOrDefault().Folio) });
+
             if (cancelacion.Amount != pCancelPayment.Transaction.Amount)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de movimientos no coinciden") });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de cancelación no coincide con el pago") });
 
             #endregion
 
@@ -923,8 +932,10 @@ namespace Siscom.Agua.Api.Controllers
                         return NotFound();
                     else
                     {
-                        if (prepaid.Status != "ANT01")
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago no se puede cancelar porque el ya ha sido debengado el anticipo") });
+                        var prepaidDetail = await _context.PrepaidDetails.Where(x => x.PrepaidId== prepaid.Id).FirstOrDefaultAsync();
+
+                        if (prepaid.Status != "ANT01" || prepaidDetail!=null)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago no se puede cancelar porque el ya ha sido devengado el anticipo") });
                     }
 
                     payment.Status = "EP002";
