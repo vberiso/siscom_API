@@ -312,8 +312,14 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(x => x.IdAgreement);
             #endregion
 
+            #region BranchOffice
+            builder.Entity<BranchOffice>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
             #region CancelAuthorization
-            
+
             #endregion
 
             #region Client

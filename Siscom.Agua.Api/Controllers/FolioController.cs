@@ -79,29 +79,31 @@ namespace Siscom.Agua.Api.Controllers
             if (id != pfolio.Id)
                 return BadRequest();
 
-            if (!Validate(pfolio))            
+            if (!Validate(pfolio))
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
 
             var branchOffice = await _context.BranchOffices.FindAsync(pfolio.BranchOfficeId);
-            if(branchOffice == null)
+            if (branchOffice == null)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("La sucursal no existe") });
+            if (!branchOffice.IsActive)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("La sucursal no está activa") });
 
             if (pfolio.IsActive == 1)
             {
-                if(await _context.Folios
+                if (await _context.Folios
                                  .Where(x => x.BranchOfficeId == pfolio.BranchOfficeId &&
                                              x.IsActive == 1)
                                  .FirstOrDefaultAsync() != null)
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("Ya existe una serie activa para esta sucursal") });
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("Ya existe una serie activa para esta sucursal") });
             }
 
             if (pfolio.IsActive == 0)
-            {               
-                if(DateTime.UtcNow.ToLocalTime().Hour> branchOffice.Opening.Hour && DateTime.UtcNow.ToLocalTime().Hour<branchOffice.Closing.Hour)
-                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("No se puede deshactivar folios mientras la sucursal esté operando") });
+            {
+                if (DateTime.UtcNow.ToLocalTime().Hour > branchOffice.Opening.Hour && DateTime.UtcNow.ToLocalTime().Hour < branchOffice.Closing.Hour)
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("No se puede deshabilitar folios mientras la sucursal esté operando") });
             }
 
-                Folio folio = new Folio();
+            Folio folio = new Folio();
             folio = await _context.Folios
                                  .Where(x => x.Id == pfolio.Id)
                                  .FirstOrDefaultAsync();

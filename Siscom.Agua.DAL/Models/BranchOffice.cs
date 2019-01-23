@@ -31,6 +31,8 @@ namespace Siscom.Agua.DAL.Models
         public DateTime Closing { get; set; }
         [Required, Column("dont_close")]
         public bool DontClose { get; set; }
+        [Column("is_active"), Required]
+        public bool IsActive { get; set; }
 
         public ICollection<Terminal> Terminals { get; set; }
         public ICollection<Folio> Folios { get; set; }
