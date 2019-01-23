@@ -67,49 +67,56 @@ namespace Siscom.Agua.Api.Controllers
         /// This will provide update for the specific ID,
         /// </summary>
         /// <param name="id">id from route (URL)</param>
-        /// <param name="pfolio">Model FolioVM</param>
+        /// <param name="pfolio">Model Folio</param>
         /// <returns></returns>
         // PUT: api/Folio/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutFolio([FromRoute] int id, [FromBody] FolioVM pfolio)
+        public async Task<IActionResult> PutFolio([FromRoute] int id, [FromBody] Folio pfolio)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             if (id != pfolio.Id)
-            {
                 return BadRequest();
-            }
 
-            if (!Validate(pfolio))
-            {
+            if (!Validate(pfolio))            
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
+
+            var branchOffice = await _context.BranchOffices.FindAsync(pfolio.BranchOfficeId);
+            if(branchOffice == null)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("La sucursal no existe") });
+
+            if (pfolio.IsActive == 1)
+            {
+                if(await _context.Folios
+                                 .Where(x => x.BranchOfficeId == pfolio.BranchOfficeId &&
+                                             x.IsActive == 1)
+                                 .FirstOrDefaultAsync() != null)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("Ya existe una serie activa para esta sucursal") });
             }
 
-            Folio folio = new Folio();
-            folio.Initial = pfolio.Folio;
+            if (pfolio.IsActive == 0)
+            {               
+                if(DateTime.UtcNow.ToLocalTime().Hour> branchOffice.Opening.Hour && DateTime.UtcNow.ToLocalTime().Hour<branchOffice.Closing.Hour)
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("No se puede deshactivar folios mientras la sucursal esté operando") });
+            }
+
+                Folio folio = new Folio();
+            folio = await _context.Folios
+                                 .Where(x => x.Id == pfolio.Id)
+                                 .FirstOrDefaultAsync();
+            if (folio == null)
+                return NotFound();
+
             folio.IsActive = pfolio.IsActive;
-            folio.Range = pfolio.Range;
-            folio.Secuential = pfolio.Folio;
-            folio.BranchOffice = await _context.BranchOffices.FindAsync(pfolio.BranchOffice);
-           
             _context.Entry(folio).State = EntityState.Modified;
 
             try
             {
-                if (await _context.Folios.Where(x => x.Id == pfolio.Id &&
-                                                     x.Secuential == pfolio.Folio &&
-                                                     x.Range == pfolio.Range &&
-                                                     x.BranchOffice.Id == pfolio.BranchOffice)
-                                           .FirstOrDefaultAsync() != null)
-                     await _context.SaveChangesAsync();
-                else
-                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("Sólo se puede modificar el estado") });
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
-            {    
+            {
                 if (!FolioExists(id))
                 {
                     return NotFound();
@@ -126,11 +133,11 @@ namespace Siscom.Agua.Api.Controllers
         /// <summary>
         /// This will provide capability add new Folio 
         /// </summary>
-        /// <param name="pfolio">Model FolioVM</param>
+        /// <param name="pfolio">Model Folio</param>
         /// <returns>New Folio added</returns>
         // POST: api/Folio
         [HttpPost]
-        public async Task<IActionResult> PostFolio([FromBody] FolioVM pfolio)
+        public async Task<IActionResult> PostFolio([FromBody] Folio pfolio)
         {
             if (!ModelState.IsValid)
             {
@@ -142,40 +149,35 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
             }
 
-            if (await _context.Folios.Where(x => x.Range == pfolio.Range &&
-                                                 x.BranchOffice.Id != pfolio.BranchOffice)
-                                           .FirstOrDefaultAsync() != null)
-            {
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = "La serie de folios ya ha sido dada de alta previamente" });
-            }
+           
 
-            if (await _context.Folios.Where(x => x.BranchOffice.Id == pfolio.BranchOffice &&
-                                                 x.IsActive==1)
-                                           .FirstOrDefaultAsync() != null)
-            {
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = "La sucursal ya cuenta con una serie de folios" });
-            }
+            if(await _context.Folios
+                             .Where(x => x.BranchOfficeId == pfolio.BranchOfficeId &&
+                                         x.IsActive == 1)
+                            .FirstOrDefaultAsync() != null)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("Ya existe una serie activa para esta sucursal") });
 
 
-            if (await _context.Folios.Where(x => x.BranchOffice.Id== pfolio.BranchOffice &&
-                                                 x.Range == pfolio.Range &&
-                                                 x.Secuential <= pfolio.Folio  )
-                                           .FirstOrDefaultAsync() != null)
-            {
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Folio fuera de rango" });
-            }
+           
+            var folios = await _context.Folios
+                                       .Where(x => x.BranchOfficeId == pfolio.BranchOfficeId &&
+                                                   x.Range == pfolio.Range)
+                                       .ToListAsync();
 
-            Folio folio = new Folio();
-            folio.Initial = pfolio.Folio;
-            folio.IsActive = pfolio.IsActive;
-            folio.Range = pfolio.Range;
-            folio.Secuential = pfolio.Folio;
-            folio.BranchOffice = await _context.BranchOffices.FindAsync(pfolio.BranchOffice);            
+            bool _conflic = false;
 
-            _context.Folios.Add(folio);
+            folios.ForEach(x => {               
+                    if (pfolio.Secuential< x.Secuential)
+                        _conflic = true;                    
+            });
+
+            if(_conflic)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Folio fuera de rango" });             
+
+            _context.Folios.Add(pfolio);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFolio", new { id = folio.Id }, folio);
+            return CreatedAtAction("GetFolio", new { id = pfolio.Id },pfolio);
         }
 
 
@@ -184,11 +186,13 @@ namespace Siscom.Agua.Api.Controllers
             return _context.Folios.Any(e => e.Id == id);
         }
 
-        private bool Validate(FolioVM folio)
+        private bool Validate(Folio folio)
         {
-            if (folio.Folio == 0)
+            if (folio.Initial == 0)
                 return false;
-            if (folio.BranchOffice == 0)
+            if (folio.Secuential == 0)
+                return false;
+            if (folio.BranchOfficeId == 0)
                 return false;
             return true;
         }
