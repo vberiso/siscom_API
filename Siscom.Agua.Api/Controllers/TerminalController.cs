@@ -89,6 +89,9 @@ namespace Siscom.Agua.Api.Controllers
             terminal.CashBox = pterminal.CashBox;
             terminal.BranchOffice = await _context.BranchOffices.FindAsync(pterminal.BranchOffice);
 
+            if(!terminal.BranchOffice.IsActive)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("La sucursal no se encuentra activa") });
+
             _context.Entry(terminal).State = EntityState.Modified;
 
             try
@@ -149,6 +152,9 @@ namespace Siscom.Agua.Api.Controllers
             terminal.CashBox = pterminal.CashBox;
             terminal.BranchOffice = await _context.BranchOffices.FindAsync(pterminal.BranchOffice);
             terminal.SerialNumber= System.Guid.NewGuid().ToString().Substring(0, 20).ToUpper();
+
+            if (!terminal.BranchOffice.IsActive)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("La sucursal no se encuentra activa") });
 
             _context.Terminal.Add(terminal);
             await _context.SaveChangesAsync();
