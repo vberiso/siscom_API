@@ -58,8 +58,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-
-                    //await _context
+                    await _context.SystemParameters.AddAsync(system);
+                    await _context.SaveChangesAsync();
                     scope.Complete();
                 }
             }
@@ -75,6 +75,53 @@ namespace Siscom.Agua.Api.Controllers
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el parametro" });
             }
+            return Ok(system);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put([FromRoute]int id, [FromBody] SystemParameters system)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (id != system.Id)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var param = await _context.SystemParameters.FindAsync(id);
+                    param.IsActive = system.IsActive;
+                    param.Name = system.Name;
+                    param.NumberColumn = system.NumberColumn;
+                    param.StartDate = system.StartDate;
+                    param.TextColumn = system.TextColumn;
+                    param.TypeColumn = system.TypeColumn;
+                    param.DateColumn = system.DateColumn;
+                    param.EndDate = system.EndDate;
+
+                    _context.Entry(param).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(system);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el parametro" });
+            }
+
             return Ok(system);
         }
 

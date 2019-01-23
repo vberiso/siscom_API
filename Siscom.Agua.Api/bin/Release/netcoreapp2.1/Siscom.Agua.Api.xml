@@ -119,19 +119,19 @@
             <param name="id">Mandatory</param>
             <returns>Folio Model</returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.FolioController.PutFolio(System.Int32,Siscom.Agua.Api.Model.FolioVM)">
+        <member name="M:Siscom.Agua.Api.Controllers.FolioController.PutFolio(System.Int32,Siscom.Agua.DAL.Models.Folio)">
             <summary>
             This will provide update for the specific ID,
             </summary>
             <param name="id">id from route (URL)</param>
-            <param name="pfolio">Model FolioVM</param>
+            <param name="pfolio">Model Folio</param>
             <returns></returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.FolioController.PostFolio(Siscom.Agua.Api.Model.FolioVM)">
+        <member name="M:Siscom.Agua.Api.Controllers.FolioController.PostFolio(Siscom.Agua.DAL.Models.Folio)">
             <summary>
             This will provide capability add new Folio 
             </summary>
-            <param name="pfolio">Model FolioVM</param>
+            <param name="pfolio">Model Folio</param>
             <returns>New Folio added</returns>
         </member>
         <member name="T:Siscom.Agua.Api.Controllers.PaymentsController">
