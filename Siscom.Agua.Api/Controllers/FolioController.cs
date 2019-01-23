@@ -99,6 +99,9 @@ namespace Siscom.Agua.Api.Controllers
 
             if (pfolio.IsActive == 0)
             {
+                if(branchOffice.DontClose)
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("No se puede deshabilitar folios mientras la sucursal esté operando") });
+
                 if (DateTime.UtcNow.ToLocalTime().Hour > branchOffice.Opening.Hour && DateTime.UtcNow.ToLocalTime().Hour < branchOffice.Closing.Hour)
                     return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = string.Format("No se puede deshabilitar folios mientras la sucursal esté operando") });
             }

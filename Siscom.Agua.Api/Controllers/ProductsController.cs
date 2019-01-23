@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -55,7 +59,7 @@ namespace Siscom.Agua.Api.Controllers
         /// <param name="Id">id Product
         /// </param>
         /// <returns>products</returns>
-        // POST: api/Products/Division/5
+        // GET: api/Products/Division/5
         [HttpGet("Child/{Id}")]
         public async Task<IActionResult> GetChild([FromRoute]  int Id)
         {
@@ -262,6 +266,63 @@ namespace Siscom.Agua.Api.Controllers
             return CreatedAtAction("GetProduct", new { id = product.Id }, product);
         }
 
+        /// <summary>
+        /// This create product in Debt of Agreement
+        /// </summary>    
+        /// <param name="AgreementId">Id Agreement
+        /// <param name="ProductVM">ProductVM Model
+        /// </param>
+        /// <returns>products</returns>
+        // POST: api/Products/Division/5
+        [HttpPost("Agreement/{AgreementId}")]
+        public async Task<IActionResult> PostProductAgreement([FromRoute]  int AgreementId, [FromBody]  ProductVM ProductVM)
+        {
+            #region Validación
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (AgreementId != 0)
+            {
+                //Agreement
+                if (!AgreementExists(ProductVM.Agreement.Id))
+                    return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El número de cuenta no existe") });
+
+                //Deuda
+                if (ProductVM.Debt.Amount != ProductVM.Debt.DebtDetails.Sum(x => x.Amount))
+                    return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("El Detalle de la deuda no coincide con el total") });
+            }
+            else
+                return StatusCode((int)TypeError.Code.BadRequest, new { Message = string.Format("EndPoint No hablitado") });
+            #endregion
+
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    _context.Debts.Add(ProductVM.Debt);
+                    await _context.SaveChangesAsync();
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = "ProductController";
+                systemLog.Action = "PostProductAgreement";
+                systemLog.Parameter = JsonConvert.SerializeObject(ProductVM);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+            }
+
+            return Ok(AgreementId);
+
+        }
+
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct([FromRoute] int id)
@@ -286,6 +347,11 @@ namespace Siscom.Agua.Api.Controllers
         private bool ProductExists(int id)
         {
             return _context.Products.Any(e => e.Id == id);
+        }
+
+        private bool AgreementExists(int id)
+        {
+            return _context.Agreements.Any(e => e.Id == id);
         }
     }
 }
