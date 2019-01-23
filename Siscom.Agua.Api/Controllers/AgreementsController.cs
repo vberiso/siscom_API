@@ -178,123 +178,264 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
             search.StringSearch.Replace("%20", " ");
-            List<Agreement> agreement = new List<Agreement>();
+            var dataTable = new System.Data.DataTable();
+            List<FindAgreementParamVM> clientsFilter = new List<FindAgreementParamVM>();
             switch (search.Type)
             {
                 case 1:
-                    var account = await (from ac in _context.Agreements
-                                        where ac.Account == search.StringSearch
-                                        orderby ac.Account
-                                        let vclient = _context.Clients
-                                                               .Where(x => x.AgreementId == ac.Id)
-                                                               .FirstOrDefault()
-                                        let vaddress = _context.Adresses
-                                                               .Where(x => x.AgreementsId == ac.Id)
-                                                               .FirstOrDefault()
-                                        select new
+                    try
+                    {
+                        using (var connection = _context.Database.GetDbConnection())
+                        {
+                            await connection.OpenAsync();
+                            using (var command = connection.CreateCommand())
+                            {
+                                command.CommandText = "SELECT A.id_agreement " +
+                                    ",A.account Account " +
+                                    ",CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name) Nombre " +
+                                    ",C.rfc RFC " +
+                                    ",TSS.id_type_state_service idStus " +
+                                    ",TSS.name [Status] " +
+                                    ",COUNT(ADI.id_discount) " +
+                                    ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
+                                    "FROM [dbo].[Client] as C " +
+                                    "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
+                                    "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
+                                    "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
+                                    "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
+                                    "WHERE A.account = '" + search.StringSearch + "' " +
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name)";
+                                using (var result = await command.ExecuteReaderAsync())
+                                {
+                                    //dataTable.Load(result);
+                                    //foreach (System.Data.DataRow item in dataTable.Rows)
+                                    //{
+                                    //    clientsFilter.Add(new FindAgreementParamVM
+                                    //    {
+                                    //        AgreementId = Convert.ToInt32(item[0]),
+                                    //        Account = item[1].ToString(),
+                                    //        Nombre = item[2].ToString().ToUpper(),
+                                    //        RFC = item[3].ToString(),
+                                    //        idStus = Convert.ToInt32(item[4]),
+                                    //        Status = item[5].ToString(),
+                                    //        WithDiscount = Convert.ToBoolean(item[6]),
+                                    //        Address = item[7].ToString()
+                                    //    });
+                                    //}
+                                    while (await result.ReadAsync())
+                                    {
+                                        clientsFilter.Add(new FindAgreementParamVM
                                         {
-                                            AgreementId = ac.Id,
-                                            Account = ac.Account,
-                                            Nombre = vclient.ToString(),
-                                            RFC = vclient.RFC,
-                                            Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
-                                            WithDiscount = (ac.AgreementDiscounts.Count > 0 ) ? true : false,
-                                            idStus = ac.TypeStateServiceId,
-                                            Status = ac.TypeStateService.Name
-                                        }
-                                   ).ToListAsync();
+                                            AgreementId = Convert.ToInt32(result[0]),
+                                            Account = result[1].ToString(),
+                                            Nombre = result[2].ToString().ToUpper(),
+                                            RFC = result[3].ToString(),
+                                            idStus = Convert.ToInt32(result[4]),
+                                            Status = result[5].ToString(),
+                                            WithDiscount = Convert.ToBoolean(result[6]),
+                                            Address = result[7].ToString()
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        if (clientsFilter.Count > 0)
+                            return Ok(clientsFilter);
+                    }
+                    catch (Exception e)
+                    {
 
-                    if (account.Count != 0)
-                        return Ok(account);
+                        throw;
+                    }
                     break;
                 case 2:
-                    search.StringSearch.ToUpper();
+                    search.StringSearch = search.StringSearch.ToUpper();
                     if(search.StringSearch.Length < 5)
                     {
                         return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "No se pudo completar su busqueda, favor de ingresar un minimo de 5 caracteres para poder continuar" });
                     }
-                    var client = await (from c in _context.Clients
-                                        join a in _context.Agreements on c.AgreementId equals a.Id
-                                        where EF.Functions.Like(c.ToString().ToUpper(), "%" + search.StringSearch + "%")
-                                        orderby c.TypeUser
-                                        let vaddress = _context.Adresses
-                                                               .Where(x => x.AgreementsId == c.AgreementId)
-                                                               .FirstOrDefault()
-                                        select new
+                    try
+                    {
+                       
+                        using (var connection = _context.Database.GetDbConnection())
+                        {
+                            await connection.OpenAsync();
+                            using (var command = connection.CreateCommand())
+                            {
+                                command.CommandText = "SELECT A.id_agreement " +
+                                    ",A.account Account " +
+                                    ",CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name) Nombre " +
+                                    ",C.rfc RFC " +
+                                    ",TSS.id_type_state_service idStus " +
+                                    ",TSS.name [Status] " +
+                                    ",COUNT(ADI.id_discount) " +
+                                    ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
+                                    "FROM [dbo].[Client] as C " +
+                                    "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
+                                    "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
+                                    "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
+                                    "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
+                                    "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' " +
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name)";
+                                using (var result = await command.ExecuteReaderAsync())
+                                {
+                                    //dataTable.Load(result);
+                                    while (await result.ReadAsync())
+                                    {
+                                        clientsFilter.Add(new FindAgreementParamVM
                                         {
-                                            AgreementId = a.Id,
-                                            Account = a.Account,
-                                            Nombre = c.ToString(),
-                                            RFC = c.RFC,
-                                            Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
-                                            WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false,
-                                            idStus = a.TypeStateServiceId,
-                                            Status = a.TypeStateService.Name
-                                        }
-                                   ).ToListAsync();
-                    if (client.Count > 0)
-                        return Ok(client);
+                                            AgreementId = Convert.ToInt32(result[0]),
+                                            Account = result[1].ToString(),
+                                            Nombre = result[2].ToString().ToUpper(),
+                                            RFC = result[3].ToString(),
+                                            idStus = Convert.ToInt32(result[4]),
+                                            Status = result[5].ToString(),
+                                            WithDiscount = Convert.ToBoolean(result[6]),
+                                            Address = result[7].ToString()
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        if (clientsFilter.Count > 0)
+                            return Ok(clientsFilter);
+                    }
+                    catch (Exception e)
+                    {
 
+                        throw;
+                    }
                     break;
                 case 3:
-                    var address = await (from ad in _context.Adresses
-                                         join a in _context.Agreements on ad.AgreementsId equals a.Id
-                                         where EF.Functions.Like(ad.ToString(), "%" + search.StringSearch + "%")
-                                         orderby ad.AgreementsId
-                                         let vclient = _context.Clients
-                                                             .Where(x => x.AgreementId == a.Id)
-                                                             .FirstOrDefault()
-                                         select new
-                                         {
-                                             AgreementId = a.Id,
-                                             Account = a.Account,
-                                             Nombre = string.Format("{0} {1} {2}", vclient.Name, vclient.SecondLastName, vclient.LastName),
-                                             RFC = vclient.RFC,
-                                             Address = string.Format("{0} {1}, {2}", ad.Street, ad.Outdoor, ad.Suburbs.Name),
-                                             WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false,
-                                             idStus = a.TypeStateServiceId,
-                                             Status = a.TypeStateService.Name
-                                         }
-                                   ).ToListAsync();
-                    if (address.Count > 0)
-                        return Ok(address);
+                    search.StringSearch = search.StringSearch.ToUpper();
+                   
+                    if (search.StringSearch.Length < 5)
+                    {
+                        return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "No se pudo completar su busqueda, favor de ingresar un minimo de 5 caracteres para poder continuar" });
+                    }
+                    try
+                    {
+                        using (var connection = _context.Database.GetDbConnection())
+                        {
+                            await connection.OpenAsync();
+                            using (var command = connection.CreateCommand())
+                            {
+                                command.CommandText = "SELECT A.id_agreement " +
+                                    ",A.account Account " +
+                                    ",CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name) Nombre " +
+                                    ",C.rfc RFC " +
+                                    ",TSS.id_type_state_service idStus " +
+                                    ",TSS.name [Status] " +
+                                    ",COUNT(ADI.id_discount) " +
+                                    ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
+                                    "FROM [dbo].[Client] as C " +
+                                    "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
+                                    "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
+                                    "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
+                                    "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
+                                    "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' " +
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name)";
+                                using (var result = await command.ExecuteReaderAsync())
+                                {
+                                    while (await result.ReadAsync())
+                                    {
+                                        clientsFilter.Add(new FindAgreementParamVM
+                                        {
+                                            AgreementId = Convert.ToInt32(result[0]),
+                                            Account = result[1].ToString(),
+                                            Nombre = result[2].ToString().ToUpper(),
+                                            RFC = result[3].ToString(),
+                                            idStus = Convert.ToInt32(result[4]),
+                                            Status = result[5].ToString(),
+                                            WithDiscount = Convert.ToBoolean(result[6]),
+                                            Address = result[7].ToString()
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        if (clientsFilter.Count > 0)
+                            return Ok(clientsFilter);
+                    }
+                    catch (Exception e)
+                    {
+
+                        throw;
+                    }
                     break;
                 case 4:
-                    var rfc = await (from c in _context.Clients
-                                     join a in _context.Agreements on c.AgreementId equals a.Id
-                                     where EF.Functions.Like(c.RFC, "%" + search.StringSearch + "%")
-                                     orderby c.TypeUser
-                                     let vaddress = _context.Adresses
-                                                            .Where(x => x.AgreementsId == c.AgreementId)
-                                                            .FirstOrDefault()
-                                     select new
-                                     {
-                                         AgreementId = a.Id,
-                                         Account = a.Account,
-                                         Nombre = c.ToString(),
-                                         RFC = c.RFC,
-                                         Address = string.Format("{0} {1}, {2}", vaddress.Street, vaddress.Outdoor, vaddress.Suburbs.Name),
-                                         WithDiscount = (a.AgreementDiscounts.Count > 0) ? true : false,
-                                         idStus = a.TypeStateServiceId,
-                                         Status = a.TypeStateService.Name
-                                     }
-                                   ).ToListAsync();
-                    if (rfc.Count > 0)
-                        return Ok(rfc);
+                    search.StringSearch = search.StringSearch.ToUpper();
+
+                    if (search.StringSearch.Length < 5)
+                    {
+                        return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "No se pudo completar su busqueda, favor de ingresar un minimo de 5 caracteres para poder continuar" });
+                    }
+                    try
+                    {
+                        using (var connection = _context.Database.GetDbConnection())
+                        {
+                            await connection.OpenAsync();
+                            using (var command = connection.CreateCommand())
+                            {
+                                command.CommandText = "SELECT A.id_agreement " +
+                                    ",A.account Account " +
+                                    ",CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name) Nombre " +
+                                    ",C.rfc RFC " +
+                                    ",TSS.id_type_state_service idStus " +
+                                    ",TSS.name [Status] " +
+                                    ",COUNT(ADI.id_discount) " +
+                                    ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
+                                    "FROM [dbo].[Client] as C " +
+                                    "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
+                                    "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
+                                    "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
+                                    "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
+                                    "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' " +
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name)";
+                                using (var result = await command.ExecuteReaderAsync())
+                                {
+                                    while (await result.ReadAsync())
+                                    {
+                                        clientsFilter.Add(new FindAgreementParamVM
+                                        {
+                                            AgreementId = Convert.ToInt32(result[0]),
+                                            Account = result[1].ToString(),
+                                            Nombre = result[2].ToString().ToUpper(),
+                                            RFC = result[3].ToString(),
+                                            idStus = Convert.ToInt32(result[4]),
+                                            Status = result[5].ToString(),
+                                            WithDiscount = Convert.ToBoolean(result[6]),
+                                            Address = result[7].ToString()
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        if (clientsFilter.Count > 0)
+                            return Ok(clientsFilter);
+                    }
+                    catch (Exception e)
+                    {
+
+                        throw;
+                    }
                     break;
                 default:
                     break;
             }
 
 
-            if (agreement == null || agreement.Count == 0)
-            {
-                return NotFound();
-            }
 
-            return Ok(agreement);
+            return BadRequest();
         }
+
 
         //PUT: api/Agreements/5
         [HttpPut("{id}")]

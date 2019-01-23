@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -22,6 +27,55 @@ namespace Siscom.Agua.Api.Controllers
         public ValueParametersController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet("GetAllParameters")]
+        public async Task<IEnumerable<SystemParameters>> GetAll()
+        {
+            return (await _context.SystemParameters.ToListAsync());
+        }
+
+        [HttpGet("GetParametersById/{id}")]
+        public async Task<IActionResult> GetParametersById([FromRoute] int id)
+        {
+            if (!ParameterExists(id))
+            {
+                return BadRequest();
+            }
+
+            return Ok(await _context.SystemParameters.FindAsync(id));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] SystemParameters system)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+
+                    //await _context
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(system);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el parametro" });
+            }
+            return Ok(system);
         }
 
         [HttpGet]
@@ -109,6 +163,11 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             return Ok(_typeTransaction);
+        }
+
+        private bool ParameterExists(int id)
+        {
+            return _context.SystemParameters.Any(e => e.Id == id);
         }
     }
 }

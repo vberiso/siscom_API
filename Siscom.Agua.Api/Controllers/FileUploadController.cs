@@ -99,61 +99,62 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> FileUpload([FromRoute] int AgreementId, [FromRoute] string TypeFile, [FromRoute] string description)
         {
             AgreementFile agreementFile = new AgreementFile();
-            IFormFile file = null;
-            try
+            foreach (var file in Request.Form.Files)
             {
-                file = Request.Form.Files[0];
-                var currentUserName = this.User.Claims.ToList()[1].Value;
-                var userId = this.User.Claims.ToList()[3].Value;
-                var MaxFileSize = (int)_context.SystemParameters.Where(n => n.Name == "FileMaxSize").FirstOrDefault().NumberColumn * 1024 * 1024;
-                var agreement = await _context.Agreements.FindAsync(AgreementId);
-                if (file == null || file.Length == 0)
-                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no seleccionado" });
-                if (file.Length > MaxFileSize)
-                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El archivo supero el tamaño maximo permitido" });
-                if (!ACCEPTED_FILE_TYPES.Any(s => s == Path.GetExtension(file.FileName).ToLower()))
-                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no soportado favor de verificar" });
-
-                var fileSize = FileConverterSize.SizeSuffix(file.Length);
-
-                //var upload = await UploadFileLocal(file, agreement.Account);
-                var upload = await UploadFileAzure(file, agreement.Account);
-                if (string.IsNullOrEmpty(upload))
-                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo al servidor, vuleva a intentarlo" });
-
-                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                try
                 {
-                    agreementFile.Name = AESEncryptionString.EncryptString(upload, appSettings.IssuerName);
-                    agreementFile.IsActive = true;
-                    agreementFile.Type = TypeFile;
-                    agreementFile.extension = new FileInfo(file.FileName).Extension;
-                    agreementFile.Size = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1];
-                    agreementFile.UploadDate = DateTime.UtcNow.ToLocalTime();
-                    agreementFile.UserId = userId;
-                    agreementFile.User = await userManager.FindByIdAsync(userId);
-                    agreementFile.AgreementId = agreement.Id;
-                    agreementFile.Agreement = agreement;
-                    agreementFile.Description = description;
+                    var currentUserName = this.User.Claims.ToList()[1].Value;
+                    var userId = this.User.Claims.ToList()[3].Value;
 
-                    await _context.AgreementFiles.AddAsync(agreementFile);
-                    await _context.SaveChangesAsync();
+                    var MaxFileSize = (int)_context.SystemParameters.Where(n => n.Name == "FileMaxSize").FirstOrDefault().NumberColumn * 1024 * 1024;
+                    var agreement = await _context.Agreements.FindAsync(AgreementId);
+                    if (file == null || file.Length == 0)
+                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no seleccionado" });
+                    if (file.Length > MaxFileSize)
+                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El archivo supero el tamaño maximo permitido" });
+                    if (!ACCEPTED_FILE_TYPES.Any(s => s == Path.GetExtension(file.FileName).ToLower()))
+                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no soportado favor de verificar" });
 
-                    scope.Complete();
+                    var fileSize = FileConverterSize.SizeSuffix(file.Length);
+
+                    //var upload = await UploadFileLocal(file, agreement.Account);
+                    var upload = await UploadFileAzure(file, agreement.Account);
+                    if (string.IsNullOrEmpty(upload))
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo al servidor, vuleva a intentarlo" });
+
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        agreementFile.Name = AESEncryptionString.EncryptString(upload, appSettings.IssuerName);
+                        agreementFile.IsActive = true;
+                        agreementFile.Type = TypeFile;
+                        agreementFile.extension = new FileInfo(file.FileName).Extension;
+                        agreementFile.Size = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1];
+                        agreementFile.UploadDate = DateTime.UtcNow.ToLocalTime();
+                        agreementFile.UserId = userId;
+                        agreementFile.User = await userManager.FindByIdAsync(userId);
+                        agreementFile.AgreementId = agreement.Id;
+                        agreementFile.Agreement = agreement;
+                        agreementFile.Description = description;
+
+                        await _context.AgreementFiles.AddAsync(agreementFile);
+                        await _context.SaveChangesAsync();
+
+                        scope.Complete();
+                    }
+                }
+                catch (Exception e)
+                {
+                    SystemLog systemLog = new SystemLog();
+                    systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                    systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                    systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                    systemLog.Parameter = string.Format("agreementId:{0}, typeFile:{1}, description:{2} file:{3}", AgreementId, TypeFile, description, file.FileName);
+                    CustomSystemLog helper = new CustomSystemLog(_context);
+                    helper.AddLog(systemLog);
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo" });
                 }
             }
-            catch (Exception e)
-            {
-                SystemLog systemLog = new SystemLog();
-                systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
-                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
-                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                systemLog.Parameter = string.Format("agreementId:{0}, typeFile:{1}, description:{2} file:{3}", AgreementId, TypeFile, description, file.FileName);
-                CustomSystemLog helper = new CustomSystemLog(_context);
-                helper.AddLog(systemLog);
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo" });
-            }
-
             return Ok(agreementFile);
         }
 
