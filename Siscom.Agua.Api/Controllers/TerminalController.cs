@@ -70,7 +70,7 @@ namespace Siscom.Agua.Api.Controllers
         /// <returns></returns>
         // PUT: api/Terminal/
         [HttpPut]
-        public async Task<IActionResult> PutTerminal([FromBody] TerminalVM pterminal)
+        public async Task<IActionResult> PutTerminal([FromBody] Terminal pterminal)
         {
             if (!ModelState.IsValid)
             {
@@ -128,14 +128,14 @@ namespace Siscom.Agua.Api.Controllers
         /// <returns>New Terminal added</returns>
         // POST: api/Terminal
         [HttpPost]
-        public async Task<IActionResult> PostTerminal([FromBody] TerminalVM pterminal)
+        public async Task<IActionResult> PostTerminal([FromBody] Terminal pterminal)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (pterminal.BranchOffice == 0 || String.IsNullOrEmpty(pterminal.MacAdress))
+            if (pterminal.BranchOfficeId == 0 || String.IsNullOrEmpty(pterminal.MacAdress))
             {
                 return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format("Información incompleta para realizar la transacción") });
             }
@@ -230,12 +230,12 @@ namespace Siscom.Agua.Api.Controllers
             return _context.Terminal.Any(e => e.Id == id);
         }
 
-        private bool Validate(TerminalVM pterminal)
+        private bool Validate(Terminal pterminal)
         {
             if (pterminal.Id == 0)
                 return false;
 
-            if (pterminal.BranchOffice == 0)
+            if (pterminal.BranchOfficeId == 0)
                 return false;
 
             return true;

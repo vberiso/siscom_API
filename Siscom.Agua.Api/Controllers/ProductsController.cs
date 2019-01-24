@@ -277,6 +277,8 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("Agreement/{AgreementId}")]
         public async Task<IActionResult> PostProductAgreement([FromRoute]  int AgreementId, [FromBody]  ProductVM ProductVM)
         {
+            Agreement agreement = new Agreement();
+
             #region Validación
             if (!ModelState.IsValid)
             {
@@ -286,21 +288,40 @@ namespace Siscom.Agua.Api.Controllers
             if (AgreementId != 0)
             {
                 //Agreement
-                if (!AgreementExists(ProductVM.Agreement.Id))
+                if (ProductVM.Agreement.Id == 0)
+                    return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("Debe indicar un número de contrato") });
+
+                agreement = await _context.Agreements.FindAsync(ProductVM.Agreement.Id);
+
+                if (agreement == null)
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El número de cuenta no existe") });
+
+                if (agreement.TypeStateServiceId != 1)
+                    return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El contrato no se encuentra activo") });
 
                 //Deuda
                 if (ProductVM.Debt.Amount != ProductVM.Debt.DebtDetails.Sum(x => x.Amount))
                     return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("El Detalle de la deuda no coincide con el total") });
             }
             else
+            {
+                agreement.NumDerivatives = 0;
+                //agreement.TypeIntake 
                 return StatusCode((int)TypeError.Code.BadRequest, new { Message = string.Format("EndPoint No hablitado") });
+            }
             #endregion
 
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
+                    Debt debt = new Debt();
+                    debt.DebitDate = DateTime.UtcNow;
+                    debt.FromDate = DateTime.UtcNow.Date;
+                    debt.UntilDate = DateTime.UtcNow.Date;
+                    debt.Derivatives = agreement.NumDerivatives;
+                    debt.Type = "TIP02";
+
                     _context.Debts.Add(ProductVM.Debt);
                     await _context.SaveChangesAsync();
                     scope.Complete();

@@ -223,6 +223,7 @@
             </param>
             <returns>products</returns>
         </member>
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.ProductsController.PostProductAgreement(System.Int32,Siscom.Agua.Api.Model.ProductVM)" -->
         <member name="T:Siscom.Agua.Api.Controllers.RegionsController">
             <summary>
             End Points Region
@@ -297,14 +298,14 @@
             <param name="id">Mandatory</param>
             <returns>Terminal Model</returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PutTerminal(Siscom.Agua.Api.Model.TerminalVM)">
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PutTerminal(Siscom.Agua.DAL.Models.Terminal)">
             <summary>
             This will provide update for the specific Terminal,
             </summary>
             <param name="pterminal">TerminalVM Model</param>
             <returns></returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PostTerminal(Siscom.Agua.Api.Model.TerminalVM)">
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PostTerminal(Siscom.Agua.DAL.Models.Terminal)">
             <summary>
             This will provide capability add new Terminal
             </summary>
