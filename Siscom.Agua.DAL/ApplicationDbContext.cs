@@ -86,6 +86,8 @@ namespace Siscom.Agua.DAL
         public DbSet<GroupType> GroupTypes { get; set; }
         public DbSet<GroupStatus> GroupStatuses { get; set; }
         public DbSet<Status> Statuses { get; set; }
+        public DbSet<Catalogue> Catalogues { get; set; }
+        public DbSet<GroupCatalogue> GroupCatalogues { get; set; }
 
 
         /// <summary> 
@@ -320,6 +322,13 @@ namespace Siscom.Agua.DAL
 
             #region CancelAuthorization
 
+            #endregion
+
+            #region Catalogue
+            builder.Entity<Catalogue>()
+                   .HasOne<GroupCatalogue>(a => a.GroupCatalogue)
+                   .WithMany(s => s.Catalogues)
+                   .HasForeignKey(s => s.GroupCatalogueId);
             #endregion
 
             #region Client

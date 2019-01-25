@@ -320,7 +320,18 @@ namespace Siscom.Agua.Api.Controllers
                     debt.FromDate = DateTime.UtcNow.Date;
                     debt.UntilDate = DateTime.UtcNow.Date;
                     debt.Derivatives = agreement.NumDerivatives;
+                    debt.TypeIntake = agreement.TypeIntake.Name;
+                    debt.TypeService = agreement.TypeService.Name;
+                    debt.Consumption = "0";
+                    debt.Amount = ProductVM.Debt.Amount;
+                    debt.OnAccount = 0;
+                    debt.Year = Convert.ToInt16( DateTime.UtcNow.Year);
                     debt.Type = "TIP02";
+                    debt.Status = "ED001";
+                    debt.DebtPeriodId = 0;
+                    debt.AgreementId = agreement.Id;
+                    debt.ExpirationDate = DateTime.UtcNow.Date;
+
 
                     _context.Debts.Add(ProductVM.Debt);
                     await _context.SaveChangesAsync();
