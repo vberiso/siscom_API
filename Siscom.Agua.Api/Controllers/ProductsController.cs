@@ -306,7 +306,6 @@ namespace Siscom.Agua.Api.Controllers
             else
             {
                 agreement.NumDerivatives = 0;
-                //agreement.TypeIntake 
                 return StatusCode((int)TypeError.Code.BadRequest, new { Message = string.Format("EndPoint No hablitado") });
             }
             #endregion
@@ -331,9 +330,9 @@ namespace Siscom.Agua.Api.Controllers
                     debt.DebtPeriodId = 0;
                     debt.AgreementId = agreement.Id;
                     debt.ExpirationDate = DateTime.UtcNow.Date;
+                    debt.DebtDetails = ProductVM.Debt.DebtDetails;                    
 
-
-                    _context.Debts.Add(ProductVM.Debt);
+                    _context.Debts.Add(debt);
                     await _context.SaveChangesAsync();
                     scope.Complete();
                 }

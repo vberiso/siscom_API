@@ -150,7 +150,7 @@ namespace Siscom.Agua.Api.Controllers
             terminal.MacAdress = pterminal.MacAdress;
             terminal.IsActive = pterminal.IsActive;
             terminal.CashBox = pterminal.CashBox;
-            terminal.BranchOffice = await _context.BranchOffices.FindAsync(pterminal.BranchOffice);
+            terminal.BranchOffice = await _context.BranchOffices.FindAsync(pterminal.BranchOfficeId);
             terminal.SerialNumber= System.Guid.NewGuid().ToString().Substring(0, 20).ToUpper();
 
             if (!terminal.BranchOffice.IsActive)
