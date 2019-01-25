@@ -36,7 +36,8 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<Folio> GetFolio()
         {
-            return _context.Folios;
+            return _context.Folios
+                           .Include(x =>x.BranchOffice);
         }
 
         /// <summary>
@@ -53,7 +54,9 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var Folio = await _context.Folios.FindAsync(id);
+            var Folio = await _context.Folios
+                                      .Include(x => x.BranchOffice)
+                                      .Where(x => x.Id ==id).FirstOrDefaultAsync();
 
             if (Folio == null)
             {
