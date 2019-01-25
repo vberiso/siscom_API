@@ -291,7 +291,10 @@ namespace Siscom.Agua.Api.Controllers
                 if (ProductVM.Agreement.Id == 0)
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("Debe indicar un número de contrato") });
 
-                agreement = await _context.Agreements.FindAsync(ProductVM.Agreement.Id);
+                agreement = await _context.Agreements
+                                          .Include(x => x.TypeIntake)
+                                          .Include(x => x.TypeService)
+                                          .Where(x => x.Id==ProductVM.Agreement.Id).FirstOrDefaultAsync();
 
                 if (agreement == null)
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El número de cuenta no existe") });
@@ -306,6 +309,7 @@ namespace Siscom.Agua.Api.Controllers
             else
             {
                 agreement.NumDerivatives = 0;
+                //agreement.TypeIntake 
                 return StatusCode((int)TypeError.Code.BadRequest, new { Message = string.Format("EndPoint No hablitado") });
             }
             #endregion
@@ -315,21 +319,21 @@ namespace Siscom.Agua.Api.Controllers
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     Debt debt = new Debt();
-                    debt.DebitDate = DateTime.UtcNow;
-                    debt.FromDate = DateTime.UtcNow.Date;
-                    debt.UntilDate = DateTime.UtcNow.Date;
+                    debt.DebitDate = DateTime.UtcNow.ToLocalTime();
+                    debt.FromDate = DateTime.UtcNow.ToLocalTime().Date;
+                    debt.UntilDate = DateTime.UtcNow.ToLocalTime().Date;
                     debt.Derivatives = agreement.NumDerivatives;
                     debt.TypeIntake = agreement.TypeIntake.Name;
                     debt.TypeService = agreement.TypeService.Name;
                     debt.Consumption = "0";
                     debt.Amount = ProductVM.Debt.Amount;
                     debt.OnAccount = 0;
-                    debt.Year = Convert.ToInt16( DateTime.UtcNow.Year);
+                    debt.Year = Convert.ToInt16( DateTime.UtcNow.ToLocalTime().Year);
                     debt.Type = "TIP02";
                     debt.Status = "ED001";
                     debt.DebtPeriodId = 0;
                     debt.AgreementId = agreement.Id;
-                    debt.ExpirationDate = DateTime.UtcNow.Date;
+                    debt.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date;
                     debt.DebtDetails = ProductVM.Debt.DebtDetails;                    
 
                     _context.Debts.Add(debt);

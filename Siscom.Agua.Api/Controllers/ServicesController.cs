@@ -94,7 +94,7 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     SystemLog systemLog = new SystemLog();
                     systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                    systemLog.DateLog = DateTime.Now;
+                    systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                     systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                     systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
                     systemLog.Parameter = JsonConvert.SerializeObject(serviceVM);
@@ -136,7 +136,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 SystemLog systemLog = new SystemLog();
                 systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                systemLog.DateLog = DateTime.Now;
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                 systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                 systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
                 systemLog.Parameter = JsonConvert.SerializeObject(serviceVM);

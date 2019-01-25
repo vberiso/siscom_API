@@ -106,7 +106,7 @@ namespace Siscom.Agua.Api.Controllers
             TerminalUser terminalUser = new TerminalUser();
             terminalUser.Terminal = await _context.Terminal.FindAsync(pterminalUser.TerminalId);
             terminalUser.User = await _context.Users.FindAsync(pterminalUser.UserId);
-            terminalUser.OpenDate = DateTime.Now.Date;
+            terminalUser.OpenDate = DateTime.UtcNow.ToLocalTime().Date;
             terminalUser.InOperation = pterminalUser.InOperation;
 
             _context.TerminalUsers.Add(terminalUser);
@@ -147,7 +147,7 @@ namespace Siscom.Agua.Api.Controllers
             terminalUser.Id = pterminalUser.Id;
             terminalUser.Terminal = await _context.Terminal.FindAsync(pterminalUser.TerminalId);
             terminalUser.User = await _context.Users.FindAsync(pterminalUser.UserId);
-            terminalUser.OpenDate = DateTime.Now.Date;
+            terminalUser.OpenDate = DateTime.UtcNow.ToLocalTime().Date;
             terminalUser.InOperation = pterminalUser.InOperation;
 
             _context.Entry(terminalUser).State = EntityState.Modified;

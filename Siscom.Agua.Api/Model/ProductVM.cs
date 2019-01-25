@@ -8,7 +8,7 @@ namespace Siscom.Agua.Api.Model
 {
     public class ProductVM
     {
-        public Agreement Agreement { get; set; }
+        public AgreementProductVM Agreement { get; set; }
         public Debt Debt { get; set; }
     }
 }
