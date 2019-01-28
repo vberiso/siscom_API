@@ -319,7 +319,7 @@ namespace Siscom.Agua.Api.Controllers
                 });
 
                 if(!_validaProducto)
-                    return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El concepto no existe o no se encuentra habilitado") });
+                    return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("No se encontró concepto o no se encuentra habilitado") });
             }
             else
             {

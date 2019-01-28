@@ -378,6 +378,9 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> PostTransactionCancel([FromRoute] int TransactionId, [FromBody] CancelPaymentVM pCancelPayment)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            KeyValuePair<int, decimal> _efectivo = new KeyValuePair<int, decimal>(0, 0);
+            KeyValuePair<int, decimal> _cheque = new KeyValuePair<int, decimal>(0, 0);
+            KeyValuePair<int, decimal> _tarjeta = new KeyValuePair<int, decimal>(0, 0);
             Payment payment = new Payment();
             decimal _sumTransactionDetail = 0;
             decimal sumPayDetail = 0;
@@ -448,6 +451,67 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeTransaction.Id == 1)
                               .FirstOrDefaultAsync() == null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+
+            var movimientosCaja = await _context.Transactions
+                                               .Include(x => x.TypeTransaction)
+                                               .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                           x.TerminalUser.InOperation == true &&
+                                                           x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
+                                               .OrderBy(x => x.Id).ToListAsync();
+
+            movimientosCaja.ForEach(x => {
+                if (x.PayMethodId == 1)
+                {
+                    if (x.TypeTransactionId == 3)
+                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
+                    if (x.TypeTransactionId == 4)
+                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                    if (x.TypeTransactionId == 6)
+                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                }
+
+                if (x.PayMethodId == 2)
+                {
+                    if (x.TypeTransactionId == 3)
+                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
+                    if (x.TypeTransactionId == 4)
+                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                    if (x.TypeTransactionId == 6)
+                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                }
+
+                if (x.PayMethodId == 3)
+                {
+                    if (x.TypeTransactionId == 3)
+                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
+                    if (x.TypeTransactionId == 4)
+                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                    if (x.TypeTransactionId == 6)
+                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                }
+
+
+            });
+
+            if (pCancelPayment.Transaction.PayMethodId == 1)
+            {
+                if (pCancelPayment.Transaction.Amount > _efectivo.Value)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay suficiente efectivo en caja para la devolución") });
+            }
+
+            if (pCancelPayment.Transaction.PayMethodId == 2)
+            {
+                if (pCancelPayment.Transaction.Amount > _cheque.Value)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay documentos en caja para la devolución") });
+            }
+
+            if (pCancelPayment.Transaction.PayMethodId == 3)
+            {
+                if (pCancelPayment.Transaction.Amount > _cheque.Value)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay documentos en caja para la devolución") });
+            }
+
+
 
             //Cancelación
             var cancelacion = await _context.Transactions.Where(x => x.Folio == pCancelPayment.Transaction.Cancellation).FirstAsync();
@@ -571,7 +635,7 @@ namespace Siscom.Agua.Api.Controllers
                         transactionDetail.Description = pay.Description;
                         transactionDetail.Transaction = transaction;
                         _context.TransactionDetails.Add(transactionDetail);
-                        await _context.SaveChangesAsync();                       
+                        await _context.SaveChangesAsync();
 
                         DebtDetail debtDetail = new DebtDetail();
                         debtDetail = await _context.DebtDetails.Where(x => x.DebtId == pay.DebtId &&
@@ -788,6 +852,9 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> PostTransactionPrepaidCancel([FromRoute] int TransactionId, [FromBody] CancelPaymentVM pCancelPayment)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            KeyValuePair<int, decimal> _efectivo = new KeyValuePair<int, decimal>(0, 0);
+            KeyValuePair<int, decimal> _cheque = new KeyValuePair<int, decimal>(0, 0);
+            KeyValuePair<int, decimal> _tarjeta = new KeyValuePair<int, decimal>(0, 0);
             bool _validation = false;
             Prepaid prepaid;
             Payment payment = new Payment();
@@ -861,6 +928,65 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeTransaction.Id == 1)
                               .FirstOrDefaultAsync() == null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+
+            var movimientosCaja = await _context.Transactions
+                                             .Include(x => x.TypeTransaction)
+                                             .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                         x.TerminalUser.InOperation == true &&
+                                                         x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
+                                             .OrderBy(x => x.Id).ToListAsync();
+
+            movimientosCaja.ForEach(x => {
+                if (x.PayMethodId == 1)
+                {
+                    if (x.TypeTransactionId == 3)
+                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
+                    if (x.TypeTransactionId == 4)
+                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                    if (x.TypeTransactionId == 6)
+                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                }
+
+                if (x.PayMethodId == 2)
+                {
+                    if (x.TypeTransactionId == 3)
+                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
+                    if (x.TypeTransactionId == 4)
+                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                    if (x.TypeTransactionId == 6)
+                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                }
+
+                if (x.PayMethodId == 3)
+                {
+                    if (x.TypeTransactionId == 3)
+                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
+                    if (x.TypeTransactionId == 4)
+                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                    if (x.TypeTransactionId == 6)
+                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
+                }
+
+
+            });
+
+            if (pCancelPayment.Transaction.PayMethodId == 1)
+            {
+                if (pCancelPayment.Transaction.Amount > _efectivo.Value)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay suficiente efectivo en caja para la devolución") });
+            }
+
+            if (pCancelPayment.Transaction.PayMethodId == 2)
+            {
+                if (pCancelPayment.Transaction.Amount > _cheque.Value)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay documentos en caja para la devolución") });
+            }
+
+            if (pCancelPayment.Transaction.PayMethodId == 3)
+            {
+                if (pCancelPayment.Transaction.Amount > _cheque.Value)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay documentos en caja para la devolución") });
+            }
 
             //Cancelación
             var cancelacion = await _context.Transactions.Where(x => x.Folio == pCancelPayment.Transaction.Cancellation).FirstAsync();
@@ -1095,7 +1221,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
                         _saldo = _cobrado.Value - _cancelado.Value - _retirado.Value;
                         if (pTransaction.PayMethodId == 0)
-                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especofocar método de pago" });
+                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Método de pago incorrecto" });
                         if (pTransaction.Amount > _saldo)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
                         _validation = true;
