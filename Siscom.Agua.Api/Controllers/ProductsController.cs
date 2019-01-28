@@ -294,7 +294,7 @@ namespace Siscom.Agua.Api.Controllers
                 agreement = await _context.Agreements
                                           .Include(x => x.TypeIntake)
                                           .Include(x => x.TypeService)
-                                          .Where(x => x.Id==ProductVM.Agreement.Id).FirstOrDefaultAsync();
+                                          .Where(x => x.Id == ProductVM.Agreement.Id).FirstOrDefaultAsync();
 
                 if (agreement == null)
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El número de cuenta no existe") });
@@ -303,18 +303,33 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El contrato no se encuentra activo") });
 
                 //Deuda
+                if (ProductVM.Debt.DebtDetails.Count == 0)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("Debe ingresar conceptos a cobrar") });
+
                 if (ProductVM.Debt.Amount != ProductVM.Debt.DebtDetails.Sum(x => x.Amount))
-                    return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("El Detalle de la deuda no coincide con el total") });
+                    return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("El detalle de la deuda no coincide con el total") });
+
+                //Producto
+                bool _validaProducto = true;
+                Product _product = new Product();
+                ProductVM.Debt.DebtDetails.ToList().ForEach( x=> {
+                    _product = FindProduct(Convert.ToInt32(x.CodeConcept));
+                    if (_product == null) _validaProducto = false;
+                    if (!_product.IsActive) _validaProducto = false;
+                });
+
+                if(!_validaProducto)
+                    return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El concepto no existe o no se encuentra habilitado") });
             }
             else
             {
                 agreement.NumDerivatives = 0;
                 //agreement.TypeIntake 
                 return StatusCode((int)TypeError.Code.BadRequest, new { Message = string.Format("EndPoint No hablitado") });
-            }
-            #endregion
+            }           
+                #endregion
 
-            try
+                try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
@@ -377,6 +392,11 @@ namespace Siscom.Agua.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(product);
+        }
+
+        private Product FindProduct(int id)
+        {            
+            return _context.Products.Find(id); 
         }
 
         private bool ProductExists(int id)

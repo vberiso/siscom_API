@@ -48,14 +48,14 @@ namespace Siscom.Agua.Api.Controllers
             var user = await userManager.FindByNameAsync(model.UserName);
             if (user == null)
             {
-                return BadRequest(new { Error = "El usuario o contraseña son incorrectos favor de verificar!" });
+                return BadRequest(new { Error = "Usuario o contraseña incorrectos. Favor de verificar" });
             }
             else
             {
                 if (userManager.SupportsUserLockout && await userManager.IsLockedOutAsync(user))
                 {
                     var LockEnd = await userManager.GetLockoutEndDateAsync(user);
-                    return StatusCode(409, new { Error = string.Format("La cuenta se bloqueo temporalmente por seguridad. Intente dentro de {0} minutos", Math.Round((LockEnd.Value - DateTimeOffset.Now).TotalMinutes)) });
+                    return StatusCode(409, new { Error = string.Format("La cuenta se bloqueó temporalmente por seguridad. Intente dentro de {0} minutos", Math.Round((LockEnd.Value - DateTimeOffset.Now).TotalMinutes)) });
                 }
                 if (await userManager.CheckPasswordAsync(user, model.Password))
                 {
@@ -106,12 +106,12 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.Now.AddMinutes(5)); //TODO: Datos configurables 
                             await userManager.ResetAccessFailedCountAsync(user);
-                            return StatusCode(409, new { Error = "Su cuenta ha sido bloqueada termporalmente, intente despues de 5 minutos" });
+                            return StatusCode(409, new { Error = "Su cuenta ha sido bloqueada termporalmente. Intente despues de 5 minutos" });
                         }
                         else
                         {
                             await userManager.AccessFailedAsync(user);
-                            return BadRequest(new { Error = string.Format("Solo le quedan {0} antes de bloquar cuenta, favor de verificar", (5 - await userManager.GetAccessFailedCountAsync(user))) });
+                            return BadRequest(new { Error = string.Format("Solo quedan {0} intentos antes de bloquear la cuenta", (5 - await userManager.GetAccessFailedCountAsync(user))) });
                         }
                     }
                 }
@@ -144,7 +144,7 @@ namespace Siscom.Agua.Api.Controllers
             await userManager.AddToRoleAsync(user, "User");
             if (result.Succeeded)
             {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Se genero usuario correctamente" });
+                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito" });
             }
             else
             {
