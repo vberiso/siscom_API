@@ -20,7 +20,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("payment_date"), Required]
         public DateTime PaymentDate { get; set; }
-        [Column("branch_office"), StringLength(20), Required]
+        [Column("branch_office"), StringLength(30), Required]
         public string BranchOffice { get; set; }
         [Column("subtotal"), Required]
         public decimal Subtotal { get; set; }
