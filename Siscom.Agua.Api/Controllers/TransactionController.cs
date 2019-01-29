@@ -378,12 +378,10 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> PostTransactionCancel([FromRoute] int TransactionId, [FromBody] CancelPaymentVM pCancelPayment)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-            KeyValuePair<int, decimal> _efectivo = new KeyValuePair<int, decimal>(0, 0);
-            KeyValuePair<int, decimal> _cheque = new KeyValuePair<int, decimal>(0, 0);
-            KeyValuePair<int, decimal> _tarjeta = new KeyValuePair<int, decimal>(0, 0);
             Payment payment = new Payment();
             decimal _sumTransactionDetail = 0;
             decimal sumPayDetail = 0;
+            decimal _saldo = 0;
 
             #region Validación
             //Parametros
@@ -398,6 +396,9 @@ namespace Siscom.Agua.Api.Controllers
 
             if (pCancelPayment.Transaction.Sign)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
+            if (pCancelPayment.Transaction.Amount <= 0)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cancelar incorrecto") });
 
             if (String.IsNullOrEmpty(pCancelPayment.Transaction.Cancellation))
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación") });
@@ -455,63 +456,20 @@ namespace Siscom.Agua.Api.Controllers
             var movimientosCaja = await _context.Transactions
                                                .Include(x => x.TypeTransaction)
                                                .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                                           x.TerminalUser.InOperation == true &&
-                                                           x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
+                                                          x.PayMethodId == pCancelPayment.Transaction.PayMethodId &&
+                                                          (x.TypeTransactionId == 3 || x.TypeTransactionId == 4 || x.TypeTransactionId == 6 ))
                                                .OrderBy(x => x.Id).ToListAsync();
 
-            movimientosCaja.ForEach(x => {
-                if (x.PayMethodId == 1)
-                {
-                    if (x.TypeTransactionId == 3)
-                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
-                    if (x.TypeTransactionId == 4)
-                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                    if (x.TypeTransactionId == 6)
-                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                }
+            if (movimientosCaja == null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Método de pago improcedente" });
 
-                if (x.PayMethodId == 2)
-                {
-                    if (x.TypeTransactionId == 3)
-                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
-                    if (x.TypeTransactionId == 4)
-                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                    if (x.TypeTransactionId == 6)
-                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                }
-
-                if (x.PayMethodId == 3)
-                {
-                    if (x.TypeTransactionId == 3)
-                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
-                    if (x.TypeTransactionId == 4)
-                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                    if (x.TypeTransactionId == 6)
-                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                }
-
-
+            movimientosCaja.ForEach(x => {              
+                    _saldo += x.Sign ? x.Amount : x.Amount*-1;
             });
 
-            if (pCancelPayment.Transaction.PayMethodId == 1)
-            {
-                if (pCancelPayment.Transaction.Amount > _efectivo.Value)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay suficiente efectivo en caja para la devolución") });
-            }
 
-            if (pCancelPayment.Transaction.PayMethodId == 2)
-            {
-                if (pCancelPayment.Transaction.Amount > _cheque.Value)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay documentos en caja para la devolución") });
-            }
-
-            if (pCancelPayment.Transaction.PayMethodId == 3)
-            {
-                if (pCancelPayment.Transaction.Amount > _cheque.Value)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay documentos en caja para la devolución") });
-            }
-
-
+            if (pCancelPayment.Transaction.Amount > _saldo)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay fondos suficientes en caja para la devolución") });
 
             //Cancelación
             var cancelacion = await _context.Transactions.Where(x => x.Folio == pCancelPayment.Transaction.Cancellation).FirstAsync();
@@ -852,15 +810,13 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> PostTransactionPrepaidCancel([FromRoute] int TransactionId, [FromBody] CancelPaymentVM pCancelPayment)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-            KeyValuePair<int, decimal> _efectivo = new KeyValuePair<int, decimal>(0, 0);
-            KeyValuePair<int, decimal> _cheque = new KeyValuePair<int, decimal>(0, 0);
-            KeyValuePair<int, decimal> _tarjeta = new KeyValuePair<int, decimal>(0, 0);
             bool _validation = false;
             Prepaid prepaid;
             Payment payment = new Payment();
             PaymentDetail paymentDetail = new PaymentDetail();
             decimal _sumTransactionDetail = 0;
             decimal sumPayDetail = 0;
+            decimal _saldo = 0;
 
             #region Validación
             //Parametros
@@ -875,6 +831,9 @@ namespace Siscom.Agua.Api.Controllers
 
             if (pCancelPayment.Transaction.Sign)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
+            if (pCancelPayment.Transaction.Amount<=0)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cancelar incorrecto") });
 
             if (String.IsNullOrEmpty(pCancelPayment.Transaction.Cancellation))
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación") });
@@ -930,63 +889,22 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Debe aperturar una terminar para realizar una transacción" });
 
             var movimientosCaja = await _context.Transactions
-                                             .Include(x => x.TypeTransaction)
-                                             .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                                         x.TerminalUser.InOperation == true &&
-                                                         x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
-                                             .OrderBy(x => x.Id).ToListAsync();
+                                               .Include(x => x.TypeTransaction)
+                                               .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                          x.PayMethodId == pCancelPayment.Transaction.PayMethodId &&
+                                                         (x.TypeTransactionId == 3 || x.TypeTransactionId == 4 || x.TypeTransactionId == 6))
+                                               .OrderBy(x => x.Id).ToListAsync();
+
+            if (movimientosCaja == null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Método de pago improcedente" });
 
             movimientosCaja.ForEach(x => {
-                if (x.PayMethodId == 1)
-                {
-                    if (x.TypeTransactionId == 3)
-                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
-                    if (x.TypeTransactionId == 4)
-                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                    if (x.TypeTransactionId == 6)
-                        _efectivo = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                }
-
-                if (x.PayMethodId == 2)
-                {
-                    if (x.TypeTransactionId == 3)
-                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
-                    if (x.TypeTransactionId == 4)
-                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                    if (x.TypeTransactionId == 6)
-                        _cheque = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                }
-
-                if (x.PayMethodId == 3)
-                {
-                    if (x.TypeTransactionId == 3)
-                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value + x.Amount);
-                    if (x.TypeTransactionId == 4)
-                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                    if (x.TypeTransactionId == 6)
-                        _tarjeta = new KeyValuePair<int, decimal>(x.PayMethodId, _efectivo.Value - x.Amount);
-                }
-
-
+                _saldo += x.Sign ? x.Amount : x.Amount * -1;
             });
 
-            if (pCancelPayment.Transaction.PayMethodId == 1)
-            {
-                if (pCancelPayment.Transaction.Amount > _efectivo.Value)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay suficiente efectivo en caja para la devolución") });
-            }
 
-            if (pCancelPayment.Transaction.PayMethodId == 2)
-            {
-                if (pCancelPayment.Transaction.Amount > _cheque.Value)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay documentos en caja para la devolución") });
-            }
-
-            if (pCancelPayment.Transaction.PayMethodId == 3)
-            {
-                if (pCancelPayment.Transaction.Amount > _cheque.Value)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay documentos en caja para la devolución") });
-            }
+            if (pCancelPayment.Transaction.Amount > _saldo)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay fondos suficientes en caja para la devolución") });
 
             //Cancelación
             var cancelacion = await _context.Transactions.Where(x => x.Folio == pCancelPayment.Transaction.Cancellation).FirstAsync();
@@ -1047,10 +965,10 @@ namespace Siscom.Agua.Api.Controllers
                         foreach (var item in payment.PaymentDetails)
                         {
                             paymentDetail = item;
-                        }                  
+                        }
                     }
                     else
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se cuenta con detalle de pago para poder revertir") });                   
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se cuenta con detalle de pago para poder revertir") });
 
                     prepaid = await _context.Prepaids.Where(x => x.Id == paymentDetail.PrepaidId).FirstAsync();
 
@@ -1058,9 +976,9 @@ namespace Siscom.Agua.Api.Controllers
                         return NotFound();
                     else
                     {
-                        var prepaidDetail = await _context.PrepaidDetails.Where(x => x.PrepaidId== prepaid.Id).FirstOrDefaultAsync();
+                        var prepaidDetail = await _context.PrepaidDetails.Where(x => x.PrepaidId == prepaid.Id).FirstOrDefaultAsync();
 
-                        if (prepaid.Status != "ANT01" || prepaidDetail!=null)
+                        if (prepaid.Status != "ANT01" || prepaidDetail != null)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago no se puede cancelar porque el ya ha sido devengado el anticipo") });
                     }
 
@@ -1104,13 +1022,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> PostTransactionCashBox([FromRoute] int teminalUserId, [FromBody] TransactionCashBoxVM pTransaction)
         {
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-            bool _validation = false;
-            bool _open = false;
-            bool _liquidada = false;
-            KeyValuePair<int, decimal> _fondoCaja = new KeyValuePair<int, decimal>(0, 0);
-            KeyValuePair<int, decimal> _retirado = new KeyValuePair<int, decimal>(0, 0);
-            KeyValuePair<int, decimal> _cobrado = new KeyValuePair<int, decimal>(0, 0);
-            KeyValuePair<int, decimal> _cancelado = new KeyValuePair<int, decimal>(0, 0);
+                     
 
             if (!ModelState.IsValid)
             {
@@ -1136,169 +1048,199 @@ namespace Siscom.Agua.Api.Controllers
             if (terminalUser.OpenDate.Date != DateTime.UtcNow.ToLocalTime().Date)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal no se encuentra operando el día de hoy" });
 
-            var movimientosCaja = await _context.Transactions
-                                                .Include(x => x.TypeTransaction)
-                                                .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                                            x.TerminalUser.InOperation == true &&
-                                                            x.DateTransaction.Date.ToShortDateString() == DateTime.UtcNow.ToLocalTime().Date.ToShortDateString())
-                                                .OrderBy(x => x.Id).ToListAsync();
-
-            foreach (var item in movimientosCaja)
+            switch (pTransaction.TypeTransactionId)
             {
-                switch (item.TypeTransaction.Id)
-                {
-                    case 1://apertura
-                        if (pTransaction.TypeTransactionId == 1)
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha aperturado" });
-                        _open = true;
-                        break;
-                    case 2://Fondo
-                        if (pTransaction.TypeTransactionId == 2)
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
-                        _fondoCaja = new KeyValuePair<int, decimal>(_fondoCaja.Key + 1, item.Total);
-                        break;
-                    case 3://Cobrado                       
-                        _cobrado = new KeyValuePair<int, decimal>(_cobrado.Key + 1, _cobrado.Value + item.Total);
-                        break;
-                    case 4://Cancelado                        
-                        _cancelado = new KeyValuePair<int, decimal>(_cancelado.Key + 1, _cancelado.Value + item.Total);
-                        break;
-                    case 5://Cierre
-                        _open = false;
-                        if (pTransaction.TypeTransactionId == 5)
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido cerrada" });
-                        break;
-                    case 6: //Retiro
-                        _retirado = new KeyValuePair<int, decimal>(_retirado.Key + 1, _retirado.Value + item.Amount);
-                        break;
-                    case 7: //Liquidada
-                        _liquidada = true;
-                        if (pTransaction.TypeTransactionId == 7)
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido liquidada" });
-                        break;
-                }
-            }
-
-            if (!_open && pTransaction.TypeTransactionId == 1)
-                _open = true;
-
-            if (_open)
-            {
-                decimal _saldo = 0;
-                switch (pTransaction.TypeTransactionId)
-                {
-                    case 1://apertura
+                case 1://apertura
+                    if (await _context.Transactions
+                                     .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                 x.TypeTransactionId == 1)
+                                     .FirstOrDefaultAsync() != null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha aperturado" });
+                  
                         pTransaction.Amount = 0;
-                        _validation = true;
-                        break;
-                    case 2://Fondo
-                        if (pTransaction.Amount == 0)
+                    break;
+                case 2://Fondo
+                    if (await _context.Transactions
+                                   .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                               x.TypeTransactionId == 1)
+                                   .FirstOrDefaultAsync() == null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+
+                    var fondo = await _context.Transactions
+                                   .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                               x.TypeTransactionId == 2)
+                                   .FirstOrDefaultAsync();
+
+                    if (fondo != null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha ingresado un fondo de caja" });
+                   
+                    if (pTransaction.Amount == 0)
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar un fondo de caja") });
+
+                    if (pTransaction.PayMethodId == 0)
+                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Falta método de pago" });
+
                         if (terminalUser.Terminal.CashBox > 0)
                         {
                             if (pTransaction.Amount > terminalUser.Terminal.CashBox)
                                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de fondo de caja debe ser menor a: ${0}", terminalUser.Terminal.CashBox) });
                         }
-                        if (pTransaction.PayMethodId == 0)
-                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Falta método de pago" });
-                        _validation = true;
-                        break;
-                    case 5://Cierre
-                        if (!_liquidada)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal debe ser liquidada previamente") });
+                   
+                    break;
+                case 3://Cobro
+                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Acción no permitida" });
+                case 4://Cancelación
+                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Acción no permitida" });
+                case 5://Cierre
+                    if (await _context.Transactions
+                                  .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                              x.TypeTransactionId == 1)
+                                  .FirstOrDefaultAsync() == null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+
+                    if (await _context.Transactions
+                                    .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                x.TypeTransactionId == 7)
+                                    .FirstOrDefaultAsync() == null)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal debe ser liquidada previamente") });
+
+                    if (await _context.Transactions
+                                   .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                               x.TypeTransactionId == 5)
+                                   .FirstOrDefaultAsync() != null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido cerrada" });
+                  
                         pTransaction.Amount = 0;
-                        _validation = true;
                         terminalUser.InOperation = false;
                         _context.Entry(terminalUser).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
-                        break;
-                    case 6://Retiro
-                        if (_liquidada)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal ya ha sido liquidada") });
-                        if (pTransaction.Sign)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
-                        if (pTransaction.Amount == 0)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto inválido") });
-                        _saldo = _cobrado.Value - _cancelado.Value - _retirado.Value;
-                        if (pTransaction.PayMethodId == 0)
-                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Método de pago incorrecto" });
-                        if (pTransaction.Amount > _saldo)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a retirar no es valido") });
-                        _validation = true;
-                        break;
-                    case 7://Liquidada
-                        if (pTransaction.Sign)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de liquidación incorrecta") });
-                        if (pTransaction.PayMethodId == 0)
-                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especificar método de pago" });
-                        _saldo = (_fondoCaja.Value + _cobrado.Value) - _cancelado.Value - _retirado.Value;
-                        if (pTransaction.Amount - _saldo != 0)
-                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de liquidación no es valido") });
-                        _validation = true;
-                        break;
-                    default:
-                        _validation = false;
-                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Opción incorrecta" });
-                }
+                    break;
+                case 6://Retiro
+                    if (await _context.Transactions
+                                  .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                              x.TypeTransactionId == 1)
+                                  .FirstOrDefaultAsync() == null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
 
-                if (_validation)
-                {
+                    if (await _context.Transactions
+                                   .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                               x.TypeTransactionId == 7)
+                                   .FirstOrDefaultAsync() != null)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal ya ha sido liquidada") });
 
-                    try
-                    {
-                        using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                        {
-                            //Transacción en caja
-                            transaction.Folio = Guid.NewGuid().ToString("D");
-                            transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
-                            transaction.Sign = pTransaction.Sign;
-                            transaction.Amount = pTransaction.Amount;
-                            transaction.Aplication = pTransaction.Aplication;
-                            transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransaction.TypeTransactionId).ConfigureAwait(false);
-                            transaction.PayMethodId = pTransaction.PayMethodId;
-                            transaction.TerminalUser = terminalUser;
-                            transaction.CancellationFolio = String.Empty;
-                            transaction.Tax = 0;
-                            transaction.Rounding = 0;
-                            transaction.AuthorizationOriginPayment = String.Empty;
-                            transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(1).ConfigureAwait(false);
-                            transaction.OriginPayment = await _context.OriginPayments.FindAsync(1).ConfigureAwait(false);
-                            transaction.Total = pTransaction.Amount;
-                            _context.Transactions.Add(transaction);
-                            await _context.SaveChangesAsync();
+                    if (await _context.Transactions
+                                 .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                             x.TypeTransactionId == 5)
+                                 .FirstOrDefaultAsync() != null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La terminal ya ha sido cerrada" });
 
-                            if (pTransaction.TypeTransactionId == 2 || pTransaction.TypeTransactionId == 6 || pTransaction.TypeTransactionId == 7)
-                            {
-                                TransactionDetail transactionDetail = new TransactionDetail();
-                                transactionDetail.CodeConcept = pTransaction.TypeTransactionId.ToString();
-                                transactionDetail.Amount = transaction.Amount;
-                                transactionDetail.Description = _context.TypeTransactions.Find(pTransaction.TypeTransactionId).Name;
-                                transactionDetail.Transaction = transaction;
-                                _context.TransactionDetails.Add(transactionDetail);
-                                await _context.SaveChangesAsync();
-                            }
-                            scope.Complete();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        SystemLog systemLog = new SystemLog();
-                        systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                        systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
-                        systemLog.Controller = "TransactionController";
-                        systemLog.Action = "PostTransaction";
-                        systemLog.Parameter = JsonConvert.SerializeObject(pTransaction);
-                        CustomSystemLog helper = new CustomSystemLog(_context);
-                        helper.AddLog(systemLog);
-                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
-                    }
-                }
-                else
-                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Acción no permitida" });
+
+                    if (pTransaction.Sign)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+                    if (pTransaction.Amount <= 0)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a retirar incorrecto") });
+                    if (pTransaction.PayMethodId == 0)
+                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Método de pago incorrecto" });
+
+                    var movimientos = await _context.Transactions
+                                                    .Include(x => x.TypeTransaction)
+                                                    .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                                x.PayMethodId == pTransaction.PayMethodId &&
+                                                                (x.TypeTransactionId == 3 || x.TypeTransactionId == 4 || x.TypeTransactionId == 6))
+                                                    .OrderBy(x => x.Id).ToListAsync();
+
+                    if (movimientos == null)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Método de retiro incorrecto" });
+
+                    decimal _saldo = 0;
+
+                    movimientos.ForEach(x => {
+                        _saldo += x.Sign ? x.Amount : x.Amount * -1;
+                    });
+
+                    if (pTransaction.Amount > _saldo)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No hay fondos suficientes en caja para el retiro") });
+                    break;
+                case 7://Liquidada
+                    if (await _context.Transactions
+                                  .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                              x.TypeTransactionId == 1)
+                                  .FirstOrDefaultAsync() == null)
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+
+                    if (await _context.Transactions
+                                 .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                             x.TypeTransactionId == 7)
+                                 .FirstOrDefaultAsync() != null)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La terminal ya ha sido liquidada") });
+
+                    if (pTransaction.Sign)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de liquidación incorrecta") });
+                    if (pTransaction.Amount < 0)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a liquidar incorrecto") });
+                    if (pTransaction.PayMethodId == 0)
+                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Especificar método de pago" });
+
+                    var liquidar = await _context.Transactions
+                                 .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                             x.TypeTransactionId == 2)
+                                 .FirstOrDefaultAsync();
+
+                    if (liquidar != null)
+                    if (pTransaction.Amount != liquidar.Amount)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto de liquidación incorrecto") });
+                    break;
+                default:
+                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Opción incorrecta" });
             }
-            else
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe aperturar una terminar para realizar una transacción" });
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    //Transacción en caja
+                    transaction.Folio = Guid.NewGuid().ToString("D");
+                    transaction.DateTransaction = DateTime.UtcNow.ToLocalTime();
+                    transaction.Sign = pTransaction.Sign;
+                    transaction.Amount = pTransaction.Amount;
+                    transaction.Aplication = pTransaction.Aplication;
+                    transaction.TypeTransaction = await _context.TypeTransactions.FindAsync(pTransaction.TypeTransactionId).ConfigureAwait(false);
+                    transaction.PayMethodId = pTransaction.PayMethodId;
+                    transaction.TerminalUser = terminalUser;
+                    transaction.CancellationFolio = String.Empty;
+                    transaction.Tax = 0;
+                    transaction.Rounding = 0;
+                    transaction.AuthorizationOriginPayment = String.Empty;
+                    transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(1).ConfigureAwait(false);
+                    transaction.OriginPayment = await _context.OriginPayments.FindAsync(1).ConfigureAwait(false);
+                    transaction.Total = pTransaction.Amount;
+                    _context.Transactions.Add(transaction);
+                    await _context.SaveChangesAsync();
 
+                    if (pTransaction.TypeTransactionId == 2 || pTransaction.TypeTransactionId == 6 || pTransaction.TypeTransactionId == 7)
+                    {
+                        TransactionDetail transactionDetail = new TransactionDetail();
+                        transactionDetail.CodeConcept = pTransaction.TypeTransactionId.ToString();
+                        transactionDetail.Amount = transaction.Amount;
+                        transactionDetail.Description = _context.TypeTransactions.Find(pTransaction.TypeTransactionId).Name;
+                        transactionDetail.Transaction = transaction;
+                        _context.TransactionDetails.Add(transactionDetail);
+                        await _context.SaveChangesAsync();
+                    }
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = "TransactionController";
+                systemLog.Action = "PostTransaction";
+                systemLog.Parameter = JsonConvert.SerializeObject(pTransaction);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+            }
             return Ok(transaction.Id);
         }
 
