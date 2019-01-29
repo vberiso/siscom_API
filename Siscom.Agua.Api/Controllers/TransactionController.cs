@@ -363,7 +363,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
 
-            return Ok(transaction);
+            return Ok(transaction.Id);
         }
 
         /// <summary>
@@ -1241,7 +1241,7 @@ namespace Siscom.Agua.Api.Controllers
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
-            return Ok(transaction);
+            return Ok(transaction.Id);
         }
 
         /// <summary>
