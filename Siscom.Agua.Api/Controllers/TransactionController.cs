@@ -464,7 +464,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Método de pago improcedente" });
 
             movimientosCaja.ForEach(x => {              
-                    _saldo += x.Sign ? x.Amount : x.Amount*-1;
+                    _saldo += x.Sign ? x.Total : x.Total*-1;
             });
 
 
@@ -899,7 +899,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Método de pago improcedente" });
 
             movimientosCaja.ForEach(x => {
-                _saldo += x.Sign ? x.Amount : x.Amount * -1;
+                _saldo += x.Sign ? x.Total : x.Total * -1;
             });
 
 
@@ -1155,7 +1155,7 @@ namespace Siscom.Agua.Api.Controllers
                     decimal _saldo = 0;
 
                     movimientos.ForEach(x => {
-                        _saldo += x.Sign ? x.Amount : x.Amount * -1;
+                        _saldo += x.Sign ? x.Total : x.Total * -1;
                     });
 
                     if (pTransaction.Amount > _saldo)
@@ -1190,8 +1190,6 @@ namespace Siscom.Agua.Api.Controllers
                     if (pTransaction.Amount != liquidar.Amount)
                         return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto de liquidación incorrecto") });
                     break;
-                default:
-                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Opción incorrecta" });
             }
             try
             {
