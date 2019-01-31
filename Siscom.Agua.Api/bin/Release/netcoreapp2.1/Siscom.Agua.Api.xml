@@ -298,14 +298,14 @@
             <param name="id">Mandatory</param>
             <returns>Terminal Model</returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PutTerminal(Siscom.Agua.Api.Model.TerminalVM)">
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PutTerminal(Siscom.Agua.DAL.Models.Terminal)">
             <summary>
             This will provide update for the specific Terminal,
             </summary>
             <param name="pterminal">TerminalVM Model</param>
             <returns></returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PostTerminal(Siscom.Agua.Api.Model.TerminalVM)">
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalController.PostTerminal(Siscom.Agua.DAL.Models.Terminal)">
             <summary>
             This will provide capability add new Terminal
             </summary>
@@ -493,6 +493,36 @@
             <param name="comparedToObject"></param>
             <returns></returns>
             ------------------------------------------------------------------------
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.TypeConsume">
+            <summary>
+            Get data from agreement
+            </summary>
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.Amount">
+            <summary>
+            Get data from DEBT
+            </summary>
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.TypeService">
+            <summary>
+            Get data from DEBT
+            </summary>
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.TypeIntake">
+            <summary>
+            Get data from Agreement
+            </summary>
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.StratDate">
+            <summary>
+            Get data from Agreement
+            </summary>
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.SuburbsId">
+            <summary>
+            Get data from agreement > address > suburb
+            </summary>
         </member>
         <member name="T:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB">
             <summary>  

@@ -494,6 +494,16 @@
             <returns></returns>
             ------------------------------------------------------------------------
         </member>
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.StratDate">
+            <summary>
+            Example 2019-01-01
+            </summary>
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.EndDate">
+            <summary>
+            Example 2019-01-01
+            </summary>
+        </member>
         <member name="T:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB">
             <summary>  
             FirebasDB Class is reference of a Firebase Database  

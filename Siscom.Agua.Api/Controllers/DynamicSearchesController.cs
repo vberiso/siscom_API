@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -33,20 +37,35 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/DynamicSearches/5
-        [HttpGet("{id}", Name = "Get")]
-        public IActionResult Get(int id)
+        [HttpGet("Padron")]
+        public IEnumerable<Agreement> Gett(PadronFilter filter)
         {
-            //var expectedName = ExpressionHelper.WrappedConstant(id);
-            //var param = Expression.Parameter(typeof(Agreement));
-            //var nameProperty = Expression.Property(param, typeof(Agreement).GetProperty("Id"));
-            //var equal = Expression.Equal(nameProperty, expectedName);
-            //var filter = Expression.Lambda(equal, param);
+            DateTime star;
+            DateTime end;
+            DateTime.TryParse(filter.StratDate, out star);
+            DateTime.TryParse(filter.EndDate, out end);
 
-            //var agreement = _context.Agreements.Where(filter);
+            if(filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)
+            {
+                var a = _context.Agreements.Include(x => x.TypeConsume)
+                                            .Include(ti => ti.TypeIntake)
+                                            .Include(ts => ts.TypeService)
+                                            .Include(d => d.Debts)
+                                            .Where(x => x.TypeConsumeId == filter.TypeConsume && 
+                                            (from d in x.Debts
+                                            where d.Status == "ED001" || d.Status == "ED004"
+                                            select d).Sum(z => z.Amount) > filter.Amount    &&
+                                            x.TypeIntakeId == filter.TypeIntake     &&
+                                            x.TypeServiceId == filter.TypeService   &&
+                                            x.StratDate >= star &&
+                                            x.StratDate <= end);
 
-            var query = _context.Agreements.Where("Id == @0", id);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
 
-            return Ok(query);
+            return null;
         }
 
         // POST: api/DynamicSearches
@@ -66,26 +85,17 @@ namespace Siscom.Agua.Api.Controllers
         public void Delete(int id)
         {
         }
-    }
-}
 
-
-public static class ExpressionHelper
-{
-    public static MemberExpression WrappedConstant<TValue>(TValue value)
-    {
-        var wrapper = new WrappedObj<TValue>(value);
-        return Expression.Property(
-            Expression.Constant(wrapper),
-            typeof(WrappedObj<TValue>).GetProperty("Value"));
-    }
-
-    private class WrappedObj<TValue>
-    {
-        public TValue Value { get; set; }
-        public WrappedObj(TValue value)
+        private string GetPropertyName<T>(Expression<Func<T>> propertyLambda)
         {
-            this.Value = value;
+            var me = propertyLambda.Body as MemberExpression;
+
+            if (me == null)
+            {
+                throw new ArgumentException("You must pass a lambda of the form: '() => Class.Property' or '() => object.Property'");
+            }
+
+            return me.Member.Name;
         }
     }
 }
