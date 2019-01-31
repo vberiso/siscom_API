@@ -65,6 +65,10 @@ namespace Siscom.Agua.DAL
         public DbSet<AgreementDetail> AgreementDetails { get; set; }
         public DbSet<AgreementFile> AgreementFiles { get; set; }
 
+
+        
+
+
         /// <summary> 
         /// Cash Box 
         /// </summary> 
@@ -132,6 +136,14 @@ namespace Siscom.Agua.DAL
         /// Authorization
         /// </summary>
         public DbSet<Authorization> Authorizations { get; set; }
+
+        /// <summary>
+        /// Orders
+        /// </summary>
+        public DbSet<TaxUser>  TaxUsers { get; set; }
+        public DbSet<TaxAddress> TaxAddresses { get; set; }
+
+
 
         public ApplicationDbContext()
         {
@@ -729,6 +741,22 @@ namespace Siscom.Agua.DAL
                    .Property(p => p.Amount)
                    .HasColumnType("decimal(18, 2)");
             #endregion
+
+            #region  TaxAddress
+            builder.Entity<TaxAddress>()
+                   .HasOne<TaxUser>(a => a.TaxUser)
+                   .WithMany(s => s.TaxAddresses)
+                   .HasForeignKey(s => s.TaxUserId);
+
+            #endregion
+
+            #region TaxUser
+            builder.Entity<TaxUser>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
+            #endregion
+
+
 
             #region Terminal
             builder.Entity<Terminal>()
