@@ -39,7 +39,8 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var env = appSettings.ValidAudience;
-            string rolname = string.Empty;
+            //string rolname = string.Empty;
+            var listRoles = new List<string>();
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -75,7 +76,8 @@ namespace Siscom.Agua.Api.Controllers
                     foreach (var item in await userManager.GetRolesAsync(user))
                     {
                         claims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, item));
-                        rolname = item;
+                        //rolname = item;
+                        listRoles.Add(item);
                     }
 
                     var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.IssuerSigningKey));
@@ -92,7 +94,7 @@ namespace Siscom.Agua.Api.Controllers
                         fullName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName),
                         token = new JwtSecurityTokenHandler().WriteToken(token),
                         expiration = token.ValidTo.ToLocalTime(),
-                        RolName = rolname,
+                        RolName = listRoles,
                         Divition = user.DivitionId
                     });
                 }
