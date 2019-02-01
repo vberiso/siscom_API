@@ -7,34 +7,20 @@ namespace Siscom.Agua.DAL.Models
     [Table("Assignment_Ticket")]
     public class AssignmentTicket
     {
-        public AssignmentTicket()
-        {
-        }
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id_breach_Warranty")]
-        public int Id { get; set; }
-
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
-        [Required, Column("assignmentdate")]
+        [Column("id_assignment_ticket")]
+        public int Id { get; set; }        
+        [Required, Column("date_assignment")]
         public DateTime AssignmentDate { get; set; }
-
-        [Column("serie"), Required, StringLength(30)]
+        [Column("serie"), StringLength(50)]
         public string Serie { get; set; }
-
-        [Column("folio"), Required, StringLength(30)]
+        [Required, Column("folio"), StringLength(10)]
         public string Folio { get; set; }
-
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
-
-
-
-
+        [Required]
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
-
     }
 }

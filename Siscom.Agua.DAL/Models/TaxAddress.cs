@@ -9,9 +9,6 @@ namespace Siscom.Agua.DAL.Models
     [Table("Tax_Address")]
     public class TaxAddress
     {
-
-
-
         [Column("id_tax_address"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
@@ -30,16 +27,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("state"),StringLength(30)]
         public string State { get; set; }
 
-
-
-
         public int TaxUserId { get; set; }
         public TaxUser TaxUser { get; set; }
-
-
-
-
     }
-
-
 }

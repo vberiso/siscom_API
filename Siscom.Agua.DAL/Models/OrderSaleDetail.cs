@@ -10,39 +10,27 @@ namespace Siscom.Agua.DAL.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_order_sale_detail")]
-        public int    Id            { get; set; }
-
-        [Required,Column("quantity"),StringLength(30)]
-        public string Quantity      { get; set; }
-
-        [Required,Column("unity"),StringLength(30)]
-        public string Unity         { get; set; }
-
-        [Required,Column("description"),StringLength(100)]
-        public string Description   { get; set; }
-
-        [Required,Column("code"),StringLength(30)]
-        public string CodeConcept   { get; set; }
-
-        [Required,Column("name"),StringLength(200)]
-        public string NameConcept   { get; set; }
-
-        [Required,Column("unit"),StringLength(30)]
-        public string UnitPrice     { get; set; }
-
-        [Required,Column("amount"),StringLength(30)]
-        public string Amount        { get; set; }
-
-        [Required,Column("on_account"),StringLength(30)]
-        public string OnAccount     { get; set; }
-
-        [Required,Column("haveTax"),StringLength(30)]
-        public string HaveTax       { get; set; }
-
+        public int Id { get; set; }
+        [Required, Column("quantity")]
+        public Int16 Quantity { get; set; }
+        [Required, Column("unity"), StringLength(10)]
+        public string Unity { get; set; }
+        [Required, Column("unit_price")]
+        public decimal UnitPrice { get; set; }
+        [Required, Column("have_tax")]
+        public bool HaveTax { get; set; }
+        [Required, Column("description"), StringLength(500)]
+        public string Description { get; set; }
+        [Required, StringLength(5), Column("code_concept")]
+        public string CodeConcept { get; set; }
+        [Required, StringLength(500), Column("name_concept")]
+        public string NameConcept { get; set; }
+        [Required, Column("amount")]
+        public decimal Amount { get; set; }
+        [Required, Column("on_account")]
+        public decimal OnAccount { get; set; }
 
         public int OrderSaleId { get; set; }
         public OrderSale OrderSale { get; set; }
-
-
     }
 }

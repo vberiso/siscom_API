@@ -13,8 +13,8 @@ namespace Siscom.Agua.DAL.Models
         public TaxUser()
         {
             TaxAddresses = new HashSet<TaxAddress>();
+            Breaches = new HashSet<Breach>();
         }
-
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -33,12 +33,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
 
-
-        public int BreachId { get; set; }
-        public Breach Breach { get; set; } 
-
-
         public ICollection<TaxAddress>  TaxAddresses { get; set; }
-
+        public ICollection<Breach> Breaches { get; set; }
     }
 }

@@ -14,9 +14,8 @@ namespace Siscom.Agua.DAL.Models
             TerminalUsers = new HashSet<TerminalUser>();
             AgreementLogs = new HashSet<AgreementLog>();
             AgreementFiles = new HashSet<AgreementFile>();
-            Breach = new HashSet<Breach>();
-            AssignmentTicket = new HashSet<AssignmentTicket>();
-
+            Breaches = new HashSet<Breach>();
+            AssignmentTickets = new HashSet<AssignmentTicket>();
         }
 
         [Column("name"), StringLength(50), Required]
@@ -31,9 +30,7 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<TerminalUser> TerminalUsers { get; set; }
         public ICollection<AgreementLog> AgreementLogs { get; set; }
         public ICollection<AgreementFile> AgreementFiles { get; set; }
-        public ICollection<Breach> Breach { get; set; }
-        public ICollection<AssignmentTicket>  AssignmentTicket { get; set; }
-
-
+        public ICollection<Breach> Breaches { get; set; }
+        public ICollection<AssignmentTicket>  AssignmentTickets { get; set; }
     }
 }

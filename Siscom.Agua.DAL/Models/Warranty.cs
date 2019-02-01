@@ -11,20 +11,15 @@ namespace Siscom.Agua.DAL.Models
         public Warranty()
         {
             BreachWarranty = new HashSet<BreachWarranty>();
-
         }
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id_breach_Warranty")]
+        [Column("id_breach_warranty")]
         public int Id { get; set; }
-
         [Column("description"), Required, StringLength(100)]
         public string Description { get; set; }
 
         public ICollection<BreachWarranty> BreachWarranty { get; set; }
-
-
-
     }
 }

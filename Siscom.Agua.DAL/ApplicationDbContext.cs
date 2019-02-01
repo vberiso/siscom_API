@@ -142,13 +142,15 @@ namespace Siscom.Agua.DAL
         /// </summary>
         public DbSet<TaxUser>  TaxUsers { get; set; }
         public DbSet<TaxAddress> TaxAddresses { get; set; }
-        public DbSet<OrderSale> OrderSale { get; set; }
-        public DbSet<OrderSaleDetail> OrderSaleDetail { get; set; }
-
-
-
-
-
+        public DbSet<OrderSale> OrderSales { get; set; }
+        public DbSet<OrderSaleDetail> OrderSaleDetails { get; set; }
+        public DbSet<Breach> Breaches { get; set; }
+        public DbSet<BreachArticle> BreachArticles { get; set; }
+        public DbSet<BreachList> BreachLists { get; set; }
+        public DbSet<BreachDetail> BreachDetails { get; set; }
+        public DbSet<AssignmentTicket> AssignmentTickets { get; set; }
+        public DbSet<BreachWarranty> BreachWarranties { get; set; }
+        public DbSet<Warranty> Warranties { get; set; }
 
         public ApplicationDbContext()
         {
@@ -331,12 +333,77 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(x => x.IdAgreement);
             #endregion
 
+            #region AssignmentTicket
+            builder.Entity<AssignmentTicket>()
+                    .HasOne<ApplicationUser>(a => a.User)
+                    .WithMany(s => s.AssignmentTickets)
+                    .HasForeignKey(s => s.UserId);
+            #endregion
+
             #region BranchOffice
             builder.Entity<BranchOffice>()
                    .Property(x => x.IsActive)
                    .HasDefaultValue(true);
             #endregion
 
+            #region Breach
+            builder.Entity<Breach>()
+                    .HasOne<ApplicationUser>(a => a.User)
+                    .WithMany(s => s.Breaches)
+                    .HasForeignKey(s => s.UserId);
+
+            builder.Entity<Breach>()
+                   .HasOne<TaxUser>(a => a.TaxUser)
+                   .WithMany(s => s.Breaches)
+                   .HasForeignKey(s => s.TaxUserId);
+            #endregion
+
+            #region BreachArticle
+            builder.Entity<BreachArticle>()
+                  .Property(x => x.IsActive)
+                  .HasDefaultValue(true);
+            #endregion
+
+            #region BreachDetail
+            builder.Entity<BreachDetail>()
+                   .HasOne<Breach>(a => a.Breach)
+                   .WithMany(s => s.BreachDetails)
+                   .HasForeignKey(s => s.BreachId);
+
+            builder.Entity<BreachDetail>()
+                  .HasOne<BreachList>(a => a.BreachList)
+                  .WithMany(s => s.BreachDetails)
+                  .HasForeignKey(s => s.BreachListId);
+            #endregion
+
+            #region BreachList
+            builder.Entity<BreachList>()
+                   .HasOne<BreachArticle>(a => a.BreachArticle)
+                   .WithMany(s => s.BreachLists)
+                   .HasForeignKey(s => s.BreachArticleId);
+
+            builder.Entity<BreachList>()
+                  .Property(x => x.IsActive)
+                  .HasDefaultValue(true);
+
+            builder.Entity<BreachList>()
+                 .Property(x => x.HaveBonification)
+                 .HasDefaultValue(false);
+            #endregion
+
+            #region BreachWarranty
+            builder.Entity<BreachWarranty>()
+                   .HasOne<Breach>(a => a.Breach)
+                   .WithMany(s => s.BreachWarranties)
+                   .HasForeignKey(s => s.BreachId);
+
+            builder.Entity<BreachWarranty>()
+                  .HasOne<Warranty>(a => a.Warranty)
+                  .WithMany(s => s.BreachWarranty)
+                  .HasForeignKey(s => s.WarrantyId);
+
+            #endregion
+           
             #region CancelAuthorization
 
             #endregion
@@ -496,6 +563,12 @@ namespace Siscom.Agua.DAL
                    .HasDefaultValue(true);
             #endregion
 
+            #region Division
+            builder.Entity<Division>()
+                  .Property(x => x.IsActive)
+                  .HasDefaultValue(true);
+            #endregion
+
             #region ExternalOriginPayment
             builder.Entity<ExternalOriginPayment>()
                    .Property(x => x.IsActive)
@@ -567,6 +640,42 @@ namespace Siscom.Agua.DAL
                    .HasOne<Notification>(a => a.Notification)
                    .WithMany(s => s.NotificationDetails)
                    .HasForeignKey(s => s.NotificationId);
+            #endregion
+
+            #region OrderSale
+            builder.Entity<OrderSale>()
+                   .HasOne<Division>(a => a.Division)
+                   .WithMany(s => s.OrderSale)
+                   .HasForeignKey(s => s.DivisionId);
+
+            builder.Entity<OrderSale>()
+                  .Property(x => x.ExpirationDate)
+                  .HasColumnType("date");
+
+            builder.Entity<OrderSale>()
+                  .Property(p => p.Amount)
+                  .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<OrderSale>()
+                   .Property(p => p.OnAccount)
+                   .HasColumnType("decimal(18, 2)");
+
+            #endregion
+
+            #region  OrderSaleDetail
+            builder.Entity<OrderSaleDetail>()
+                   .HasOne<OrderSale>(a => a.OrderSale)
+                   .WithMany(s => s.OrderSaleDetail)
+                   .HasForeignKey(s => s.OrderSaleId);
+
+            builder.Entity<OrderSaleDetail>()
+                 .Property(p => p.Amount)
+                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<OrderSaleDetail>()
+                   .Property(p => p.OnAccount)
+                   .HasColumnType("decimal(18, 2)");
+
             #endregion
 
             #region OriginPayment
@@ -759,61 +868,7 @@ namespace Siscom.Agua.DAL
             builder.Entity<TaxUser>()
                    .Property(x => x.IsActive)
                    .HasDefaultValue(true);
-            #endregion
-
-
-            #region  OrderSaleDetail
-            builder.Entity<OrderSaleDetail>()
-                   .HasOne<OrderSale>(a => a.OrderSale)
-                   .WithMany(s => s.OrderSaleDetail)
-                   .HasForeignKey(s => s.OrderSaleId);
-
-            #endregion
-
-            #region OrderSale
-            builder.Entity<OrderSale>()
-                   .HasOne<Division>(a => a.Division)
-                   .WithMany(s => s.OrderSale)
-                   .HasForeignKey(s => s.DivisionId);
-
-            #endregion
-
-
-            #region BreachWarranty
-            builder.Entity<BreachWarranty>()
-                   .HasOne<Breach>(a => a.Breach)
-                   .WithMany(s => s.BreachWarranty)
-                   .HasForeignKey(s => s.BreachId);
-
-            #endregion
-
-
-            #region Warranty
-            builder.Entity<BreachWarranty>()
-                   .HasOne<Warranty>(a => a.Warranty)
-                   .WithMany(s => s.BreachWarranty)
-                   .HasForeignKey(s => s.WarrantyId);
-
-            #endregion
-
-            #region Breach
-            builder.Entity<Breach>()
-                    .HasOne<ApplicationUser>(a => a.User)
-                    .WithMany(s => s.Breach)
-                    .HasForeignKey(s => s.UserId);
-
-
-            #endregion
-
-
-            #region AssignmentTicket
-            builder.Entity<AssignmentTicket>()
-                    .HasOne<ApplicationUser>(a => a.User)
-                    .WithMany(s => s.AssignmentTicket)
-                    .HasForeignKey(s => s.UserId);
-            #endregion
-
-
+            #endregion          
 
             #region Terminal
             builder.Entity<Terminal>()

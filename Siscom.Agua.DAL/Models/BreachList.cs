@@ -10,43 +10,28 @@ namespace Siscom.Agua.DAL.Models
     {
         public BreachList()
         {
-
+            BreachDetails = new HashSet<BreachDetail>();
         }
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_breach_list")]
         public int Id { get; set; }
-
-        [Column("active"), Required, StringLength(30)]
-        public string Active {get;set;}
-
         [Column("fraction"), Required, StringLength(40)]
         public string Fraction {get;set;}
-
         [Column("description"), Required, StringLength(100)]
         public string Description {get;set;}
+        [Column("min"), Required]
+        public int Min {get;set;}
+        [Column("min"), Required]
+        public int Max {get;set;}
+        [Column("have_bonification"), Required]
+        public bool HaveBonification {get;set;}
+        [Column("is_active"), Required]
+        public bool IsActive { get; set; }
 
-
-        [Column("min"), Required, StringLength(30)]
-        public string Min {get;set;}
-
-
-        [Column("min"), Required, StringLength(30)]
-        public string Max {get;set;}
-
-        [Column("bonification"), Required, StringLength(100)]
-        public string Bonification {get;set;}
-
-
-        public string BreachArticleId { get; set; }
+        public int BreachArticleId { get; set; }
         public BreachArticle  BreachArticle { get; set; }
 
-        
-
-
-        
-
-
+        public ICollection<BreachDetail> BreachDetails { get; set; }
     }
 }
