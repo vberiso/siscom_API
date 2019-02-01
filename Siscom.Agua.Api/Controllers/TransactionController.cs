@@ -620,7 +620,7 @@ namespace Siscom.Agua.Api.Controllers
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
-            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+            return Ok(transaction.Id);
         }
 
         /// <summary>

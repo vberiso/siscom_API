@@ -33,6 +33,7 @@ namespace Siscom.Agua.DAL.Models
         public int ClasificationsId { get; set; }
         public Clasification Clasifications { get; set; }
 
+        [JsonIgnore]
         public ICollection<Address> Addresses { get; set; }
     }
 }

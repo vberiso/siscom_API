@@ -15,7 +15,8 @@ namespace Siscom.Agua.Api.Data
             //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
             ////var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             //var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
-            //string[] roleNames = { "Super", "Admin", "User", "Isabi", "Transito" };
+           // string[] roleNames = { "Super", "Admin", "User", "Isabi", "Transito", "Supervisor" };
+            //string[] roleNames = { "Super", "Admin", "User", "Supervisor" };
             ////////    //await context.Database.EnsureDeletedAsync();
             ////////    //await context.Database.MigrateAsync();
 

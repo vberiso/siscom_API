@@ -494,34 +494,14 @@
             <returns></returns>
             ------------------------------------------------------------------------
         </member>
-        <member name="P:Siscom.Agua.Api.Model.PadronFilter.TypeConsume">
-            <summary>
-            Get data from agreement
-            </summary>
-        </member>
-        <member name="P:Siscom.Agua.Api.Model.PadronFilter.Amount">
-            <summary>
-            Get data from DEBT
-            </summary>
-        </member>
-        <member name="P:Siscom.Agua.Api.Model.PadronFilter.TypeService">
-            <summary>
-            Get data from DEBT
-            </summary>
-        </member>
-        <member name="P:Siscom.Agua.Api.Model.PadronFilter.TypeIntake">
-            <summary>
-            Get data from Agreement
-            </summary>
-        </member>
         <member name="P:Siscom.Agua.Api.Model.PadronFilter.StratDate">
             <summary>
-            Get data from Agreement
+            Example 2019-01-01
             </summary>
         </member>
-        <member name="P:Siscom.Agua.Api.Model.PadronFilter.SuburbsId">
+        <member name="P:Siscom.Agua.Api.Model.PadronFilter.EndDate">
             <summary>
-            Get data from agreement > address > suburb
+            Example 2019-01-01
             </summary>
         </member>
         <member name="T:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB">
