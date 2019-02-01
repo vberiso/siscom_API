@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         {
             TaxUser = new HashSet<TaxUser>();
             BreachWarranty = new HashSet<BreachWarranty>();
+            BreachDetail = new HashSet<BreachDetail>();
 
         }
 
@@ -75,6 +76,7 @@ namespace Siscom.Agua.DAL.Models
 
         public ICollection<TaxUser> TaxUser { get; set; }
         public ICollection<BreachWarranty> BreachWarranty { get; set; }
+        public ICollection<BreachDetail> BreachDetail { get; set; }
 
 
 
