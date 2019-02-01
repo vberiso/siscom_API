@@ -20,7 +20,7 @@ namespace Siscom.Agua.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_tax_user")]
         public int Id { get; set; }
-        [Column("name"),Required,StringLength(200)]
+        [Column("name"), Required, StringLength(200)]
         public String Name { get; set; }
         [Column("rfc"), StringLength(17)]
         public String RFC { get; set; }
@@ -32,6 +32,11 @@ namespace Siscom.Agua.DAL.Models
         public String EMail { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
+
+
+        public int BreachId { get; set; }
+        public Breach Breach { get; set; } 
+
 
         public ICollection<TaxAddress>  TaxAddresses { get; set; }
 

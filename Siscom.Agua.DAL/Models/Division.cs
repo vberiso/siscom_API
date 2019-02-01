@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public Division()
         {
             Products = new HashSet<Product>();
+            OrderSale = new HashSet<OrderSale>();
         }
 
         [Key]
@@ -21,6 +22,13 @@ namespace Siscom.Agua.DAL.Models
         [Required, StringLength(150), Column("name")]
         public string Name { get; set; }
 
+        [Column("is_active")]
+        public bool IsActive { get; set; }
+
+        [Column("id_solution")]
+        public int IdSolution { get; set; }
+
         public ICollection<Product> Products { get; set; }
+        public ICollection<OrderSale> OrderSale { get; set; }
     }
 }

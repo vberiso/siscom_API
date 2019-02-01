@@ -142,6 +142,11 @@ namespace Siscom.Agua.DAL
         /// </summary>
         public DbSet<TaxUser>  TaxUsers { get; set; }
         public DbSet<TaxAddress> TaxAddresses { get; set; }
+        public DbSet<OrderSale> OrderSale { get; set; }
+        public DbSet<OrderSaleDetail> OrderSaleDetail { get; set; }
+
+
+
 
 
 
@@ -754,6 +759,58 @@ namespace Siscom.Agua.DAL
             builder.Entity<TaxUser>()
                    .Property(x => x.IsActive)
                    .HasDefaultValue(true);
+            #endregion
+
+
+            #region  OrderSaleDetail
+            builder.Entity<OrderSaleDetail>()
+                   .HasOne<OrderSale>(a => a.OrderSale)
+                   .WithMany(s => s.OrderSaleDetail)
+                   .HasForeignKey(s => s.OrderSaleId);
+
+            #endregion
+
+            #region OrderSale
+            builder.Entity<OrderSale>()
+                   .HasOne<Division>(a => a.Division)
+                   .WithMany(s => s.OrderSale)
+                   .HasForeignKey(s => s.DivisionId);
+
+            #endregion
+
+
+            #region BreachWarranty
+            builder.Entity<BreachWarranty>()
+                   .HasOne<Breach>(a => a.Breach)
+                   .WithMany(s => s.BreachWarranty)
+                   .HasForeignKey(s => s.BreachId);
+
+            #endregion
+
+
+            #region Warranty
+            builder.Entity<BreachWarranty>()
+                   .HasOne<Warranty>(a => a.Warranty)
+                   .WithMany(s => s.BreachWarranty)
+                   .HasForeignKey(s => s.WarrantyId);
+
+            #endregion
+
+            #region Breach
+            builder.Entity<Breach>()
+                    .HasOne<ApplicationUser>(a => a.User)
+                    .WithMany(s => s.Breach)
+                    .HasForeignKey(s => s.UserId);
+
+
+            #endregion
+
+
+            #region AssignmentTicket
+            builder.Entity<AssignmentTicket>()
+                    .HasOne<ApplicationUser>(a => a.User)
+                    .WithMany(s => s.AssignmentTicket)
+                    .HasForeignKey(s => s.UserId);
             #endregion
 
 

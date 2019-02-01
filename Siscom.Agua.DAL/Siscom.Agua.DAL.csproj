@@ -44,4 +44,7 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Models\OrderSale.json" />
+  </ItemGroup>
 </Project>
