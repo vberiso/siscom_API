@@ -152,6 +152,7 @@ namespace Siscom.Agua.Api
             {
                 options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
+                options.AddPolicy("RequireSupervisorRole", policy => policy.RequireRole("Supervisor"));
             });
         }
 
