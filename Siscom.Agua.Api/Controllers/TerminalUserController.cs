@@ -85,12 +85,14 @@ namespace Siscom.Agua.Api.Controllers
                 terminalUsers = await _context.TerminalUsers
                                               .Include(x => x.Terminal)
                                                   .ThenInclude(BranchOffice => BranchOffice.BranchOffice)
+                                              .Include(x => x.User)
                                               .Where(x => x.OpenDate.Date == Convert.ToDateTime(date).Date).ToListAsync();
             }
             else {
                 terminalUsers = await _context.TerminalUsers
                                               .Include(x => x.Terminal)
                                                     .ThenInclude(BranchOffice => BranchOffice.BranchOffice)
+                                              .Include(x => x.User)
                                               .Where(x => x.OpenDate.Date == Convert.ToDateTime(date).Date &&
                                                           x.Terminal.BranchOfficeId== BranchOfficeId).ToListAsync();
             }
