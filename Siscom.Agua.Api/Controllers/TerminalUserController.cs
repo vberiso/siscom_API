@@ -47,7 +47,7 @@ namespace Siscom.Agua.Api.Controllers
         /// <returns>TerminalUser Model</returns>
         // GET: api/TerminalUser/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetBranchOffice([FromRoute] int id)
+        public async Task<IActionResult> GetTerminalUser([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
@@ -62,6 +62,45 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             return Ok(terminalUser);
+        }
+
+        /// <summary>
+        /// This will provide details for the specific ID, of Terminal User which is being passed
+        /// </summary>
+        /// <param name="date">string date YYY-MM-DD</param>
+        /// <param name="BranchOfficeId"> Id BranchOffice</param>
+        /// <returns>TerminalUser Model</returns>
+        // GET: api/TerminalUser/
+        [HttpGet("{date}/{BranchOfficeId}")]
+        public async Task<IActionResult> GetTerminalUserByDate([FromRoute] string date, int BranchOfficeId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            List<TerminalUser> terminalUsers = new List<TerminalUser>();
+            if (BranchOfficeId == 0)
+            {
+                terminalUsers = await _context.TerminalUsers
+                                              .Include(x => x.Terminal)
+                                                  .ThenInclude(BranchOffice => BranchOffice.BranchOffice)
+                                              .Where(x => x.OpenDate.Date == Convert.ToDateTime(date).Date).ToListAsync();
+            }
+            else {
+                terminalUsers = await _context.TerminalUsers
+                                              .Include(x => x.Terminal)
+                                                    .ThenInclude(BranchOffice => BranchOffice.BranchOffice)
+                                              .Where(x => x.OpenDate.Date == Convert.ToDateTime(date).Date &&
+                                                          x.Terminal.BranchOfficeId== BranchOfficeId).ToListAsync();
+            }
+
+            if (terminalUsers == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(terminalUsers);
         }
 
         /// <summary>

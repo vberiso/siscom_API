@@ -338,11 +338,19 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.GetBranchOffice(System.Int32)">
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.GetTerminalUser(System.Int32)">
             <summary>
             This will provide details for the specific ID, of Terminal User which is being passed
             </summary>
             <param name="id">Mandatory</param>
+            <returns>TerminalUser Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.GetTerminalUserByDate(System.String,System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of Terminal User which is being passed
+            </summary>
+            <param name="date">string date YYY-MM-DD</param>
+            <param name="BranchOfficeId"> Id BranchOffice</param>
             <returns>TerminalUser Model</returns>
         </member>
         <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.PostTerminalUser(Siscom.Agua.Api.Model.TermimalUserVM)">
