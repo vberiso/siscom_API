@@ -5,6 +5,7 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,9 @@ using Siscom.Agua.DAL.Models;
 namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
+    [Produces("application/json")]
     [ApiController]
+    [Authorize]
     public class DynamicSearchesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -28,7 +31,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/DynamicSearches/5
-        [HttpGet("Padron")]
+        [HttpPost("Padron")]
         public IEnumerable<Agreement> Gett(PadronFilter filter)
         {
             DateTime star;
@@ -782,7 +785,7 @@ namespace Siscom.Agua.Api.Controllers
             return null;
         }
 
-        [HttpGet("Recaudacion")]
+        [HttpPost("Recaudacion")]
         public IEnumerable<Payment> Get(FundraisingFilter filter)
         {
             DateTime star;

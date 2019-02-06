@@ -38,8 +38,8 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/Agreements
-        [HttpGet("GetSummary")]
-        public async Task<IActionResult> GetAgreements()
+        [HttpGet("GetSummary/{Account}")]
+        public async Task<IActionResult> GetAgreements([FromRoute] string Account)
         {
             var summary = await _context.Agreements
                                     .Include(a => a.Addresses)
@@ -51,7 +51,10 @@ namespace Siscom.Agua.Api.Controllers
                                         .ThenInclude(d => d.Discount)
                                     .Include(d => d.Debts)
                                     .Include(p => p.Prepaids)
-                                    .ToListAsync();
+                                    .Where(a => a.Account == Account)
+                                    .FirstOrDefaultAsync();
+
+            summary.Clients = summary.Clients.Where(x => x.IsActive).ToList();
             return Ok(summary);
         }
 
