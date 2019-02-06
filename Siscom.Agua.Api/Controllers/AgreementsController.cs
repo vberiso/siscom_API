@@ -37,14 +37,23 @@ namespace Siscom.Agua.Api.Controllers
             this.appSettings = appSettings.Value;
         }
 
-        //// GET: api/Agreements
-        //[HttpGet]
-        //public async Task<IEnumerable<Agreement>> GetAgreements()
-        //{
-        //    var b  =  await _context.Agreements.Include(a => a.Addresses)
-        //                            .Include(c => c.Clients).ToListAsync();
-        //    return b;
-        //}
+        // GET: api/Agreements
+        [HttpGet("GetSummary")]
+        public async Task<IActionResult> GetAgreements()
+        {
+            var summary = await _context.Agreements
+                                    .Include(a => a.Addresses)
+                                        .ThenInclude(s => s.Suburbs)
+                                    .Include(c => c.Clients)
+                                    .Include(ti => ti.TypeIntake)
+                                    .Include(ts => ts.TypeStateService)
+                                    .Include(di => di.AgreementDiscounts)
+                                        .ThenInclude(d => d.Discount)
+                                    .Include(d => d.Debts)
+                                    .Include(p => p.Prepaids)
+                                    .ToListAsync();
+            return Ok(summary);
+        }
 
 
         // GET: api/Agreements/5

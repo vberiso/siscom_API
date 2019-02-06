@@ -338,11 +338,19 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.GetBranchOffice(System.Int32)">
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.GetTerminalUser(System.Int32)">
             <summary>
             This will provide details for the specific ID, of Terminal User which is being passed
             </summary>
             <param name="id">Mandatory</param>
+            <returns>TerminalUser Model</returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.GetTerminalUserByDate(System.String,System.Int32)">
+            <summary>
+            This will provide details for the specific ID, of Terminal User which is being passed
+            </summary>
+            <param name="date">string date YYY-MM-DD</param>
+            <param name="BranchOfficeId"> Id BranchOffice</param>
             <returns>TerminalUser Model</returns>
         </member>
         <member name="M:Siscom.Agua.Api.Controllers.TerminalUserController.PostTerminalUser(Siscom.Agua.Api.Model.TermimalUserVM)">
@@ -405,6 +413,7 @@
         <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionPrepaid(System.Int32,Siscom.Agua.Api.Model.TransactionVM)" -->
         <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionPrepaidCancel(System.Int32,Siscom.Agua.Api.Model.CancelPaymentVM)" -->
         <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCashBox(System.Int32,Siscom.Agua.Api.Model.TransactionCashBoxVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCashBoxSuper(System.Int32,Siscom.Agua.Api.Model.TransactionCashBoxVM)" -->
         <member name="M:Siscom.Agua.Api.Controllers.TransactionController.FindTransactions(System.String,System.Int32)">
             <summary>
             Get all transactions of terminalUser from day
@@ -493,6 +502,16 @@
             <param name="comparedToObject"></param>
             <returns></returns>
             ------------------------------------------------------------------------
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.FundraisingFilter.StratDate">
+            <summary>
+            Example 2019-01-01
+            </summary>
+        </member>
+        <member name="P:Siscom.Agua.Api.Model.FundraisingFilter.EndDate">
+            <summary>
+            Example 2019-01-01
+            </summary>
         </member>
         <member name="P:Siscom.Agua.Api.Model.PadronFilter.StratDate">
             <summary>

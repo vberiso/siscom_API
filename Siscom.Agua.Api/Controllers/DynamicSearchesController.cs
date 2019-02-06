@@ -27,15 +27,6 @@ namespace Siscom.Agua.Api.Controllers
             _context = context;
         }
 
-        // GET: api/DynamicSearches
-        [HttpGet]
-        public IActionResult Get()
-        {
-            
-            
-            return Ok();
-        }
-
         // GET: api/DynamicSearches/5
         [HttpGet("Padron")]
         public IEnumerable<Agreement> Gett(PadronFilter filter)
@@ -50,6 +41,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                             .Include(ti => ti.TypeIntake)
                                             .Include(ts => ts.TypeService)
+                                            .Include(c => c.Clients)
                                             .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                             .Include(d => d.Debts)
@@ -71,6 +63,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                             .Include(ti => ti.TypeIntake)
                                             .Include(ts => ts.TypeService)
+                                            .Include(c => c.Clients)
                                              .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                             .Include(d => d.Debts)
@@ -91,7 +84,8 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                             .Include(ti => ti.TypeIntake)
                                             .Include(ts => ts.TypeService)
-                                             .Include(ad => ad.Addresses)
+                                            .Include(c => c.Clients)
+                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                             .Include(d => d.Debts)
                                             .Where(x => x.TypeConsumeId == filter.TypeConsume &&
@@ -111,6 +105,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                             .Include(ti => ti.TypeIntake)
                                             .Include(ts => ts.TypeService)
+                                            .Include(c => c.Clients)
                                              .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                             .Include(d => d.Debts)
@@ -129,6 +124,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                             .Include(ti => ti.TypeIntake)
                                             .Include(ts => ts.TypeService)
+                                            .Include(c => c.Clients)
                                              .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                             .Include(d => d.Debts)
@@ -149,6 +145,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                             .Include(ti => ti.TypeIntake)
                                             .Include(ts => ts.TypeService)
+                                            .Include(c => c.Clients)
                                              .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                             .Include(d => d.Debts)
@@ -168,6 +165,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -188,6 +186,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -206,6 +205,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -225,6 +225,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -244,6 +245,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -261,6 +263,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -278,6 +281,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -293,6 +297,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -309,6 +314,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -325,6 +331,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -340,6 +347,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -355,6 +363,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -374,6 +383,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -392,6 +402,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -410,6 +421,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -426,6 +438,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -444,6 +457,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -461,6 +475,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -478,6 +493,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -493,6 +509,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -507,6 +524,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -521,6 +539,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -539,6 +558,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -556,6 +576,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -571,6 +592,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -588,6 +610,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -604,6 +627,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -618,6 +642,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -635,6 +660,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -649,6 +675,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -665,6 +692,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Agreements.Include(x => x.TypeConsume)
                                           .Include(ti => ti.TypeIntake)
                                           .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
@@ -678,37 +706,221 @@ namespace Siscom.Agua.Api.Controllers
                 var f = a.Count();
                 return a;
             }
+            else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//38
+            {
+                var a = _context.Agreements.Include(x => x.TypeConsume)
+                                          .Include(ti => ti.TypeIntake)
+                                          .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
+                                           .Include(ad => ad.Addresses)
+                                                .ThenInclude(s => s.Suburbs)
+                                          .Include(d => d.Debts)
+                                          .Where(x => x.TypeConsumeId == filter.TypeConsume &&
+                                                      (from d in x.Debts
+                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       select d).Sum(z => z.Amount) > filter.Amount &&
+                                          x.StratDate >= star &&
+                                          x.StratDate <= end);
+
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//39
+            {
+                var a = _context.Agreements.Include(x => x.TypeConsume)
+                                          .Include(ti => ti.TypeIntake)
+                                          .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
+                                           .Include(ad => ad.Addresses)
+                                                .ThenInclude(s => s.Suburbs)
+                                          .Include(d => d.Debts)
+                                          .Where(x => x.TypeConsumeId == filter.TypeConsume &&
+                                          x.TypeServiceId == filter.TypeService &&
+                                          x.StratDate >= star &&
+                                          x.StratDate <= end);
+
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//40
+            {
+                var a = _context.Agreements.Include(x => x.TypeConsume)
+                                          .Include(ti => ti.TypeIntake)
+                                          .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
+                                           .Include(ad => ad.Addresses)
+                                                .ThenInclude(s => s.Suburbs)
+                                          .Include(d => d.Debts)
+                                          .Where(x => x.TypeConsumeId == filter.TypeConsume &&
+                                          x.TypeIntakeId == filter.TypeIntake &&
+                                          x.StratDate >= star &&
+                                          x.StratDate <= end);
+
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//41
+            {
+                var a = _context.Agreements.Include(x => x.TypeConsume)
+                                          .Include(ti => ti.TypeIntake)
+                                          .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
+                                           .Include(ad => ad.Addresses)
+                                                .ThenInclude(s => s.Suburbs)
+                                          .Include(d => d.Debts)
+                                          .Where(x => x.TypeConsumeId == filter.TypeConsume &&
+                                          x.StratDate >= star &&
+                                          x.StratDate <= end);
+
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
             return null;
         }
 
-        // POST: api/DynamicSearches
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpGet("Recaudacion")]
+        public IEnumerable<Payment> Get(FundraisingFilter filter)
         {
-        }
-
-        // PUT: api/DynamicSearches/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-
-        private string GetPropertyName<T>(Expression<Func<T>> propertyLambda)
-        {
-            var me = propertyLambda.Body as MemberExpression;
-
-            if (me == null)
+            DateTime star;
+            DateTime end;
+            DateTime.TryParse(filter.StratDate, out star);
+            DateTime.TryParse(filter.EndDate, out end);
+            if(star != DateTime.MinValue && end != DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
             {
-                throw new ArgumentException("You must pass a lambda of the form: '() => Class.Property' or '() => object.Property'");
+                var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
+                                                     x.PaymentDate.Date <= end.Date &&
+                                                     x.BranchOffice == filter.BranchOffice &&
+                                                     x.Type == filter.Type &&
+                                                     x.Status == filter.Status);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
             }
-
-            return me.Member.Name;
+            else if (star != DateTime.MinValue && end != DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
+                                                     x.PaymentDate.Date <= end.Date &&
+                                                     x.BranchOffice == filter.BranchOffice &&
+                                                     x.Type == filter.Type);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star != DateTime.MinValue && end != DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
+                                                     x.PaymentDate.Date <= end.Date &&
+                                                     x.BranchOffice == filter.BranchOffice &&
+                                                     x.Status == filter.Status);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star != DateTime.MinValue && end != DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
+                                                     x.PaymentDate.Date <= end.Date &&
+                                                     x.Type == filter.Type &&
+                                                     x.Status == filter.Status);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star != DateTime.MinValue && end != DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
+                                                     x.PaymentDate.Date <= end.Date &&
+                                                     x.Status == filter.Status);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star != DateTime.MinValue && end != DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
+                                                     x.PaymentDate.Date <= end.Date &&
+                                                     x.Type == filter.Type);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star != DateTime.MinValue && end != DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
+                                                     x.PaymentDate.Date <= end.Date &&
+                                                     x.BranchOffice == filter.BranchOffice);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star != DateTime.MinValue && end != DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
+                                                     x.PaymentDate.Date <= end.Date);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if(star == DateTime.MinValue && end == DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.BranchOffice == filter.BranchOffice &&
+                                                     x.Type == filter.Type &&
+                                                     x.Status == filter.Status);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if(star == DateTime.MinValue && end == DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.BranchOffice == filter.BranchOffice &&
+                                                     x.Status == filter.Status);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star == DateTime.MinValue && end == DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.Type == filter.Type &&
+                                                     x.Status == filter.Status);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star == DateTime.MinValue && end == DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.Type == filter.Type);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star == DateTime.MinValue && end == DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.Status == filter.Status);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if(star == DateTime.MinValue && end == DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.BranchOffice == filter.BranchOffice);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            else if (star == DateTime.MinValue && end == DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
+            {
+                var a = _context.Payments.Where(x => x.BranchOffice == filter.BranchOffice &&
+                                                     x.Type == filter.Type);
+                var sql = a.ToSql();
+                var f = a.Count();
+                return a;
+            }
+            return null;
         }
+      
     }
 }
