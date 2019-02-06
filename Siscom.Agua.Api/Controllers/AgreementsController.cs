@@ -44,6 +44,8 @@ namespace Siscom.Agua.Api.Controllers
             var summary = await _context.Agreements
                                     .Include(a => a.Addresses)
                                         .ThenInclude(s => s.Suburbs)
+                                            .ThenInclude(t => t.Towns)
+                                                .ThenInclude(st => st.States)
                                     .Include(c => c.Clients)
                                     .Include(ti => ti.TypeIntake)
                                     .Include(ts => ts.TypeStateService)
