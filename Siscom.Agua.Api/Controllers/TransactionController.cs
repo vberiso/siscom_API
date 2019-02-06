@@ -1487,8 +1487,7 @@ namespace Siscom.Agua.Api.Controllers
            var transaction = await _context.Transactions
                                     .Include(x => x.TypeTransaction)
                                     .Include(x=> x.TransactionFolios)
-                                    .Where(x => x.TerminalUser.Id == terminalUserId &&
-                                                x.DateTransaction.Date == Convert.ToDateTime(date).Date)
+                                    .Where(x => x.TerminalUser.Id == terminalUserId)
                                     .OrderBy(x => x.Id).ToListAsync();
             transaction.ToList().ForEach(x =>
             {
