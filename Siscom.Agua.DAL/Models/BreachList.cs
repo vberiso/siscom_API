@@ -18,7 +18,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("fraction"), Required, StringLength(40)]
         public string Fraction {get;set;}
-        [Column("description"), Required, StringLength(100)]
+        [Column("description"), Required, StringLength(200)]
         public string Description {get;set;}
         [Column("min"), Required]
         public int Min {get;set;}
