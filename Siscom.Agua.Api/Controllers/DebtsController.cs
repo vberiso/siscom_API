@@ -36,7 +36,16 @@ namespace Siscom.Agua.Api.Controllers
 
             var debt = await _context.Debts.Include(dd => dd.DebtDetails)
                         .Where(gs => _context.Statuses
-                                .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == idAgreement).OrderBy(x => x.DebitDate).ToListAsync(); 
+                                .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == idAgreement).OrderBy(x => x.DebitDate).ToListAsync();
+            var status = await _context.Statuses.Include(x => x.GroupStatus)
+
+                                              .ToListAsync();
+            debt.ForEach(x =>
+            {
+                x.DescriptionStatus = (from d in status
+                                       where d.CodeName == x.Status
+                                       select d).FirstOrDefault().Description;
+            });
 
 
             if (debt == null)
