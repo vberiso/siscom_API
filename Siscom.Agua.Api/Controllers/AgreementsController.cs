@@ -134,6 +134,33 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
+        // GET: api/Agreements/
+        [HttpGet("AgreementByAccount/Cash/{AcountNumber}")]
+        public async Task<IActionResult> GetGetAgreementByAccountCash([FromRoute] string AcountNumber)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var agreement = await _context.Agreements
+                                      .Include(x => x.Clients)
+                                      .Include(x => x.Addresses)
+                                        .ThenInclude(s => s.Suburbs)
+                                            .ThenInclude(t => t.Towns)
+                                                .ThenInclude(st => st.States)
+                                      .FirstOrDefaultAsync(a => a.Account == AcountNumber);
+
+            agreement.Clients = agreement.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();
+            agreement.Addresses = agreement.Addresses.Where(c => c.TypeAddress == "DIR01" && c.IsActive == true).ToList();
+
+            if (agreement == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(agreement);
+        }
         // GET: api/Agreements
         [HttpGet("AgreementsBasic/{id}")]
         public async Task<IActionResult> GetAgreementsBasic([FromRoute] int id)
