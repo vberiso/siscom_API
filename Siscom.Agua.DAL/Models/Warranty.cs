@@ -15,7 +15,7 @@ namespace Siscom.Agua.DAL.Models
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id_breach_warranty")]
+        [Column("id_warranty")]
         public int Id { get; set; }
         [Column("description"), Required, StringLength(100)]
         public string Description { get; set; }
