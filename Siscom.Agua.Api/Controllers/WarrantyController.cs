@@ -59,8 +59,6 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-           ;
             _context.Warranties.Add(warranty);
             await _context.SaveChangesAsync();
 
