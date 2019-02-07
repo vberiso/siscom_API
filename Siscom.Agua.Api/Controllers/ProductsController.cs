@@ -270,12 +270,12 @@ namespace Siscom.Agua.Api.Controllers
         /// This create product in Debt of Agreement
         /// </summary>    
         /// <param name="AgreementId">Id Agreement
-        /// <param name="ProductVM">ProductVM Model
+        /// <param name="pDebt">Debt Model
         /// </param>
         /// <returns>products</returns>
-        // POST: api/Products/Division/5
+        // POST: api/Products/Agreement/5
         [HttpPost("Agreement/{AgreementId}")]
-        public async Task<IActionResult> PostProductAgreement([FromRoute]  int AgreementId, [FromBody]  ProductVM ProductVM)
+        public async Task<IActionResult> PostProductAgreement([FromRoute]  int AgreementId, [FromBody]  Debt pDebt)
         {
             Agreement agreement = new Agreement();
 
@@ -288,13 +288,10 @@ namespace Siscom.Agua.Api.Controllers
             if (AgreementId != 0)
             {
                 //Agreement
-                if (ProductVM.Agreement.Id == 0)
-                    return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("Debe indicar un número de contrato") });
-
                 agreement = await _context.Agreements
                                           .Include(x => x.TypeIntake)
                                           .Include(x => x.TypeService)
-                                          .Where(x => x.Id == ProductVM.Agreement.Id).FirstOrDefaultAsync();
+                                          .Where(x => x.Id == AgreementId).FirstOrDefaultAsync();
 
                 if (agreement == null)
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El número de cuenta no existe") });
@@ -303,16 +300,16 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El contrato no se encuentra activo") });
 
                 //Deuda
-                if (ProductVM.Debt.DebtDetails.Count == 0)
+                if (pDebt.DebtDetails.Count == 0)
                     return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("Debe ingresar conceptos a cobrar") });
 
-                if (ProductVM.Debt.Amount != ProductVM.Debt.DebtDetails.Sum(x => x.Amount))
+                if (pDebt.Amount != pDebt.DebtDetails.Sum(x => x.Amount))
                     return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("El detalle de la deuda no coincide con el total") });
 
                 //Producto
                 bool _validaProducto = true;
                 Product _product = new Product();
-                ProductVM.Debt.DebtDetails.ToList().ForEach( x=> {
+                pDebt.DebtDetails.ToList().ForEach( x=> {
                     _product = FindProduct(Convert.ToInt32(x.CodeConcept));
                     if (_product == null) _validaProducto = false;
                     if (!_product.IsActive) _validaProducto = false;
@@ -323,8 +320,6 @@ namespace Siscom.Agua.Api.Controllers
             }
             else
             {
-                agreement.NumDerivatives = 0;
-                //agreement.TypeIntake 
                 return StatusCode((int)TypeError.Code.BadRequest, new { Message = string.Format("EndPoint No hablitado") });
             }           
                 #endregion
@@ -341,7 +336,7 @@ namespace Siscom.Agua.Api.Controllers
                     debt.TypeIntake = agreement.TypeIntake.Name;
                     debt.TypeService = agreement.TypeService.Name;
                     debt.Consumption = "0";
-                    debt.Amount = ProductVM.Debt.Amount;
+                    debt.Amount = pDebt.Amount;
                     debt.OnAccount = 0;
                     debt.Year = Convert.ToInt16( DateTime.UtcNow.ToLocalTime().Year);
                     debt.Type = "TIP02";
@@ -349,7 +344,7 @@ namespace Siscom.Agua.Api.Controllers
                     debt.DebtPeriodId = 0;
                     debt.AgreementId = agreement.Id;
                     debt.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date;
-                    debt.DebtDetails = ProductVM.Debt.DebtDetails;                    
+                    debt.DebtDetails = pDebt.DebtDetails;                    
 
                     _context.Debts.Add(debt);
                     await _context.SaveChangesAsync();
@@ -363,7 +358,7 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                 systemLog.Controller = "ProductController";
                 systemLog.Action = "PostProductAgreement";
-                systemLog.Parameter = JsonConvert.SerializeObject(ProductVM);
+                systemLog.Parameter = JsonConvert.SerializeObject(pDebt);
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
