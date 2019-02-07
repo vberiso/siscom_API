@@ -50,7 +50,7 @@ namespace Siscom.Agua.Api.Controllers
                                             .Include(d => d.Debts)
                                             .Where(x => x.TypeConsumeId == filter.TypeConsume && 
                                             (from d in x.Debts
-                                            where d.Status == "ED001" || d.Status == "ED004"
+                                            where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                             select d).Sum(z => z.Amount) > filter.Amount    &&
                                             x.TypeIntakeId == filter.TypeIntake     &&
                                             x.TypeServiceId == filter.TypeService   &&
@@ -58,7 +58,7 @@ namespace Siscom.Agua.Api.Controllers
                                             x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               // var f = a.Count();
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//2
@@ -72,7 +72,7 @@ namespace Siscom.Agua.Api.Controllers
                                             .Include(d => d.Debts)
                                             .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                             (from d in x.Debts
-                                             where d.Status == "ED001" || d.Status == "ED004"
+                                             where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                              select d).Sum(z => z.Amount) > filter.Amount &&
                                             x.TypeIntakeId == filter.TypeIntake &&
                                             x.StratDate >= star &&
@@ -93,7 +93,7 @@ namespace Siscom.Agua.Api.Controllers
                                             .Include(d => d.Debts)
                                             .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                             (from d in x.Debts
-                                             where d.Status == "ED001" || d.Status == "ED004"
+                                             where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                              select d).Sum(z => z.Amount) > filter.Amount &&
                                             x.TypeServiceId == filter.TypeService &&
                                             x.StratDate >= star &&
@@ -132,7 +132,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                             .Include(d => d.Debts)
                                             .Where(x => (from d in x.Debts
-                                             where d.Status == "ED001" || d.Status == "ED004"
+                                             where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                              select d).Sum(z => z.Amount) > filter.Amount &&
                                             x.TypeIntakeId == filter.TypeIntake &&
                                             x.TypeServiceId == filter.TypeService &&
@@ -154,7 +154,7 @@ namespace Siscom.Agua.Api.Controllers
                                             .Include(d => d.Debts)
                                             .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                             (from d in x.Debts
-                                             where d.Status == "ED001" || d.Status == "ED004"
+                                             where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                              select d).Sum(z => z.Amount) > filter.Amount &&
                                             x.TypeIntakeId == filter.TypeIntake &&
                                             x.TypeServiceId == filter.TypeService);
@@ -173,7 +173,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                           where d.Status == "ED001" || d.Status == "ED004"
+                                           where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService &&
@@ -194,7 +194,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                           where d.Status == "ED001" || d.Status == "ED004"
+                                           where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
@@ -213,7 +213,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.StratDate >= star &&
@@ -233,7 +233,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeServiceId == filter.TypeService &&
                                           x.StratDate >= star &&
@@ -372,7 +372,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume && 
                                           (from d in x.Debts
-                                            where d.Status == "ED001" || d.Status == "ED004"
+                                            where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                             select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
@@ -392,7 +392,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                           (from d in x.Debts
-                                           where d.Status == "ED001" || d.Status == "ED004"
+                                           where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake);
 
@@ -411,7 +411,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                           (from d in x.Debts
-                                           where d.Status == "ED001" || d.Status == "ED004"
+                                           where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeServiceId == filter.TypeService);
 
@@ -446,7 +446,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
@@ -465,7 +465,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake);
 
@@ -483,7 +483,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeServiceId == filter.TypeService);
 
@@ -548,7 +548,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                           (from d in x.Debts
-                                           where d.Status == "ED001" || d.Status == "ED004"
+                                           where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake);
 
@@ -567,7 +567,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                           (from d in x.Debts
-                                           where d.Status == "ED001" || d.Status == "ED004"
+                                           where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount);
 
                 var sql = a.ToSql();
@@ -600,7 +600,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake);
 
@@ -618,7 +618,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount);
 
                 var sql = a.ToSql();
@@ -651,7 +651,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                           (from d in x.Debts
-                                           where d.Status == "ED001" || d.Status == "ED004"
+                                           where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount);
 
                 var sql = a.ToSql();
@@ -683,7 +683,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                           where d.Status == "ED001" || d.Status == "ED004"
+                                           where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount);
 
                 var sql = a.ToSql();
@@ -700,7 +700,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
@@ -720,7 +720,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                                       (from d in x.Debts
-                                                       where d.Status == "ED001" || d.Status == "ED004"
+                                                       where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
