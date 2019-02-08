@@ -43,6 +43,8 @@ namespace Siscom.Agua.DAL.Models
         public Int16 Year { get; set; }
         [Column("type"), StringLength(5), Required]
         public string Type { get; set; }
+        [NotMapped]
+        public string DescriptionType { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
         [NotMapped]

@@ -37,14 +37,19 @@ namespace Siscom.Agua.Api.Controllers
             var debt = await _context.Debts.Include(dd => dd.DebtDetails)
                         .Where(gs => _context.Statuses
                                 .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == idAgreement).OrderBy(x => x.DebitDate).ToListAsync();
-            var status = await _context.Statuses.Include(x => x.GroupStatus)
+            var status = await _context.Statuses.ToListAsync();
+            var type = await _context.Types.ToListAsync();
 
-                                              .ToListAsync();
             debt.ForEach(x =>
             {
                 x.DescriptionStatus = (from d in status
                                        where d.CodeName == x.Status
                                        select d).FirstOrDefault().Description;
+
+                x.DescriptionType = (from d in type
+                                     where d.CodeName == x.Status
+                                     select d).FirstOrDefault().Description;
+
             });
 
 
@@ -69,15 +74,19 @@ namespace Siscom.Agua.Api.Controllers
                                      .Include(dd => dd.DebtDetails)
                                      .Where(gs => gs.AgreementId == idAgreement)
                                      .OrderBy(x => x.DebitDate).ToListAsync();
-            var status = await _context.Statuses.Include(x => x.GroupStatus)
-                                               
-                                                .ToListAsync();
+
+            var status = await _context.Statuses.ToListAsync();
+            var type = await _context.Types.ToListAsync();
 
             debt.ForEach(x =>
             {
                 x.DescriptionStatus = (from d in status
                                        where d.CodeName == x.Status
                                        select d).FirstOrDefault().Description;
+
+                x.DescriptionType = (from d in type
+                                     where d.CodeName == x.Status
+                                     select d).FirstOrDefault().Description;
             });
 
             if (debt == null)
