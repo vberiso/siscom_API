@@ -105,7 +105,7 @@
             <param name="id">Mandatory</param>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "T:Siscom.Agua.Api.Controllers.FolioController" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "T:Siscom.Agua.Api.Controllers.FolioController" -->
         <member name="M:Siscom.Agua.Api.Controllers.FolioController.GetFolio">
             <summary>
             Get list of all Folio
@@ -223,7 +223,7 @@
             </param>
             <returns>products</returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Siscom.Agua.Api.Controllers.ProductsController.PostProductAgreement(System.Int32,Siscom.Agua.Api.Model.ProductVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.ProductsController.PostProductAgreement(System.Int32,Siscom.Agua.Api.Model.ProductVM)" -->
         <member name="T:Siscom.Agua.Api.Controllers.RegionsController">
             <summary>
             End Points Region
@@ -409,11 +409,11 @@
             </param>
             <returns>New TerminalUser added</returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCancel(System.Int32,Siscom.Agua.Api.Model.CancelPaymentVM)" -->
-        <!-- Badly formed XML comment ignored for member "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionPrepaid(System.Int32,Siscom.Agua.Api.Model.TransactionVM)" -->
-        <!-- Badly formed XML comment ignored for member "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionPrepaidCancel(System.Int32,Siscom.Agua.Api.Model.CancelPaymentVM)" -->
-        <!-- Badly formed XML comment ignored for member "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCashBox(System.Int32,Siscom.Agua.Api.Model.TransactionCashBoxVM)" -->
-        <!-- Badly formed XML comment ignored for member "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCashBoxSuper(System.Int32,Siscom.Agua.Api.Model.TransactionCashBoxVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCancel(System.Int32,Siscom.Agua.Api.Model.CancelPaymentVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionPrepaid(System.Int32,Siscom.Agua.Api.Model.TransactionVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionPrepaidCancel(System.Int32,Siscom.Agua.Api.Model.CancelPaymentVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCashBox(System.Int32,Siscom.Agua.Api.Model.TransactionCashBoxVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.TransactionController.PostTransactionCashBoxSuper(System.Int32,Siscom.Agua.Api.Model.TransactionCashBoxVM)" -->
         <member name="M:Siscom.Agua.Api.Controllers.TransactionController.FindTransactions(System.String,System.Int32)">
             <summary>
             Get all transactions of terminalUser from day
@@ -528,7 +528,7 @@
             FirebasDB Class is reference of a Firebase Database  
             </summary>  
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.#ctor(System.String)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.#ctor(System.String)" -->
         <member name="P:Siscom.Agua.Api.Services.FirebaseService.FirebaseDB.RootNode">
             <summary>  
             Gets or sets Represents current full path of a Firebase Database resource  
@@ -587,7 +587,7 @@
             </summary>  
             <returns>Current resource URL as string</returns>  
         </member>
-        <!-- Badly formed XML comment ignored for member "T:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "T:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest" -->
         <member name="F:Siscom.Agua.Api.Services.FirebaseService.FirebaseRequest.JSON_SUFFIX">
             <summary>  
             Suffix to be added in each resource URI  
