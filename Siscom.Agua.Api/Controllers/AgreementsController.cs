@@ -151,13 +151,13 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(st => st.States)
                                       .FirstOrDefaultAsync(a => a.Account == AcountNumber);
 
-            agreement.Clients = agreement.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();
-            agreement.Addresses = agreement.Addresses.Where(c => c.TypeAddress == "DIR01" && c.IsActive == true).ToList();
-
             if (agreement == null)
             {
                 return NotFound();
             }
+
+            agreement.Clients = agreement.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();
+            agreement.Addresses = agreement.Addresses.Where(c => c.TypeAddress == "DIR01" && c.IsActive == true).ToList();           
 
             return Ok(agreement);
         }
