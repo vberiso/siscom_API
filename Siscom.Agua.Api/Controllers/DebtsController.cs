@@ -47,7 +47,7 @@ namespace Siscom.Agua.Api.Controllers
                                        select d).FirstOrDefault().Description;
 
                 x.DescriptionType = (from d in type
-                                     where d.CodeName == x.Status
+                                     where d.CodeName == x.Type
                                      select d).FirstOrDefault().Description;
 
             });
@@ -85,7 +85,7 @@ namespace Siscom.Agua.Api.Controllers
                                        select d).FirstOrDefault().Description;
 
                 x.DescriptionType = (from d in type
-                                     where d.CodeName == x.Status
+                                     where d.CodeName == x.Type
                                      select d).FirstOrDefault().Description;
             });
 
