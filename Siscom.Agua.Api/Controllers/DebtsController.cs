@@ -97,27 +97,5 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(debt);
         }
 
-        //[HttpGet("GetDebtByPeriod/{idAgreement}")]
-        //public async Task<IActionResult> GetDebtByPeriod([FromRoute] int idAgreement)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var debt = await _context.Debts.Include(dd => dd.DebtDetails)
-        //                                    .Where(gs => gs.AgreementId == idAgreement)
-        //                                    .OrderBy(x => x.DebitDate).ToListAsync();
-
-
-        //    if (debt == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return Ok(debt);
-        //}
-
-
     }
 }
