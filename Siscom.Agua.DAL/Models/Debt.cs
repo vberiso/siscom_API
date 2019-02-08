@@ -56,7 +56,6 @@ namespace Siscom.Agua.DAL.Models
         [Column("expiration_date"), Required]
         public DateTime ExpirationDate { get; set; }
 
-        //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
 
