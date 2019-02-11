@@ -223,7 +223,7 @@
             </param>
             <returns>products</returns>
         </member>
-        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.ProductsController.PostProductAgreement(System.Int32,Siscom.Agua.Api.Model.ProductVM)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:Siscom.Agua.Api.Controllers.ProductsController.PostProductAgreement(System.Int32,Siscom.Agua.DAL.Models.Debt)" -->
         <member name="T:Siscom.Agua.Api.Controllers.RegionsController">
             <summary>
             End Points Region

@@ -153,7 +153,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if (agreement == null)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = "No hay datos para este número de cuenta" });
             }
 
             agreement.Clients = agreement.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();

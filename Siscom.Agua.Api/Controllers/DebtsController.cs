@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -36,7 +37,7 @@ namespace Siscom.Agua.Api.Controllers
 
             var debt = await _context.Debts.Include(dd => dd.DebtDetails)
                         .Where(gs => _context.Statuses
-                                .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == idAgreement).OrderBy(x => x.DebitDate).ToListAsync();
+                                .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == idAgreement).OrderBy(x => x.FromDate).ToListAsync();
             var status = await _context.Statuses.ToListAsync();
             var type = await _context.Types.ToListAsync();
 
@@ -55,7 +56,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if (debt == null)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se ha encontrado deuda activa para esta cuenta" });
             }
 
             return Ok(debt);

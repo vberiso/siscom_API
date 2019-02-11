@@ -36,13 +36,14 @@ namespace Siscom.Agua.DAL.Models
         public string AuthorizationOriginPayment { get; set; }        
         [Column("transaction_folio"), StringLength(40)]
         public string TransactionFolio { get; set; }
-
         [Column("id_agreement"), Required]
         public int AgreementId { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
         [Column("type"), StringLength(5), Required]
         public string Type { get; set; }
+        [Column("pay_method_number"), StringLength(31)]
+        public string PayMethodNumber { get; set; }
 
         //[ForeignKey("OriginPayment")]
         public int OriginPaymentId { get; set; }

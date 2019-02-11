@@ -41,6 +41,8 @@ namespace Siscom.Agua.DAL.Models
         public string AuthorizationOriginPayment { get; set; }
         [Column("id_cancel_authorization")]
         public int CancelAuthorizationId { get; set; }
+        [Column("pay_method_number"), StringLength(31)]
+        public string PayMethodNumber { get; set; }
 
         //[ForeignKey("TerminalUser")]
         public int TerminalUserId { get; set; }
@@ -59,9 +61,9 @@ namespace Siscom.Agua.DAL.Models
         public OriginPayment OriginPayment { get; set; }
 
         public int ExternalOriginPaymentId { get; set; }
-        public ExternalOriginPayment ExternalOriginPayment { get; set; }
+        public ExternalOriginPayment ExternalOriginPayment { get; set; }        
 
         public ICollection<TransactionFolio> TransactionFolios { get; set; }
-        public ICollection<TransactionDetail> TransactionDetails { get; set; }
+        public ICollection<TransactionDetail> TransactionDetails { get; set; }        
     }
 }
