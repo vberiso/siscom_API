@@ -6,20 +6,6 @@
   
   <ItemGroup>
     <Compile Remove="Migrations\" />
-    <Compile Remove="Migrations\20181205224906_TypeClasif.cs" />
-    <Compile Remove="Migrations\20181206214156_DebtStatus.cs" />
-    <Compile Remove="Migrations\20181206215248_DebtStatus.cs" />
-    <Compile Remove="Migrations\20181210190901_Tariff.cs" />
-    <Compile Remove="Migrations\20181211185236_PrepaidDetail.cs" />
-    <Compile Remove="Migrations\20181211211854_XX.cs" />
-    <Compile Remove="Migrations\20181213164128_PaymentDetail.cs" />
-    <Compile Remove="Migrations\20181213164314_PaymentDetail.cs" />
-    <Compile Remove="Migrations\20181217183905_Decimal.cs" />
-    <Compile Remove="Migrations\20181218204021_IsActive.cs" />
-    <Compile Remove="Migrations\20181226230715_RemoveConstrainTransaction.cs" />
-    <Compile Remove="Migrations\20190201213910_Infracciones.cs" />
-    <Compile Remove="Migrations\20190201215553_Infracciones2.cs" />
-    <Compile Remove="Migrations\20190201215956_Infracciones3.cs" />
   </ItemGroup>
   
   <ItemGroup>
