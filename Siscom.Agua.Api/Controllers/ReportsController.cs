@@ -6,6 +6,7 @@ using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,9 +16,8 @@ namespace Siscom.Agua.Api.Controllers
     [Produces("application/json")]
     [ApiController]
     [Authorize]
-    public class ReportsController : ControllerBase 
+    public class ReportsController : ControllerBase
     {
-
         private readonly ApplicationDbContext _context;
 
         public ReportsController(ApplicationDbContext context)
@@ -34,13 +34,13 @@ namespace Siscom.Agua.Api.Controllers
             var payment = await _context.Payments
                             .Include(p => p.PaymentDetails)
 
-                .Where(p=> p.PaymentDate.Year == Convert.ToDateTime(Date).Year).ToListAsync();
+                .Where(p => p.PaymentDate.Year == Convert.ToDateTime(Date).Year).ToListAsync();
 
 
             var debt = _context.DebtDiscounts.Where(d => d.DebtId == 450620).ToList().Sum(d => d.DiscountAmount);
 
-           
-            
+
+
 
             if (payment == null)
             {
@@ -49,14 +49,16 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(payment);
         }
 
-        // GET: api/Agreements
-        [HttpGet]
-        public async Task<IActionResult> GetReportDebt()
+        // GET: api/Prueba
+        [HttpGet("Prueba/{Date}")]
+        public async Task<IActionResult> GetReportDebt([FromRoute] string Date)
         {
-            var payment = await _context.Payments.Include(x => x.PaymentDetails).FirstOrDefaultAsync();
+            var payment = await _context.Payments.Include(x => x.PaymentDetails)
+                        .Where(p => p.PaymentDate.Year == Convert.ToDateTime(Date).Year).FirstOrDefaultAsync();
 
 
-            payment.PaymentDetails.ToList().ForEach(x =>{
+            payment.PaymentDetails.ToList().ForEach(x =>
+            {
 
                 x.Debt = _context.Debts
                     .Include(dd => dd.DebtDiscounts)
@@ -64,6 +66,8 @@ namespace Siscom.Agua.Api.Controllers
                     .FirstOrDefault();
 
             });
+
+
             //payment..ToList().ForEach(x =>
             //{
             //    x.Suburbs = _context.Suburbs.Include(r => r.Regions)
@@ -78,9 +82,78 @@ namespace Siscom.Agua.Api.Controllers
             //var payment = await _context.PaymentDetails.Where(id => id.DebtId == 118313).ToListAsync();
 
 
-           
+
             return Ok(payment);
         }
+
+        [HttpGet("Consulta/{Num}")]
+        public async Task<IActionResult> GetConsult([FromRoute] string Num)
+        {
+
+
+            var cons = await _context.Agreements
+                            .Include(p => p.Addresses)
+                            .Include(c => c.Clients)
+                            .Include(t => t.TypeService)
+                            .Where(d => d.Account == Num).ToListAsync();
+
+            if (cons == null)
+            {
+                return NotFound();
+            }
+            return Ok(cons);
+        }
+
+        [HttpGet("ExerciseMonth")]
+        public async Task<IActionResult> GetExerciseMonth([FromRoute] string Date)
+        {
+
+
+            var payment = await _context.Payments
+                            .Include(p => p.PaymentDetails)
+
+                .Where(p => p.PaymentDate.Year == Convert.ToDateTime(Date).Year).ToListAsync();
+
+
+            var debt = _context.DebtDiscounts.Where(d => d.DebtId == 450620).ToList().Sum(d => d.DiscountAmount);
+
+
+
+
+            if (payment == null)
+            {
+                return NotFound();
+            }
+            return Ok(payment);
+        }
+
+        [HttpGet("Historic/{Date}")]
+        public async Task<IActionResult> GetHistoric([FromRoute] string Date)
+        {
+
+            Model.Prueba ps = new Model.Prueba();
+            decimal result = 0;
+            decimal sub = 0;
+
+
+            var payment = await _context.Payments
+                .Where(p => p.PaymentDate.Year == Convert.ToDateTime(Date).Year).ToListAsync();
+
+
+
+
+            result = payment.Sum(x => x.Total);
+            sub = payment.Sum(s => s.Subtotal );
+
+            ps.Total = result;
+            ps.subTotal = sub;
+
+
+            return Ok(ps);
+
+            //return Ok("Total:"+result);
+        }
+
 
     }
 }
