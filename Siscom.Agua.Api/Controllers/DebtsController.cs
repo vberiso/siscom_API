@@ -97,6 +97,26 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(debt);
         }
+       
+        [HttpGet("Detail/{DebtId}")]
+        public async Task<IActionResult> GetDebtDetail([FromRoute] int DebtId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var debt = await _context.DebtDetails
+                                     .Where(d => d.DebtId== DebtId)
+                                     .OrderBy(x => x.NameConcept).ToListAsync();
+
+            if (debt == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(debt);
+        }
 
     }
 }
