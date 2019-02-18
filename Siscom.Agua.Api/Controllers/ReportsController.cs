@@ -104,34 +104,42 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(cons);
         }
 
-        [HttpGet("ExerciseMonth")]
+        [HttpGet("ExerciseMonth/{Date}")]
         public async Task<IActionResult> GetExerciseMonth([FromRoute] string Date)
         {
 
+            Model.Report mon = new Model.Report();
+            decimal total = 0;
+            decimal subto = 0;
 
             var payment = await _context.Payments
-                            .Include(p => p.PaymentDetails)
+                .Where(p => p.PaymentDate.Month == Convert.ToDateTime(Date).Month).ToListAsync();
 
-                .Where(p => p.PaymentDate.Year == Convert.ToDateTime(Date).Year).ToListAsync();
+            total = payment.Sum(x => x.Total);
+            subto = payment.Sum(s => s.Subtotal);
 
+            if(total == 0){
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No existen pagos en este mes" });
 
-            var debt = _context.DebtDiscounts.Where(d => d.DebtId == 450620).ToList().Sum(d => d.DiscountAmount);
-
-
-
-
-            if (payment == null)
-            {
-                return NotFound();
             }
-            return Ok(payment);
+
+            mon.Total = total;
+            mon.subTotal = subto; 
+
+
+            if (mon == null){
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No encontrado" });
+
+                //return NotFound();
+            }
+            return Ok(mon);
         }
 
         [HttpGet("Historic/{Date}")]
         public async Task<IActionResult> GetHistoric([FromRoute] string Date)
         {
 
-            Model.Prueba ps = new Model.Prueba();
+            Model.Report ps = new Model.Report();
             decimal result = 0;
             decimal sub = 0;
 
@@ -145,10 +153,21 @@ namespace Siscom.Agua.Api.Controllers
             result = payment.Sum(x => x.Total);
             sub = payment.Sum(s => s.Subtotal );
 
+            if(result == 0){
+
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay registro" });
+
+            }
+
             ps.Total = result;
             ps.subTotal = sub;
 
 
+            if (ps == null){
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No encontrado" });
+
+                //return NotFound();
+            }
             return Ok(ps);
 
             //return Ok("Total:"+result);
