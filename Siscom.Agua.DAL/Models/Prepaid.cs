@@ -29,6 +29,8 @@ namespace Siscom.Agua.DAL.Models
         public string StatusDescription { get; set; }
         [Column("type"), StringLength(5), Required]
         public string Type { get; set; }
+        [NotMapped]
+        public string TypeDescription { get; set; }
         [Column("percentage"), Required]
         public Int16 Percentage { get; set; }
 

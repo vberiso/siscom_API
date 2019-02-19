@@ -59,6 +59,20 @@ namespace Siscom.Agua.Api.Controllers
             summary.Clients = summary.Clients.Where(c => c.IsActive == true).ToList();
             summary.Addresses = summary.Addresses.Where(a => a.TypeAddress == "DIR01" && a.IsActive == true).ToList();
 
+            var status = await _context.Statuses.ToListAsync();
+            var type = await _context.Types.ToListAsync();
+
+            summary.Prepaids.ToList().ForEach(x =>
+            {  
+                x.StatusDescription = (from d in status
+                                       where d.CodeName == x.Status
+                                       select d).FirstOrDefault().Description;
+                x.TypeDescription = (from d in type
+                                     where d.CodeName == x.Type
+                                     select d).FirstOrDefault().Description;
+            });
+
+
             summary.Debts = await _context.Debts
                                           .Include( gs => gs.DebtDetails)
                                           .Where(gs => _context.Statuses
