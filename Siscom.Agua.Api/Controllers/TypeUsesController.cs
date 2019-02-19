@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using Siscom.Agua.DAL.Models;
 namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
     public class TypeUsesController : ControllerBase
     {

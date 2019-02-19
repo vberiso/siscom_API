@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http.Cors;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -16,6 +17,7 @@ namespace Siscom.Agua.Api.Controllers
     /// </summary>
     [Route("api/PayMethod")]
     [Produces("application/json")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
     [Authorize]
     public class PayMethodController : ControllerBase

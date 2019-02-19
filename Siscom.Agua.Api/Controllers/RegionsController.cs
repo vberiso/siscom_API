@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ namespace Siscom.Agua.Api.Controllers
     /// End Points Region
     /// </summary>
     [Route("api/[controller]")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [Produces("application/json")]
     [ApiController]
     [Authorize]

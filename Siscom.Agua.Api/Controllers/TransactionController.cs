@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using System.Data;
 using System.Data.SqlClient;
+using System.Web.Http.Cors;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -24,6 +25,7 @@ namespace Siscom.Agua.Api.Controllers
     /// End Points Transaction
     /// </summary>
     [Route("api/Transaction")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [Produces("application/json")]
     [ApiController]
     [Authorize]

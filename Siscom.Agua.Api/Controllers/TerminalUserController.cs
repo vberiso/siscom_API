@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Web.Http.Cors;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -18,6 +19,7 @@ namespace Siscom.Agua.Api.Controllers
     /// </summary>
     [Route("api/TerminalUser")]
     [Produces("application/json")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
     [Authorize]
     public class TerminalUserController : ControllerBase

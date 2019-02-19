@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Siscom.Agua.DAL;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Web.Http.Cors;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -11,6 +12,8 @@ namespace Siscom.Agua.Api.Controllers
     //[Authorize]
     [Authorize]
     [Route("api/[controller]")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
+
     public class ValuesController : Controller
     {
         private readonly ApplicationDbContext _context;

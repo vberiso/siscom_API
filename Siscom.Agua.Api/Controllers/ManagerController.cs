@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Siscom.Agua.Api.Controllers
 {
     [Produces("application/json")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [Route("api/Manager")]
     public class ManagerController : Controller
     {

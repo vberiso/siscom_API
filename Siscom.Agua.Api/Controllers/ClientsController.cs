@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,7 @@ namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/Agreement/{AgreementId}/[controller]")]
     [Produces("application/json")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
     [Authorize]
     public class ClientsController : ControllerBase

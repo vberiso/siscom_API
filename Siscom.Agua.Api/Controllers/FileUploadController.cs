@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +27,7 @@ using Siscom.Agua.DAL.Models;
 namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     //[Produces("application/json", "application/json-patch+json", "multipart/form-data")]
     [ApiController]
     [Authorize]
