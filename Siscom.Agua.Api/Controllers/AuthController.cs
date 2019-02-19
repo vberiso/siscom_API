@@ -22,7 +22,7 @@ namespace Siscom.Agua.Api.Controllers
 {
     [Produces("application/json")]
     [Route("api/Auth")]
-    [EnableCors(origins: "https://siscomayuntamientodesarrollo.azurewebsites.net", headers: "*", methods: "*")]
+    [EnableCors(origins: "https://siscomwebayuntamiento.azurewebsites.net", headers: "*", methods: "*")]
     public class AuthController : Controller
     {
         private UserManager<ApplicationUser> userManager;
