@@ -302,6 +302,9 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El contrato no se encuentra activo") });
 
                 //Deuda
+                if(pDebt.Amount==0)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("Importe incorrecto") });
+
                 if (pDebt.DebtDetails.Count == 0)
                     return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("Debe ingresar conceptos a cobrar") });
 
