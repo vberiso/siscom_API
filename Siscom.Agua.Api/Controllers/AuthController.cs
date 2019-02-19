@@ -16,11 +16,13 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http.Cors;
 
 namespace Siscom.Agua.Api.Controllers
 {
     [Produces("application/json")]
     [Route("api/Auth")]
+    [EnableCors(origins: "https://siscomayuntamientodesarrollo.azurewebsites.net", headers: "*", methods: "*")]
     public class AuthController : Controller
     {
         private UserManager<ApplicationUser> userManager;
