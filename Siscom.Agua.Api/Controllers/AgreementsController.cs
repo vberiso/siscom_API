@@ -64,10 +64,13 @@ namespace Siscom.Agua.Api.Controllers
 
             summary.Prepaids.ToList().ForEach(x =>
             {  
+                if(!string.IsNullOrEmpty(x.Status))
                 x.StatusDescription = (from d in status
                                        where d.CodeName == x.Status
                                        select d).FirstOrDefault().Description;
-                x.TypeDescription = (from d in type
+
+                if (!string.IsNullOrEmpty(x.Type))
+                    x.TypeDescription = (from d in type
                                      where d.CodeName == x.Type
                                      select d).FirstOrDefault().Description;
             });
