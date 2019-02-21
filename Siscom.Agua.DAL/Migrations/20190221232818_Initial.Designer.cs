@@ -10,7 +10,7 @@ using Siscom.Agua.DAL;
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190213222241_Initial")]
+    [Migration("20190221232818_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1522,7 +1522,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 2, 13, 16, 22, 41, 483, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 2, 21, 17, 28, 17, 579, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2497,7 +2497,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("Town")
                         .HasColumnName("town")
-                        .HasMaxLength(30);
+                        .HasMaxLength(50);
 
                     b.Property<string>("Zip")
                         .HasColumnName("zip")

@@ -724,7 +724,7 @@ namespace Siscom.Agua.DAL.Migrations
                     range = table.Column<string>(nullable: false),
                     initial = table.Column<int>(nullable: false),
                     secuential = table.Column<int>(nullable: false),
-                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2019, 2, 13, 16, 22, 41, 483, DateTimeKind.Local)),
+                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2019, 2, 21, 17, 28, 17, 579, DateTimeKind.Local)),
                     is_active = table.Column<int>(nullable: false),
                     BranchOfficeId = table.Column<int>(nullable: false)
                 },
@@ -1017,7 +1017,7 @@ namespace Siscom.Agua.DAL.Migrations
                     indoor = table.Column<string>(maxLength: 50, nullable: true),
                     zip = table.Column<string>(maxLength: 5, nullable: true),
                     suburb = table.Column<string>(maxLength: 100, nullable: true),
-                    town = table.Column<string>(maxLength: 30, nullable: true),
+                    town = table.Column<string>(maxLength: 50, nullable: true),
                     state = table.Column<string>(maxLength: 30, nullable: true),
                     TaxUserId = table.Column<int>(nullable: false)
                 },
