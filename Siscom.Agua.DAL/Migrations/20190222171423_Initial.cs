@@ -298,6 +298,7 @@ namespace Siscom.Agua.DAL.Migrations
                     id_pay_method = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     name = table.Column<string>(maxLength: 50, nullable: false),
+                    code = table.Column<string>(maxLength: 5, nullable: false),
                     is_active = table.Column<bool>(nullable: false, defaultValue: true)
                 },
                 constraints: table =>
@@ -724,7 +725,7 @@ namespace Siscom.Agua.DAL.Migrations
                     range = table.Column<string>(nullable: false),
                     initial = table.Column<int>(nullable: false),
                     secuential = table.Column<int>(nullable: false),
-                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2019, 2, 21, 17, 28, 17, 579, DateTimeKind.Local)),
+                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2019, 2, 22, 11, 14, 23, 361, DateTimeKind.Local)),
                     is_active = table.Column<int>(nullable: false),
                     BranchOfficeId = table.Column<int>(nullable: false)
                 },
@@ -820,7 +821,7 @@ namespace Siscom.Agua.DAL.Migrations
                     period = table.Column<short>(nullable: false),
                     type = table.Column<string>(maxLength: 5, nullable: false),
                     status = table.Column<string>(maxLength: 5, nullable: false),
-                    observation = table.Column<string>(maxLength: 250, nullable: true),
+                    observation = table.Column<string>(nullable: true),
                     id_origin = table.Column<int>(nullable: false),
                     id_tax_user = table.Column<int>(nullable: false),
                     expiration_date = table.Column<DateTime>(type: "date", nullable: false),
@@ -1040,6 +1041,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     concept = table.Column<string>(maxLength: 80, nullable: false),
                     account_number = table.Column<string>(maxLength: 20, nullable: false),
+                    unit_measurement = table.Column<string>(maxLength: 10, nullable: false),
                     have_tax = table.Column<bool>(nullable: false),
                     percentage = table.Column<short>(nullable: false),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
@@ -1291,7 +1293,7 @@ namespace Siscom.Agua.DAL.Migrations
                     unity = table.Column<string>(maxLength: 10, nullable: false),
                     unit_price = table.Column<decimal>(nullable: false),
                     have_tax = table.Column<bool>(nullable: false),
-                    description = table.Column<string>(maxLength: 500, nullable: false),
+                    description = table.Column<string>(nullable: false),
                     code_concept = table.Column<string>(maxLength: 5, nullable: false),
                     name_concept = table.Column<string>(maxLength: 500, nullable: false),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
@@ -1316,6 +1318,7 @@ namespace Siscom.Agua.DAL.Migrations
                     id_tariff = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     account_number = table.Column<string>(maxLength: 20, nullable: false),
+                    unit_measurement = table.Column<string>(maxLength: 10, nullable: false),
                     have_tax = table.Column<bool>(nullable: false),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     from_date = table.Column<DateTime>(nullable: false),

@@ -33,7 +33,7 @@ namespace Siscom.Agua.DAL.Models
         public string Type { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
-        [Column("observation"),StringLength(250)]
+        [Column("observation")]
         public string Observation { get; set; }
         [Column("id_origin")]
         public int IdOrigin { get; set; }

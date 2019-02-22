@@ -19,7 +19,7 @@ namespace Siscom.Agua.DAL.Models
         public decimal UnitPrice { get; set; }
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }
-        [Required, Column("description"), StringLength(500)]
+        [Required, Column("description")]
         public string Description { get; set; }
         [Required, StringLength(5), Column("code_concept")]
         public string CodeConcept { get; set; }

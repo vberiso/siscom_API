@@ -10,7 +10,7 @@ using Siscom.Agua.DAL;
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190221232818_Initial")]
+    [Migration("20190222171423_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1522,7 +1522,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 2, 21, 17, 28, 17, 579, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 2, 22, 11, 14, 23, 361, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -1788,8 +1788,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_tax_user");
 
                     b.Property<string>("Observation")
-                        .HasColumnName("observation")
-                        .HasMaxLength(250);
+                        .HasColumnName("observation");
 
                     b.Property<decimal>("OnAccount")
                         .HasColumnName("on_account")
@@ -1836,8 +1835,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnName("description")
-                        .HasMaxLength(500);
+                        .HasColumnName("description");
 
                     b.Property<bool>("HaveTax")
                         .HasColumnName("have_tax");
@@ -2010,6 +2008,11 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_pay_method")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnName("code")
+                        .HasMaxLength(5);
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -2404,6 +2407,11 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("TypeIntakeId");
 
+                    b.Property<string>("UnitMeasurement")
+                        .IsRequired()
+                        .HasColumnName("unit_measurement")
+                        .HasMaxLength(10);
+
                     b.Property<DateTime>("UntilDate")
                         .HasColumnName("until_date")
                         .HasColumnType("date");
@@ -2454,6 +2462,11 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<short>("TimesFactor")
                         .HasColumnName("times_factor");
+
+                    b.Property<string>("UnitMeasurement")
+                        .IsRequired()
+                        .HasColumnName("unit_measurement")
+                        .HasMaxLength(10);
 
                     b.Property<DateTime>("UntilDate")
                         .HasColumnName("until_date");
