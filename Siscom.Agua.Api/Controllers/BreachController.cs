@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -19,10 +21,14 @@ namespace Siscom.Agua.Api.Controllers
     public class BreachController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private UserManager<ApplicationUser> userManager;
 
-        public BreachController(ApplicationDbContext context)
+
+        public BreachController(ApplicationDbContext context, UserManager<ApplicationUser>userManager)
         {
             _context = context;
+            this.userManager = userManager;
+
 
         }
 
@@ -43,7 +49,31 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            _context.Breaches.Add(breanch);
+
+            Breach NewBreach = new Breach(){
+                Series             = breanch.Series,
+                Folio              = breanch.Folio,
+                CaptureDate        = breanch.CaptureDate,
+                Place              = breanch.Place,
+                Sector             = breanch.Sector,
+                Zone               = breanch.Zone,
+                Car                = breanch.Car,
+                TypeCar            = breanch.TypeCar,
+                Service            = breanch.Service,
+                Color              = breanch.Color,
+                LicensePlate       = breanch.LicensePlate,
+                Reason             = breanch.Reason,
+                Judge              = breanch.Judge,
+                DateBreach         = breanch.DateBreach,
+                Status             = breanch.Status,
+                AssignmentTicketId = breanch.AssignmentTicketId,
+                UserId             = breanch.UserId,
+                User               = await userManager.FindByIdAsync(breanch.UserId),
+                TaxUserId          = await userManager.FindByIdAsync(breanch.TaxUserId)
+
+            };
+
+            _context.Breaches.Add(NewBreach);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetBreach", new { id = breanch.Id }, breanch);
