@@ -68,8 +68,7 @@ namespace Siscom.Agua.Api.Controllers
                 Status             = breanch.Status,
                 AssignmentTicketId = breanch.AssignmentTicketId,
                 UserId             = breanch.UserId,
-                User               = await userManager.FindByIdAsync(breanch.UserId),
-                TaxUserId          = await userManager.FindByIdAsync(breanch.TaxUserId)
+                User               = await userManager.FindByIdAsync(breanch.UserId)
 
             };
 
