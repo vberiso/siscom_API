@@ -13,5 +13,6 @@ namespace Siscom.Agua.Api.Model
         public string Name { get; set; }
         public int RegionId { get; set; }
         public int ClasificationId { get; set; }
+        public int SuburbId { get; set; }
     }
 }

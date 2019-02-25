@@ -37,7 +37,7 @@ namespace Siscom.Agua.Api.Controllers
             return new ObjectResult(payments);
         }
 
-        [HttpGet("{debtId}")]
+        [HttpGet("Debts/{debtId}")]
         public async Task<IActionResult> GetPaymentsByDebt([FromRoute] int debtId)
         {
             var debts = await _context.Debts

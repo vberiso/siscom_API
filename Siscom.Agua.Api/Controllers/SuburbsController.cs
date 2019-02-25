@@ -42,6 +42,7 @@ namespace Siscom.Agua.Api.Controllers
                                             Name = x.Name,
                                             ClasificationId = x.Clasifications.Id,
                                             RegionId = x.Regions.Id,
+                                            SuburbId = x.Towns.StateId
                                         }).ToList().OrderByDescending(x => x.Name);
                 return a;
             }
@@ -61,7 +62,11 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var suburb = await _context.Suburbs.Include(r => r.Regions).Include(c => c.Clasifications).SingleOrDefaultAsync(i => i.Id == id);
+            var suburb = await _context.Suburbs
+                                        .Include(r => r.Regions)
+                                        .Include(c => c.Clasifications)
+                                        .Include(t => t.Towns)
+                                        .SingleOrDefaultAsync(i => i.Id == id);
 
             if (suburb == null)
             {
