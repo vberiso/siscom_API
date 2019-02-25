@@ -26,29 +26,29 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/Warranty
-        [HttpGet]
-        public IEnumerable<TaxUser> GetTaxUsers()
-        {
-            return (System.Collections.Generic.IEnumerable<Siscom.Agua.Api.Controllers.TaxUser>)_context.TaxUsers;
-        }
+        //[HttpGet]
+        //public IEnumerable<TaxUser> GetTaxUsers()
+        //{
+        //    return (System.Collections.Generic.IEnumerable<Siscom.Agua.Api.Controllers.TaxUser>)_context.TaxUsers;
+        //}
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetTaxUser([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetTaxUser([FromRoute] int id)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var taxuser = await _context.TaxUsers.FindAsync(id);
+        //    var taxuser = await _context.TaxUsers.FindAsync(id);
 
-            if (taxuser == null)
-            {
-                return NotFound();
-            }
+        //    if (taxuser == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(taxuser);
-        }
+        //    return Ok(taxuser);
+        //}
 
        
 
