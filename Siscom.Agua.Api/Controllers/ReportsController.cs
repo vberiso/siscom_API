@@ -106,8 +106,8 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(cons);
         }
 
-        [HttpGet("ExerciseMonth/{Date}")]
-        public async Task<IActionResult> GetExerciseMonth([FromRoute] string Date)
+        [HttpGet("ExerciseMonth/{DateYear}/{Month}")]
+        public async Task<IActionResult> GetExerciseMonth([FromRoute] string DateYear, string Month)
         {
 
             Model.Report mon = new Model.Report();
@@ -115,7 +115,12 @@ namespace Siscom.Agua.Api.Controllers
             decimal subto = 0;
 
             var payment = await _context.Payments
-                .Where(p => p.PaymentDate.Month == Convert.ToDateTime(Date).Month).ToListAsync();
+                                .Where(p => p.PaymentDate.Year == Convert.ToDateTime(DateYear).Year && 
+                                     Convert.ToDateTime(Month).Month == p.PaymentDate.Month).ToListAsync();
+
+
+            //var payment = first
+                //.Where().ToListAsync();
 
             total = payment.Sum(x => x.Total);
             subto = payment.Sum(s => s.Subtotal);
