@@ -146,6 +146,7 @@ namespace Siscom.Agua.Api.Controllers
                 _sumTransactionDetail += item.Amount;
             }
 
+
             if (pPaymentConcepts.Transaction.Amount != _sumTransactionDetail)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pPaymentConcepts.Transaction.Amount) });
 
@@ -280,10 +281,10 @@ namespace Siscom.Agua.Api.Controllers
 
                         if (!String.IsNullOrEmpty(debt.NewStatus))
                         {
-                            
+
                             if (await _context.Statuses
                                                       .Where(x => x.GroupStatusId == 4 &&
-                                                                  x.CodeName == debtFind.Status).FirstAsync() !=null)
+                                                                  x.CodeName == debtFind.Status).FirstAsync() != null)
                             {
                                 debtFind.Status = debt.NewStatus;
                                 debtFind.OnAccount = debt.OnAccount;
@@ -316,12 +317,32 @@ namespace Siscom.Agua.Api.Controllers
                                     _context.Entry(conceptos).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
 
+                                    string _accountNumber =String.Empty;
+                                    string _unitMeasurement= String.Empty;
+
+                                    if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
+                                    {
+                                        ServiceParam _serviceParam = await _context.ServiceParams.FindAsync(detail.CodeConcept);
+                                        _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
+                                        _unitMeasurement = _serviceParam != null ? _serviceParam.UnitMeasurement : String.Empty;
+                                    }
+                                    else
+                                    {
+                                        ProductParam _productParam = await _context.ProductParams.FindAsync(detail.CodeConcept);
+                                        _accountNumber = _productParam != null ? _productParam.CodeConcept : String.Empty;
+                                        _unitMeasurement = _productParam != null ? _productParam.UnitMeasurement : String.Empty;
+                                    }
+                                   
+
                                     PaymentDetail paymentDetail = new PaymentDetail();
                                     paymentDetail.CodeConcept = detail.CodeConcept;
+                                    paymentDetail.AccountNumber = _accountNumber;
+                                    paymentDetail.UnitMeasurement = _unitMeasurement;
                                     paymentDetail.Amount = detail.OnPayment;
                                     paymentDetail.Description = detail.NameConcept;
                                     paymentDetail.DebtId = debt.Id;
                                     paymentDetail.PrepaidId = 0;
+                                    paymentDetail.OrderSaleId = 0;
                                     paymentDetail.PaymentId = payment.Id;
                                     _context.PaymentDetails.Add(paymentDetail);
                                     await _context.SaveChangesAsync();

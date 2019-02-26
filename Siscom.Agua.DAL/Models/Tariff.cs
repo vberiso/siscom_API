@@ -16,9 +16,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("concept"), StringLength(80), Required]
         public string Concept { get; set; }
         [Column("account_number"), StringLength(20), Required]
-        public string AccountNumber { get; set; }
-        [Column("unit_measurement"), StringLength(10), Required]
-        public string UnitMeasurement { get; set; }
+        public string AccountNumber { get; set; }       
         [Required, Column("have_tax")]
         public bool HaveTax { get; set; }
         [Column("percentage"), Required]
@@ -46,6 +44,6 @@ namespace Siscom.Agua.DAL.Models
         public TypeIntake TypeIntake { get; set; }
 
         public int TypeConsumeId { get; set; }
-        public TypeConsume TypeConsume { get; set; }
+        public TypeConsume TypeConsume { get; set; }       
     }
 }

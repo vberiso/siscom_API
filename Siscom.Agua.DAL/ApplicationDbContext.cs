@@ -112,6 +112,9 @@ namespace Siscom.Agua.DAL
         public DbSet<INPC> INPCs { get; set; }
         public DbSet<Division> Divisions { get; set; }
         public DbSet<DebtCalculation> DebtCalculations { get; set; }
+        public DbSet<ProductParam> ProductParams { get; set; }
+        public DbSet<ServiceParam> ServiceParams { get; set; }
+        
 
         /// <summary> 
         /// Payment
@@ -848,6 +851,21 @@ namespace Siscom.Agua.DAL
             builder.Entity<Tariff>()
                    .Property(p => p.EndConsume)
                    .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Payment>()
+                   .Property(x => x.HaveTaxReceipt)
+                   .HasDefaultValue(true);
+            #endregion
+
+            #region TariffParam
+            builder.Entity<ServiceParam>()
+                   .HasOne<Service>(a => a.Service)
+                   .WithMany(s => s.ServiceParams)
+                   .HasForeignKey(s => s.ServiceId);
+
+            builder.Entity<ServiceParam>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
             #endregion
 
             #region TariffProduct
@@ -859,6 +877,17 @@ namespace Siscom.Agua.DAL
             builder.Entity<TariffProduct>()
                    .Property(p => p.Amount)
                    .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region TariffParam
+            builder.Entity<ProductParam>()
+                   .HasOne<Product>(a => a.Product)
+                   .WithMany(s => s.ProductParams)
+                   .HasForeignKey(s => s.ProductId);
+
+            builder.Entity<ProductParam>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
             #endregion
 
             #region  TaxAddress

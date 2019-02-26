@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public Product()
         {
             TariffProducts = new HashSet<TariffProduct>();
+            ProductParams = new HashSet<ProductParam>();
         }
 
         [Key]
@@ -29,9 +30,10 @@ namespace Siscom.Agua.DAL.Models
         [Required, Column("is_active")]
         public bool IsActive { get; set; }
 
-        public ICollection<TariffProduct> TariffProducts { get; set; }
-
         public int DivisionId { get; set; }
         public Division Division { get; set; }
+
+        public ICollection<TariffProduct> TariffProducts { get; set; }
+        public ICollection<ProductParam> ProductParams { get; set; }
     }
 }
