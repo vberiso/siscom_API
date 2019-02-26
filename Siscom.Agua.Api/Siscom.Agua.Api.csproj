@@ -21,6 +21,7 @@
   <ItemGroup>
     <Compile Remove="Model\TransactionDetailVM.cs" />
     <Compile Remove="Controllers\TaxUser.cs" />
+    <Compile Remove="Controllers\TaxReceipt.cs" />
   </ItemGroup>
 
   <ItemGroup>

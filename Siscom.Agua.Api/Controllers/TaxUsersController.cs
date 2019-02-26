@@ -13,25 +13,25 @@ namespace Siscom.Agua.Api.Controllers
     [Route("api/TaxUsers/")]
     [Produces("application/json")]
     [Authorize]
-    public class TaxUsers : ControllerBase
+    public class TaxUsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public TaxUsers(ApplicationDbContext context)
+        public TaxUsersController(ApplicationDbContext context)
         {
             _context = context;
 
         }
 
 
-        // GET: api/Warranty
+        // GET: api/TaxUser
         [HttpGet]
         public IEnumerable<TaxUser> GetTaxUsers()
         {
             return _context.TaxUsers;
         }
 
-        // GET: api/Warranty/1
+        // GET: api/TaxUsers/1
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTaxUser([FromRoute] int id)
         {
@@ -51,7 +51,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
-        // POST: api/Warranty
+        // POST: api/TaxUsers
         [HttpPost]
         public async Task<IActionResult> PostTaxUsers(int TaxUsersId, [FromBody] TaxUser taxUsers)
         {
@@ -65,7 +65,7 @@ namespace Siscom.Agua.Api.Controllers
             return CreatedAtAction("GetTaxUsers", new { id = taxUsers.Id }, taxUsers);
         }
 
-        // PUT: api/Warranty/1
+        // PUT: api/TaxUsers/1
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWarranty([FromRoute] int id, [FromBody] TaxUser tax)
         {
@@ -100,7 +100,7 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(tax);
         }
 
-        // DELETE: api/Warranty/1
+        // DELETE: api/TaxUsers/1
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaxUser([FromRoute] int id)
         {
