@@ -20,7 +20,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("unit_measurement"), StringLength(10), Required]
         public string UnitMeasurement { get; set; }
         [Column("is_active"), Required]
-        public int IsActive { get; set; }
+        public bool IsActive { get; set; }
 
         public int ServiceId { get; set; }
         public Service Service { get; set; }
