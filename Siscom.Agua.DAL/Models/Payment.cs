@@ -44,6 +44,8 @@ namespace Siscom.Agua.DAL.Models
         public string Type { get; set; }
         [Column("pay_method_number"), StringLength(31)]
         public string PayMethodNumber { get; set; }
+        [Column("have_tax_receipt"), Required]
+        public bool HaveTaxReceipt { get; set; }
 
         //[ForeignKey("OriginPayment")]
         public int OriginPaymentId { get; set; }
@@ -58,5 +60,6 @@ namespace Siscom.Agua.DAL.Models
         public PayMethod PayMethod { get; set; }
 
         public ICollection<PaymentDetail> PaymentDetails { get; set; }
+        public ICollection<TaxReceipt> TaxReceipts { get; set; }
     }
 }

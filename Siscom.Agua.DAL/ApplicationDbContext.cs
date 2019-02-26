@@ -120,6 +120,7 @@ namespace Siscom.Agua.DAL
         public DbSet<ExternalOriginPayment> ExternalOriginPayments { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PaymentDetail> PaymentDetails { get; set; }
+        public DbSet<TaxReceipt> TaxReceipts { get; set; }
 
         /// <summary>
         /// System
@@ -715,6 +716,10 @@ namespace Siscom.Agua.DAL
             builder.Entity<Payment>()
                 .Property(p => p.Total)
                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Payment>()
+                   .Property(x => x.HaveTaxReceipt)
+                   .HasDefaultValue(false);
             #endregion
 
             #region PaymentDetail
@@ -868,7 +873,19 @@ namespace Siscom.Agua.DAL
             builder.Entity<TaxUser>()
                    .Property(x => x.IsActive)
                    .HasDefaultValue(true);
-            #endregion          
+            #endregion
+
+            #region  TaxReceipt
+            builder.Entity<TaxReceipt>()
+                   .HasOne<Payment>(a => a.Payment)
+                   .WithMany(s => s.TaxReceipts)
+                   .HasForeignKey(s => s.PaymentId);
+
+            builder.Entity<TaxReceipt>()
+                  .HasOne<ApplicationUser>(a => a.User)
+                  .WithMany(s => s.TaxReceipts)
+                  .HasForeignKey(s => s.UserId);
+            #endregion            
 
             #region Terminal
             builder.Entity<Terminal>()

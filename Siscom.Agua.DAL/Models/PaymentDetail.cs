@@ -15,6 +15,10 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("code_concept"), StringLength(10)]
         public string CodeConcept { get; set; }
+        [Column("account_number"), StringLength(20), Required]
+        public string AccountNumber { get; set; }
+        [Column("unit_measurement"), StringLength(10), Required]
+        public string UnitMeasurement { get; set; }
         [Column("description"), StringLength(150)]
         public string Description { get; set; }
         [Column("amount"), Required]
@@ -27,6 +31,10 @@ namespace Siscom.Agua.DAL.Models
         public int PrepaidId { get; set; }
         [NotMapped]
         public Prepaid Prepaid { get; set; }
+        [Column("id_order_sale"), Required]
+        public int OrderSaleId { get; set; }
+        [NotMapped]
+        public OrderSale OrderSale { get; set; }
 
         public int PaymentId { get; set; }
         public Payment Payment { get; set; }
