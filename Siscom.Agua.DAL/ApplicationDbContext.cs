@@ -852,8 +852,8 @@ namespace Siscom.Agua.DAL
                    .Property(p => p.EndConsume)
                    .HasColumnType("decimal(18, 2)");
 
-            builder.Entity<Payment>()
-                   .Property(x => x.HaveTaxReceipt)
+            builder.Entity<Tariff>()
+                   .Property(x => x.IsActive)
                    .HasDefaultValue(true);
             #endregion
 
