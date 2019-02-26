@@ -50,27 +50,39 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            Breach NewBreach = new Breach(){
-                Series             = breanch.Series,
-                Folio              = breanch.Folio,
-                CaptureDate        = breanch.CaptureDate,
-                Place              = breanch.Place,
-                Sector             = breanch.Sector,
-                Zone               = breanch.Zone,
-                Car                = breanch.Car,
-                TypeCar            = breanch.TypeCar,
-                Service            = breanch.Service,
-                Color              = breanch.Color,
-                LicensePlate       = breanch.LicensePlate,
-                Reason             = breanch.Reason,
-                Judge              = breanch.Judge,
-                DateBreach         = breanch.DateBreach,
-                Status             = breanch.Status,
-                AssignmentTicketId = breanch.AssignmentTicketId,
-                UserId             = breanch.UserId,
-                User               = await userManager.FindByIdAsync(breanch.UserId)
+            Breach NewBreach = new Breach();
 
-            };
+
+            var taxu = await _context.TaxUsers.FindAsync(breanch.TaxUserId);
+            //var user = await _context.Breaches.FindAsync(breanch.UserId);
+
+
+
+            //Breach NewBreach = new Breach(){
+            //    Series             = breanch.Series,
+            //    Folio              = breanch.Folio,
+            //    CaptureDate        = breanch.CaptureDate,
+            //    Place              = breanch.Place,
+            //    Sector             = breanch.Sector,
+            //    Zone               = breanch.Zone,
+            //    Car                = breanch.Car,
+            //    TypeCar            = breanch.TypeCar,
+            //    Service            = breanch.Service,
+            //    Color              = breanch.Color,
+            //    LicensePlate       = breanch.LicensePlate,
+            //    Reason             = breanch.Reason,
+            //    Judge              = breanch.Judge,
+            //    DateBreach         = breanch.DateBreach,
+            //    Status             = breanch.Status,
+            //    AssignmentTicketId = breanch.AssignmentTicketId,
+            //    UserId             = breanch.UserId,
+            //    User               = await userManager.FindByIdAsync(breanch.UserId)
+
+            //};
+
+            NewBreach.TaxUser = taxu;
+
+
 
             _context.Breaches.Add(NewBreach);
             await _context.SaveChangesAsync();

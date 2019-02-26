@@ -35,5 +35,10 @@ namespace Siscom.Agua.DAL.Models
 
         public ICollection<TaxAddress>  TaxAddresses { get; set; }
         public ICollection<Breach> Breaches { get; set; }
+
+        public static implicit operator int(TaxUser v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

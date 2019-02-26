@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿
+using System.Collections.Generic;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Siscom.Agua.DAL;
-using Siscom.Agua.DAL.Models;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -23,6 +20,12 @@ namespace Siscom.Agua.Api.Controllers
         public TaxUser(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet]
+        public Microsoft.EntityFrameworkCore.DbSet<DAL.Models.TaxUser> GetTaxUsers()
+        {
+           return _context.TaxUsers;
         }
 
         // GET: api/Warranty
@@ -50,7 +53,7 @@ namespace Siscom.Agua.Api.Controllers
         //    return Ok(taxuser);
         //}
 
-       
+
 
     }
 }
