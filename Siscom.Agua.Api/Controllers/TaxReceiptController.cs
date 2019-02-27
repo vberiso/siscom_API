@@ -6,6 +6,7 @@ using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -67,6 +68,12 @@ namespace Siscom.Agua.Api.Controllers
 
 
             //NewTaxReceipts.TaxUser = taxu;
+
+            if(taxReceipt.UserId == null || taxReceipt.UserId == "0")
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Ingresar id de usuario" });
+
+            }
 
 
             _context.TaxReceipts.Add(taxReceipt);
