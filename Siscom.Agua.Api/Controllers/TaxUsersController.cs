@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/TaxUsers/")]
     [Produces("application/json")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [Authorize]
     public class TaxUsersController : ControllerBase
     {
@@ -49,6 +51,25 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(taxuser);
         }
+
+        [HttpGet("Search/{name}")]
+        public async Task<IActionResult> GetSearch([FromRoute] string name)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var taxuser = await _context.TaxUsers.Where(n => n.Name == name).ToListAsync();
+
+            if (taxuser == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(taxuser);
+        }
+
 
 
         // POST: api/TaxUsers
@@ -126,5 +147,9 @@ namespace Siscom.Agua.Api.Controllers
         {
             return _context.TaxUsers.Any(e => e.Id == id);
         }
+
+
+
+
     }
 }
