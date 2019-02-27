@@ -6,6 +6,7 @@ using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -62,12 +63,62 @@ namespace Siscom.Agua.Api.Controllers
 
             var taxuser = await _context.TaxUsers.Where(n => n.Name == name).ToListAsync();
 
-            if (taxuser == null)
+            if (taxuser.Count == 0)
             {
-                return NotFound();
+
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El usuario no existe" });
+
             }
 
             return Ok(taxuser);
+        }
+
+        [HttpGet("SearchRFC/{rfc}")]
+        public async Task<IActionResult>GetSearchR([FromRoute] string rfc){
+            if(!ModelState.IsValid){
+                return BadRequest(ModelState);
+            }
+
+            var tax = await _context.TaxUsers.Where(r => r.RFC == rfc).ToListAsync();
+
+            if(tax.Count == 0){
+
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El usuario no existe" });
+            }
+
+            return Ok(tax);
+
+        }
+
+        [HttpGet("SearchCurp/{curp}")]
+        public async Task<IActionResult>GetSearchC([FromRoute] string curp){
+
+            if (!ModelState.IsValid){
+                return BadRequest(ModelState);
+            }
+
+            var taxc = await _context.TaxUsers.Where(c => c.CURP == curp).ToListAsync();
+            if(taxc.Count == 0 ){
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El usuario no existe" });
+            }
+
+            return Ok(taxc);
+        }
+
+        [HttpGet("SearchPhone/{phone}")]
+        public async Task<IActionResult>GetSearchP([FromRoute] string phone){
+            if (!ModelState.IsValid){
+                return BadRequest(ModelState);
+
+            }
+
+            var taxp = await _context.TaxUsers.Where(p => p.PhoneNumber == phone).ToListAsync();
+
+            if (taxp.Count == 0){
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El usuario no existe" });
+            }
+
+            return Ok(taxp);
         }
 
 
