@@ -84,6 +84,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
 
+
             _context.TaxReceipts.Add(taxReceipt);
             await _context.SaveChangesAsync();
 
