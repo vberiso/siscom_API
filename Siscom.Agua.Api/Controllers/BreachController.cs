@@ -81,13 +81,36 @@ namespace Siscom.Agua.Api.Controllers
             //};
 
             NewBreach.TaxUser = taxu;
+            NewBreach.Car = breanch.Car;
+            NewBreach.Series = breanch.Series;
+            NewBreach.Folio = breanch.Folio;
+            NewBreach.CaptureDate = breanch.CaptureDate;
+            NewBreach.Place = breanch.Place;
+            NewBreach.Sector = breanch.Sector;
+            NewBreach.Zone = breanch.Zone;
+            NewBreach.TypeCar = breanch.TypeCar;
+            NewBreach.Service = breanch.Service;
+            NewBreach.Color = breanch.Color;
+            NewBreach.Reason = breanch.Reason;
+            NewBreach.LicensePlate = breanch.LicensePlate;
+            NewBreach.Reason = breanch.Reason;
+            NewBreach.Judge = breanch.Judge;
+            NewBreach.DateBreach = breanch.DateBreach;
+            NewBreach.Status = breanch.Status;
+            NewBreach.AssignmentTicketId = breanch.AssignmentTicketId;
+            NewBreach.UserId = breanch.UserId;
+
+
+
+
+
 
 
 
             _context.Breaches.Add(NewBreach);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBreach", new { id = breanch.Id }, breanch);
+            return CreatedAtAction("GetBreach", new { id = NewBreach.Id }, NewBreach);
         }
 
         // PUT: api/Breach/1
