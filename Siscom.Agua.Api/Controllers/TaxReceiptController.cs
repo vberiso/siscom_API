@@ -69,18 +69,18 @@ namespace Siscom.Agua.Api.Controllers
 
             //NewTaxReceipts.TaxUser = taxu;
 
-            if(taxReceipt.UserId == null || taxReceipt.UserId == "0")
+            if(string.IsNullOrEmpty(taxReceipt.UserId))
             {
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Ingresar id de usuario" });
 
             }
 
-            if(taxReceipt.FielXML == null || taxReceipt.FielXML== "0"){
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "ingresar archivo xml" });
+            if(string.IsNullOrEmpty(taxReceipt.FielXML)){
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Ingresar archivo xml" });
             }
 
-            if(taxReceipt.XML == null || taxReceipt.FielXML == "0"){
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "ingresar xml" });
+            if(string.IsNullOrEmpty(taxReceipt.XML)){
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Ingresar xml" });
             }
 
 
