@@ -75,11 +75,11 @@ namespace Siscom.Agua.Api.Controllers
 
             }
 
-            if(taxReceipt.FielXML == 0){
+            if(taxReceipt.FielXML == null || taxReceipt.FielXML== "0"){
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "ingresar archivo xml" });
             }
 
-            if(taxReceipt.XML == 0){
+            if(taxReceipt.XML == null || taxReceipt.FielXML == "0"){
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "ingresar xml" });
             }
 
