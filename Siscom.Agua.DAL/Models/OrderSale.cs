@@ -36,16 +36,15 @@ namespace Siscom.Agua.DAL.Models
         [Column("observation")]
         public string Observation { get; set; }
         [Column("id_origin")]
-        public int IdOrigin { get; set; }
-        [Column("id_tax_user")]
-        public int IdTaxUser { get; set; }
-        [NotMapped]
-        public TaxUser TaxUser { get; set; }
+        public int IdOrigin { get; set; }       
         [Required,Column("expiration_date")]
         public DateTime ExpirationDate { get; set; }        
 
         public int DivisionId { get; set; }
         public Division Division { get; set; }
+
+        public int TaxUserId { get; set; }
+        public TaxUser TaxUser { get; set; }
 
         public ICollection<OrderSaleDetail> OrderSaleDetail { get; set; }
     }

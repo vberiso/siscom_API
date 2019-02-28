@@ -653,6 +653,11 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.DivisionId);
 
             builder.Entity<OrderSale>()
+                   .HasOne<TaxUser>(a => a.TaxUser)
+                   .WithMany(s => s.OrderSales)
+                   .HasForeignKey(s => s.TaxUserId);
+
+            builder.Entity<OrderSale>()
                   .Property(x => x.ExpirationDate)
                   .HasColumnType("date");
 

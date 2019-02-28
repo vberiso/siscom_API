@@ -28,6 +28,7 @@ namespace Siscom.Agua.DAL.Models
         public String CURP { get; set; }
         [Column("phone_number"), StringLength(50), Required]
         public String PhoneNumber { get; set; }
+
         [Column("email"), StringLength(150)]
         public String EMail { get; set; }
         [Column("is_active"), Required]
@@ -35,10 +36,6 @@ namespace Siscom.Agua.DAL.Models
 
         public ICollection<TaxAddress>  TaxAddresses { get; set; }
         public ICollection<Breach> Breaches { get; set; }
-
-        public static implicit operator int(TaxUser v)
-        {
-            throw new NotImplementedException();
-        }
+        public ICollection<OrderSale> OrderSales { get; set; }
     }
 }

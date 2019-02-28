@@ -47,7 +47,7 @@ namespace Siscom.Agua.Api.Controllers
 
             orderSale.TaxUser = await _context.TaxUsers
                                              .Include(x => x.TaxAddresses)
-                                             .Where(x => x.Id == orderSale.IdTaxUser)
+                                             .Where(x => x.Id == orderSale.TaxUserId)
                                              .FirstOrDefaultAsync();
 
             return Ok(orderSale);
@@ -76,7 +76,7 @@ namespace Siscom.Agua.Api.Controllers
 
             orderSale.TaxUser = await _context.TaxUsers
                                              .Include(x => x.TaxAddresses)
-                                             .Where(x => x.Id == orderSale.IdTaxUser)
+                                             .Where(x => x.Id == orderSale.TaxUserId)
                                              .FirstOrDefaultAsync();
 
             return Ok(orderSale);
