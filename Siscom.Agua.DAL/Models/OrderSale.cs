@@ -38,7 +38,9 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_origin")]
         public int IdOrigin { get; set; }
         [Column("id_tax_user")]
-        public int IdTaxUser { get; set; }        
+        public int IdTaxUser { get; set; }
+        [NotMapped]
+        public TaxUser TaxUser { get; set; }
         [Required,Column("expiration_date")]
         public DateTime ExpirationDate { get; set; }        
 

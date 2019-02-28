@@ -320,24 +320,24 @@ namespace Siscom.Agua.Api.Controllers
                                     string _accountNumber =String.Empty;
                                     string _unitMeasurement= String.Empty;
 
-                                    //if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
-                                    //{
-                                    //    var _serviceParam = await _context.ServiceParams
-                                    //                                               .Where(x => x.CodeConcept == detail.CodeConcept && x.IsActive==true)
-                                    //                                               .FirstOrDefaultAsync();
+                                    if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
+                                    {
+                                        var _serviceParam = await _context.ServiceParams
+                                                                          .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrEmpty(detail.CodeConcept)? detail.CodeConcept : "0") && x.IsActive == true)
+                                                                          .FirstOrDefaultAsync();
 
-                                    //    _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
-                                    //    _unitMeasurement = _serviceParam != null ? _serviceParam.UnitMeasurement : String.Empty;
-                                    //}
-                                    //else
-                                    //{
-                                    //    var _productParam = await _context.ProductParams
-                                    //                                      .Where(x => x.CodeConcept == detail.CodeConcept && x.IsActive == true)
-                                    //                                      .FirstOrDefaultAsync();
-                                    //    _accountNumber = _productParam != null ? _productParam.CodeConcept : String.Empty;
-                                    //    _unitMeasurement = _productParam != null ? _productParam.UnitMeasurement : String.Empty;
-                                    //}
-                                   
+                                        _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
+                                        _unitMeasurement = _serviceParam != null ? _serviceParam.UnitMeasurement : String.Empty;
+                                    }
+                                    else
+                                    {
+                                        var _productParam = await _context.ProductParams
+                                                                          .Where(x => x.CodeConcept == detail.CodeConcept && x.IsActive == true)
+                                                                          .FirstOrDefaultAsync();
+                                        _accountNumber = _productParam != null ? _productParam.CodeConcept : String.Empty;
+                                        _unitMeasurement = _productParam != null ? _productParam.UnitMeasurement : String.Empty;
+                                    }
+
 
                                     PaymentDetail paymentDetail = new PaymentDetail();
                                     paymentDetail.CodeConcept = detail.CodeConcept;

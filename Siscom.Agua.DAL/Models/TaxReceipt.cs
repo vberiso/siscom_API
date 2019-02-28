@@ -16,9 +16,9 @@ namespace Siscom.Agua.DAL.Models
         [Column("tax_receipt_date"), Required]
         public DateTime TaxReceiptDate { get; set; }
         [Column("tax_receipt_xml")]
-        public int XML { get; set; }
+        public string XML { get; set; }
         [Column("tax_receipt_xml_fiel")]
-        public int FielXML { get; set; }
+        public string FielXML { get; set; }
         [Column("rfc"), StringLength(17)]
         public String RFC { get; set; }
         [Column("type"), StringLength(5), Required]
