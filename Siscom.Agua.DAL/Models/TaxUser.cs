@@ -14,6 +14,7 @@ namespace Siscom.Agua.DAL.Models
         {
             TaxAddresses = new HashSet<TaxAddress>();
             Breaches = new HashSet<Breach>();
+            OrderSales = new HashSet<OrderSale>();
         }
 
         [Key]
