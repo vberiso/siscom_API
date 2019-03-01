@@ -143,7 +143,7 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.Parameter = JsonConvert.SerializeObject(breanch);
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el contrato" });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar la infracción" });
             }
 
             return CreatedAtAction("GetBreach", new { id = NewBreach.Id }, NewBreach);
@@ -160,30 +160,54 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
+           
             if (id != breach.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(breach).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BreachExist(id))
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    return NotFound();
+                    _context.Entry(breach).State = EntityState.Modified;
+
+                    try
+                    {
+
+                        await _context.SaveChangesAsync();
+
+
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!BreachExist(id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    return Ok(breach);
+
+
                 }
-                else
-                {
-                    throw;
-                }
+            }catch(Exception e){
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(breach);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para editar la infracción" });
+
+
             }
 
-            return Ok(breach);
         }
 
         [HttpDelete("{id}")]
