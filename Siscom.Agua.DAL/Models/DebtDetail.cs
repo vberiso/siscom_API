@@ -24,7 +24,9 @@ namespace Siscom.Agua.DAL.Models
         public string CodeConcept { get; set; }
         [Required, StringLength(500), Column("name_concept")]
         public string NameConcept { get; set; }
-
+        [NotMapped]
+        [Column("tax"), Required]
+        public decimal Tax { get; set; }
         //[ForeignKey("Debt")]
         public int DebtId { get; set; }
         public Debt Debt { get; set; }

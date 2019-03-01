@@ -739,6 +739,14 @@ namespace Siscom.Agua.DAL
             builder.Entity<PaymentDetail>()
                .Property(p => p.Amount)
                .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<PaymentDetail>()
+                   .Property(x => x.HaveTax)
+                   .HasDefaultValue(false);
+
+            builder.Entity<PaymentDetail>()
+                   .Property(x => x.Tax)
+                   .HasDefaultValue(0);
             #endregion
 
             #region Product

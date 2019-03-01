@@ -35,6 +35,10 @@ namespace Siscom.Agua.DAL.Models
         public int OrderSaleId { get; set; }
         [NotMapped]
         public OrderSale OrderSale { get; set; }
+        [Required, Column("have_tax")]
+        public bool HaveTax { get; set; }
+        [Column("tax"), Required]
+        public decimal Tax { get; set; }
 
         public int PaymentId { get; set; }
         public Payment Payment { get; set; }
