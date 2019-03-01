@@ -43,12 +43,7 @@ namespace Siscom.Agua.Api.Controllers
             if (orderSale == null)
             {
                 return NotFound();
-            }
-
-            orderSale.TaxUser = await _context.TaxUsers
-                                             .Include(x => x.TaxAddresses)
-                                             .Where(x => x.Id == orderSale.TaxUserId)
-                                             .FirstOrDefaultAsync();
+            }            
 
             return Ok(orderSale);
         }
@@ -66,19 +61,26 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Folio incorrecto" });
 
             var orderSale = await _context.OrderSales
+                                          .Include(x=> x.TaxUser)
+                                            .ThenInclude(y => y.TaxAddresses)
+                                          .Include(x => x.OrderSaleDetail)
                                           .Where(x => x.Folio == folio)
                                           .FirstOrDefaultAsync();
+
+            orderSale.DescriptionStatus = await _context.Statuses
+                                                        .Where(x => x.CodeName == orderSale.Status)
+                                                        .Select(x => x.Description)
+                                                        .FirstOrDefaultAsync();
+            orderSale.DescriptionType = await _context.Types
+                                                        .Where(x => x.CodeName == orderSale.Type)
+                                                        .Select(x => x.Description)
+                                                        .FirstOrDefaultAsync();
 
             if (orderSale == null)
             {
                 return NotFound();
             }
-
-            orderSale.TaxUser = await _context.TaxUsers
-                                             .Include(x => x.TaxAddresses)
-                                             .Where(x => x.Id == orderSale.TaxUserId)
-                                             .FirstOrDefaultAsync();
-
+         
             return Ok(orderSale);
         }
 

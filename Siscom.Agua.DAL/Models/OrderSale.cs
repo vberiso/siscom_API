@@ -31,8 +31,12 @@ namespace Siscom.Agua.DAL.Models
         public Int16 Period { get; set; }
         [Required,StringLength(5),Column("type")]
         public string Type { get; set; }
+        [NotMapped]
+        public string DescriptionType { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
+        [NotMapped]
+        public string DescriptionStatus { get; set; }
         [Column("observation")]
         public string Observation { get; set; }
         [Column("id_origin")]
