@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -33,11 +38,30 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
-        // GET: api/Warranty
+        // GET: api/Breach
         [HttpGet]
         public IEnumerable<Breach> GetBreach()
         {
             return _context.Breaches;
+        }
+
+        // GET: api/Breach/1
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBreaches([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var breach = await _context.Breaches.FindAsync(id);
+
+            if (breach == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(breach);
         }
 
 
@@ -79,38 +103,52 @@ namespace Siscom.Agua.Api.Controllers
             //    User               = await userManager.FindByIdAsync(breanch.UserId)
 
             //};
-
-            NewBreach.TaxUser = taxu;
-            NewBreach.Car = breanch.Car;
-            NewBreach.Series = breanch.Series;
-            NewBreach.Folio = breanch.Folio;
-            NewBreach.CaptureDate = breanch.CaptureDate;
-            NewBreach.Place = breanch.Place;
-            NewBreach.Sector = breanch.Sector;
-            NewBreach.Zone = breanch.Zone;
-            NewBreach.TypeCar = breanch.TypeCar;
-            NewBreach.Service = breanch.Service;
-            NewBreach.Color = breanch.Color;
-            NewBreach.Reason = breanch.Reason;
-            NewBreach.LicensePlate = breanch.LicensePlate;
-            NewBreach.Reason = breanch.Reason;
-            NewBreach.Judge = breanch.Judge;
-            NewBreach.DateBreach = breanch.DateBreach;
-            NewBreach.Status = breanch.Status;
-            NewBreach.AssignmentTicketId = breanch.AssignmentTicketId;
-            NewBreach.UserId = breanch.UserId;
-
-
-
+            try{
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled)){
+                    NewBreach.TaxUser = taxu;
+                    NewBreach.Car = breanch.Car;
+                    NewBreach.Series = breanch.Series;
+                    NewBreach.Folio = breanch.Folio;
+                    NewBreach.CaptureDate = breanch.CaptureDate;
+                    NewBreach.Place = breanch.Place;
+                    NewBreach.Sector = breanch.Sector;
+                    NewBreach.Zone = breanch.Zone;
+                    NewBreach.TypeCar = breanch.TypeCar;
+                    NewBreach.Service = breanch.Service;
+                    NewBreach.Color = breanch.Color;
+                    NewBreach.Reason = breanch.Reason;
+                    NewBreach.LicensePlate = breanch.LicensePlate;
+                    NewBreach.Reason = breanch.Reason;
+                    NewBreach.Judge = breanch.Judge;
+                    NewBreach.DateBreach = breanch.DateBreach;
+                    NewBreach.Status = breanch.Status;
+                    NewBreach.AssignmentTicketId = breanch.AssignmentTicketId;
+                    NewBreach.UserId = breanch.UserId;
 
 
+                    _context.Breaches.Add(NewBreach);
+                    await _context.SaveChangesAsync();
 
 
+                    scope.Complete();
 
-            _context.Breaches.Add(NewBreach);
-            await _context.SaveChangesAsync();
+                }
+            }
+            catch(Exception e){
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(breanch);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el contrato" });
+            }
 
             return CreatedAtAction("GetBreach", new { id = NewBreach.Id }, NewBreach);
+
+
         }
 
         // PUT: api/Breach/1
