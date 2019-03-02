@@ -124,6 +124,7 @@ namespace Siscom.Agua.Api.Controllers
             decimal _sumDebtDetail = 0;
             decimal _sumPayDebtDetail = 0;
             decimal _sumTransactionDetail = 0;
+            decimal _sumTaxDebtDetail = 0;
             bool _validation = true;
 
             #region Validación
@@ -189,11 +190,18 @@ namespace Siscom.Agua.Api.Controllers
                 if (!String.IsNullOrEmpty(x.NewStatus))
                 {
                     _sumDebtDetail = 0;
-                    _sumPayDebtDetail = 0;
+                    _sumPayDebtDetail = 0;                    
                     x.DebtDetails.ToList().ForEach(y =>
                     {
                         _sumPayDebtDetail += y.OnPayment;
                         _sumDebtDetail += y.OnAccount;
+
+                        if (y.HaveTax)
+                        {
+                            _sumTaxDebtDetail = y.Tax;
+                            if (y.Tax == 0)
+                                _validation = false;                                
+                        }
                     });
                     if (x.OnAccount != _sumDebtDetail)
                         _validation = false;
@@ -204,16 +212,18 @@ namespace Siscom.Agua.Api.Controllers
                         if (_sumDebtDetail != x.Amount)
                             _validation = false;
                     }
-
                     _sumDebt += _sumPayDebtDetail;
                 }
             });
 
             if (!_validation)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto a cueta de detalle de deuda, no es el mismo que el monto a cuenta de la deuda") });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos a pagar en el detalle no son correctos") });
 
             if (pPaymentConcepts.Transaction.Amount != _sumDebt)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de la transacción no es el mismo que la suma del pago a detalle de deuda ") });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El monto de a pagar en el detalle no es correcto") });
+
+            if(pPaymentConcepts.Transaction.Tax != _sumTaxDebtDetail)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El IVA calculado no es correcto en su detalle ") });
 
             #endregion
 
@@ -349,6 +359,8 @@ namespace Siscom.Agua.Api.Controllers
                                     paymentDetail.PrepaidId = 0;
                                     paymentDetail.OrderSaleId = 0;
                                     paymentDetail.PaymentId = payment.Id;
+                                    paymentDetail.HaveTax = detail.HaveTax;
+                                    paymentDetail.Tax = detail.Tax;
                                     _context.PaymentDetails.Add(paymentDetail);
                                     await _context.SaveChangesAsync();
                                 }
@@ -803,6 +815,8 @@ namespace Siscom.Agua.Api.Controllers
                     paymentDetail.DebtId = 0;
                     paymentDetail.PrepaidId = prepaid.Id;
                     paymentDetail.PaymentId = payment.Id;
+                    paymentDetail.HaveTax = false;
+                    paymentDetail.Tax = 0;
                     _context.PaymentDetails.Add(paymentDetail);
                     await _context.SaveChangesAsync();
 
