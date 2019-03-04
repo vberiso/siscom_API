@@ -67,6 +67,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.Folio == folio)
                                           .FirstOrDefaultAsync();
 
+            if (orderSale == null)
+            {
+                return NotFound();
+            }
+
             orderSale.DescriptionStatus = await _context.Statuses
                                                         .Where(x => x.CodeName == orderSale.Status)
                                                         .Select(x => x.Description)
@@ -74,12 +79,7 @@ namespace Siscom.Agua.Api.Controllers
             orderSale.DescriptionType = await _context.Types
                                                         .Where(x => x.CodeName == orderSale.Type)
                                                         .Select(x => x.Description)
-                                                        .FirstOrDefaultAsync();
-
-            if (orderSale == null)
-            {
-                return NotFound();
-            }
+                                                        .FirstOrDefaultAsync();           
          
             return Ok(orderSale);
         }

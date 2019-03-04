@@ -54,6 +54,7 @@ namespace Siscom.Agua.Api.Controllers
                                     .Include(di => di.AgreementDiscounts)
                                         .ThenInclude(d => d.Discount)
                                     .Include(p => p.Prepaids)
+                                    .Include(a=> a.AgreementLogs)
                                     .Where(a => a.Account == Account).FirstOrDefaultAsync();
 
             summary.Clients = summary.Clients.Where(c => c.IsActive == true).ToList();
