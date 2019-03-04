@@ -44,6 +44,13 @@ namespace Siscom.Agua.DAL.Models
         public string Reason { get; set; }
         [Column("judge"), Required]
         public decimal Judge { get; set; }
+
+        [NotMapped]
+        public string DescriptionType { get; set; }
+
+        [NotMapped]
+        public string DescriptionStatus { get; set; }
+
         [Required, Column("date_breach")]
         public DateTime DateBreach { get; set; }
         [Column("status"), StringLength(5), Required]

@@ -65,6 +65,15 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
+        [HttpGet("GetStatus")]
+        public  IEnumerable<Status> GetStatus(){
+
+            return _context.Statuses.Where(d => d.GroupStatusId == 7);
+
+
+
+        }
+
         //POST: API/BREACH
         [HttpPost]
         public async Task<IActionResult> PostBreach(int BreachId, [FromBody] Breach breanch)
@@ -190,6 +199,7 @@ namespace Siscom.Agua.Api.Controllers
                             throw;
                         }
                     }
+                    scope.Complete();
                     return Ok(breach);
 
 
