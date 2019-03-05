@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -76,6 +80,7 @@ namespace Siscom.Agua.Api.Controllers
                                                         .Where(x => x.CodeName == orderSale.Status)
                                                         .Select(x => x.Description)
                                                         .FirstOrDefaultAsync();
+
             orderSale.DescriptionType = await _context.Types
                                                         .Where(x => x.CodeName == orderSale.Type)
                                                         .Select(x => x.Description)
@@ -123,15 +128,69 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostOrderSale([FromBody] OrderSale orderSale)
         {
+
+            OrderSale _orderSale = new OrderSale();
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            #region Validación
+            var param = await _context.SystemParameters
+                                    .Where(x => x.Name == "DAYS_EXPIRE_ORDER").FirstOrDefaultAsync();
 
-            _context.OrderSales.Add(orderSale);
-            await _context.SaveChangesAsync();
+            if(param!=null)
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
+            #endregion
 
-            return CreatedAtAction("GetOrderSale", new { id = orderSale.Id }, orderSale);
+
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    TaxUser _taxUser = new TaxUser();
+
+                    if (_taxUser.Id != 0)
+                        _taxUser = await _context.TaxUsers.FindAsync(_taxUser.Id);
+                    else
+                    {
+                        _taxUser = orderSale.TaxUser;
+                        _context.TaxUsers.Add(_taxUser);
+                    }
+
+                    _orderSale.DateOrder = DateTime.UtcNow.ToLocalTime();
+                    _orderSale.Amount = orderSale.Amount;
+                    _orderSale.OnAccount = 0;
+                    _orderSale.Year = Convert.ToInt16(DateTime.UtcNow.ToLocalTime().Year);
+                    _orderSale.Period = 1;
+                    _orderSale.Type = orderSale.Type;
+                    _orderSale.Status = "ED001";
+                    _orderSale.Observation = orderSale.Observation;
+                    _orderSale.IdOrigin = orderSale.IdOrigin;
+                    _orderSale.TaxUserId = _taxUser.Id;
+                    _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
+                    _orderSale.Division = orderSale.Division;
+
+                    _context.OrderSales.Add(orderSale);
+
+                    await _context.SaveChangesAsync();
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = "ProductController";
+                systemLog.Action = "PostProductAgreement";
+                systemLog.Parameter = JsonConvert.SerializeObject(orderSale);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+            }
+
+            return Ok(_orderSale.Folio);
         }
 
         // DELETE: api/OrderSales/5

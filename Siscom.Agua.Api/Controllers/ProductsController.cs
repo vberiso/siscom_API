@@ -89,7 +89,7 @@ namespace Siscom.Agua.Api.Controllers
         /// <param name="DivisionId">id Division
         /// </param>
         /// <returns>products</returns>
-        // POST: api/Products/Division/5
+        // GET: api/Products/Division/5
         [HttpGet("Division/{DivisionId}")]
         public async Task<IActionResult> GetProductDivision([FromRoute]  int DivisionId)
         {
@@ -157,12 +157,10 @@ namespace Siscom.Agua.Api.Controllers
         /// <param name="ProductId">id Product
         /// </param>
         /// <returns>products</returns>
-        // POST: api/Products/Tariff/5
+        // GET: api/Products/Tariff/5
         [HttpGet("Tariff/{ProductId}")]
         public async Task<IActionResult> GetProductTariff([FromRoute]  int ProductId)
         {
-           // TariffProductVM tariffProductVM = new TariffProductVM();
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -175,44 +173,6 @@ namespace Siscom.Agua.Api.Controllers
             if(tariff ==null)
                 return NotFound();
 
-
-            ////var factor = await _context.SystemParameters
-            ////                          .Where(x => x.Name == "FACTOR")
-            ////                          .SingleOrDefaultAsync();
-
-
-            ////var tax = await _context.SystemParameters
-            ////                          .Where(x => x.Name == "IVA")
-            ////                          .SingleOrDefaultAsync();
-
-
-            ////tariffProductVM.IdProduct = tariff.ProductId;
-
-            ////if (tariff.TimesFactor != 0)
-            ////{
-            ////    tariffProductVM.Type = (int)TypeTariffProduct.By.Factor;
-            ////    tariffProductVM.Amount = tariff.TimesFactor * factor.NumberColumn;
-            ////}
-            ////else if (tariff.Percentage != 0)
-            ////{
-            ////    tariffProductVM.Type = (int)TypeTariffProduct.By.Percentage;
-            ////}
-            ////else if (tariff.IsVariable)
-            ////{
-            ////    tariffProductVM.Type = (int)TypeTariffProduct.By.Variable;
-            ////}
-            ////else
-            ////{
-            ////    tariffProductVM.Type = (int)TypeTariffProduct.By.Amount;
-            ////    tariffProductVM.Amount = tariff.Amount;
-            ////}
-
-            ////if (tariff.HaveTax)
-            ////{
-            ////    tariffProductVM.Tax = (tariffProductVM.Amount * tax.NumberColumn) / 100; 
-            ////}
-
-            ////tariffProductVM.Total = tariffProductVM.Amount + tariffProductVM.Tax;
 
             return Ok(tariff);
         }
@@ -287,6 +247,12 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
+            var param = await _context.SystemParameters
+                                  .Where(x => x.Name == "DAYS_EXPIRE_ORDER").FirstOrDefaultAsync();
+
+            if (param != null)
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
+
             if (AgreementId != 0)
             {
                 //Agreement
@@ -302,7 +268,7 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("El contrato no se encuentra activo") });
 
                 //Deuda
-                if(pDebt.Amount==0)
+                if (pDebt.Amount == 0)
                     return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("Importe incorrecto") });
 
                 if (pDebt.DebtDetails.Count == 0)
@@ -314,22 +280,23 @@ namespace Siscom.Agua.Api.Controllers
                 //Producto
                 bool _validaProducto = true;
                 Product _product = new Product();
-                pDebt.DebtDetails.ToList().ForEach( x=> {
+                pDebt.DebtDetails.ToList().ForEach(x => {
                     _product = FindProduct(Convert.ToInt32(x.CodeConcept));
                     if (_product == null) _validaProducto = false;
                     if (!_product.IsActive) _validaProducto = false;
                 });
 
-                if(!_validaProducto)
+                if (!_validaProducto)
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("No se encontró concepto o no se encuentra habilitado") });
+               
             }
             else
             {
                 return StatusCode((int)TypeError.Code.BadRequest, new { Message = string.Format("EndPoint No hablitado") });
-            }           
-                #endregion
+            }
+            #endregion
 
-                try
+            try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
@@ -343,13 +310,13 @@ namespace Siscom.Agua.Api.Controllers
                     debt.Consumption = "0";
                     debt.Amount = pDebt.Amount;
                     debt.OnAccount = 0;
-                    debt.Year = Convert.ToInt16( DateTime.UtcNow.ToLocalTime().Year);
+                    debt.Year = Convert.ToInt16(DateTime.UtcNow.ToLocalTime().Year);
                     debt.Type = "TIP02";
                     debt.Status = "ED001";
                     debt.DebtPeriodId = 0;
                     debt.AgreementId = agreement.Id;
-                    debt.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date;
-                    debt.DebtDetails = pDebt.DebtDetails;                    
+                    debt.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
+                    debt.DebtDetails = pDebt.DebtDetails;
 
                     _context.Debts.Add(debt);
                     await _context.SaveChangesAsync();
