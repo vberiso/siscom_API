@@ -155,6 +155,8 @@ namespace Siscom.Agua.DAL
         public DbSet<AssignmentTicket> AssignmentTickets { get; set; }
         public DbSet<BreachWarranty> BreachWarranties { get; set; }
         public DbSet<Warranty> Warranties { get; set; }
+        public DbSet<OrderSaleDiscount> OrderSaleDiscounts { get; set; }
+        public DbSet<DiscountCampaign> DiscountCampaigns { get; set; }
 
         public ApplicationDbContext()
         {
@@ -493,6 +495,21 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtDetail>()
                    .Property(p => p.OnAccount)
                    .HasColumnType("decimal(18, 2)");
+            #endregion           
+
+            #region DebtDiscount
+            builder.Entity<DebtDiscount>()
+                   .HasOne<Debt>(a => a.Debt)
+                   .WithMany(s => s.DebtDiscounts)
+                   .HasForeignKey(s => s.DebtId);
+
+            builder.Entity<DebtDiscount>()
+                   .Property(p => p.OriginalAmount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DebtDiscount>()
+                   .Property(p => p.DiscountAmount)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region DebtPeriod
@@ -515,21 +532,6 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtPeriod>()
                   .Property(x => x.ExpirationDate)
                   .HasColumnType("date");
-            #endregion
-
-            #region DebtDiscount
-            builder.Entity<DebtDiscount>()
-                   .HasOne<Debt>(a => a.Debt)
-                   .WithMany(s => s.DebtDiscounts)
-                   .HasForeignKey(s => s.DebtId);
-
-            builder.Entity<DebtDiscount>()
-                   .Property(p => p.OriginalAmount)
-                   .HasColumnType("decimal(18, 2)");
-
-            builder.Entity<DebtDiscount>()
-                   .Property(p => p.DiscountAmount)
-                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region DebtPrepaid           
@@ -565,6 +567,18 @@ namespace Siscom.Agua.DAL
             builder.Entity<Diameter>()
                    .Property(x => x.IsActive)
                    .HasDefaultValue(true);
+            #endregion
+
+            #region Discount
+            builder.Entity<Discount>()
+                  .Property(x => x.IsVariable)
+                  .HasDefaultValue(false);
+            #endregion
+
+            #region DiscountCampaign
+            builder.Entity<DiscountCampaign>()
+                  .Property(x => x.IsVariable)
+                  .HasDefaultValue(false);
             #endregion
 
             #region Division
@@ -674,7 +688,7 @@ namespace Siscom.Agua.DAL
             #region  OrderSaleDetail
             builder.Entity<OrderSaleDetail>()
                    .HasOne<OrderSale>(a => a.OrderSale)
-                   .WithMany(s => s.OrderSaleDetail)
+                   .WithMany(s => s.OrderSaleDetails)
                    .HasForeignKey(s => s.OrderSaleId);
 
             builder.Entity<OrderSaleDetail>()
@@ -685,6 +699,21 @@ namespace Siscom.Agua.DAL
                    .Property(p => p.OnAccount)
                    .HasColumnType("decimal(18, 2)");
 
+            #endregion
+
+            #region  OrderSaleDiscount
+            builder.Entity<OrderSaleDiscount>()
+                  .HasOne<OrderSale>(a => a.OrderSale)
+                  .WithMany(s => s.OrderSaleDiscounts)
+                  .HasForeignKey(s => s.OrderSaleId);
+
+            builder.Entity<OrderSaleDiscount>()
+                   .Property(p => p.OriginalAmount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<OrderSaleDiscount>()
+                   .Property(p => p.DiscountAmount)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region OriginPayment

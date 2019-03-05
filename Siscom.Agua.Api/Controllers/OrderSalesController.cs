@@ -67,7 +67,7 @@ namespace Siscom.Agua.Api.Controllers
             var orderSale = await _context.OrderSales
                                           .Include(x=> x.TaxUser)
                                             .ThenInclude(y => y.TaxAddresses)
-                                          .Include(x => x.OrderSaleDetail)
+                                          .Include(x => x.OrderSaleDetails)
                                           .Where(x => x.Folio == folio)
                                           .FirstOrDefaultAsync();
 

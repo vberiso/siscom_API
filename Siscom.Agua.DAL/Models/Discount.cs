@@ -26,6 +26,8 @@ namespace Siscom.Agua.DAL.Models
         public DateTime? EndDate { get; set; }
         [Required, Column("in_agreement")]
         public bool InAgreement { get; set; }
+        [Column("is_variable")]
+        public bool IsVariable { get; set; }
 
         public ICollection<AgreementDiscount> AgreementDiscounts { get; set; }
     }
