@@ -140,12 +140,15 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Información incompleta" });
 
             if (!pPaymentConcepts.Transaction.Sign)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Naturaleza de transacción incorrecta"});
 
             foreach (var item in pPaymentConcepts.Transaction.transactionDetails)
             {
                 _sumTransactionDetail += item.Amount;
             }
+
+            if((pPaymentConcepts.Transaction.Amount + pPaymentConcepts.Transaction.Tax + pPaymentConcepts.Transaction.Rounding) != pPaymentConcepts.Transaction.Total)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El monto total de la transacción no es correcto"});
 
 
             if (pPaymentConcepts.Transaction.Amount != _sumTransactionDetail)
@@ -448,6 +451,9 @@ namespace Siscom.Agua.Api.Controllers
                 _sumTransactionDetail += item.Amount;
             }
 
+            if ((pCancelPayment.Transaction.Amount + pCancelPayment.Transaction.Tax + pCancelPayment.Transaction.Rounding) != pCancelPayment.Transaction.Total)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El monto total de la transacción no es correcto" });
+
             if (pCancelPayment.Transaction.Amount != _sumTransactionDetail)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción-> {0}, no coincide con el total de la transacción-> {1}", _sumTransactionDetail, pCancelPayment.Transaction.Amount) });
 
@@ -699,6 +705,9 @@ namespace Siscom.Agua.Api.Controllers
                 _sumTransactionDetail += item.Amount;
             }
 
+            if ((pTransactionVM.Amount + pTransactionVM.Tax + pTransactionVM.Rounding) != pTransactionVM.Total)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El monto total de la transacción no es correcto" });
+
             if (pTransactionVM.Amount != _sumTransactionDetail)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pTransactionVM.Amount) });
 
@@ -884,6 +893,9 @@ namespace Siscom.Agua.Api.Controllers
             {
                 _sumTransactionDetail += item.Amount;
             }
+
+            if ((pCancelPayment.Transaction.Amount + pCancelPayment.Transaction.Tax + pCancelPayment.Transaction.Rounding) != pCancelPayment.Transaction.Total)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El monto total de la transacción no es correcto" });
 
             if (pCancelPayment.Transaction.Amount != _sumTransactionDetail)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pCancelPayment.Transaction.Amount) });
