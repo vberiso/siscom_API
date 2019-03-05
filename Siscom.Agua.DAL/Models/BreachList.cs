@@ -20,10 +20,10 @@ namespace Siscom.Agua.DAL.Models
         public string Fraction {get;set;}
         [Column("description"), Required, StringLength(200)]
         public string Description {get;set;}
-        [Column("min"), Required]
-        public int Min {get;set;}
-        [Column("min"), Required]
-        public int Max {get;set;}
+        [Column("min_times_factor"), Required]
+        public Int16 MinTimesFactor { get; set; }
+        [Column("max_times_factor"), Required]
+        public Int16 MaxTimesFactor { get; set; }
         [Column("have_bonification"), Required]
         public bool HaveBonification {get;set;}
         [Column("is_active"), Required]

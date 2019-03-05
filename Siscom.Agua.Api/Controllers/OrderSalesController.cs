@@ -61,7 +61,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
             
-            if(string.IsNullOrEmpty(folio))
+            if(string.IsNullOrWhiteSpace(folio))
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Folio incorrecto" });
 
             var orderSale = await _context.OrderSales
