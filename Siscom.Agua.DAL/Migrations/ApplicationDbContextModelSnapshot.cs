@@ -751,30 +751,25 @@ namespace Siscom.Agua.DAL.Migrations
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.BreachDetail", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_breach_detail")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("BreachId")
+                        .HasColumnName("id_breach");
+
+                    b.Property<int>("BreachListId")
+                        .HasColumnName("id_breach_list");
 
                     b.Property<decimal>("Amount")
                         .HasColumnName("amount");
 
-                    b.Property<int>("AplicationDays")
-                        .HasColumnName("aplication_days");
-
                     b.Property<decimal>("Bonification")
                         .HasColumnName("bonification");
-
-                    b.Property<int>("BreachId");
-
-                    b.Property<int>("BreachListId");
 
                     b.Property<decimal>("PercentBonification")
                         .HasColumnName("porcent_bonification");
 
-                    b.HasKey("Id");
+                    b.Property<short>("TimesFactor")
+                        .HasColumnName("times_factor");
 
-                    b.HasIndex("BreachId");
+                    b.HasKey("BreachId", "BreachListId");
 
                     b.HasIndex("BreachListId");
 
@@ -825,12 +820,11 @@ namespace Siscom.Agua.DAL.Migrations
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.BreachWarranty", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_breach_warranty")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("BreachId")
+                        .HasColumnName("id_breach");
 
-                    b.Property<int>("BreachId");
+                    b.Property<int>("WarrantyId")
+                        .HasColumnName("id_warranty");
 
                     b.Property<string>("Observations")
                         .IsRequired()
@@ -842,11 +836,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("references")
                         .HasMaxLength(100);
 
-                    b.Property<int>("WarrantyId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BreachId");
+                    b.HasKey("BreachId", "WarrantyId");
 
                     b.HasIndex("WarrantyId");
 
@@ -1463,6 +1453,107 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Discount");
                 });
 
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.DiscountAuthorization", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_discount_authorization")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnName("amount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("AmountDiscount")
+                        .HasColumnName("amount_discount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime>("AuthorizationDate")
+                        .HasColumnName("authorization_date");
+
+                    b.Property<string>("BranchOffice")
+                        .IsRequired()
+                        .HasColumnName("branch_office")
+                        .HasMaxLength(30);
+
+                    b.Property<short>("DiscountPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("discount_percentage")
+                        .HasDefaultValue((short)0);
+
+                    b.Property<string>("Folio")
+                        .IsRequired()
+                        .HasColumnName("folio")
+                        .HasMaxLength(30);
+
+                    b.Property<int>("IdOrigin")
+                        .HasColumnName("id_origin");
+
+                    b.Property<string>("Observation")
+                        .HasColumnName("observation");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnName("request_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnName("status")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnName("type")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("UserAuthorizationId");
+
+                    b.Property<string>("UserRequestId")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserRequestId");
+
+                    b.ToTable("Discount_Authorization");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.DiscountAuthorizationDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_authorization_detail")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CodeConcept")
+                        .IsRequired()
+                        .HasColumnName("code_concept")
+                        .HasMaxLength(5);
+
+                    b.Property<int>("DebtId")
+                        .HasColumnName("id_debt");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnName("discount_amount");
+
+                    b.Property<short>("DiscountPercentage")
+                        .HasColumnName("discount_percentage");
+
+                    b.Property<string>("NameConcept")
+                        .IsRequired()
+                        .HasColumnName("name_concept")
+                        .HasMaxLength(500);
+
+                    b.Property<int>("OrderSaleId")
+                        .HasColumnName("id_order_sale");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasColumnName("original_amount");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Discount_Authorization_Detail");
+                });
+
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DiscountCampaign", b =>
                 {
                     b.Property<int>("Id")
@@ -1556,7 +1647,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 3, 5, 16, 9, 6, 375, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 3, 6, 12, 23, 30, 707, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3626,6 +3717,14 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
                         .WithMany("Derivatives")
                         .HasForeignKey("AgreementId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.DiscountAuthorization", b =>
+                {
+                    b.HasOne("Siscom.Agua.DAL.Models.ApplicationUser", "UserRequest")
+                        .WithMany("DiscountAuthorizations")
+                        .HasForeignKey("UserRequestId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

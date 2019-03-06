@@ -185,11 +185,48 @@ namespace Siscom.Agua.DAL.Migrations
                     month = table.Column<short>(nullable: false),
                     start_date = table.Column<DateTime>(nullable: true),
                     end_date = table.Column<DateTime>(nullable: true),
-                    in_agreement = table.Column<bool>(nullable: false)
+                    in_agreement = table.Column<bool>(nullable: false),
+                    is_variable = table.Column<bool>(nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Discount", x => x.id_discount);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Discount_Authorization_Detail",
+                columns: table => new
+                {
+                    id_authorization_detail = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    code_concept = table.Column<string>(maxLength: 5, nullable: false),
+                    name_concept = table.Column<string>(maxLength: 500, nullable: false),
+                    original_amount = table.Column<decimal>(nullable: false),
+                    discount_amount = table.Column<decimal>(nullable: false),
+                    discount_percentage = table.Column<short>(nullable: false),
+                    id_debt = table.Column<int>(nullable: false),
+                    id_order_sale = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Discount_Authorization_Detail", x => x.id_authorization_detail);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Discount_Campaign",
+                columns: table => new
+                {
+                    id_discount_campaign = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    name = table.Column<string>(maxLength: 50, nullable: false),
+                    percentage = table.Column<short>(nullable: false),
+                    is_variable = table.Column<bool>(nullable: false, defaultValue: false),
+                    profile = table.Column<bool>(nullable: false),
+                    is_active = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Discount_Campaign", x => x.id_discount_campaign);
                 });
 
             migrationBuilder.CreateTable(
@@ -717,6 +754,37 @@ namespace Siscom.Agua.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Discount_Authorization",
+                columns: table => new
+                {
+                    id_discount_authorization = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    request_date = table.Column<DateTime>(nullable: false),
+                    authorization_date = table.Column<DateTime>(nullable: false),
+                    amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    amount_discount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    discount_percentage = table.Column<short>(nullable: false, defaultValue: (short)0),
+                    folio = table.Column<string>(maxLength: 30, nullable: false),
+                    id_origin = table.Column<int>(nullable: false),
+                    type = table.Column<string>(maxLength: 5, nullable: false),
+                    status = table.Column<string>(maxLength: 5, nullable: false),
+                    observation = table.Column<string>(nullable: true),
+                    branch_office = table.Column<string>(maxLength: 30, nullable: false),
+                    UserAuthorizationId = table.Column<string>(nullable: true),
+                    UserRequestId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Discount_Authorization", x => x.id_discount_authorization);
+                    table.ForeignKey(
+                        name: "FK_Discount_Authorization_AspNetUsers_UserRequestId",
+                        column: x => x.UserRequestId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Folio",
                 columns: table => new
                 {
@@ -725,7 +793,7 @@ namespace Siscom.Agua.DAL.Migrations
                     range = table.Column<string>(nullable: false),
                     initial = table.Column<int>(nullable: false),
                     secuential = table.Column<int>(nullable: false),
-                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2019, 2, 22, 11, 14, 23, 361, DateTimeKind.Local)),
+                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2019, 3, 6, 12, 23, 30, 707, DateTimeKind.Local)),
                     is_active = table.Column<int>(nullable: false),
                     BranchOfficeId = table.Column<int>(nullable: false)
                 },
@@ -771,7 +839,8 @@ namespace Siscom.Agua.DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     fraction = table.Column<string>(maxLength: 40, nullable: false),
                     description = table.Column<string>(maxLength: 200, nullable: false),
-                    min = table.Column<int>(nullable: false),
+                    min_times_factor = table.Column<short>(nullable: false),
+                    max_times_factor = table.Column<short>(nullable: false),
                     have_bonification = table.Column<bool>(nullable: false, defaultValue: false),
                     is_active = table.Column<bool>(nullable: false, defaultValue: true),
                     BreachArticleId = table.Column<int>(nullable: false)
@@ -804,37 +873,6 @@ namespace Siscom.Agua.DAL.Migrations
                         column: x => x.CountriesId,
                         principalTable: "Country",
                         principalColumn: "id_country",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Order_Sale",
-                columns: table => new
-                {
-                    id_order_sale = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    folio = table.Column<string>(maxLength: 30, nullable: false),
-                    date_order = table.Column<DateTime>(nullable: false),
-                    amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
-                    on_account = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
-                    year = table.Column<short>(nullable: false),
-                    period = table.Column<short>(nullable: false),
-                    type = table.Column<string>(maxLength: 5, nullable: false),
-                    status = table.Column<string>(maxLength: 5, nullable: false),
-                    observation = table.Column<string>(nullable: true),
-                    id_origin = table.Column<int>(nullable: false),
-                    id_tax_user = table.Column<int>(nullable: false),
-                    expiration_date = table.Column<DateTime>(type: "date", nullable: false),
-                    DivisionId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Order_Sale", x => x.id_order_sale);
-                    table.ForeignKey(
-                        name: "FK_Order_Sale_Division_DivisionId",
-                        column: x => x.DivisionId,
-                        principalTable: "Division",
-                        principalColumn: "id_division",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -938,6 +976,7 @@ namespace Siscom.Agua.DAL.Migrations
                     status = table.Column<string>(maxLength: 5, nullable: false),
                     type = table.Column<string>(maxLength: 5, nullable: false),
                     pay_method_number = table.Column<string>(maxLength: 31, nullable: true),
+                    have_tax_receipt = table.Column<bool>(nullable: false, defaultValue: false),
                     OriginPaymentId = table.Column<int>(nullable: false),
                     ExternalOriginPaymentId = table.Column<int>(nullable: false),
                     PayMethodId = table.Column<int>(nullable: false)
@@ -962,6 +1001,29 @@ namespace Siscom.Agua.DAL.Migrations
                         column: x => x.PayMethodId,
                         principalTable: "Pay_Method",
                         principalColumn: "id_pay_method",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Service_Param",
+                columns: table => new
+                {
+                    id_service_param = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    code_concept = table.Column<string>(maxLength: 20, nullable: false),
+                    name_concept = table.Column<string>(maxLength: 500, nullable: false),
+                    unit_measurement = table.Column<string>(maxLength: 10, nullable: false),
+                    is_active = table.Column<bool>(nullable: false, defaultValue: true),
+                    ServiceId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Service_Param", x => x.id_service_param);
+                    table.ForeignKey(
+                        name: "FK_Service_Param_Service_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Service",
+                        principalColumn: "id_service",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -1008,6 +1070,43 @@ namespace Siscom.Agua.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Order_Sale",
+                columns: table => new
+                {
+                    id_order_sale = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    folio = table.Column<string>(maxLength: 30, nullable: false),
+                    date_order = table.Column<DateTime>(nullable: false),
+                    amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    on_account = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    year = table.Column<short>(nullable: false),
+                    period = table.Column<short>(nullable: false),
+                    type = table.Column<string>(maxLength: 5, nullable: false),
+                    status = table.Column<string>(maxLength: 5, nullable: false),
+                    observation = table.Column<string>(nullable: true),
+                    id_origin = table.Column<int>(nullable: false),
+                    expiration_date = table.Column<DateTime>(type: "date", nullable: false),
+                    DivisionId = table.Column<int>(nullable: false),
+                    TaxUserId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Order_Sale", x => x.id_order_sale);
+                    table.ForeignKey(
+                        name: "FK_Order_Sale_Division_DivisionId",
+                        column: x => x.DivisionId,
+                        principalTable: "Division",
+                        principalColumn: "id_division",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Order_Sale_Tax_User_TaxUserId",
+                        column: x => x.TaxUserId,
+                        principalTable: "Tax_User",
+                        principalColumn: "id_tax_user",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tax_Address",
                 columns: table => new
                 {
@@ -1041,13 +1140,12 @@ namespace Siscom.Agua.DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     concept = table.Column<string>(maxLength: 80, nullable: false),
                     account_number = table.Column<string>(maxLength: 20, nullable: false),
-                    unit_measurement = table.Column<string>(maxLength: 10, nullable: false),
                     have_tax = table.Column<bool>(nullable: false),
                     percentage = table.Column<short>(nullable: false),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     from_date = table.Column<DateTime>(type: "date", nullable: false),
                     until_date = table.Column<DateTime>(type: "date", nullable: false),
-                    is_active = table.Column<int>(nullable: false),
+                    is_active = table.Column<int>(nullable: false, defaultValue: 1),
                     start_consume = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     end_consume = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     have_consume = table.Column<bool>(nullable: false),
@@ -1284,30 +1382,25 @@ namespace Siscom.Agua.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Order_Sale_Detail",
+                name: "Product_Param",
                 columns: table => new
                 {
-                    id_order_sale_detail = table.Column<int>(nullable: false)
+                    id_product_param = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    quantity = table.Column<short>(nullable: false),
-                    unity = table.Column<string>(maxLength: 10, nullable: false),
-                    unit_price = table.Column<decimal>(nullable: false),
-                    have_tax = table.Column<bool>(nullable: false),
-                    description = table.Column<string>(nullable: false),
-                    code_concept = table.Column<string>(maxLength: 5, nullable: false),
+                    code_concept = table.Column<string>(maxLength: 20, nullable: false),
                     name_concept = table.Column<string>(maxLength: 500, nullable: false),
-                    amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
-                    on_account = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
-                    OrderSaleId = table.Column<int>(nullable: false)
+                    unit_measurement = table.Column<string>(maxLength: 10, nullable: false),
+                    is_active = table.Column<bool>(nullable: false, defaultValue: true),
+                    ProductId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Order_Sale_Detail", x => x.id_order_sale_detail);
+                    table.PrimaryKey("PK_Product_Param", x => x.id_product_param);
                     table.ForeignKey(
-                        name: "FK_Order_Sale_Detail_Order_Sale_OrderSaleId",
-                        column: x => x.OrderSaleId,
-                        principalTable: "Order_Sale",
-                        principalColumn: "id_order_sale",
+                        name: "FK_Product_Param_Product_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Product",
+                        principalColumn: "id_product",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -1318,7 +1411,6 @@ namespace Siscom.Agua.DAL.Migrations
                     id_tariff = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     account_number = table.Column<string>(maxLength: 20, nullable: false),
-                    unit_measurement = table.Column<string>(maxLength: 10, nullable: false),
                     have_tax = table.Column<bool>(nullable: false),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     from_date = table.Column<DateTime>(nullable: false),
@@ -1347,10 +1439,15 @@ namespace Siscom.Agua.DAL.Migrations
                     id_transaction_detail = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     code_concept = table.Column<string>(maxLength: 10, nullable: true),
+                    account_number = table.Column<string>(maxLength: 20, nullable: false),
+                    unit_measurement = table.Column<string>(maxLength: 10, nullable: false),
                     description = table.Column<string>(maxLength: 150, nullable: true),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     id_debt = table.Column<int>(nullable: false),
                     id_prepaid = table.Column<int>(nullable: false),
+                    id_order_sale = table.Column<int>(nullable: false),
+                    have_tax = table.Column<bool>(nullable: false, defaultValue: false),
+                    tax = table.Column<decimal>(nullable: false, defaultValue: 0m),
                     PaymentId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -1365,30 +1462,60 @@ namespace Siscom.Agua.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Breach_Detail",
+                name: "Tax_Receipt",
                 columns: table => new
                 {
-                    id_breach_detail = table.Column<int>(nullable: false)
+                    id_tax_receipt = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    aplication_days = table.Column<int>(nullable: false),
-                    amount = table.Column<decimal>(nullable: false),
-                    porcent_bonification = table.Column<decimal>(nullable: false),
-                    bonification = table.Column<decimal>(nullable: false),
-                    BreachId = table.Column<int>(nullable: false),
-                    BreachListId = table.Column<int>(nullable: false)
+                    tax_receipt_date = table.Column<DateTime>(nullable: false),
+                    tax_receipt_xml = table.Column<string>(nullable: true),
+                    tax_receipt_xml_fiel = table.Column<string>(nullable: true),
+                    rfc = table.Column<string>(maxLength: 17, nullable: true),
+                    type = table.Column<string>(maxLength: 5, nullable: false),
+                    status = table.Column<string>(maxLength: 5, nullable: false),
+                    UserId = table.Column<string>(nullable: true),
+                    PaymentId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Breach_Detail", x => x.id_breach_detail);
+                    table.PrimaryKey("PK_Tax_Receipt", x => x.id_tax_receipt);
                     table.ForeignKey(
-                        name: "FK_Breach_Detail_Breach_BreachId",
-                        column: x => x.BreachId,
+                        name: "FK_Tax_Receipt_Payment_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payment",
+                        principalColumn: "id_payment",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tax_Receipt_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Breach_Detail",
+                columns: table => new
+                {
+                    id_breach = table.Column<int>(nullable: false),
+                    id_breach_list = table.Column<int>(nullable: false),
+                    times_factor = table.Column<short>(nullable: false),
+                    amount = table.Column<decimal>(nullable: false),
+                    porcent_bonification = table.Column<decimal>(nullable: false),
+                    bonification = table.Column<decimal>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Breach_Detail", x => new { x.id_breach, x.id_breach_list });
+                    table.ForeignKey(
+                        name: "FK_Breach_Detail_Breach_id_breach",
+                        column: x => x.id_breach,
                         principalTable: "Breach",
                         principalColumn: "id_breach",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Breach_Detail_Breach_List_BreachListId",
-                        column: x => x.BreachListId,
+                        name: "FK_Breach_Detail_Breach_List_id_breach_list",
+                        column: x => x.id_breach_list,
                         principalTable: "Breach_List",
                         principalColumn: "id_breach_list",
                         onDelete: ReferentialAction.Cascade);
@@ -1398,27 +1525,77 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Breach_Warranty",
                 columns: table => new
                 {
-                    id_breach_warranty = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    id_breach = table.Column<int>(nullable: false),
+                    id_warranty = table.Column<int>(nullable: false),
                     references = table.Column<string>(maxLength: 100, nullable: false),
-                    observations = table.Column<string>(maxLength: 256, nullable: false),
-                    BreachId = table.Column<int>(nullable: false),
-                    WarrantyId = table.Column<int>(nullable: false)
+                    observations = table.Column<string>(maxLength: 256, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Breach_Warranty", x => x.id_breach_warranty);
+                    table.PrimaryKey("PK_Breach_Warranty", x => new { x.id_breach, x.id_warranty });
                     table.ForeignKey(
-                        name: "FK_Breach_Warranty_Breach_BreachId",
-                        column: x => x.BreachId,
+                        name: "FK_Breach_Warranty_Breach_id_breach",
+                        column: x => x.id_breach,
                         principalTable: "Breach",
                         principalColumn: "id_breach",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Breach_Warranty_Warranty_WarrantyId",
-                        column: x => x.WarrantyId,
+                        name: "FK_Breach_Warranty_Warranty_id_warranty",
+                        column: x => x.id_warranty,
                         principalTable: "Warranty",
                         principalColumn: "id_warranty",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Order_Sale_Detail",
+                columns: table => new
+                {
+                    id_order_sale_detail = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    quantity = table.Column<short>(nullable: false),
+                    unity = table.Column<string>(maxLength: 10, nullable: false),
+                    unit_price = table.Column<decimal>(nullable: false),
+                    have_tax = table.Column<bool>(nullable: false),
+                    description = table.Column<string>(nullable: false),
+                    code_concept = table.Column<string>(maxLength: 10, nullable: false),
+                    name_concept = table.Column<string>(maxLength: 500, nullable: false),
+                    amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    on_account = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    OrderSaleId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Order_Sale_Detail", x => x.id_order_sale_detail);
+                    table.ForeignKey(
+                        name: "FK_Order_Sale_Detail_Order_Sale_OrderSaleId",
+                        column: x => x.OrderSaleId,
+                        principalTable: "Order_Sale",
+                        principalColumn: "id_order_sale",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Order_Sale_Discount",
+                columns: table => new
+                {
+                    id_order_sale_discount = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    code_concept = table.Column<string>(maxLength: 10, nullable: false),
+                    name_concept = table.Column<string>(maxLength: 500, nullable: false),
+                    original_amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    discount_amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    discount_percentage = table.Column<short>(nullable: false),
+                    OrderSaleId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Order_Sale_Discount", x => x.id_order_sale_discount);
+                    table.ForeignKey(
+                        name: "FK_Order_Sale_Discount_Order_Sale_OrderSaleId",
+                        column: x => x.OrderSaleId,
+                        principalTable: "Order_Sale",
+                        principalColumn: "id_order_sale",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -2257,14 +2434,9 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Breach_Detail_BreachId",
+                name: "IX_Breach_Detail_id_breach_list",
                 table: "Breach_Detail",
-                column: "BreachId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Breach_Detail_BreachListId",
-                table: "Breach_Detail",
-                column: "BreachListId");
+                column: "id_breach_list");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Breach_List_BreachArticleId",
@@ -2272,14 +2444,9 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "BreachArticleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Breach_Warranty_BreachId",
+                name: "IX_Breach_Warranty_id_warranty",
                 table: "Breach_Warranty",
-                column: "BreachId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Breach_Warranty_WarrantyId",
-                table: "Breach_Warranty",
-                column: "WarrantyId");
+                column: "id_warranty");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Catalogue_GroupCatalogueId",
@@ -2347,6 +2514,11 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "AgreementId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Discount_Authorization_UserRequestId",
+                table: "Discount_Authorization",
+                column: "UserRequestId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Folio_BranchOfficeId",
                 table: "Folio",
                 column: "BranchOfficeId");
@@ -2372,8 +2544,18 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "DivisionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Order_Sale_TaxUserId",
+                table: "Order_Sale",
+                column: "TaxUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Order_Sale_Detail_OrderSaleId",
                 table: "Order_Sale_Detail",
+                column: "OrderSaleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Order_Sale_Discount_OrderSaleId",
+                table: "Order_Sale_Discount",
                 column: "OrderSaleId");
 
             migrationBuilder.CreateIndex(
@@ -2410,6 +2592,16 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "IX_Product_DivisionId",
                 table: "Product",
                 column: "DivisionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Product_Param_ProductId",
+                table: "Product_Param",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Service_Param_ServiceId",
+                table: "Service_Param",
+                column: "ServiceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_State_CountriesId",
@@ -2460,6 +2652,16 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "IX_Tax_Address_TaxUserId",
                 table: "Tax_Address",
                 column: "TaxUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tax_Receipt_PaymentId",
+                table: "Tax_Receipt",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tax_Receipt_UserId",
+                table: "Tax_Receipt",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Terminal_BranchOfficeId",
@@ -2609,6 +2811,15 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Derivative");
 
             migrationBuilder.DropTable(
+                name: "Discount_Authorization");
+
+            migrationBuilder.DropTable(
+                name: "Discount_Authorization_Detail");
+
+            migrationBuilder.DropTable(
+                name: "Discount_Campaign");
+
+            migrationBuilder.DropTable(
                 name: "Folio");
 
             migrationBuilder.DropTable(
@@ -2621,10 +2832,19 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Order_Sale_Detail");
 
             migrationBuilder.DropTable(
+                name: "Order_Sale_Discount");
+
+            migrationBuilder.DropTable(
                 name: "Payment_Detail");
 
             migrationBuilder.DropTable(
+                name: "Product_Param");
+
+            migrationBuilder.DropTable(
                 name: "Push_Notification");
+
+            migrationBuilder.DropTable(
+                name: "Service_Param");
 
             migrationBuilder.DropTable(
                 name: "Status");
@@ -2643,6 +2863,9 @@ namespace Siscom.Agua.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Tax_Address");
+
+            migrationBuilder.DropTable(
+                name: "Tax_Receipt");
 
             migrationBuilder.DropTable(
                 name: "Transaction_Detail");
@@ -2693,9 +2916,6 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Order_Sale");
 
             migrationBuilder.DropTable(
-                name: "Payment");
-
-            migrationBuilder.DropTable(
                 name: "Group_Status");
 
             migrationBuilder.DropTable(
@@ -2703,6 +2923,9 @@ namespace Siscom.Agua.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Product");
+
+            migrationBuilder.DropTable(
+                name: "Payment");
 
             migrationBuilder.DropTable(
                 name: "Transaction");
@@ -2729,16 +2952,16 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Breach_Article");
 
             migrationBuilder.DropTable(
-                name: "Tax_User");
-
-            migrationBuilder.DropTable(
                 name: "Prepaid");
 
             migrationBuilder.DropTable(
-                name: "Pay_Method");
+                name: "Tax_User");
 
             migrationBuilder.DropTable(
                 name: "Division");
+
+            migrationBuilder.DropTable(
+                name: "Pay_Method");
 
             migrationBuilder.DropTable(
                 name: "External_Origin_Payment");

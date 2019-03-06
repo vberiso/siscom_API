@@ -10,14 +10,14 @@ using Siscom.Agua.DAL;
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190226213209_SAT")]
-    partial class SAT
+    [Migration("20190306182331_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.1.8-servicing-32085")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -753,30 +753,25 @@ namespace Siscom.Agua.DAL.Migrations
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.BreachDetail", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_breach_detail")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("BreachId")
+                        .HasColumnName("id_breach");
+
+                    b.Property<int>("BreachListId")
+                        .HasColumnName("id_breach_list");
 
                     b.Property<decimal>("Amount")
                         .HasColumnName("amount");
 
-                    b.Property<int>("AplicationDays")
-                        .HasColumnName("aplication_days");
-
                     b.Property<decimal>("Bonification")
                         .HasColumnName("bonification");
-
-                    b.Property<int>("BreachId");
-
-                    b.Property<int>("BreachListId");
 
                     b.Property<decimal>("PercentBonification")
                         .HasColumnName("porcent_bonification");
 
-                    b.HasKey("Id");
+                    b.Property<short>("TimesFactor")
+                        .HasColumnName("times_factor");
 
-                    b.HasIndex("BreachId");
+                    b.HasKey("BreachId", "BreachListId");
 
                     b.HasIndex("BreachListId");
 
@@ -812,11 +807,11 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("is_active")
                         .HasDefaultValue(true);
 
-                    b.Property<int>("Max")
-                        .HasColumnName("min");
+                    b.Property<short>("MaxTimesFactor")
+                        .HasColumnName("max_times_factor");
 
-                    b.Property<int>("Min")
-                        .HasColumnName("min");
+                    b.Property<short>("MinTimesFactor")
+                        .HasColumnName("min_times_factor");
 
                     b.HasKey("Id");
 
@@ -827,12 +822,11 @@ namespace Siscom.Agua.DAL.Migrations
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.BreachWarranty", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_breach_warranty")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("BreachId")
+                        .HasColumnName("id_breach");
 
-                    b.Property<int>("BreachId");
+                    b.Property<int>("WarrantyId")
+                        .HasColumnName("id_warranty");
 
                     b.Property<string>("Observations")
                         .IsRequired()
@@ -844,11 +838,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("references")
                         .HasMaxLength(100);
 
-                    b.Property<int>("WarrantyId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BreachId");
+                    b.HasKey("BreachId", "WarrantyId");
 
                     b.HasIndex("WarrantyId");
 
@@ -1441,6 +1431,11 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsVariable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("is_variable")
+                        .HasDefaultValue(false);
+
                     b.Property<short>("Month")
                         .HasColumnName("month");
 
@@ -1458,6 +1453,138 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Discount");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.DiscountAuthorization", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_discount_authorization")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnName("amount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("AmountDiscount")
+                        .HasColumnName("amount_discount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime>("AuthorizationDate")
+                        .HasColumnName("authorization_date");
+
+                    b.Property<string>("BranchOffice")
+                        .IsRequired()
+                        .HasColumnName("branch_office")
+                        .HasMaxLength(30);
+
+                    b.Property<short>("DiscountPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("discount_percentage")
+                        .HasDefaultValue((short)0);
+
+                    b.Property<string>("Folio")
+                        .IsRequired()
+                        .HasColumnName("folio")
+                        .HasMaxLength(30);
+
+                    b.Property<int>("IdOrigin")
+                        .HasColumnName("id_origin");
+
+                    b.Property<string>("Observation")
+                        .HasColumnName("observation");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnName("request_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnName("status")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnName("type")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("UserAuthorizationId");
+
+                    b.Property<string>("UserRequestId")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserRequestId");
+
+                    b.ToTable("Discount_Authorization");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.DiscountAuthorizationDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_authorization_detail")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CodeConcept")
+                        .IsRequired()
+                        .HasColumnName("code_concept")
+                        .HasMaxLength(5);
+
+                    b.Property<int>("DebtId")
+                        .HasColumnName("id_debt");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnName("discount_amount");
+
+                    b.Property<short>("DiscountPercentage")
+                        .HasColumnName("discount_percentage");
+
+                    b.Property<string>("NameConcept")
+                        .IsRequired()
+                        .HasColumnName("name_concept")
+                        .HasMaxLength(500);
+
+                    b.Property<int>("OrderSaleId")
+                        .HasColumnName("id_order_sale");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasColumnName("original_amount");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Discount_Authorization_Detail");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.DiscountCampaign", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_discount_campaign")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsVariable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("is_variable")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnName("name")
+                        .HasMaxLength(50);
+
+                    b.Property<short>("Percentage")
+                        .HasColumnName("percentage");
+
+                    b.Property<bool>("profile")
+                        .HasColumnName("profile");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Discount_Campaign");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Division", b =>
@@ -1522,7 +1649,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 2, 26, 15, 32, 8, 352, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 3, 6, 12, 23, 30, 707, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -1784,9 +1911,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("IdOrigin")
                         .HasColumnName("id_origin");
 
-                    b.Property<int>("IdTaxUser")
-                        .HasColumnName("id_tax_user");
-
                     b.Property<string>("Observation")
                         .HasColumnName("observation");
 
@@ -1802,6 +1926,8 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("status")
                         .HasMaxLength(5);
 
+                    b.Property<int>("TaxUserId");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnName("type")
@@ -1813,6 +1939,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DivisionId");
+
+                    b.HasIndex("TaxUserId");
 
                     b.ToTable("Order_Sale");
                 });
@@ -1831,7 +1959,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<string>("CodeConcept")
                         .IsRequired()
                         .HasColumnName("code_concept")
-                        .HasMaxLength(5);
+                        .HasMaxLength(10);
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -1867,6 +1995,43 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("OrderSaleId");
 
                     b.ToTable("Order_Sale_Detail");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.OrderSaleDiscount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_order_sale_discount")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CodeConcept")
+                        .IsRequired()
+                        .HasColumnName("code_concept")
+                        .HasMaxLength(10);
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnName("discount_amount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<short>("DiscountPercentage")
+                        .HasColumnName("discount_percentage");
+
+                    b.Property<string>("NameConcept")
+                        .IsRequired()
+                        .HasColumnName("name_concept")
+                        .HasMaxLength(500);
+
+                    b.Property<int>("OrderSaleId");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasColumnName("original_amount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderSaleId");
+
+                    b.ToTable("Order_Sale_Discount");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.OriginPayment", b =>
@@ -1915,7 +2080,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<bool>("HaveTaxReceipt")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("have_tax_receipt")
-                        .HasDefaultValue(true);
+                        .HasDefaultValue(false);
 
                     b.Property<int>("OriginPaymentId");
 
@@ -2000,6 +2165,11 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("description")
                         .HasMaxLength(150);
 
+                    b.Property<bool>("HaveTax")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("have_tax")
+                        .HasDefaultValue(false);
+
                     b.Property<int>("OrderSaleId")
                         .HasColumnName("id_order_sale");
 
@@ -2007,6 +2177,11 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("PrepaidId")
                         .HasColumnName("id_prepaid");
+
+                    b.Property<decimal>("Tax")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("tax")
+                        .HasDefaultValue(0m);
 
                     b.Property<string>("UnitMeasurement")
                         .IsRequired()
@@ -2160,10 +2335,10 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("code_concept")
                         .HasMaxLength(20);
 
-                    b.Property<int>("IsActive")
+                    b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("is_active")
-                        .HasDefaultValue(1);
+                        .HasDefaultValue(true);
 
                     b.Property<string>("NameConcept")
                         .IsRequired()
@@ -2283,10 +2458,10 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("code_concept")
                         .HasMaxLength(20);
 
-                    b.Property<int>("IsActive")
+                    b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("is_active")
-                        .HasDefaultValue(1);
+                        .HasDefaultValue(true);
 
                     b.Property<string>("NameConcept")
                         .IsRequired()
@@ -2482,7 +2657,9 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("have_tax");
 
                     b.Property<int>("IsActive")
-                        .HasColumnName("is_active");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("is_active")
+                        .HasDefaultValue(1);
 
                     b.Property<short>("Percentage")
                         .HasColumnName("percentage");
@@ -2610,7 +2787,7 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_tax_receipt")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("FielXML")
+                    b.Property<string>("FielXML")
                         .HasColumnName("tax_receipt_xml_fiel");
 
                     b.Property<int>("PaymentId");
@@ -2634,7 +2811,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("UserId");
 
-                    b.Property<int>("XML")
+                    b.Property<string>("XML")
                         .HasColumnName("tax_receipt_xml");
 
                     b.HasKey("Id");
@@ -3545,6 +3722,14 @@ namespace Siscom.Agua.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.DiscountAuthorization", b =>
+                {
+                    b.HasOne("Siscom.Agua.DAL.Models.ApplicationUser", "UserRequest")
+                        .WithMany("DiscountAuthorizations")
+                        .HasForeignKey("UserRequestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Folio", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.BranchOffice", "BranchOffice")
@@ -3583,12 +3768,25 @@ namespace Siscom.Agua.DAL.Migrations
                         .WithMany("OrderSale")
                         .HasForeignKey("DivisionId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Siscom.Agua.DAL.Models.TaxUser", "TaxUser")
+                        .WithMany("OrderSales")
+                        .HasForeignKey("TaxUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.OrderSaleDetail", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.OrderSale", "OrderSale")
-                        .WithMany("OrderSaleDetail")
+                        .WithMany("OrderSaleDetails")
+                        .HasForeignKey("OrderSaleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.OrderSaleDiscount", b =>
+                {
+                    b.HasOne("Siscom.Agua.DAL.Models.OrderSale", "OrderSale")
+                        .WithMany("OrderSaleDiscounts")
                         .HasForeignKey("OrderSaleId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
