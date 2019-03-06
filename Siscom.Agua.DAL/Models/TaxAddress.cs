@@ -22,7 +22,7 @@ namespace Siscom.Agua.DAL.Models
         public string Zip { get; set; }
         [Column("suburb"),StringLength(100)]
         public string Suburb { get; set; }
-        [Column("town"),StringLength(50)]
+        [Column("town"),StringLength(100)]
         public string Town { get; set; }
         [Column("state"),StringLength(30)]
         public string State { get; set; }
