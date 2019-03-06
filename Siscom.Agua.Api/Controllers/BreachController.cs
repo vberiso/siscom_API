@@ -136,16 +136,7 @@ namespace Siscom.Agua.Api.Controllers
                 tax.TaxAddresses.Add(address);
                 _context.TaxUsers.Add(tax);
 
-                foreach (var list in breanch.BreachDetails){
-                   var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).ToListAsync();
-
-                    BreachDetail newBreachDetail = new BreachDetail();
-                    if (breanch.LicensePlate == null){
-                        //newBreachDetail.AplicationDays = 
-                    }
-
-
-                }
+             
 
 
                 var param = await _context.SystemParameters
@@ -197,6 +188,30 @@ namespace Siscom.Agua.Api.Controllers
 
                 _context.Breaches.Add(NewBreach);
                 await _context.SaveChangesAsync();
+
+                foreach (var list in breanch.BreachDetails)
+                {
+                    var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).FirstOrDefaultAsync();
+
+                    //BreachDetail newBreachDetail = new BreachDetail();
+                    //if (breanch.LicensePlate == null){
+                    //    //newBreachDetail.AplicationDays = 
+                    //}
+                    _context.BreachDetails.Add(new BreachDetail
+                    {
+                        Breach = NewBreach,
+                        BreachId = NewBreach.Id,
+                        BreachList = value,
+                        BreachListId = value.Id,
+                        Amount = value.MinTimesFactor * param.NumberColumn,
+                        Bonification = 0,
+                        PercentBonification = 0,
+                        TimesFactor = value.MinTimesFactor
+                        
+                    });
+
+                    _context.SaveChanges();
+                }
 
                 return CreatedAtAction("GetBreach", new { id = NewBreach.Id }, NewBreach);
 
