@@ -134,6 +134,7 @@ namespace Siscom.Agua.Api.Controllers
             _context.TaxUsers.Add(taxUsers);
             await _context.SaveChangesAsync();
 
+
             return CreatedAtAction("GetTaxUsers", new { id = taxUsers.Id }, taxUsers);
         }
 

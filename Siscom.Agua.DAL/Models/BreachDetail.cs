@@ -26,3 +26,4 @@ namespace Siscom.Agua.DAL.Models
         public decimal Bonification { get; set; }       
     }
 }
+
