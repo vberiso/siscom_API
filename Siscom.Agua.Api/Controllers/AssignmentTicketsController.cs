@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -90,6 +91,10 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+
+            if(_context.AssignmentTickets
+                       .Where(x=> x.Serie== assignmentTicket.Serie && x.Serie== assignmentTicket.Serie).FirstOrDefault() != null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "No hay datos para este número de cuenta" });
 
             _context.AssignmentTickets.Add(assignmentTicket);
             await _context.SaveChangesAsync();
