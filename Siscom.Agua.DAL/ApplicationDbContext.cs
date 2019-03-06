@@ -157,6 +157,8 @@ namespace Siscom.Agua.DAL
         public DbSet<Warranty> Warranties { get; set; }
         public DbSet<OrderSaleDiscount> OrderSaleDiscounts { get; set; }
         public DbSet<DiscountCampaign> DiscountCampaigns { get; set; }
+        public DbSet<DiscountAuthorization> DiscountAuthorizations { get; set; }
+        public DbSet<DiscountAuthorizationDetail> DiscountAuthorizationDetails { get; set; }
 
         public ApplicationDbContext()
         {
@@ -370,16 +372,18 @@ namespace Siscom.Agua.DAL
                   .HasDefaultValue(true);
             #endregion
 
-            #region BreachDetail
+            #region BreachDetail           
+            builder.Entity<BreachDetail>().HasKey(x => new { x.BreachId, x.BreachListId });
+
             builder.Entity<BreachDetail>()
                    .HasOne<Breach>(a => a.Breach)
                    .WithMany(s => s.BreachDetails)
                    .HasForeignKey(s => s.BreachId);
 
             builder.Entity<BreachDetail>()
-                  .HasOne<BreachList>(a => a.BreachList)
-                  .WithMany(s => s.BreachDetails)
-                  .HasForeignKey(s => s.BreachListId);
+                   .HasOne<BreachList>(a => a.BreachList)
+                   .WithMany(s => s.BreachDetails)
+                   .HasForeignKey(s => s.BreachListId);
             #endregion
 
             #region BreachList
@@ -398,6 +402,8 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region BreachWarranty
+            builder.Entity<BreachWarranty>().HasKey(x => new { x.BreachId, x.WarrantyId }); 
+
             builder.Entity<BreachWarranty>()
                    .HasOne<Breach>(a => a.Breach)
                    .WithMany(s => s.BreachWarranties)
@@ -573,6 +579,26 @@ namespace Siscom.Agua.DAL
             builder.Entity<Discount>()
                   .Property(x => x.IsVariable)
                   .HasDefaultValue(false);
+            #endregion
+
+            #region DiscountAuthorization
+            builder.Entity<DiscountAuthorization>()
+                  .HasOne<ApplicationUser>(a => a.UserRequest)
+                  .WithMany(s => s.DiscountAuthorizations)
+                  .HasForeignKey(s => s.UserRequestId);
+
+            builder.Entity<DiscountAuthorization>()
+                   .Property(p => p.Amount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DiscountAuthorization>()
+                  .Property(p => p.AmountDiscount)
+                  .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DiscountAuthorization>()
+                 .Property(x => x.DiscountPercentage)
+                 .HasDefaultValue(0);
+
             #endregion
 
             #region DiscountCampaign

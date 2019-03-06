@@ -16,6 +16,7 @@ namespace Siscom.Agua.DAL.Models
             AgreementFiles = new HashSet<AgreementFile>();
             Breaches = new HashSet<Breach>();
             AssignmentTickets = new HashSet<AssignmentTicket>();
+            DiscountAuthorizations = new HashSet<DiscountAuthorization>();
         }
 
         [Column("name"), StringLength(50), Required]
@@ -33,5 +34,6 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<Breach> Breaches { get; set; }
         public ICollection<AssignmentTicket>  AssignmentTickets { get; set; }
         public ICollection<TaxReceipt> TaxReceipts { get; set; }
+        public ICollection<DiscountAuthorization> DiscountAuthorizations { get; set; }
     }
 }
