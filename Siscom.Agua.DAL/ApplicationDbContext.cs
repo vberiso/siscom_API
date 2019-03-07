@@ -718,6 +718,10 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.OrderSaleId);
 
             builder.Entity<OrderSaleDetail>()
+                  .Property(p => p.Quantity)
+                  .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<OrderSaleDetail>()
                  .Property(p => p.Amount)
                  .HasColumnType("decimal(18, 2)");
 
@@ -945,6 +949,14 @@ namespace Siscom.Agua.DAL
             builder.Entity<TariffProduct>()
                    .Property(p => p.Amount)
                    .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<TariffProduct>()
+                  .Property(p => p.Percentage)
+                  .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<TariffProduct>()
+                  .Property(x => x.Type)
+                  .HasDefaultValue("TTP01");
             #endregion
 
             #region TariffParam

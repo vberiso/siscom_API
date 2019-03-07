@@ -26,11 +26,15 @@ namespace Siscom.Agua.DAL.Models
         [Column("is_active"), Required]
         public int IsActive { get; set; }
         [Column("percentage")]
-        public Int16 Percentage { get; set; }
+        public decimal Percentage { get; set; }
         [Column("times_factor")]
         public Int16 TimesFactor { get; set; }
         [Column("is_variable")]
         public bool IsVariable { get; set; }
+        [Required, StringLength(5), Column("type")]
+        public string Type { get; set; }
+        [NotMapped]
+        public string DescriptionType { get; set; }
 
         //[ForeignKey("Product")]
         public int ProductId { get; set; }

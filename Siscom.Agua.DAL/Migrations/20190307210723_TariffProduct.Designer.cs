@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190307210723_TariffProduct")]
+    partial class TariffProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1647,7 +1649,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 3, 7, 16, 59, 8, 915, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 3, 7, 15, 7, 22, 560, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -1977,9 +1979,8 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("OrderSaleId");
 
-                    b.Property<decimal>("Quantity")
-                        .HasColumnName("quantity")
-                        .HasColumnType("decimal(18, 2)");
+                    b.Property<short>("Quantity")
+                        .HasColumnName("quantity");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnName("unit_price");
@@ -2724,13 +2725,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<short>("TimesFactor")
                         .HasColumnName("times_factor");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("type")
-                        .HasMaxLength(5)
-                        .HasDefaultValue("TTP01");
 
                     b.Property<DateTime>("UntilDate")
                         .HasColumnName("until_date");
