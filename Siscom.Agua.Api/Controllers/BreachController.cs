@@ -176,6 +176,7 @@ namespace Siscom.Agua.Api.Controllers
                         //breanch.BreachDetails.Add(breachDetail);
                         //_context.BreachDetails.Add(breachDetail);
                         //_context.SaveChanges();
+                        //var prueba =  _context.AssignmentTickets;
                         var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01").FirstOrDefaultAsync();
 
                         if (getf == null)
@@ -183,7 +184,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Ok, new { Error = "no existen folios disponibles" });
                         }
 
-                        getf.Status = "ETFO2";
+                        getf.Status = "EFT02";
 
                         _context.Entry(getf).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
@@ -306,37 +307,75 @@ namespace Siscom.Agua.Api.Controllers
                         await _context.SaveChangesAsync();
 
 
+                       
+
+
                         decimal sumBreanch = 0;
 
                         foreach (var list in breanch.BreachDetails)
                         {
                             var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).FirstOrDefaultAsync();
 
+
+                            var getLicense = await _context.Breaches.Where(z => z.LicensePlate.Contains(breanch.LicensePlate)).ToListAsync();
+                            int cont = getLicense.Count;
+
+
+                            if (cont > 1 )
+                            {
+                                var valueJudge = value.MaxTimesFactor;
+                                BreachDetail listBreanch = new BreachDetail
+                                {
+                                    //Breach = NewBreach,
+                                    BreachId = NewBreach.Id,
+
+                                    //BreachList = value,
+                                    BreachListId = value.Id,
+                                    Amount = valueJudge * param.NumberColumn,
+                                    Bonification = 0,
+                                    PercentBonification = 0,
+                                    TimesFactor = valueJudge
+
+
+                                };
+
+                                sumBreanch += listBreanch.Amount;
+
+
+
+                                _context.Add(listBreanch);
+                                _context.SaveChanges();
+
+                            }
+                            else{
+                                var valueJudge = value.MinTimesFactor;
+                                BreachDetail listBreanch = new BreachDetail
+                                {
+                                    //Breach = NewBreach,
+                                    BreachId = NewBreach.Id,
+
+                                    //BreachList = value,
+                                    BreachListId = value.Id,
+                                    Amount = valueJudge * param.NumberColumn,
+                                    Bonification = 0,
+                                    PercentBonification = 0,
+                                    TimesFactor = valueJudge
+
+
+                                };
+
+                                sumBreanch += listBreanch.Amount;
+
+
+
+                                _context.Add(listBreanch);
+                                _context.SaveChanges();
+                            }
                             //BreachDetail newBreachDetail = new BreachDetail();
                             //if (breanch.LicensePlate == null){
                             //    //newBreachDetail.AplicationDays = 
                             //}
-                            BreachDetail listBreanch = new BreachDetail
-                            {
-                                //Breach = NewBreach,
-                                BreachId = NewBreach.Id,
 
-                                //BreachList = value,
-                                BreachListId = value.Id,
-                                Amount = value.MinTimesFactor * param.NumberColumn,
-                                Bonification = 0,
-                                PercentBonification = 0,
-                                TimesFactor = value.MinTimesFactor
-
-
-                            };
-
-                            sumBreanch += listBreanch.Amount;
-
-
-
-                            _context.Add(listBreanch);
-                            _context.SaveChanges();
                         }
 
                         NewBreach.Judge = sumBreanch;
@@ -387,7 +426,7 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.Ok, new { Error = "no existen folios disponibles" });
                 }
 
-                getf.Status = "ETFO2";
+                getf.Status = "EFT02";
 
                 _context.Entry(getf).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
@@ -509,31 +548,61 @@ namespace Siscom.Agua.Api.Controllers
                         foreach (var list in breanch.BreachDetails)
                         {
                             var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).FirstOrDefaultAsync();
+                            var getLicense = await _context.Breaches.Where(z => z.LicensePlate.Contains(breanch.LicensePlate)).ToListAsync();
+                            int cont = getLicense.Count;
 
-                            //BreachDetail newBreachDetail = new BreachDetail();
-                            //if (breanch.LicensePlate == null){
-                            //    //newBreachDetail.AplicationDays = 
-                            //}
-                            BreachDetail listBreanch = new BreachDetail
+
+                            if (cont > 1)
                             {
-                                //Breach = NewBreach,
-                                BreachId = NewBreach.Id,
-                                //BreachList = value,
-                                BreachListId = value.Id,
-                                Amount = value.MinTimesFactor * param.NumberColumn,
-                                Bonification = 0,
-                                PercentBonification = 0,
-                                TimesFactor = value.MinTimesFactor
+                                var valueJudge = value.MaxTimesFactor;
+                                BreachDetail listBreanch = new BreachDetail
+                                {
+                                    //Breach = NewBreach,
+                                    BreachId = NewBreach.Id,
+
+                                    //BreachList = value,
+                                    BreachListId = value.Id,
+                                    Amount = valueJudge * param.NumberColumn,
+                                    Bonification = 0,
+                                    PercentBonification = 0,
+                                    TimesFactor = valueJudge
 
 
-                            };
+                                };
 
-                            sumBreanch += listBreanch.Amount;
+                                sumBreanch += listBreanch.Amount;
 
 
 
-                            _context.Add(listBreanch);
-                            _context.SaveChanges();
+                                _context.Add(listBreanch);
+                                _context.SaveChanges();
+
+                            }
+                            else
+                            {
+                                var valueJudge = value.MinTimesFactor;
+                                BreachDetail listBreanch = new BreachDetail
+                                {
+                                    //Breach = NewBreach,
+                                    BreachId = NewBreach.Id,
+
+                                    //BreachList = value,
+                                    BreachListId = value.Id,
+                                    Amount = valueJudge * param.NumberColumn,
+                                    Bonification = 0,
+                                    PercentBonification = 0,
+                                    TimesFactor = valueJudge
+
+
+                                };
+
+                                sumBreanch += listBreanch.Amount;
+
+
+
+                                _context.Add(listBreanch);
+                                _context.SaveChanges();
+                            }
                         }
 
 
