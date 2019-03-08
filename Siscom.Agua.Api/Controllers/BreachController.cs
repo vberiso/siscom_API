@@ -68,6 +68,98 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(breach);
         }
 
+        [HttpPost("OrderSale/{id}")]
+        public async Task<IActionResult> PostOrderSale([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var breach = await _context.Breaches.Where(i => i.Id == id).ToListAsync();
+
+            if(breach == null)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre la infracción" });
+
+            }
+
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+
+                    OrderSale order = new OrderSale();
+
+                    order.Folio = breach.FirstOrDefault().Folio;
+                    if(order.Folio == null)
+                    {
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene folio" });
+
+                    }
+                    order.DateOrder = DateTime.UtcNow.ToLocalTime();
+                    if(order.DateOrder == null)
+                    {
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ingresar la fecha" });
+
+                    }
+                    order.Amount = breach.FirstOrDefault().Judge;
+                    if(order.Amount == 0)
+                    {
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene monto" });
+
+                    }
+                    order.OnAccount = 0;
+                    order.Year = (short)DateTime.UtcNow.ToLocalTime().Year;
+                    order.Period = 0;
+                    order.Type = "OM001";
+                    order.Status = "EOS01";
+                    order.Observation = breach.FirstOrDefault().Reason;
+                    if(order.Observation == null)
+                    {
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene observaciones" });
+
+                    }
+                    order.IdOrigin = breach.FirstOrDefault().Id;
+                    if(order.IdOrigin == 0)
+                    {
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para encontrar la infracción" });
+
+                    }
+                    order.TaxUserId = breach.FirstOrDefault().TaxUserId;
+                    if(order.TaxUserId == 0)
+                    {
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para encontrar el usuario" });
+
+                    }
+                    order.DivisionId = 14;
+
+                    _context.OrderSales.Add(order);
+                    await _context.SaveChangesAsync();
+
+                    scope.Complete();
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(breach);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para generar order de cobro" });
+            }
+
+           
+
+           
+            return StatusCode((int)TypeError.Code.InternalServerError, new { Success = "Orden de cobro generada" });
+        }
+
 
         [HttpGet("GetStatus")]
         public  IEnumerable<Status> GetStatus(){
