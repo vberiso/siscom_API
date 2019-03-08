@@ -109,7 +109,14 @@ namespace Siscom.Agua.Api.Controllers
 
             }
 
-            
+
+            var orderLast = await _context.OrderSales.Where(o => o.IdOrigin == breach.Id).FirstOrDefaultAsync();
+
+            if(orderLast.Status == "EOS01")
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se puede agregar la infraccion por el estado de estatus" });
+
+            }
 
             #endregion
 
@@ -201,6 +208,8 @@ namespace Siscom.Agua.Api.Controllers
                     await _context.SaveChangesAsync();
 
                     scope.Complete();
+
+
                 }
 
 
