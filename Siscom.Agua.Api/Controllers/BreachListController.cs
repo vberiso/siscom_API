@@ -1,11 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -71,54 +76,78 @@ namespace Siscom.Agua.Api.Controllers
 
             BreachList newBreachList = new BreachList();
 
-            newBreachList.Fraction = breachList.Fraction;
-            if(newBreachList.Fraction == null)
+            try
             {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "falta agregar la fracción" });
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+
+                    newBreachList.Fraction = breachList.Fraction;
+                    if (newBreachList.Fraction == null)
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Error = "falta agregar la fracción" });
+
+                    }
+                    newBreachList.Description = breachList.Description;
+                    if (newBreachList.Description == null)
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta agregar la descripcion" });
+
+                    }
+
+                    newBreachList.MinTimesFactor = breachList.MinTimesFactor;
+                    if (newBreachList.MinTimesFactor == 0)
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Error = "falta agregar factor minimo" });
+
+                    }
+
+                    newBreachList.MaxTimesFactor = breachList.MaxTimesFactor;
+                    if (newBreachList.MaxTimesFactor == 0)
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta agregar factor maximo" });
+
+                    }
+
+                    newBreachList.HaveBonification = breachList.HaveBonification;
+                    if (newBreachList.HaveBonification == false)
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta agregar la bonificacion" });
+
+                    }
+                    newBreachList.IsActive = breachList.IsActive;
+                    if (newBreachList.IsActive == false)
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Error = "Activar el estado" });
+
+                    }
+                    newBreachList.BreachArticleId = breachList.BreachArticleId;
+                    if (newBreachList.BreachArticleId == 0)
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta agregar el id del ariculo" });
+
+                    }
+
+                    _context.BreachLists.Add(newBreachList);
+                    await _context.SaveChangesAsync();
+
+                    scope.Complete();
+                }
+
 
             }
-            newBreachList.Description = breachList.Description;
-            if (newBreachList.Description ==  null)
+            catch (Exception e)
             {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta agregar la descripcion" });
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(breachList);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para crear lista de infracción" });
 
             }
-
-            newBreachList.MinTimesFactor = breachList.MinTimesFactor;
-            if(newBreachList.MinTimesFactor == 0)
-            {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "falta agregar factor minimo" });
-
-            }
-
-            newBreachList.MaxTimesFactor = breachList.MaxTimesFactor;
-            if (newBreachList.MaxTimesFactor == 0)
-            {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta agregar factor maximo" });
-
-            }
-
-            newBreachList.HaveBonification = breachList.HaveBonification;
-            if (newBreachList.HaveBonification == false)
-            {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta agregar la bonificacion" });
-
-            }
-            newBreachList.IsActive = breachList.IsActive;
-            if(newBreachList.IsActive == false)
-            {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Activar el estado" });
-
-            }
-            newBreachList.BreachArticleId = breachList.BreachArticleId;
-            if(newBreachList.BreachArticleId == 0)
-            {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta agregar el id del ariculo" });
-
-            }
-
-            _context.BreachLists.Add(newBreachList);
-            await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetBreachLists", new { id = newBreachList.Id }, newBreachList);
         }
@@ -132,28 +161,53 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != breachList.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(breachList).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+
+                    if (id != breachList.Id)
+                    {
+                        return BadRequest();
+                    }
+
+                    _context.Entry(breachList).State = EntityState.Modified;
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!BreachListExist(id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+
+                }
+
+
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!BreachListExist(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(breachList);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para editar lista de infracción" });
             }
+
+          
 
             return Ok(breachList);
         }
