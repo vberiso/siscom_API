@@ -201,7 +201,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         if (y.HaveTax)
                         {
-                            _sumTaxDebtDetail = y.Tax;
+                            _sumTaxDebtDetail += y.Tax;
                             if (y.Tax == 0)
                                 _validation = false;                                
                         }

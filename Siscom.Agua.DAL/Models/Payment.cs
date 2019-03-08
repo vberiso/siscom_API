@@ -33,7 +33,11 @@ namespace Siscom.Agua.DAL.Models
         [Column("total"), Required]
         public decimal Total { get; set; }
         [Column("authorization_origin_payment"), StringLength(50)]
-        public string AuthorizationOriginPayment { get; set; }        
+        public string AuthorizationOriginPayment { get; set; }
+        [Column("number_bank"), StringLength(33)]
+        public string NumberBank { get; set; }
+        [Column("account_number"), StringLength(10)]
+        public string AccountNumber { get; set; }
         [Column("transaction_folio"), StringLength(40)]
         public string TransactionFolio { get; set; }
         [Column("id_agreement"), Required]
