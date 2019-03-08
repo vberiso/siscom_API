@@ -71,17 +71,38 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("OrderSale/{id}")]
         public async Task<IActionResult> PostOrderSale([FromRoute] int id)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var breach = await _context.Breaches.Where(i => i.Id == id).ToListAsync();
 
-            if(breach == null)
+            #region Validación
+            var param = await _context.SystemParameters
+                                    .Where(x => x.Name == "DAYS_EXPIRE_ORDER").FirstOrDefaultAsync();
+
+            if (param != null)
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
+
+            var factor = await _context.SystemParameters
+                                   .Where(x => x.Name == "FACTOR").FirstOrDefaultAsync();
+
+            if (factor != null)
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta el monto de factor de cálculo ") });
+
+
+            var breach = await _context.Breaches
+                                       .Include(x=> x.BreachDetails)
+                                        .ThenInclude(y=> y.BreachList)
+                                       .Where(x=> x.Id== id)
+                                       .FirstOrDefaultAsync();
+
+            if (breach == null)
             {
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre la infracción" });
 
             }
+            #endregion
 
             try
             {
@@ -90,20 +111,21 @@ namespace Siscom.Agua.Api.Controllers
 
                     OrderSale order = new OrderSale();
 
-                    order.Folio = breach.FirstOrDefault().Folio;
-                    if(order.Folio == null)
+                    //Temporal en lo que se crea trigger de asignacion de folio
+                    order.Folio = "F-" + breach.Folio;
+                    if (order.Folio == null)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene folio" });
 
                     }
                     order.DateOrder = DateTime.UtcNow.ToLocalTime();
-                    if(order.DateOrder == null)
+                    if (order.DateOrder == null)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ingresar la fecha" });
 
                     }
-                    order.Amount = breach.FirstOrDefault().Judge;
-                    if(order.Amount == 0)
+                    order.Amount = breach.Judge;
+                    if (order.Amount == 0)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene monto" });
 
@@ -113,25 +135,45 @@ namespace Siscom.Agua.Api.Controllers
                     order.Period = 0;
                     order.Type = "OM001";
                     order.Status = "EOS01";
-                    order.Observation = breach.FirstOrDefault().Reason;
-                    if(order.Observation == null)
+                    order.Observation = breach.Reason;
+                    order.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
+                    if (order.Observation == null)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene observaciones" });
 
                     }
-                    order.IdOrigin = breach.FirstOrDefault().Id;
+                    order.IdOrigin = breach.Id;
                     if(order.IdOrigin == 0)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para encontrar la infracción" });
 
                     }
-                    order.TaxUserId = breach.FirstOrDefault().TaxUserId;
+                    order.TaxUserId = breach.TaxUserId;
                     if(order.TaxUserId == 0)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para encontrar el usuario" });
 
                     }
                     order.DivisionId = 14;
+
+                    List<OrderSaleDetail> orderSaleDetails = new List<OrderSaleDetail>();
+                    breach.BreachDetails.ToList().ForEach( x=> {
+                        OrderSaleDetail orderSaleDetail = new OrderSaleDetail
+                        {
+                            Quantity = 1,
+                            Unity = "",
+                            UnitPrice = factor.NumberColumn,
+                            HaveTax = false,
+                            Description = x.BreachList.Description,
+                            CodeConcept = "",
+                            NameConcept = x.BreachList.Description,
+                            Amount = x.Amount,
+                            OnAccount = 0
+                        };
+                        orderSaleDetails.Add(orderSaleDetail);                       
+                    });
+
+                    order.OrderSaleDetails = orderSaleDetails;
 
                     _context.OrderSales.Add(order);
                     await _context.SaveChangesAsync();
