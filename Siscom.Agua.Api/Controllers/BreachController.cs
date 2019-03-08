@@ -114,7 +114,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if(orderLast.Status == "EOS01")
             {
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se puede agregar la infraccion por el estado de estatus" });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se puede agregar la infracción por el estado de estatus" });
 
             }
 
