@@ -81,14 +81,20 @@ namespace Siscom.Agua.Api.Controllers
             var param = await _context.SystemParameters
                                     .Where(x => x.Name == "DAYS_EXPIRE_ORDER").FirstOrDefaultAsync();
 
-            if (param != null)
+            if (param == null)
+            {
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
+
+            }
 
             var factor = await _context.SystemParameters
                                    .Where(x => x.Name == "FACTOR").FirstOrDefaultAsync();
 
-            if (factor != null)
+            if (factor == null)
+            {
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta el monto de factor de cálculo ") });
+
+            }
 
 
             var breach = await _context.Breaches
@@ -102,6 +108,9 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre la infracción" });
 
             }
+
+            
+
             #endregion
 
             try
@@ -137,6 +146,13 @@ namespace Siscom.Agua.Api.Controllers
                     order.Status = "EOS01";
                     order.Observation = breach.Reason;
                     order.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
+                    var valueDate = order.ExpirationDate.DayOfYear;
+                    var valDate = order.DateOrder.DayOfYear;
+                    if (valueDate > valDate)
+                    {
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No puedes generar la orden por vigencia vence hasta "+ order.ExpirationDate});
+
+                    }
                     if (order.Observation == null)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene observaciones" });
@@ -173,8 +189,14 @@ namespace Siscom.Agua.Api.Controllers
                         orderSaleDetails.Add(orderSaleDetail);                       
                     });
 
-                    order.OrderSaleDetails = orderSaleDetails;
 
+
+                    order.OrderSaleDetails = orderSaleDetails;
+                    if(order.OrderSaleDetails == null)
+                    {
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problema para agregar detalles de orden de cobro" });
+
+                    }
                     _context.OrderSales.Add(order);
                     await _context.SaveChangesAsync();
 
