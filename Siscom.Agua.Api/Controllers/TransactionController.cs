@@ -90,7 +90,7 @@ namespace Siscom.Agua.Api.Controllers
                                                         .Include(p => p.OriginPayment)
                                                         .Include(p => p.PayMethod)
                                                         .Include(p => p.PaymentDetails)
-                                                        .Where(m => m.TransactionFolio == transactionPayment.Transaction.Folio)
+                                                        .Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
                                                         .FirstOrDefaultAsync();
 
             if (transactionPayment.Payment != null)
