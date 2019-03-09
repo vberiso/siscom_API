@@ -13,7 +13,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Required, Column("quantity")]
         public decimal Quantity { get; set; }
-        [Required, Column("unity"), StringLength(10)]
+        [Required, Column("unity"), StringLength(18)]
         public string Unity { get; set; }
         [Required, Column("unit_price")]
         public decimal UnitPrice { get; set; }
