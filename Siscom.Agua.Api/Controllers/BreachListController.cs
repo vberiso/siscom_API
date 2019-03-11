@@ -190,6 +190,9 @@ namespace Siscom.Agua.Api.Controllers
                         }
                     }
 
+                    scope.Complete();
+                    return Ok(breachList);
+
                 }
 
 
