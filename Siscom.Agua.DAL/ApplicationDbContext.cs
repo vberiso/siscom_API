@@ -57,7 +57,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Derivative> Derivatives { get; set; }
         public DbSet<AgreementLog> AgreementLogs { get; set; }
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<FolioBreach> FolioBreaches { get; set; }
+        public DbSet<FolioOrdersale> FolioOrdersales { get; set; }
         public DbSet<TypeClassification> TypeClassifications { get; set; }
         public DbSet<Prepaid> Prepaids { get; set; }
         public DbSet<PrepaidDetail> PrepaidDetails { get; set; }

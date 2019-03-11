@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Siscom.Agua.DAL.Models
 {
-    [Table("FolioBreach")]
-    public class FolioBreach
+    [Table("FolioOrdersale")]
+    public class FolioOrdersale
     {
 
         [Key]
