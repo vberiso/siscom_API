@@ -21,5 +21,7 @@ namespace Siscom.Agua.DAL.Models
         public string Suffixes { get; set; }
         [Column("is_active"), Required]        
         public bool IsActive { get; set; }
+
+
     }
 }
