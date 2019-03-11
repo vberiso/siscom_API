@@ -4,13 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Siscom.Agua.DAL.Models
 {
-    [Table("FolioOrdersale")]
-    public class FolioOrdersale
+    [Table("FolioOrderSale")]
+    public class FolioOrderSale
     {
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id_folio_breach")]
+        [Column("id_folio_order_sale")]
         public int Id { get; set; }
         [Column("prefix")]
         public string Prefix { get; set; }
@@ -20,7 +20,7 @@ namespace Siscom.Agua.DAL.Models
         public string Suffixes { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
-        [Column("type")]
+        [Required, StringLength(5), Column("type")]
         public string Type { get; set; }
 
     }

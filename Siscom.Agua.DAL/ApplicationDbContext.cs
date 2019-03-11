@@ -57,7 +57,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Derivative> Derivatives { get; set; }
         public DbSet<AgreementLog> AgreementLogs { get; set; }
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<FolioOrdersale> FolioOrdersales { get; set; }
+        public DbSet<FolioOrderSale> FolioOrdersales { get; set; }
         public DbSet<TypeClassification> TypeClassifications { get; set; }
         public DbSet<Prepaid> Prepaids { get; set; }
         public DbSet<PrepaidDetail> PrepaidDetails { get; set; }
@@ -629,6 +629,13 @@ namespace Siscom.Agua.DAL
             builder.Entity<Folio>()
                .Property(x => x.DateCurrent)
                .HasDefaultValue(System.DateTime.Now);
+
+            #endregion
+
+            #region FolioOrderSale           
+            builder.Entity<FolioOrderSale>()
+                  .Property(x => x.IsActive)
+                  .HasDefaultValue(true);
 
             #endregion
 
