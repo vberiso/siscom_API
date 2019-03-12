@@ -36,7 +36,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
 
-        public BreachController(ApplicationDbContext context, UserManager<ApplicationUser>userManager)
+        public BreachController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             this.userManager = userManager;
@@ -67,9 +67,9 @@ namespace Siscom.Agua.Api.Controllers
                                     //.Where(i=>i.Id == id).FirstOrDefaultAsync();
 
             var breach = await _context.Breaches
-                                    .Include( t => t.TaxUser)
+                                    .Include(t => t.TaxUser)
                                         .ThenInclude(ad => ad.TaxAddresses)
-                                    .Include( b => b.BreachDetails)
+                                    .Include(b => b.BreachDetails)
                                     .FirstOrDefaultAsync(a => a.Id == id);
 
             if (breach == null)
@@ -110,9 +110,9 @@ namespace Siscom.Agua.Api.Controllers
 
 
             var breach = await _context.Breaches
-                                       .Include(x=> x.BreachDetails)
-                                        .ThenInclude(y=> y.BreachList)
-                                       .Where(x=> x.Id== id)
+                                       .Include(x => x.BreachDetails)
+                                        .ThenInclude(y => y.BreachList)
+                                       .Where(x => x.Id == id)
                                        .FirstOrDefaultAsync();
 
             if (breach == null)
@@ -124,7 +124,7 @@ namespace Siscom.Agua.Api.Controllers
 
             var orderLast = await _context.OrderSales.Where(o => o.IdOrigin == breach.Id).FirstOrDefaultAsync();
 
-            if(orderLast.Status == "EOS01")
+            if (orderLast.Status == "EOS01")
             {
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se puede agregar la infracción por el estado de estatus" });
 
@@ -169,7 +169,7 @@ namespace Siscom.Agua.Api.Controllers
                     var valDate = order.DateOrder.DayOfYear;
                     if (valueDate > valDate)
                     {
-                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No puedes generar la orden por vigencia vence hasta "+ order.ExpirationDate});
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No puedes generar la orden por vigencia vence hasta " + order.ExpirationDate });
 
                     }
                     if (order.Observation == null)
@@ -178,13 +178,13 @@ namespace Siscom.Agua.Api.Controllers
 
                     }
                     order.IdOrigin = breach.Id;
-                    if(order.IdOrigin == 0)
+                    if (order.IdOrigin == 0)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para encontrar la infracción" });
 
                     }
                     order.TaxUserId = breach.TaxUserId;
-                    if(order.TaxUserId == 0)
+                    if (order.TaxUserId == 0)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para encontrar el usuario" });
 
@@ -192,7 +192,7 @@ namespace Siscom.Agua.Api.Controllers
                     order.DivisionId = 14;
 
                     List<OrderSaleDetail> orderSaleDetails = new List<OrderSaleDetail>();
-                    breach.BreachDetails.ToList().ForEach( x=> {
+                    breach.BreachDetails.ToList().ForEach(x => {
                         OrderSaleDetail orderSaleDetail = new OrderSaleDetail
                         {
                             Quantity = 1,
@@ -205,13 +205,13 @@ namespace Siscom.Agua.Api.Controllers
                             Amount = x.Amount,
                             OnAccount = 0
                         };
-                        orderSaleDetails.Add(orderSaleDetail);                       
+                        orderSaleDetails.Add(orderSaleDetail);
                     });
 
 
 
                     order.OrderSaleDetails = orderSaleDetails;
-                    if(order.OrderSaleDetails == null)
+                    if (order.OrderSaleDetails == null)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problema para agregar detalles de orden de cobro" });
 
@@ -239,15 +239,16 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para generar order de cobro" });
             }
 
-           
 
-           
+
+
             return StatusCode((int)TypeError.Code.InternalServerError, new { Success = "Orden de cobro generada" });
         }
 
 
         [HttpGet("GetStatus")]
-        public  IEnumerable<Status> GetStatus(){
+        public IEnumerable<Status> GetStatus()
+        {
             return _context.Statuses.Where(d => d.GroupStatusId == 7);
         }
 
@@ -290,7 +291,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             Breach NewBreach = new Breach();
-           
+
             if ((breanch.BreachDetails != null) && ((breanch != null) && (breanch.TaxUserId == 0)))
             {
 
@@ -484,7 +485,7 @@ namespace Siscom.Agua.Api.Controllers
                         await _context.SaveChangesAsync();
 
 
-                       
+
 
 
                         decimal sumBreanch = 0;
@@ -494,233 +495,6 @@ namespace Siscom.Agua.Api.Controllers
                             var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).FirstOrDefaultAsync();
 
 
-                            var getLicense = await _context.Breaches.Where(z => z.LicensePlate.Contains(breanch.LicensePlate)).ToListAsync();
-                            int cont = getLicense.Count;
-
-
-                            if (cont > 1 )
-                            {
-                                var valueJudge = value.MaxTimesFactor;
-                                BreachDetail listBreanch = new BreachDetail
-                                {
-                                    //Breach = NewBreach,
-                                    BreachId = NewBreach.Id,
-
-                                    //BreachList = value,
-                                    BreachListId = value.Id,
-                                    Amount = valueJudge * param.NumberColumn,
-                                    Bonification = 0,
-                                    PercentBonification = 0,
-                                    TimesFactor = valueJudge
-
-
-                                };
-
-                                sumBreanch += listBreanch.Amount;
-
-
-
-                                _context.Add(listBreanch);
-                                _context.SaveChanges();
-
-                            }
-                            else{
-                                var valueJudge = value.MinTimesFactor;
-                                BreachDetail listBreanch = new BreachDetail
-                                {
-                                    //Breach = NewBreach,
-                                    BreachId = NewBreach.Id,
-
-                                    //BreachList = value,
-                                    BreachListId = value.Id,
-                                    Amount = valueJudge * param.NumberColumn,
-                                    Bonification = 0,
-                                    PercentBonification = 0,
-                                    TimesFactor = valueJudge
-
-
-                                };
-
-                                sumBreanch += listBreanch.Amount;
-
-
-
-                                _context.Add(listBreanch);
-                                _context.SaveChanges();
-                            }
-                            //BreachDetail newBreachDetail = new BreachDetail();
-                            //if (breanch.LicensePlate == null){
-                            //    //newBreachDetail.AplicationDays = 
-                            //}
-
-                        }
-
-                        NewBreach.Judge = sumBreanch;
-                        _context.Entry(NewBreach).State = EntityState.Modified;
-                        await _context.SaveChangesAsync();
-
-                        scope.Complete();
-
-
-
-
-                    }
-
-
-                }catch(Exception e)
-                {
-                    SystemLog systemLog = new SystemLog();
-                    systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                    systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
-                    systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
-                    systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                    systemLog.Parameter = JsonConvert.SerializeObject(breanch);
-                    CustomSystemLog helper = new CustomSystemLog(_context);
-                    helper.AddLog(systemLog);
-                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para crear la infracción" });
-
-                }
-                return CreatedAtAction("GetBreach", new { id = NewBreach.Id }, NewBreach);
-
-            }
-            else
-            {
-                var taxu = await _context.TaxUsers.FindAsync(breanch.TaxUserId);
-                var param = await _context.SystemParameters
-                                    .Where(x => x.Name == "FACTOR").FirstOrDefaultAsync();
-                if (param == null){
-                    return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de salario minimo") });
-
-                }
-                var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01").FirstOrDefaultAsync();
-
-                if (getf == null)
-                {
-                    return StatusCode((int)TypeError.Code.Ok, new { Error = "no existen folios disponibles" });
-                }
-
-                getf.Status = "EFT02";
-
-                _context.Entry(getf).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-
-                try
-                {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                    {
-                        NewBreach.TaxUserId = taxu.Id;
-                        if(NewBreach.TaxUserId == 0)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encontro al usuario") });
-
-                        }
-                        NewBreach.Car = breanch.Car;
-                        if(NewBreach.Car == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el tipo de automovil") });
-
-                        }
-                        NewBreach.Series = breanch.Series;
-                        if(NewBreach.Series == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la serie") });
-
-                        }
-                        NewBreach.Folio = getf.Folio;
-                        if(NewBreach.Folio == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Problema para agregar folio") });
-
-                        }
-                        NewBreach.CaptureDate = breanch.CaptureDate;
-                        if(NewBreach.CaptureDate == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el dia captura de la infracción") });
-
-                        }
-                        NewBreach.Place = breanch.Place;
-                        if (NewBreach.Place == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el lugar") });
-
-                        }
-                        NewBreach.Sector = breanch.Sector;
-                        if(NewBreach.Sector == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el sector") });
-
-                        }
-                        NewBreach.Zone = breanch.Zone;
-                        if (NewBreach.Zone == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la zona") });
-
-                        }
-                        NewBreach.TypeCar = breanch.TypeCar;
-                        if(NewBreach.TypeCar == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el tipo de automovil") });
-
-                        }
-                        NewBreach.Service = breanch.Service;
-                        if(NewBreach.Service == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el servicio") });
-
-                        }
-                        NewBreach.Color = breanch.Color;
-                        if(NewBreach.Color == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el color") });
-
-                        }
-                        NewBreach.Reason = breanch.Reason;
-                        if (NewBreach.Reason == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la razon") });
-
-                        }
-                        NewBreach.LicensePlate = breanch.LicensePlate;
-                        if(NewBreach.LicensePlate == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la placa") });
-
-                        }
-                        NewBreach.Judge = breanch.Judge;
-                        NewBreach.DateBreach = breanch.DateBreach;
-                        if(NewBreach.DateBreach == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el dia de alta de la infracción") });
-
-                        }
-                        NewBreach.Status = breanch.Status;
-                        if (NewBreach.Status == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el estatus") });
-
-                        }
-                        NewBreach.AssignmentTicketId = getf.Id;
-                        if (NewBreach.AssignmentTicketId == 0)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Error para ingresar el folio") });
-
-                        }
-                        NewBreach.UserId = breanch.UserId;
-                        if(NewBreach.UserId == null)
-                        {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el usuario que crea la infracción") });
-
-                        }
-
-
-                        _context.Breaches.Add(NewBreach);
-                        await _context.SaveChangesAsync();
-
-                        decimal sumBreanch = 0;
-
-                        foreach (var list in breanch.BreachDetails)
-                        {
-                            var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).FirstOrDefaultAsync();
                             var getLicense = await _context.Breaches.Where(z => z.LicensePlate.Contains(breanch.LicensePlate)).ToListAsync();
                             int cont = getLicense.Count;
 
@@ -821,6 +595,8 @@ namespace Siscom.Agua.Api.Controllers
            
           
 
+
+
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -856,7 +632,8 @@ namespace Siscom.Agua.Api.Controllers
 
                 }
             }
-            catch(Exception e){
+            catch (Exception e)
+            {
                 SystemLog systemLog = new SystemLog();
                 systemLog.Description = e.ToMessageAndCompleteStacktrace();
                 systemLog.DateLog = DateTime.UtcNow.ToLocalTime();

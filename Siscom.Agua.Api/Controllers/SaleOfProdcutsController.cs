@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Http.Cors;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace Siscom.Agua.Api.Controllers
     [Route("api/[controller]")]
     [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
+    [Authorize]
     public class SaleOfProdcutsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

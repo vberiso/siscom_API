@@ -250,6 +250,8 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pPaymentConcepts.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
                     transaction.OriginPayment = await _context.OriginPayments.FindAsync(pPaymentConcepts.Transaction.OriginPaymentId).ConfigureAwait(false);
                     transaction.Total = pPaymentConcepts.Transaction.Total;
+                    transaction.AccountNumber = pPaymentConcepts.Transaction.AccountNumber;
+                    transaction.NumberBank = pPaymentConcepts.Transaction.NumberBank;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
@@ -276,6 +278,8 @@ namespace Siscom.Agua.Api.Controllers
                     payment.Rounding = Math.Truncate(transaction.Rounding * 100) / 100;
                     payment.Total = transaction.Total;
                     payment.AuthorizationOriginPayment = transaction.AuthorizationOriginPayment;
+                    payment.NumberBank = transaction.NumberBank;
+                    payment.AccountNumber = transaction.AccountNumber;
                     payment.AgreementId = pPaymentConcepts.Transaction.AgreementId;
                     payment.Status = "EP001";
                     payment.Type = pPaymentConcepts.Transaction.Type;
