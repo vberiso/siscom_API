@@ -573,12 +573,8 @@ namespace Siscom.Agua.Api.Controllers
                     helper.AddLog(systemLog);
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar la infracción" });
                 }
-
-                return CreatedAtAction("GetBreach", new { id = NewBreach.Id }, NewBreach);
-
             }
-
-
+            return CreatedAtAction("GetBreach", new { id = NewBreach.Id }, NewBreach);
         }
 
        
