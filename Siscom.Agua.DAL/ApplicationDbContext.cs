@@ -633,7 +633,7 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region FolioOrderSale           
-            builder.Entity<FolioOrderSale>()
+            builder.Entity<FolioOrdersale>()
                   .Property(x => x.IsActive)
                   .HasDefaultValue(true);
 
