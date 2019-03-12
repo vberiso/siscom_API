@@ -24,6 +24,8 @@ namespace Siscom.Agua.DAL.Models
         public string CodeConcept { get; set; }
         [Required, StringLength(500), Column("name_concept")]
         public string NameConcept { get; set; }
+        [Required,Column("cuantity")]
+        public decimal Cuantity { get; set; }
         [NotMapped]
         [Column("tax"), Required]
         public decimal Tax { get; set; }

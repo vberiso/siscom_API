@@ -502,6 +502,15 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtDetail>()
                    .Property(p => p.OnAccount)
                    .HasColumnType("decimal(18, 2)");
+     
+            builder.Entity<DebtDetail>()
+                  .Property(p => p.Cuantity)
+                  .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DebtDetail>()
+                  .Property(x => x.Cuantity)
+                  .HasDefaultValue(1);
+
             #endregion           
 
             #region DebtDiscount
