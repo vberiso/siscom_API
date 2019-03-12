@@ -57,7 +57,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Derivative> Derivatives { get; set; }
         public DbSet<AgreementLog> AgreementLogs { get; set; }
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<FolioOrdersale> FolioOrdersales { get; set; }
+        public DbSet<FolioOrderSale> FolioOrderSales { get; set; }
         public DbSet<TypeClassification> TypeClassifications { get; set; }
         public DbSet<Prepaid> Prepaids { get; set; }
         public DbSet<PrepaidDetail> PrepaidDetails { get; set; }
@@ -504,11 +504,11 @@ namespace Siscom.Agua.DAL
                    .HasColumnType("decimal(18, 2)");
      
             builder.Entity<DebtDetail>()
-                  .Property(p => p.Cuantity)
+                  .Property(p => p.Quantity)
                   .HasColumnType("decimal(18, 2)");
 
             builder.Entity<DebtDetail>()
-                  .Property(x => x.Cuantity)
+                  .Property(x => x.Quantity)
                   .HasDefaultValue(1);
 
             #endregion           
@@ -642,7 +642,7 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region FolioOrderSale           
-            builder.Entity<FolioOrdersale>()
+            builder.Entity<FolioOrderSale>()
                   .Property(x => x.IsActive)
                   .HasDefaultValue(true);
 
