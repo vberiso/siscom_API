@@ -252,7 +252,7 @@ namespace Siscom.Agua.Api.Controllers
             var param = await _context.SystemParameters
                                   .Where(x => x.Name == "DAYS_EXPIRE_ORDER").FirstOrDefaultAsync();
 
-            if (param != null)
+            if (param == null)
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
 
             if (AgreementId != 0)
