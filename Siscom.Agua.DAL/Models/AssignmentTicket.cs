@@ -15,7 +15,7 @@ namespace Siscom.Agua.DAL.Models
         public DateTime AssignmentDate { get; set; }
         [Column("serie"), StringLength(50)]
         public string Serie { get; set; }
-        [Required, Column("folio"), StringLength(10)]
+        [Required, Column("folio")]
         public int Folio { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }

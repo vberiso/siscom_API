@@ -20,7 +20,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("series"),Required,StringLength(50)]
         public string Series { get; set; }
-        [Required, Column("folio"), StringLength(10)]
+        [Required, Column("folio")]
         public int Folio { get; set; }
         [Required, Column("date_capture")]
         public DateTime CaptureDate { get; set; }

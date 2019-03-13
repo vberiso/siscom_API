@@ -87,7 +87,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // POST: api/AssignmentTickets
-        [HttpPost("AssigmentTickets/{Initial}/{Final}")]
+        [HttpPost("{Initial}/{Final}")]
         public async Task<IActionResult> PostAssignmentTicket([FromRoute] int Initial ,int Final ,[FromBody] AssignmentTicket assignmentTicket)
         {
             if (!ModelState.IsValid)
@@ -95,21 +95,24 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            if(_context.AssignmentTickets
-                       .Where(x=> x.Serie== assignmentTicket.Serie && x.Serie== assignmentTicket.Serie).FirstOrDefault() != null)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = "No hay datos para este número de cuenta" });
+           if(Initial==0 || Final ==0)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Rango de folios incorrectos" });
+           if(String.IsNullOrEmpty(assignmentTicket.UserId))
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe proporcionar un usuario" });
+
+           if((await _context.Users.Where(x=> x.Id== assignmentTicket.UserId).FirstOrDefaultAsync())== null)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "No existe el usuario a asignar folios" });
 
 
-
-            for ( int i = Initial; i < Final; i++ )
+            for ( int i = Initial; i <= Final; i++ )
             {
                 AssignmentTicket assignment = new AssignmentTicket();
-                assignment.AssignmentDate = assignmentTicket.AssignmentDate;
+                assignment.AssignmentDate = DateTime.UtcNow.ToLocalTime();
                 assignment.Folio = i;
-                assignment.Status = assignmentTicket.Status;
+                assignment.Status = "EFT01";
                 assignment.UserId = assignmentTicket.UserId;
 
-                _context.AssignmentTickets.Add(assignmentTicket);
+                _context.AssignmentTickets.Add(assignment);
                 await _context.SaveChangesAsync();
             }
           
