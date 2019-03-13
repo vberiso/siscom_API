@@ -141,7 +141,7 @@ namespace Siscom.Agua.Api.Controllers
             var param = await _context.SystemParameters
                                     .Where(x => x.Name == "DAYS_EXPIRE_ORDER").FirstOrDefaultAsync();
 
-            if(param!=null)
+            if(param==null)
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
             #endregion
 
@@ -152,12 +152,26 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     TaxUser _taxUser = new TaxUser();
 
-                    if (_taxUser.Id != 0)
+                    if (orderSale.TaxUserId != 0)
+                    {
                         _taxUser = await _context.TaxUsers.FindAsync(_taxUser.Id);
+                        if (_taxUser == null)
+                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No existe cliente proporcionado" });
+                    }
                     else
                     {
-                        _taxUser = orderSale.TaxUser;
-                        _context.TaxUsers.Add(_taxUser);
+                        if (orderSale.TaxUserId == 0)
+                            _taxUser.Id = 16;
+                        else
+                        {
+
+                            if (string.IsNullOrEmpty(orderSale.TaxUser.Name))
+                                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Debe proporcionar nombre de cliente" });
+
+                            _taxUser = orderSale.TaxUser;
+                            _taxUser.IsActive = true;
+                            _context.TaxUsers.Add(_taxUser);
+                        }
                     }
 
                     _orderSale.DateOrder = DateTime.UtcNow.ToLocalTime();
@@ -173,7 +187,7 @@ namespace Siscom.Agua.Api.Controllers
                     _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
                     _orderSale.Division = orderSale.Division;
 
-                    _context.OrderSales.Add(orderSale);
+                    _context.OrderSales.Add(_orderSale);
 
                     await _context.SaveChangesAsync();
                     scope.Complete();
@@ -192,7 +206,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
 
-            return Ok(_orderSale.Folio);
+            return Ok(_orderSale);
         }
 
         // DELETE: api/OrderSales/5
