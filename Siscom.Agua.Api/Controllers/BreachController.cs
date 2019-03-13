@@ -391,7 +391,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar el numero de serie" });
                         }
                         NewBreach.Folio = getf.Folio;
-                        if (NewBreach.Folio == null)
+                        if (NewBreach.Folio == 0)
                         {
                             return StatusCode((int)TypeError.Code.Ok, new { Error = "Problema para ingresar folio" });
 
@@ -638,7 +638,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         }
                         NewBreach.Folio = getf.Folio;
-                        if (NewBreach.Folio == null)
+                        if (NewBreach.Folio == 0)
                         {
                             return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Problema para agregar folio") });
 

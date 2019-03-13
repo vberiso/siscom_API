@@ -16,7 +16,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("serie"), StringLength(50)]
         public string Serie { get; set; }
         [Required, Column("folio"), StringLength(10)]
-        public string Folio { get; set; }
+        public int Folio { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
         [Required]
