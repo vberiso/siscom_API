@@ -18,7 +18,7 @@ namespace Siscom.Agua.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_order_sale")]
         public int Id { get; set; }
-        [Required, StringLength(30), Column("folio")]
+        [StringLength(30), Column("folio")]
         public string Folio { get; set; }
         [Required, Column("date_order")]
         public DateTime DateOrder { get; set; }
