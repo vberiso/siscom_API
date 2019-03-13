@@ -87,7 +87,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // POST: api/AssignmentTickets
-        [HttpPost("{Initial}/{Final}")]
+        [HttpPost("AssigmentTickets/{Initial}/{Final}")]
         public async Task<IActionResult> PostAssignmentTicket([FromRoute] int Initial ,int Final ,[FromBody] AssignmentTicket assignmentTicket)
         {
             if (!ModelState.IsValid)
