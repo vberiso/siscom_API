@@ -131,34 +131,5 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Unauthorized();
         }
-
-        // GET api/values
-        [Authorize(Policy = "RequireAdminRole")]
-        [HttpPost]
-        public async Task<IActionResult> Get([FromBody] AddUserVM addUser)
-        {
-            IdentityResult result;
-            ApplicationUser user = new ApplicationUser()
-            {
-                Email = addUser.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = addUser.UserName,
-                Name = addUser.Name,
-                LastName = addUser.LastName,
-                SecondLastName = addUser.SecondLastName,
-                DivitionId = addUser.DivitionId
-            };
-
-            result = await userManager.CreateAsync(user, "Presidencia2019");
-            await userManager.AddToRoleAsync(user, "User");
-            if (result.Succeeded)
-            {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito" });
-            }
-            else
-            {
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(" ",result.Errors) });
-            }
-        }
     }
 }
