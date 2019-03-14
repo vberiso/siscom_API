@@ -165,12 +165,12 @@ namespace Siscom.Agua.Api.Controllers
                         //else
                         //{
 
-                            if (string.IsNullOrEmpty(orderSale.TaxUser.Name))
-                                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Debe proporcionar nombre de cliente" });
+                        if (string.IsNullOrEmpty(orderSale.TaxUser.Name))
+                            return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Debe proporcionar nombre de cliente" });
 
-                            _taxUser = orderSale.TaxUser;
-                            _taxUser.IsActive = true;
-                            _context.TaxUsers.Add(_taxUser);
+                        _taxUser = orderSale.TaxUser;
+                        _taxUser.IsActive = true;
+                        _context.TaxUsers.Add(_taxUser);
                         //}
                     }
 
@@ -185,7 +185,8 @@ namespace Siscom.Agua.Api.Controllers
                     _orderSale.IdOrigin = orderSale.IdOrigin;
                     _orderSale.TaxUserId = _taxUser.Id;
                     _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
-                    _orderSale.Division = orderSale.Division;
+                    _orderSale.DivisionId = orderSale.DivisionId == 0 ? 15 : orderSale.DivisionId;
+                    _orderSale.OrderSaleDetails = orderSale.OrderSaleDetails;
 
                     _context.OrderSales.Add(_orderSale);
 
