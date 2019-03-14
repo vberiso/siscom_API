@@ -18,7 +18,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
         [Required]
-        public string TransitPoliceId { get; set; }
+        public int TransitPoliceId { get; set; }
         public TransitPolice TransitPolice { get; set; }
     }
 }

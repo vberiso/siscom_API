@@ -97,13 +97,14 @@ namespace Siscom.Agua.Api.Controllers
 
            if(Initial==0 || Final ==0)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Rango de folios incorrectos" });
-           if(String.IsNullOrEmpty(assignmentTicket.TransitPoliceId))
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe proporcionar un usuario" });
+           if(assignmentTicket.TransitPoliceId==0)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe proporcionar un agente" });
 
-           if((await _context.Users.Where(x=> x.Id== assignmentTicket.TransitPoliceId).FirstOrDefaultAsync())== null)
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "No existe el usuario a asignar folios" });
+           if((await _context.TransitPolices.Where(x=> x.Id== assignmentTicket.TransitPoliceId).FirstOrDefaultAsync())== null)
+                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "No se ha localizado agente para asignar folios" });
 
-           //Validar que el rango no esté dado de alta previamente
+            //Fata Validar que el rango de folios no esté dado de alta previamente
+            //EFT03 CANCELADA; EFT02 ASIGNADO; EFT01= SIN ASIGNAR
 
             for ( int i = Initial; i <= Final; i++ )
             {

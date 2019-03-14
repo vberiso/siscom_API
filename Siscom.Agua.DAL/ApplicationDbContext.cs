@@ -350,6 +350,12 @@ namespace Siscom.Agua.DAL
                     .HasForeignKey(s => s.TransitPoliceId);
             #endregion
 
+            #region ApplicationUser
+            builder.Entity<ApplicationUser>()
+                .Property(x => x.IsActive)
+                .HasDefaultValue(false);
+            #endregion            
+
             #region BranchOffice
             builder.Entity<BranchOffice>()
                    .Property(x => x.IsActive)
