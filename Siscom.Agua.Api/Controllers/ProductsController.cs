@@ -169,12 +169,13 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             var tariff = await _context.TariffProducts
-                                        .Where(x => x.ProductId == ProductId &&
-                                                    x.IsActive==1).SingleOrDefaultAsync();
+                                     .Include(x => x.Product)
+                                       .ThenInclude(product => product.ProductParams)
+                                     .Where(x => x.ProductId == ProductId &&
+                                                  x.IsActive == 1).SingleOrDefaultAsync();
 
-            if(tariff ==null)
+            if (tariff ==null)
                 return NotFound();
-
 
             return Ok(tariff);
         }
