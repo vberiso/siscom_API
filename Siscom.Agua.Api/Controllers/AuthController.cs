@@ -25,6 +25,7 @@ namespace Siscom.Agua.Api.Controllers
     [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     public class AuthController : Controller
     {
+        //user manager
         private UserManager<ApplicationUser> userManager;
         private readonly AppSettings appSettings;
         private readonly ApplicationDbContext _context;
@@ -47,6 +48,10 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+
+            //Get all user with role Agente
+            var users = userManager.GetUsersInRoleAsync("Agente").Result;
+            //*******************************************
 
             var user = await userManager.FindByNameAsync(model.UserName);
             if (user == null)
