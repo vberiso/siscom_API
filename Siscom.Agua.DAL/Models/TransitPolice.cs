@@ -8,6 +8,11 @@ namespace Siscom.Agua.DAL.Models
 {
     public class TransitPolice
     {
+        public TransitPolice()
+        {
+            AssignmentTickets = new HashSet<AssignmentTicket>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_transit_police")]
@@ -27,5 +32,7 @@ namespace Siscom.Agua.DAL.Models
 
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
+
+        public ICollection<AssignmentTicket> AssignmentTickets { get; set; }
     }
 }

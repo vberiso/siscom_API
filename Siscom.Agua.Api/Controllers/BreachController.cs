@@ -28,20 +28,10 @@ namespace Siscom.Agua.Api.Controllers
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> userManager;
 
-
-
-
-
-
-
-
-
         public BreachController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             this.userManager = userManager;
-
-
         }
 
 
@@ -52,10 +42,6 @@ namespace Siscom.Agua.Api.Controllers
             return _context.Breaches;
 
         }
-       
-
-
-
 
         // GET: api/Breach/1
         [HttpGet("{id}")]
@@ -386,10 +372,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar carro" });
                         }
                         NewBreach.Series = breanch.Series;
-                        if (NewBreach.Series == null)
-                        {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar el numero de serie" });
-                        }
+                        
                         NewBreach.Folio = getf.Folio;
                         if (NewBreach.Folio == 0)
                         {

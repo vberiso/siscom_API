@@ -58,7 +58,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_assignment_ticket"),  Required]
         public int AssignmentTicketId { get; set; }
         [NotMapped]
-        public string AssignmentTicketUserId { get; set; }
+        public string TransitPoliceId { get; set; }
         [Required]
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }

@@ -160,6 +160,7 @@ namespace Siscom.Agua.DAL
         public DbSet<DiscountCampaign> DiscountCampaigns { get; set; }
         public DbSet<DiscountAuthorization> DiscountAuthorizations { get; set; }
         public DbSet<DiscountAuthorizationDetail> DiscountAuthorizationDetails { get; set; }
+        public DbSet<TransitPolice> TransitPolices { get; set; }
 
         public ApplicationDbContext()
         {
@@ -344,9 +345,9 @@ namespace Siscom.Agua.DAL
 
             #region AssignmentTicket
             builder.Entity<AssignmentTicket>()
-                    .HasOne<ApplicationUser>(a => a.User)
+                    .HasOne<TransitPolice>(a => a.TransitPolice)
                     .WithMany(s => s.AssignmentTickets)
-                    .HasForeignKey(s => s.UserId);
+                    .HasForeignKey(s => s.TransitPoliceId);
             #endregion
 
             #region BranchOffice
@@ -1115,6 +1116,17 @@ namespace Siscom.Agua.DAL
                    .WithMany(s => s.TransactionFolios)
                    .HasForeignKey(s => s.TransactionId);
             #endregion
+
+            #region TransitPolice
+            builder.Entity<TransitPolice>()
+                  .HasOne<ApplicationUser>(a => a.User)
+                  .WithMany(s => s.TransitPolices)
+                  .HasForeignKey(s => s.UserId);
+
+            builder.Entity<TransitPolice>()
+             .Property(x => x.IsActive)
+             .HasDefaultValue(true);
+            #endregion            
 
             #region Type
             builder.Entity<Models.Type>()
