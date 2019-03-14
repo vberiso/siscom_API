@@ -352,7 +352,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         if (getf == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "no existen folios disponibles" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "no existen folios disponibles" });
                         }
 
                         getf.Status = "EFT02";
@@ -369,105 +369,105 @@ namespace Siscom.Agua.Api.Controllers
                         NewBreach.Car = breanch.Car;
                         if (NewBreach.Car == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar carro" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar carro" });
                         }
                         NewBreach.Series = breanch.Series;
                         
                         NewBreach.Folio = getf.Folio;
                         if (NewBreach.Folio == 0)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Problema para ingresar folio" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Problema para ingresar folio" });
 
                         }
                         NewBreach.CaptureDate = breanch.CaptureDate;
                         if (NewBreach.CaptureDate == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar dia de captura" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar dia de captura" });
                         }
                         NewBreach.Place = breanch.Place;
                         if (NewBreach.Place == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar lugar" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar lugar" });
 
                         }
                         NewBreach.Sector = breanch.Sector;
                         if (NewBreach.Sector == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar el sector" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar el sector" });
 
                         }
                         NewBreach.Zone = breanch.Zone;
                         if (NewBreach.Zone == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar zona" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar zona" });
 
                         }
                         NewBreach.TypeCar = breanch.TypeCar;
                         if (NewBreach.TypeCar == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar tipo de automovil" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar tipo de automovil" });
 
                         }
                         NewBreach.Service = breanch.Service;
                         if (NewBreach.Service == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar servicio" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar servicio" });
 
                         }
                         NewBreach.Color = breanch.Color;
                         if (NewBreach.Color == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar el color" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar el color" });
 
                         }
                         NewBreach.Reason = breanch.Reason;
                         if (NewBreach.Reason == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar la razon" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar la razon" });
 
                         }
                         NewBreach.LicensePlate = breanch.LicensePlate;
                         if (NewBreach.LicensePlate == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar la placa" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar la placa" });
 
                         }
                         NewBreach.Reason = breanch.Reason;
                         if (NewBreach.Reason == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar razon" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar razon" });
 
                         }
                         NewBreach.Judge = breanch.Judge;
                         NewBreach.DateBreach = breanch.DateBreach;
                         if (NewBreach.DateBreach == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar dia de la infracción" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar dia de la infracción" });
 
                         }
                         NewBreach.Status = breanch.Status;
                         if (NewBreach.Status == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar estatus" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar estatus" });
 
                         }
                         NewBreach.AssignmentTicketId = getf.Id;
                         if (NewBreach.AssignmentTicketId == 0)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Error al asignar folio" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Error al asignar folio" });
 
                         }
                         NewBreach.UserId = breanch.UserId;
                         if (NewBreach.UserId == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar el id del usuario" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar el id del usuario" });
 
                         }
 
                         NewBreach.TaxUser = breanch.TaxUser;
                         if (NewBreach.TaxUser == null)
                         {
-                            return StatusCode((int)TypeError.Code.Ok, new { Error = "Faltan datos del contribuyente" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Faltan datos del contribuyente" });
 
                         }
 
@@ -605,104 +605,104 @@ namespace Siscom.Agua.Api.Controllers
                         NewBreach.TaxUserId = taxu.Id;
                         if (NewBreach.TaxUserId == 0)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encontro al usuario") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("No se encontro al usuario") });
 
                         }
                         NewBreach.Car = breanch.Car;
                         if (NewBreach.Car == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el tipo de automovil") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el tipo de automovil") });
 
                         }
                         NewBreach.Series = breanch.Series;
                         if (NewBreach.Series == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la serie") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar la serie") });
 
                         }
                         NewBreach.Folio = getf.Folio;
                         if (NewBreach.Folio == 0)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Problema para agregar folio") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Problema para agregar folio") });
 
                         }
                         NewBreach.CaptureDate = breanch.CaptureDate;
                         if (NewBreach.CaptureDate == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el dia captura de la infracción") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el dia captura de la infracción") });
 
                         }
                         NewBreach.Place = breanch.Place;
                         if (NewBreach.Place == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el lugar") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el lugar") });
 
                         }
                         NewBreach.Sector = breanch.Sector;
                         if (NewBreach.Sector == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el sector") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el sector") });
 
                         }
                         NewBreach.Zone = breanch.Zone;
                         if (NewBreach.Zone == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la zona") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar la zona") });
 
                         }
                         NewBreach.TypeCar = breanch.TypeCar;
                         if (NewBreach.TypeCar == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el tipo de automovil") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el tipo de automovil") });
 
                         }
                         NewBreach.Service = breanch.Service;
                         if (NewBreach.Service == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el servicio") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el servicio") });
 
                         }
                         NewBreach.Color = breanch.Color;
                         if (NewBreach.Color == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el color") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el color") });
 
                         }
                         NewBreach.Reason = breanch.Reason;
                         if (NewBreach.Reason == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la razon") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar la razon") });
 
                         }
                         NewBreach.LicensePlate = breanch.LicensePlate;
                         if (NewBreach.LicensePlate == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la placa") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar la placa") });
 
                         }
                         NewBreach.Judge = breanch.Judge;
                         NewBreach.DateBreach = breanch.DateBreach;
                         if (NewBreach.DateBreach == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el dia de alta de la infracción") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el dia de alta de la infracción") });
 
                         }
                         NewBreach.Status = breanch.Status;
                         if (NewBreach.Status == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el estatus") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el estatus") });
 
                         }
                         NewBreach.AssignmentTicketId = getf.Id;
                         if (NewBreach.AssignmentTicketId == 0)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Error para ingresar el folio") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Error para ingresar el folio") });
 
                         }
                         NewBreach.UserId = breanch.UserId;
                         if (NewBreach.UserId == null)
                         {
-                            return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el usuario que crea la infracción") });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el usuario que crea la infracción") });
 
                         }
 

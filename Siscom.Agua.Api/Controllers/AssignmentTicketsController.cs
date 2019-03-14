@@ -94,8 +94,10 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+            //var value = _context.AssignmentTickets.OrderBy(x => x.Folio).ToListAsync();
 
-           if(Initial==0 || Final ==0)
+
+            if (Initial==0 || Final ==0)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Rango de folios incorrectos" });
            if(assignmentTicket.TransitPoliceId==0)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Debe proporcionar un agente" });
@@ -106,12 +108,17 @@ namespace Siscom.Agua.Api.Controllers
             //Fata Validar que el rango de folios no esté dado de alta previamente
             //EFT03 CANCELADA; EFT02 ASIGNADO; EFT01= SIN ASIGNAR
 
-            var value = _context.AssignmentTickets.OrderBy(x=>x.Folio).ToListAsync();
 
 
 
             for ( int i = Initial; i <= Final; i++ )
             {
+                var value = await _context.AssignmentTickets.Where(x => x.Folio == Initial).FirstOrDefaultAsync();
+                if (value.Folio ==  Initial)
+                {
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio existe cambie su rango" });
+
+                }
                 AssignmentTicket assignment = new AssignmentTicket();
                 assignment.AssignmentDate = DateTime.UtcNow.ToLocalTime();
                 assignment.Folio = i;
