@@ -385,7 +385,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar carro" });
                         }
-                        NewBreach.Series = getf.Serie;
+                        NewBreach.Series = breanch.Series;
                         if (NewBreach.Series == null)
                         {
                             return StatusCode((int)TypeError.Code.Ok, new { Error = "Falta ingresar el numero de serie" });
@@ -631,7 +631,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar el tipo de automovil") });
 
                         }
-                        NewBreach.Series = getf.Serie;
+                        NewBreach.Series = breanch.Series;
                         if (NewBreach.Series == null)
                         {
                             return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("Falta ingresar la serie") });
