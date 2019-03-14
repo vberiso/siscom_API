@@ -106,6 +106,10 @@ namespace Siscom.Agua.Api.Controllers
             //Fata Validar que el rango de folios no esté dado de alta previamente
             //EFT03 CANCELADA; EFT02 ASIGNADO; EFT01= SIN ASIGNAR
 
+            var value = _context.AssignmentTickets.OrderBy(x=>x.Folio).ToListAsync();
+
+
+
             for ( int i = Initial; i <= Final; i++ )
             {
                 AssignmentTicket assignment = new AssignmentTicket();
