@@ -355,6 +355,12 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "no existen folios disponibles" });
                         }
 
+                        if(getf.Folio != breanch.Folio)
+                        {
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto" });
+
+                        }
+
                         getf.Status = "EFT02";
 
                         _context.Entry(getf).State = EntityState.Modified;
@@ -592,6 +598,13 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     return StatusCode((int)TypeError.Code.Ok, new { Error = "no existen folios disponibles" });
                 }
+
+                if (getf.Folio != breanch.Folio)
+                {
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto" });
+
+                }
+
 
                 getf.Status = "EFT02";
 
