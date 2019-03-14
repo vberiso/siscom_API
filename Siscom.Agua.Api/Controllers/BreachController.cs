@@ -809,15 +809,6 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-           
-          
-
-
-
-            try
-            {
-                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                {
                     if (id != breach.Id)
                     {
                         return BadRequest();
@@ -842,27 +833,8 @@ namespace Siscom.Agua.Api.Controllers
                             throw;
                         }
                     }
-                    scope.Complete();
                     return Ok(breach);
 
-
-
-                }
-            }
-            catch (Exception e)
-            {
-                SystemLog systemLog = new SystemLog();
-                systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
-                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
-                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                systemLog.Parameter = JsonConvert.SerializeObject(breach);
-                CustomSystemLog helper = new CustomSystemLog(_context);
-                helper.AddLog(systemLog);
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para editar la infracción" });
-
-
-            }
 
         }
 
