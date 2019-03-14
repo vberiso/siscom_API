@@ -160,10 +160,10 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     else
                     {
-                        if (orderSale.TaxUserId == 0)
-                            _taxUser.Id = 16;
-                        else
-                        {
+                        //if (orderSale.TaxUserId == 0)
+                        //    _taxUser.Id = 16;
+                        //else
+                        //{
 
                             if (string.IsNullOrEmpty(orderSale.TaxUser.Name))
                                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Debe proporcionar nombre de cliente" });
@@ -171,7 +171,7 @@ namespace Siscom.Agua.Api.Controllers
                             _taxUser = orderSale.TaxUser;
                             _taxUser.IsActive = true;
                             _context.TaxUsers.Add(_taxUser);
-                        }
+                        //}
                     }
 
                     _orderSale.DateOrder = DateTime.UtcNow.ToLocalTime();
