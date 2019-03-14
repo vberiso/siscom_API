@@ -348,7 +348,7 @@ namespace Siscom.Agua.Api.Controllers
                         //_context.BreachDetails.Add(breachDetail);
                         //_context.SaveChanges();
                         //var prueba =  _context.AssignmentTickets;
-                        var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01").FirstOrDefaultAsync();
+                        var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.Folio == breanch.TransitPoliceId).FirstOrDefaultAsync();
 
                         if (getf == null)
                         {
@@ -586,7 +586,7 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de salario minimo") });
 
                 }
-                var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01").FirstOrDefaultAsync();
+                var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.Folio == breanch.TransitPoliceId).FirstOrDefaultAsync();
 
                 if (getf == null)
                 {
