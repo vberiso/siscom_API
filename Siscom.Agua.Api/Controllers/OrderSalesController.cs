@@ -154,7 +154,7 @@ namespace Siscom.Agua.Api.Controllers
 
                     if (orderSale.TaxUserId != 0)
                     {
-                        _taxUser = await _context.TaxUsers.FindAsync(_taxUser.Id);
+                        _taxUser = await _context.TaxUsers.FindAsync(orderSale.TaxUserId);
                         if (_taxUser == null)
                             return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No existe cliente proporcionado" });
                     }
