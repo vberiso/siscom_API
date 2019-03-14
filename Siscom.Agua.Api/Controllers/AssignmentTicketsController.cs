@@ -113,20 +113,29 @@ namespace Siscom.Agua.Api.Controllers
 
             for ( int i = Initial; i <= Final; i++ )
             {
-                var value = await _context.AssignmentTickets.Where(x => x.Folio == Initial).FirstOrDefaultAsync();
-                if (value.Folio ==  Initial)
+                var value = await _context.AssignmentTickets.Where(x => x.Folio == i).FirstOrDefaultAsync();
+                if (value ==  null)
                 {
-                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio existe cambie su rango" });
+                    AssignmentTicket assignment = new AssignmentTicket();
+                    assignment.AssignmentDate = DateTime.UtcNow.ToLocalTime();
+                    assignment.Folio = i;
+                    assignment.Status = "EFT01";
+                    assignment.TransitPoliceId = assignmentTicket.TransitPoliceId;
+
+                    _context.AssignmentTickets.Add(assignment);
+                    await _context.SaveChangesAsync();
+
 
                 }
-                AssignmentTicket assignment = new AssignmentTicket();
-                assignment.AssignmentDate = DateTime.UtcNow.ToLocalTime();
-                assignment.Folio = i;
-                assignment.Status = "EFT01";
-                assignment.TransitPoliceId = assignmentTicket.TransitPoliceId;
+                else
+                {
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio " + i + " existe, cambie su rango" });
 
-                _context.AssignmentTickets.Add(assignment);
-                await _context.SaveChangesAsync();
+                }
+
+
+
+
             }
           
 
