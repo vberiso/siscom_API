@@ -180,7 +180,7 @@ namespace Siscom.Agua.Api.Controllers
                     _orderSale.Year = Convert.ToInt16(DateTime.UtcNow.ToLocalTime().Year);
                     _orderSale.Period = 1;
                     _orderSale.Type = orderSale.Type;
-                    _orderSale.Status = "ED001";
+                    _orderSale.Status = "EOS01";
                     _orderSale.Observation = orderSale.Observation;
                     _orderSale.IdOrigin = orderSale.IdOrigin;
                     _orderSale.TaxUserId = _taxUser.Id;
