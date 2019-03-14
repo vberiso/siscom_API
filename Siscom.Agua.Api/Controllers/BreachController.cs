@@ -348,7 +348,7 @@ namespace Siscom.Agua.Api.Controllers
                         //_context.BreachDetails.Add(breachDetail);
                         //_context.SaveChanges();
                         //var prueba =  _context.AssignmentTickets;
-                        var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.Folio == breanch.TransitPoliceId).FirstOrDefaultAsync();
+                        var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.TransitPoliceId == breanch.TransitPoliceId && f.Folio == breanch.Folio).FirstOrDefaultAsync();
 
                         if (getf == null)
                         {
@@ -357,8 +357,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         if(getf.Folio != breanch.Folio)
                         {
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto" });
-
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto,,favor de verificar" });
                         }
 
                         getf.Status = "EFT02";
@@ -592,7 +591,7 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de salario minimo") });
 
                 }
-                var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.Folio == breanch.TransitPoliceId).FirstOrDefaultAsync();
+                var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.TransitPoliceId == breanch.TransitPoliceId && f.Folio == breanch.Folio).FirstOrDefaultAsync();
 
                 if (getf == null)
                 {
@@ -601,7 +600,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 if (getf.Folio != breanch.Folio)
                 {
-                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto" });
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto,favor de verificar" });
 
                 }
 
