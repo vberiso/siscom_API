@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +18,9 @@ using Siscom.Agua.DAL.Models;
 namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
+    [Produces("application/json")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
-    [Authorize]
     public class OrderSalesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -37,6 +39,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/OrderSales/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetOrderSale([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -60,6 +63,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/OrderSales/5
         [HttpGet("Folio/{folio}")]
+        [Authorize]
         public async Task<IActionResult> GetOrderSaleFolio([FromRoute] string folio)
         {
             if (!ModelState.IsValid)
@@ -97,6 +101,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // PUT: api/OrderSales/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutOrderSale([FromRoute] int id, [FromBody] OrderSale orderSale)
         {
             if (!ModelState.IsValid)
@@ -132,6 +137,7 @@ namespace Siscom.Agua.Api.Controllers
 
         // POST: api/OrderSales
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> PostOrderSale([FromBody] OrderSale orderSale)
         {
 
@@ -211,13 +217,33 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
 
-            RedirectToActionResult redirect = new RedirectToActionResult("GetOrderSale", "OrderSales", new { @id = _orderSale.Id });
+            RedirectToActionResult redirect = new RedirectToActionResult("GetOrderSaleById", "OrderSales", new { @id = _orderSale.Id });
             return redirect;
             //return Ok(_orderSale);
+            //return RedirectToAction("GetOrderSaleById", "OrderSales", new { id = _orderSale.Id });
+        }
+
+        [HttpGet("GetOrderSaleById", Name = "GetOrderSaleById")]
+        public async Task<IActionResult> GetOrderSaleById(int id)
+        {
+
+            var orderSale = await _context.OrderSales
+                                          .Include(x => x.TaxUser)
+                                            .ThenInclude(user => user.TaxAddresses)
+                                          .Where(x => x.Id == id)
+                                          .FirstOrDefaultAsync();
+
+            if (orderSale == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(orderSale);
         }
 
         // DELETE: api/OrderSales/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteOrderSale([FromRoute] int id)
         {
             if (!ModelState.IsValid)

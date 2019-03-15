@@ -19,6 +19,10 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("name"), Required, StringLength(100)]
         public String Name { get; set; }
+        [StringLength(150)]
+        public string LastName { get; set; }
+        [StringLength(150)]
+        public string SecondLastName { get; set; }
         [Column("phone_number"), StringLength(50)]
         public String PhoneNumber { get; set; }
         [Column("email"), StringLength(150)]

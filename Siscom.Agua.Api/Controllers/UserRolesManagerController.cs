@@ -34,7 +34,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("AddUsers")]
         public async Task<IActionResult> Post([FromBody] AddUserVM addUser)
         {
             IdentityResult result;
@@ -49,30 +49,83 @@ namespace Siscom.Agua.Api.Controllers
                 DivitionId = addUser.DivitionId,
                 IsActive = true
             };
-
-            result = await UserManager.CreateAsync(user, CrearPassword(5));
+            string password = CrearPassword(5);
+            result = await UserManager.CreateAsync(user, password);
             await UserManager.AddToRoleAsync(user, addUser.RoleName);
 
             if (result.Succeeded)
             {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito" });
+                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito Contraseña [" + password + "]" });
             }
             else
             {
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(" ", result.Errors) });
             }
         }
+
+        [HttpPost("AddUsersTransitPolice")]
+        public async Task<IActionResult> AddTransitPolice ([FromBody] TransitPoliceVM addUser)
+        {
+            IdentityResult result;
+            ApplicationUser user = new ApplicationUser()
+            {
+                Email = addUser.EMail,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = addUser.UserName,
+                Name = addUser.Name,
+                LastName = addUser.LastName,
+                SecondLastName = addUser.SecondLastName,
+                DivitionId = 14,
+                IsActive = true
+            };
+            string password = CrearPassword(5);
+            result = await UserManager.CreateAsync(user, password);
+            await UserManager.AddToRoleAsync(user, "Agente");
+
+            if (result.Succeeded)
+            {
+                TransitPolice police = new TransitPolice
+                {
+                    Name = addUser.Name,
+                    LastName = addUser.LastName,
+                    SecondLastName = addUser.SecondLastName,
+                    EMail = addUser.EMail,
+                    PhoneNumber = addUser.PhoneNumber,
+                    Plate = addUser.Plate,
+                    IsActive = true,
+                    Address = addUser.Address,
+                    User = user,
+                    UserId = user.Id,
+                };
+
+                await _context.TransitPolices.AddAsync(police);
+                await _context.SaveChangesAsync();
+                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito Contraseña [" + password + "]" });
+            }
+            else
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(" ", result.Errors) });
+            }
+        }
+
         [HttpPost("ChangePassword")]
         public async Task<IActionResult> ChangePassword(ChangePwdViewModel usermodel)
         {
             var userId = User.Claims.ToList()[3].Value;
             var user = await UserManager.FindByIdAsync(userId);
             var result = await UserManager.ChangePasswordAsync(user, usermodel.oldPassword, usermodel.newPassword);
-            //if (!result.Succeeded)
-            //{
-            //    //throw exception......
-            //}
+            if (!result.Succeeded)
+            {
+                //throw exception......
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Error al intentar cambiar la contraseña favor de intentarlo mas tarde. Detalles de error: " + string.Join(" ", result.Errors) });
+            }
             return Ok();
+        }
+
+        [HttpGet("GetUserByRoleName/{RoleName}")]
+        public async Task<IActionResult> GetUserByRoleName([FromRoute] string RoleName)
+        {
+            return Ok(UserManager.GetUsersInRoleAsync(RoleName).Result);
         }
 
         private string CrearPassword(int longitud)
@@ -90,10 +143,10 @@ namespace Siscom.Agua.Api.Controllers
 
     public class ChangePwdViewModel
     {
-        [DataType(DataType.Password), Required(ErrorMessage = "Old Password Required")]
+        [DataType(DataType.Password), Required(ErrorMessage = "Contraseña actual Requerida")]
         public string oldPassword { get; set; }
 
-        [DataType(DataType.Password), Required(ErrorMessage = "New Password Required")]
+        [DataType(DataType.Password), Required(ErrorMessage = "Nueva Contraseña Requerida")]
         public string newPassword { get; set; }
     }
 }
