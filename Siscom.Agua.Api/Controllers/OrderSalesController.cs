@@ -44,7 +44,11 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var orderSale = await _context.OrderSales.FindAsync(id);
+            var orderSale = await _context.OrderSales
+                                          .Include(x=> x.TaxUser)
+                                            .ThenInclude(user => user.TaxAddresses)
+                                          .Where(x=> x.Id== id)
+                                          .FirstOrDefaultAsync();
 
             if (orderSale == null)
             {
@@ -207,7 +211,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
 
-            RedirectToActionResult redirect = new RedirectToActionResult("GetOrderSale", "OrderSale", new { @id = _orderSale.Id });
+            RedirectToActionResult redirect = new RedirectToActionResult("GetOrderSale", "OrderSales", new { @id = _orderSale.Id });
             return redirect;
             //return Ok(_orderSale);
         }
