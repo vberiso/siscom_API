@@ -357,7 +357,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         if(getf.Folio != breanch.Folio)
                         {
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto,,favor de verificar" });
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto,favor de verificar" });
                         }
 
                         getf.Status = "EFT02";

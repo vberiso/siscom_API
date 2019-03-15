@@ -19,7 +19,7 @@ namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize]
     public class UserRolesManagerController : ControllerBase
     {
         private RoleManager<ApplicationRol> RoleManager;
