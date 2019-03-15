@@ -49,9 +49,9 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            //Get all user with role Agente
-            var users = userManager.GetUsersInRoleAsync("Agente").Result;
-            //*******************************************
+            ////Get all user with role Agente
+            //var users = userManager.GetUsersInRoleAsync("Agente").Result;
+            ////*******************************************
 
             var user = await userManager.FindByNameAsync(model.UserName);
             if (user == null)
