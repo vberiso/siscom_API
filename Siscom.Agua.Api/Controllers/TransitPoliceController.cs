@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -15,10 +20,12 @@ namespace Siscom.Agua.Api.Controllers
     public class TransitPoliceController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private UserManager<ApplicationUser> UserManager;
 
-        public TransitPoliceController(ApplicationDbContext context)
+        public TransitPoliceController(IServiceProvider serviceProvider, ApplicationDbContext context)
         {
             _context = context;
+            UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         }
 
         // GET: api/TransitPolice
@@ -84,17 +91,48 @@ namespace Siscom.Agua.Api.Controllers
 
         // POST: api/TransitPolice
         [HttpPost]
-        public async Task<IActionResult> PostTransitPolice([FromBody] TransitPolice transitPolice)
+        public async Task<IActionResult> PostTransitPolice([FromBody] TransitPoliceVM transitPolice)
         {
-            if (!ModelState.IsValid)
+            IdentityResult result;
+            ApplicationUser user = new ApplicationUser()
             {
-                return BadRequest(ModelState);
+                Email = transitPolice.EMail,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = transitPolice.UserName,
+                Name = transitPolice.Name,
+                LastName = transitPolice.LastName,
+                SecondLastName = transitPolice.SecondLastName,
+                DivitionId = 14,
+                IsActive = true
+            };
+            string password = CrearPassword(5);
+            result = await UserManager.CreateAsync(user, password);
+            await UserManager.AddToRoleAsync(user, "Agente");
+
+            if (result.Succeeded)
+            {
+                TransitPolice police = new TransitPolice
+                {
+                    Name = transitPolice.Name,
+                    LastName = transitPolice.LastName,
+                    SecondLastName = transitPolice.SecondLastName,
+                    EMail = transitPolice.EMail,
+                    PhoneNumber = transitPolice.PhoneNumber,
+                    Plate = transitPolice.Plate,
+                    IsActive = true,
+                    Address = transitPolice.Address,
+                    User = user,
+                    UserId = user.Id,
+                };
+
+                await _context.TransitPolices.AddAsync(police);
+                await _context.SaveChangesAsync();
+                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito Contraseña [" + password + "]" });
             }
-
-            _context.TransitPolices.Add(transitPolice);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetTransitPolice", new { id = transitPolice.Id }, transitPolice);
+            else
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(" ", result.Errors) });
+            }
         }
 
         // DELETE: api/TransitPolice/5
@@ -121,6 +159,18 @@ namespace Siscom.Agua.Api.Controllers
         private bool TransitPoliceExists(int id)
         {
             return _context.TransitPolices.Any(e => e.Id == id);
+        }
+
+        private string CrearPassword(int longitud)
+        {
+            string caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            StringBuilder res = new StringBuilder();
+            Random rnd = new Random();
+            while (0 < longitud--)
+            {
+                res.Append(caracteres[rnd.Next(caracteres.Length)]);
+            }
+            return res.ToString();
         }
     }
 }
