@@ -185,6 +185,10 @@ namespace Siscom.Agua.Api.Controllers
                         //}
                     }
 
+                    var paramSystem = await _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL" && x.IsActive==true).FirstOrDefaultAsync();
+                    if(paramSystem == null)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Falta parametro de configuración" });
+
                     _orderSale.DateOrder = DateTime.UtcNow.ToLocalTime();
                     _orderSale.Amount = orderSale.Amount;
                     _orderSale.OnAccount = 0;
@@ -196,7 +200,7 @@ namespace Siscom.Agua.Api.Controllers
                     _orderSale.IdOrigin = orderSale.IdOrigin;
                     _orderSale.TaxUserId = _taxUser.Id;
                     _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
-                    _orderSale.DivisionId = orderSale.DivisionId == 0 ? 15 : orderSale.DivisionId;
+                    _orderSale.DivisionId = orderSale.DivisionId == 0 ? (paramSystem.TextColumn=="NO"? 1 : 15) : orderSale.DivisionId;
                     _orderSale.OrderSaleDetails = orderSale.OrderSaleDetails;
 
                     _context.OrderSales.Add(_orderSale);
