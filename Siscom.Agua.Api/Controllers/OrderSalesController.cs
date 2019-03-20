@@ -50,6 +50,7 @@ namespace Siscom.Agua.Api.Controllers
             var orderSale = await _context.OrderSales
                                           .Include(x=> x.TaxUser)
                                             .ThenInclude(user => user.TaxAddresses)
+                                          .Include(x => x.OrderSaleDetails)
                                           .Where(x=> x.Id== id)
                                           .FirstOrDefaultAsync();
 
@@ -75,7 +76,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Folio incorrecto" });
 
             var orderSale = await _context.OrderSales
-                                          .Include(x=> x.TaxUser)
+                                          .Include(x => x.TaxUser)
                                             .ThenInclude(y => y.TaxAddresses)
                                           .Include(x => x.OrderSaleDetails)
                                           .Where(x => x.Folio == folio)

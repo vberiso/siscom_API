@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190320223337_AccountNumberLenght")]
+    partial class AccountNumberLenght
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1649,7 +1651,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 3, 20, 16, 48, 18, 180, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 3, 20, 16, 33, 36, 311, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2096,7 +2098,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("AccountNumber")
                         .HasColumnName("account_number")
-                        .HasMaxLength(25);
+                        .HasMaxLength(10);
 
                     b.Property<int>("AgreementId")
                         .HasColumnName("id_agreement");

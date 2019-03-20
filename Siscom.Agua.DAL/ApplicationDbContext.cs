@@ -837,6 +837,10 @@ namespace Siscom.Agua.DAL
                    .HasOne<Division>(a => a.Division)
                    .WithMany(s => s.Products)
                    .HasForeignKey(s => s.DivisionId);
+
+            builder.Entity<Product>()
+                .Property(x => x.HaveAccount)
+                .HasDefaultValue(false);
             #endregion
 
             #region Region  

@@ -29,6 +29,8 @@ namespace Siscom.Agua.DAL.Models
         public bool HaveTariff { get; set; }
         [Required, Column("is_active")]
         public bool IsActive { get; set; }
+        [Required, Column("have_account")]
+        public bool HaveAccount { get; set; }
 
         public int DivisionId { get; set; }
         public Division Division { get; set; }

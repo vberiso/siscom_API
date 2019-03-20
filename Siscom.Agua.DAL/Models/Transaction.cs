@@ -41,7 +41,7 @@ namespace Siscom.Agua.DAL.Models
         public string AuthorizationOriginPayment { get; set; }
         [Column("number_bank"), StringLength(33)]
         public string NumberBank { get; set; }
-        [Column("account_number"), StringLength(10)]
+        [Column("account_number"), StringLength(25)]
         public string AccountNumber { get; set; }
         [Column("id_cancel_authorization")]
         public int CancelAuthorizationId { get; set; }

@@ -117,7 +117,7 @@ namespace Siscom.Agua.Api.Controllers
             if (!result.Succeeded)
             {
                 //throw exception......
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Error al intentar cambiar la contraseña favor de intentarlo mas tarde. Detalles de error: " + string.Join(" ", result.Errors) });
+                return BadRequest( new { Error = "Error al intentar cambiar la contraseña favor de intentarlo mas tarde. Detalles de error: " + string.Join(" ", result.Errors.ToList()) });
             }
             return Ok();
         }
