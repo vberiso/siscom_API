@@ -8,6 +8,7 @@
     <Compile Remove="Migrations\" />
     <Compile Remove="Migrations\20190312223132_DebtDetail.cs" />
     <Compile Remove="Migrations\20190312223727_DebtDetail.cs" />
+    <Compile Remove="Migrations\20190316154406_TranslationCode.cs" />
   </ItemGroup>
   
   <ItemGroup>

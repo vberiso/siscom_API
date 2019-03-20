@@ -93,6 +93,8 @@ namespace Siscom.Agua.DAL
         public DbSet<Status> Statuses { get; set; }
         public DbSet<Catalogue> Catalogues { get; set; }
         public DbSet<GroupCatalogue> GroupCatalogues { get; set; }
+        public DbSet<GroupTranslationCode> GroupTranslationCodes { get; set; }
+        public DbSet<TranslationCode> TranslationCodes { get; set; }
 
 
         /// <summary> 
@@ -1064,7 +1066,7 @@ namespace Siscom.Agua.DAL
                    .HasOne<State>(a => a.States)
                    .WithMany(s => s.Towns)
                    .HasForeignKey(s => s.StateId);
-            #endregion
+            #endregion            
 
             #region Transaction
             builder.Entity<Transaction>()
@@ -1137,6 +1139,10 @@ namespace Siscom.Agua.DAL
              .Property(x => x.IsActive)
              .HasDefaultValue(true);
             #endregion            
+
+            #region TranslationCode
+            builder.Entity<TranslationCode>().HasKey(x => new { x.ProductId, x.GroupTranslationCodeId });
+            #endregion
 
             #region Type
             builder.Entity<Models.Type>()
