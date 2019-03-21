@@ -24,6 +24,7 @@ namespace Siscom.Agua.Api.Model
         public string AuthorizationOriginPayment { get; set; }
         public string NumberBank { get; set; }
         public string AccountNumber { get; set; }
+        public string Account { get; set; }
         public int OriginPaymentId { get; set; }
         public int ExternalOriginPaymentId { get; set; }
         public string Type { get; set; }

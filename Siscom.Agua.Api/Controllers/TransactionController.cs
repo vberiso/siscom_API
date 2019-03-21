@@ -279,7 +279,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Naturaleza de transacción incorrecta"});
 
             if (await _context.Agreements
-                             .Where(x => x.Account == pPaymentConcepts.Transaction.AccountNumber)
+                             .Where(x => x.Account == pPaymentConcepts.Transaction.Account)
                              .FirstOrDefaultAsync() == null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "El número de cuenta no es correcto" });
 
@@ -394,6 +394,7 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.AccountNumber = pPaymentConcepts.Transaction.AccountNumber;
                     transaction.NumberBank = pPaymentConcepts.Transaction.NumberBank;
                     transaction.AccountNumber = pPaymentConcepts.Transaction.AccountNumber;
+                    transaction.Account = pPaymentConcepts.Transaction.Account;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
@@ -429,7 +430,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.PayMethod = await _context.PayMethods.FindAsync(transaction.PayMethodId);
                     payment.TransactionFolio = transaction.Folio;
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
-                    payment.AccountNumber = transaction.AccountNumber;
+                    payment.Account = transaction.Account;
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
