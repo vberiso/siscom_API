@@ -109,6 +109,142 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         /// <summary>
+        /// Get all transactions of terminalUser from day
+        /// </summary>
+        /// <param name="date">date yyyy-mm-dd</param>
+        /// <param name="terminalUserId">terminalUserId</param>
+        /// <returns></returns>
+        // GET: api/TerminalUser
+        [HttpGet("{date}/{terminalUserId}")]
+        public async Task<IActionResult> FindTransactions([FromRoute] string date, int terminalUserId)
+        {
+            var transaction = await _context.Transactions
+                                     .Include(x => x.TypeTransaction)
+                                     .Include(x => x.TransactionFolios)
+                                     .Where(x => x.TerminalUser.Id == terminalUserId)
+                                     .OrderBy(x => x.Id).ToListAsync();
+            transaction.ToList().ForEach(x =>
+            {
+                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
+            });
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(transaction);
+        }
+
+        /// <summary>
+        /// Get state operation terminal user
+        /// </summary>       
+        /// <param name="teminalUserId">Model TransactionVM
+        /// </param>
+        /// <returns>State Operation Terminaluser</returns>
+        // GET: api/Transaction
+        [HttpGet("Terminal/{teminalUserId}")]
+        public async Task<IActionResult> GetTransactionCashBox([FromRoute] int teminalUserId)
+        {
+            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            int _typeTransaction = 0;
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            TerminalUser terminalUser = new TerminalUser();
+            terminalUser = await _context.TerminalUsers
+                                             .Include(x => x.Terminal)
+                                             .Where(x => x.Id == teminalUserId).FirstOrDefaultAsync();
+
+            if (terminalUser == null)
+            {
+                return NotFound();
+            }
+
+
+            var movimientosCaja = await _context.Transactions
+                                                .Include(x => x.TypeTransaction)
+                                                .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                            x.TerminalUser.InOperation == true)
+                                                .OrderBy(x => x.Id).ToListAsync();
+
+            foreach (var item in movimientosCaja)
+            {
+                switch (item.TypeTransaction.Id)
+                {
+                    case 1://apertura
+                        _typeTransaction = item.TypeTransaction.Id;
+                        break;
+                    case 2://Fondo
+                        _typeTransaction = item.TypeTransaction.Id;
+                        break;
+                    case 5://Cierre
+                        _typeTransaction = item.TypeTransaction.Id;
+                        break;
+                    case 7: //Liquidada
+                        _typeTransaction = item.TypeTransaction.Id;
+                        break;
+                }
+            }
+
+            return Ok(_typeTransaction);
+        }
+
+        /// <summary>
+        /// Get all transactions of BranchOffice
+        /// </summary>
+        /// <param name="date">date yyyy-mm-dd</param>
+        /// <param name="BranchOfficeId">BranchOfficeId</param>
+        /// <returns></returns>
+        // GET: api/Transaction
+        [HttpGet("BranchOffice/{date}/{BranchOfficeId}")]
+        public async Task<IActionResult> FindTransactionsAllBranchOffice([FromRoute] string date, int BranchOfficeId)
+        {
+            string error = string.Empty;
+            List<TransactionBranchOfficeVM> entities = null;
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "getTransactionBranchOffice";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fecha", date));
+                command.Parameters.Add(new SqlParameter("@branch", BranchOfficeId));
+
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    var dataTable = new DataTable();
+                    dataTable.Load(result);
+                    entities = new List<TransactionBranchOfficeVM>();
+                    foreach (DataRow item in dataTable.Rows)
+                    {
+                        var T = new TransactionBranchOfficeVM();
+                        T.BranchOffice = item[0].ToString();
+                        T.TerminalUserId = Convert.ToInt32(item[1].ToString());
+                        T.Hour = item[2].ToString();
+                        T.Sign = Convert.ToInt16(item[3]);
+                        T.Amount = Convert.ToDecimal(item[4].ToString());
+                        T.Tax = Convert.ToDecimal(item[5].ToString());
+                        T.Rounding = Convert.ToDecimal(item[6].ToString());
+                        T.Total = Convert.ToDecimal(item[7].ToString());
+                        T.TypeTransaction = item[8].ToString();
+                        T.PayMethod = item[9].ToString();
+                        T.Origin_Payment = item[10].ToString();
+                        T.External_Origin_Payment = item[11].ToString();
+                        entities.Add(T);
+                    }
+
+                }
+            }
+            return Ok(entities);
+        }
+
+
+
+
+
+        /// <summary>
         /// This will provide capability add new Transaction
         /// </summary>       
         /// <param name="pPaymentConcepts">Model PaymentConcepts
@@ -141,6 +277,11 @@ namespace Siscom.Agua.Api.Controllers
 
             if (!pPaymentConcepts.Transaction.Sign)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Naturaleza de transacción incorrecta"});
+
+            if (await _context.Agreements
+                             .Where(x => x.Account == pPaymentConcepts.Transaction.AccountNumber)
+                             .FirstOrDefaultAsync() == null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El número de cuenta no es correcto" });
 
             foreach (var item in pPaymentConcepts.Transaction.transactionDetails)
             {
@@ -415,7 +556,6 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(transaction.Id);
         }
 
-
         [HttpPost("OrderTransaction")]
         public async Task<IActionResult> PostOrdenTransaction([FromBody] PaymentOrdersVM pPaymentOrders)
         {
@@ -442,6 +582,11 @@ namespace Siscom.Agua.Api.Controllers
 
             if (!pPaymentOrders.Transaction.Sign)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Naturaleza de transacción incorrecta" });
+
+            if( await _context.OrderSales
+                              .Where(x=> x.Folio == pPaymentOrders.Transaction.AccountNumber)
+                              .FirstOrDefaultAsync() ==null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El folio no existe" });
 
             foreach (var item in pPaymentOrders.Transaction.transactionDetails)
             {
@@ -997,6 +1142,11 @@ namespace Siscom.Agua.Api.Controllers
 
             if (!pTransactionVM.Sign)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
+
+            if (await _context.Agreements
+                              .Where(x => x.Account == pTransactionVM.AccountNumber)
+                              .FirstOrDefaultAsync() == null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El número de cuenta no es correcto" });
 
             foreach (var item in pTransactionVM.transactionDetails)
             {
@@ -1827,138 +1977,6 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
             return Ok(transaction.Id);
-        }
-
-        /// <summary>
-        /// Get all transactions of terminalUser from day
-        /// </summary>
-        /// <param name="date">date yyyy-mm-dd</param>
-        /// <param name="terminalUserId">terminalUserId</param>
-        /// <returns></returns>
-        // GET: api/TerminalUser
-        [HttpGet("{date}/{terminalUserId}")]
-        public async Task<IActionResult> FindTransactions([FromRoute] string date, int terminalUserId)
-        {
-           var transaction = await _context.Transactions
-                                    .Include(x => x.TypeTransaction)
-                                    .Include(x=> x.TransactionFolios)
-                                    .Where(x => x.TerminalUser.Id == terminalUserId)
-                                    .OrderBy(x => x.Id).ToListAsync();
-            transaction.ToList().ForEach(x =>
-            {
-                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
-            });
-           if (transaction == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(transaction);
-        }
-
-        /// <summary>
-        /// Get state operation terminal user
-        /// </summary>       
-        /// <param name="teminalUserId">Model TransactionVM
-        /// </param>
-        /// <returns>State Operation Terminaluser</returns>
-        // GET: api/Transaction
-        [HttpGet("Terminal/{teminalUserId}")]
-        public async Task<IActionResult> GetTransactionCashBox([FromRoute] int teminalUserId)
-        {
-            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
-            int _typeTransaction = 0;
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            TerminalUser terminalUser = new TerminalUser();
-            terminalUser = await _context.TerminalUsers
-                                             .Include(x => x.Terminal)
-                                             .Where(x => x.Id == teminalUserId).FirstOrDefaultAsync();
-
-            if (terminalUser == null)
-            {
-                return NotFound();
-            }
-
-
-            var movimientosCaja = await _context.Transactions
-                                                .Include(x => x.TypeTransaction)
-                                                .Where(x => x.TerminalUser.Id == terminalUser.Id &&
-                                                            x.TerminalUser.InOperation == true)
-                                                .OrderBy(x => x.Id).ToListAsync();
-
-            foreach (var item in movimientosCaja)
-            {
-                switch (item.TypeTransaction.Id)
-                {
-                    case 1://apertura
-                        _typeTransaction = item.TypeTransaction.Id;
-                        break;
-                    case 2://Fondo
-                        _typeTransaction = item.TypeTransaction.Id;
-                        break;
-                    case 5://Cierre
-                        _typeTransaction = item.TypeTransaction.Id;
-                        break;
-                    case 7: //Liquidada
-                        _typeTransaction = item.TypeTransaction.Id;
-                        break;
-                }
-            }
-
-            return Ok(_typeTransaction);
-        }
-
-        /// <summary>
-        /// Get all transactions of BranchOffice
-        /// </summary>
-        /// <param name="date">date yyyy-mm-dd</param>
-        /// <param name="BranchOfficeId">BranchOfficeId</param>
-        /// <returns></returns>
-        // GET: api/Transaction
-        [HttpGet("BranchOffice/{date}/{BranchOfficeId}")]
-        public async Task<IActionResult> FindTransactionsAllBranchOffice([FromRoute] string date, int BranchOfficeId)
-        {
-            string error = string.Empty;
-            List<TransactionBranchOfficeVM> entities = null;
-            using (var command = _context.Database.GetDbConnection().CreateCommand())
-            {
-                command.CommandText = "getTransactionBranchOffice";
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add(new SqlParameter("@fecha", date));
-                command.Parameters.Add(new SqlParameter("@branch", BranchOfficeId));
-               
-                this._context.Database.OpenConnection();
-                using (var result = await command.ExecuteReaderAsync())
-                {
-                    var dataTable = new DataTable();
-                    dataTable.Load(result);
-                    entities = new List<TransactionBranchOfficeVM>();
-                    foreach (DataRow item in dataTable.Rows)
-                    {
-                        var T = new TransactionBranchOfficeVM();
-                        T.BranchOffice = item[0].ToString();
-                        T.TerminalUserId = Convert.ToInt32(item[1].ToString());
-                        T.Hour = item[2].ToString();
-                        T.Sign = Convert.ToInt16(item[3]);
-                        T.Amount = Convert.ToDecimal(item[4].ToString());
-                        T.Tax = Convert.ToDecimal(item[5].ToString());
-                        T.Rounding = Convert.ToDecimal(item[6].ToString());
-                        T.Total = Convert.ToDecimal(item[7].ToString());
-                        T.TypeTransaction = item[8].ToString();
-                        T.PayMethod = item[9].ToString();
-                        T.Origin_Payment = item[10].ToString();
-                        T.External_Origin_Payment = item[11].ToString();
-                        entities.Add(T);
-                    }
-                    
-                }                  
-            }
-            return Ok(entities);
         }
 
         private bool Validate(TransactionVM ptransaction)
