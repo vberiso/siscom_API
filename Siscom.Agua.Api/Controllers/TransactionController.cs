@@ -252,6 +252,7 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.Total = pPaymentConcepts.Transaction.Total;
                     transaction.AccountNumber = pPaymentConcepts.Transaction.AccountNumber;
                     transaction.NumberBank = pPaymentConcepts.Transaction.NumberBank;
+                    transaction.AccountNumber = pPaymentConcepts.Transaction.AccountNumber;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
@@ -287,6 +288,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.PayMethod = await _context.PayMethods.FindAsync(transaction.PayMethodId);
                     payment.TransactionFolio = transaction.Folio;
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
+                    payment.AccountNumber = transaction.AccountNumber;
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
@@ -551,6 +553,7 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.Total = pPaymentOrders.Transaction.Total;
                     transaction.AccountNumber = pPaymentOrders.Transaction.AccountNumber;
                     transaction.NumberBank = pPaymentOrders.Transaction.NumberBank;
+                    transaction.AccountNumber = pPaymentOrders.Transaction.AccountNumber;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
@@ -586,6 +589,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.PayMethod = await _context.PayMethods.FindAsync(transaction.PayMethodId);
                     payment.TransactionFolio = transaction.Folio;
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
+                    payment.AccountNumber = transaction.AccountNumber;
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
@@ -701,6 +705,7 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(transaction.Id);
         }
+
         /// <summary>
         /// This will provide capability add new Transaction
         /// </summary>       
@@ -845,6 +850,7 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pCancelPayment.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
                     transaction.OriginPayment = await _context.OriginPayments.FindAsync(pCancelPayment.Transaction.OriginPaymentId).ConfigureAwait(false);
                     transaction.Total = pCancelPayment.Transaction.Total;
+                    transaction.AccountNumber = transaction.AccountNumber;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
@@ -1065,6 +1071,7 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pTransactionVM.ExternalOriginPaymentId).ConfigureAwait(false);
                     transaction.OriginPayment = await _context.OriginPayments.FindAsync(pTransactionVM.OriginPaymentId).ConfigureAwait(false);
                     transaction.Total = pTransactionVM.Total;
+                    transaction.AccountNumber = pTransactionVM.AccountNumber;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
@@ -1106,6 +1113,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.TransactionFolio = transaction.Folio;
                     payment.Rounding = transaction.Rounding;
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
+                    payment.AccountNumber = transaction.AccountNumber;
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
@@ -1288,6 +1296,7 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pCancelPayment.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
                     transaction.OriginPayment = await _context.OriginPayments.FindAsync(pCancelPayment.Transaction.OriginPaymentId).ConfigureAwait(false);
                     transaction.Total = pCancelPayment.Transaction.Total;
+                    transaction.AccountNumber = pCancelPayment.Transaction.AccountNumber;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
