@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190321161741_addRouteAgreement")]
+    partial class addRouteAgreement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,10 +209,8 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("Route")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasColumnName("route")
-                        .HasMaxLength(50)
-                        .HasDefaultValue("0");
+                        .HasMaxLength(50);
 
                     b.Property<DateTime>("StratDate")
                         .HasColumnName("start_date")
@@ -1656,7 +1656,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 3, 21, 11, 39, 1, 463, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 3, 21, 10, 17, 40, 996, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2117,10 +2117,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_payment")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Account")
-                        .HasColumnName("account")
-                        .HasMaxLength(50);
 
                     b.Property<string>("AccountNumber")
                         .HasColumnName("account_number")
@@ -3032,10 +3028,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_transaction")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Account")
-                        .HasColumnName("account")
-                        .HasMaxLength(50);
 
                     b.Property<string>("AccountNumber")
                         .HasColumnName("account_number")

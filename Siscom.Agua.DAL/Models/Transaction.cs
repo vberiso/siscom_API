@@ -47,6 +47,8 @@ namespace Siscom.Agua.DAL.Models
         public int CancelAuthorizationId { get; set; }
         [Column("pay_method_number"), StringLength(31)]
         public string PayMethodNumber { get; set; }
+        [Column("account"), StringLength(50)]
+        public string Account { get; set; }
 
         //[ForeignKey("TerminalUser")]
         public int TerminalUserId { get; set; }

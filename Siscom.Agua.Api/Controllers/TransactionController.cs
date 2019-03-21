@@ -610,23 +610,23 @@ namespace Siscom.Agua.Api.Controllers
                                 //Conceptos
                                 foreach (var detail in order.OrderSaleDetails)
                                 {
-                                    var conceptos = await _context.DebtDetails.Where(x => x.DebtId == order.Id &&
+                                    var conceptos = await _context.OrderSaleDetails.Where(x => x.OrderSaleId == order.Id &&
                                                                                           x.Id == detail.Id).FirstOrDefaultAsync();
 
-                                    if (conceptos.OnAccount != detail.OnAccount)
-                                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a pagar del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
+                                    //if (conceptos.OnAccount != detail.OnAccount)
+                                    //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a pagar del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
 
                                     if (conceptos.OnAccount > conceptos.Amount)
                                         return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
 
-                                    conceptos.OnAccount = conceptos.OnAccount;
+                                    conceptos.OnAccount = detail.OnAccount;
                                     _context.Entry(conceptos).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
 
                                     string _accountNumber = String.Empty;
                                     string _unitMeasurement = String.Empty;
 
-                                    if (orderFind.Type == "TIP01" || orderFind.Type == "TIP04")
+                                    if (orderFind.Type == "OA001" || orderFind.Type == "OM001")
                                     {
                                         var _serviceParam = await _context.ServiceParams
                                                                           .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0") && x.IsActive == true)

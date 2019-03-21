@@ -262,6 +262,10 @@ namespace Siscom.Agua.DAL
             builder.Entity<Agreement>()
                  .Property(x => x.StratDate)
                  .HasColumnType("date");
+
+            builder.Entity<Agreement>()
+                .Property(x => x.Route)
+                .HasDefaultValue("0");
             #endregion
 
             #region AgreementDetail

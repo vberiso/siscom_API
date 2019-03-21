@@ -50,6 +50,8 @@ namespace Siscom.Agua.DAL.Models
         public string PayMethodNumber { get; set; }
         [Column("have_tax_receipt"), Required]
         public bool HaveTaxReceipt { get; set; }
+        [Column("account"), StringLength(50)]
+        public string Account { get; set; }
 
         //[ForeignKey("OriginPayment")]
         public int OriginPaymentId { get; set; }

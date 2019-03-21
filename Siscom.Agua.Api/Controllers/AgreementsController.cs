@@ -167,24 +167,32 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            var agreement = await _context.Agreements
-                                      .Include(x => x.Clients)
-                                      .Include(x => x.Addresses)
-                                        .ThenInclude(s => s.Suburbs)
-                                            .ThenInclude(t => t.Towns)
-                                                .ThenInclude(st => st.States)
-                                      .FirstOrDefaultAsync(a => a.Account == AcountNumber);
-
-            if (agreement == null)
+            try
             {
-                return StatusCode((int)TypeError.Code.NotFound, new { Error = "No hay datos para este número de cuenta" });
+                var agreement = await _context.Agreements
+                                     .Include(x => x.Clients)
+                                     .Include(x => x.Addresses)
+                                       .ThenInclude(s => s.Suburbs)
+                                           .ThenInclude(t => t.Towns)
+                                               .ThenInclude(st => st.States)
+                                     .FirstOrDefaultAsync(a => a.Account == AcountNumber);
+                if (agreement == null)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "No hay datos para este número de cuenta" });
+                }
+
+                agreement.Clients = agreement.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();
+                agreement.Addresses = agreement.Addresses.Where(c => c.TypeAddress == "DIR01" && c.IsActive == true).ToList();
+
+                return Ok(agreement);
+
             }
+            catch (Exception e)
+            {
 
-            agreement.Clients = agreement.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();
-            agreement.Addresses = agreement.Addresses.Where(c => c.TypeAddress == "DIR01" && c.IsActive == true).ToList();           
-
-            return Ok(agreement);
+            }
+            return NotFound();
+         
         }
         // GET: api/Agreements
         [HttpGet("AgreementsBasic/{id}")]

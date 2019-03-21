@@ -36,6 +36,8 @@ namespace Siscom.Agua.DAL.Models
         public DateTime StratDate { get; set; }
         [Column("type_agreement"), StringLength(5), Required]
         public string TypeAgreement { get; set; }
+        [Column("route"), StringLength(50), Required]
+        public string Route { get; set; }
 
         //[ForeignKey("TypeService")]
         public int TypeServiceId { get; set; }
