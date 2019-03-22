@@ -52,6 +52,8 @@ namespace Siscom.Agua.DAL.Models
         public bool HaveTaxReceipt { get; set; }
         [Column("account"), StringLength(50)]
         public string Account { get; set; }
+        [Column("id_order_sale"), Required]
+        public int OrderSaleId { get; set; }
 
         //[ForeignKey("OriginPayment")]
         public int OriginPaymentId { get; set; }

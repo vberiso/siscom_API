@@ -423,13 +423,14 @@ namespace Siscom.Agua.Api.Controllers
                     payment.NumberBank = transaction.NumberBank;
                     payment.AccountNumber = transaction.AccountNumber;
                     payment.AgreementId = pPaymentConcepts.Transaction.AgreementId;
+                    payment.OrderSaleId = pPaymentConcepts.Transaction.OrderSaleId;
                     payment.Status = "EP001";
                     payment.Type = pPaymentConcepts.Transaction.Type;
                     payment.OriginPayment = transaction.OriginPayment;
                     payment.PayMethod = await _context.PayMethods.FindAsync(transaction.PayMethodId);
                     payment.TransactionFolio = transaction.Folio;
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
-                    payment.Account = transaction.Account;
+                    payment.Account = transaction.Account;                    
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
@@ -584,7 +585,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "Naturaleza de transacción incorrecta" });
 
             if( await _context.OrderSales
-                              .Where(x=> x.Folio == pPaymentOrders.Transaction.AccountNumber)
+                              .Where(x=> x.Folio == pPaymentOrders.Transaction.Account)
                               .FirstOrDefaultAsync() ==null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "El folio no existe" });
 
@@ -728,6 +729,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.NumberBank = transaction.NumberBank;
                     payment.AccountNumber = transaction.AccountNumber;
                     payment.AgreementId = pPaymentOrders.Transaction.AgreementId;
+                    payment.OrderSaleId = pPaymentOrders.Transaction.OrderSaleId;
                     payment.Status = "EP001";
                     payment.Type = pPaymentOrders.Transaction.Type;
                     payment.OriginPayment = transaction.OriginPayment;
@@ -995,7 +997,9 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(pCancelPayment.Transaction.ExternalOriginPaymentId).ConfigureAwait(false);
                     transaction.OriginPayment = await _context.OriginPayments.FindAsync(pCancelPayment.Transaction.OriginPaymentId).ConfigureAwait(false);
                     transaction.Total = pCancelPayment.Transaction.Total;
-                    transaction.Account = transaction.Account;
+                    transaction.Account = pCancelPayment.Transaction.Account;
+                    transaction.AccountNumber = pCancelPayment.Transaction.AccountNumber;
+                    transaction.NumberBank = pCancelPayment.Transaction.NumberBank;                    
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
@@ -1144,7 +1148,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Naturaleza de transacción incorrecta") });
 
             if (await _context.Agreements
-                              .Where(x => x.Account == pTransactionVM.AccountNumber)
+                              .Where(x => x.Account == pTransactionVM.Account)
                               .FirstOrDefaultAsync() == null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = "El número de cuenta no es correcto" });
 
@@ -1222,6 +1226,8 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.OriginPayment = await _context.OriginPayments.FindAsync(pTransactionVM.OriginPaymentId).ConfigureAwait(false);
                     transaction.Total = pTransactionVM.Total;
                     transaction.Account = pTransactionVM.Account;
+                    transaction.AccountNumber = pTransactionVM.AccountNumber;
+                    transaction.NumberBank = pTransactionVM.NumberBank;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
@@ -1255,7 +1261,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.Tax = transaction.Tax;
                     payment.Total = transaction.Amount + transaction.Tax + transaction.Rounding;
                     payment.AuthorizationOriginPayment = transaction.AuthorizationOriginPayment;
-                    payment.AgreementId = prepaid.AgreementId;
+                    payment.AgreementId = prepaid.AgreementId;                    
                     payment.Status = "EP001";
                     payment.Type = pTransactionVM.Type;
                     payment.OriginPayment = transaction.OriginPayment;
@@ -1264,6 +1270,8 @@ namespace Siscom.Agua.Api.Controllers
                     payment.Rounding = transaction.Rounding;
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
                     payment.Account = transaction.Account;
+                    payment.AccountNumber = transaction.AccountNumber;
+                    payment.NumberBank = transaction.NumberBank;
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
@@ -1447,6 +1455,8 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.OriginPayment = await _context.OriginPayments.FindAsync(pCancelPayment.Transaction.OriginPaymentId).ConfigureAwait(false);
                     transaction.Total = pCancelPayment.Transaction.Total;
                     transaction.Account = pCancelPayment.Transaction.Account;
+                    transaction.AccountNumber = pCancelPayment.Transaction.AccountNumber;
+                    transaction.NumberBank = pCancelPayment.Transaction.NumberBank;
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 

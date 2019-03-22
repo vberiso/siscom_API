@@ -817,6 +817,14 @@ namespace Siscom.Agua.DAL
             builder.Entity<Payment>()
                    .Property(x => x.HaveTaxReceipt)
                    .HasDefaultValue(false);
+
+            builder.Entity<Payment>()
+                   .Property(x => x.AgreementId )
+                   .HasDefaultValue(0);
+
+            builder.Entity<Payment>()
+                   .Property(x => x.OrderSaleId)
+                   .HasDefaultValue(0);
             #endregion
 
             #region PaymentDetail

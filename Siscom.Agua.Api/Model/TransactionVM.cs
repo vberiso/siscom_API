@@ -30,6 +30,7 @@ namespace Siscom.Agua.Api.Model
         public string Type { get; set; }
         public string PaytStatus { get; set; }
         public int AgreementId { get; set; }
+        public int OrderSaleId { get; set; }
         public Int16 Percentage { get; set; }
         public List<TransactionDetail> transactionDetails { get; set; }
     }
