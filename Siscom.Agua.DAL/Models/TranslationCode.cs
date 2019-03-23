@@ -15,9 +15,14 @@ namespace Siscom.Agua.DAL.Models
         [Key]
         [Column("id_group_translation", Order = 1)]
         public int GroupTranslationCodeId { get; set; }
+        [Key]
+        [Column("type", Order = 2), StringLength(5)]
+        public string Type { get; set; }
 
-        [Column("code"), StringLength(30), Required]
+        [Column("code"), StringLength(500), Required]
         public string Code { get; set; }
+
+        
 
         public GroupTranslationCode GroupTranslationCode { get; set; }
     }

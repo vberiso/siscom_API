@@ -39,6 +39,8 @@ namespace Siscom.Agua.DAL.Models
         public bool HaveTax { get; set; }
         [Column("tax"), Required]
         public decimal Tax { get; set; }
+        [Column("type"), StringLength(5), Required]
+        public string Type { get; set; }
 
         public int PaymentId { get; set; }
         public Payment Payment { get; set; }

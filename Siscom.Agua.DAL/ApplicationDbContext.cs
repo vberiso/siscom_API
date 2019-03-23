@@ -1153,7 +1153,7 @@ namespace Siscom.Agua.DAL
             #endregion            
 
             #region TranslationCode
-            builder.Entity<TranslationCode>().HasKey(x => new { x.ProductId, x.GroupTranslationCodeId });
+            builder.Entity<TranslationCode>().HasKey(x => new { x.ProductId, x.GroupTranslationCodeId, x.Type });
             #endregion
 
             #region Type

@@ -478,13 +478,13 @@ namespace Siscom.Agua.Api.Controllers
                                     _context.Entry(conceptos).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
 
-                                    string _accountNumber =String.Empty;
-                                    string _unitMeasurement= String.Empty;
+                                    string _accountNumber = String.Empty;
+                                    string _unitMeasurement = String.Empty;
 
                                     if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
                                     {
                                         var _serviceParam = await _context.ServiceParams
-                                                                          .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept)? detail.CodeConcept : "0") && x.IsActive == true)
+                                                                          .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0") && x.IsActive == true)
                                                                           .FirstOrDefaultAsync();
 
                                         _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
@@ -512,6 +512,7 @@ namespace Siscom.Agua.Api.Controllers
                                     paymentDetail.PaymentId = payment.Id;
                                     paymentDetail.HaveTax = detail.HaveTax;
                                     paymentDetail.Tax = detail.Tax;
+                                    paymentDetail.Type = debt.Type;
                                     _context.PaymentDetails.Add(paymentDetail);
                                     await _context.SaveChangesAsync();
                                 }
@@ -808,6 +809,7 @@ namespace Siscom.Agua.Api.Controllers
                                     paymentDetail.PaymentId = payment.Id;
                                     paymentDetail.HaveTax = detail.HaveTax;
                                     paymentDetail.Tax = detail.Tax;
+                                    paymentDetail.Type = order.Type;
                                     _context.PaymentDetails.Add(paymentDetail);
                                     await _context.SaveChangesAsync();
                                 }
