@@ -1136,13 +1136,69 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
+            var valueSystem =  await _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL").FirstOrDefaultAsync();
 
-            var discounts = await _context.AgreementDiscounts
-                                          .Include(x => x.Discount)
-                                          .Where(x => x.IdAgreement == AgreementId &&
-                                                      x.IsActive == true).ToListAsync();
 
-            return Ok(discounts);
+            if(valueSystem.IsActive == false)
+            {
+                Agreement agreement = await _context.Agreements
+                                               .Include(x => x.TypeIntake)
+                                               .Include(x => x.TypeStateService)
+                                               //.Include(x => x.AgreementDiscounts.Where(z => z.IsActive == true))
+                                               .Where(x => x.Id == AgreementId)
+                                               .FirstOrDefaultAsync();
+
+
+
+
+
+                if (agreement.TypeIntake.Acronym != "HA")
+                {
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
+                }
+
+                if (agreement.TypeStateService.Id != 1 && agreement.TypeStateService.Id != 3)
+                {
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
+                }
+
+
+                var discounts = await _context.AgreementDiscounts
+
+                                              .Include(x => x.Discount)
+                                              .Where(x => x.IdAgreement == AgreementId &&
+                                                          x.IsActive == true).ToListAsync();
+
+                return Ok(discounts);
+            }
+            else
+            {
+                Agreement agreement = await _context.Agreements
+                                             .Include(x => x.TypeIntake)
+                                             .Include(x => x.TypeStateService)
+                                             //.Include(x => x.AgreementDiscounts.Where(z => z.IsActive == true))
+                                             .Where(x => x.Id == AgreementId)
+                                             .FirstOrDefaultAsync();
+
+                var catalogue = await _context.GroupCatalogues.Include(x => x.Catalogues).Where(x => x.Id == agreement.TypeUse.Id).FirstOrDefaultAsync();
+
+                if(catalogue == null)
+                {
+                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
+
+                }
+
+                var discounts = await _context.AgreementDiscounts
+
+                                             .Include(x => x.Discount)
+                                             .Where(x => x.IdAgreement == AgreementId &&
+                                                         x.IsActive == true).ToListAsync();
+
+                return Ok(discounts);
+
+            }
+
+
 
         }
 
