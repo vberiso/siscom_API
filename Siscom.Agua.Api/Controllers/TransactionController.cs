@@ -240,13 +240,20 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(entities);
         }
 
-        [HttpGet("TransactionPaymentWithoutFactura")]
-        public async Task<IActionResult> GetTransactionPaymentWithoutFactura()
+        [HttpGet("TransactionPaymentWithoutFactura/{date}/{BranchOfficeId}")]
+        public async Task<IActionResult> GetTransactionPaymentWithoutFactura([FromRoute] string date, int BranchOfficeId)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            int tmpAño = int.Parse(date.Split("-")[0]);
+            int tmpMes = int.Parse(date.Split("-")[1]);
+            int tmpDia = int.Parse(date.Split("-")[2]);
+            DateTime tmpFechaStart = new DateTime(tmpAño, tmpMes, tmpDia, 0, 0, 0);
+            DateTime tmpFechaEnd = new DateTime(tmpAño, tmpMes, tmpDia, 23, 59, 59);
+
+            //obtengo el listado de Transacciones por TypeTransaction y Fecha
             TransactionPaymentWithoutFacturaVM transactionPayment = new TransactionPaymentWithoutFacturaVM();
             transactionPayment.lstTransaction = await _context.Transactions
                                                             //.Include(x => x.OriginPayment)
@@ -258,7 +265,7 @@ namespace Siscom.Agua.Api.Controllers
                                                             //.Include(x => x.TransactionDetails)
                                                             //.Include(x => x.TransactionFolios)
                                                             //.Include(x => x.TypeTransaction)
-                                                            .Where(x => x.TypeTransactionId == 3).ToListAsync();
+                                                            .Where(x => x.TypeTransactionId == 3 && x.DateTransaction >= tmpFechaStart && x.DateTransaction <= tmpFechaEnd).ToListAsync();
                                                             //.FirstOrDefaultAsync(a => a.Id == 10);
 
             if (transactionPayment.lstTransaction == null)
@@ -266,33 +273,31 @@ namespace Siscom.Agua.Api.Controllers
                 return NotFound();
             }
 
-            //transactionPayment.Transaction.PayMethod = await _context.PayMethods.FindAsync(transactionPayment.Transaction.PayMethodId);
-
-
+            //Obtengo la oficina
+            var BranchOffice = _context.BranchOffices.Find(BranchOfficeId);
+                       
+            //Obtengo los pagos segun la lista de transacciones.
             var tmp = transactionPayment.lstTransaction.Select(t => t.Folio).ToList();
-
-            transactionPayment.lstPayment = await _context.Payments
+            List<Payment> lstPaymentRelacionadosATransacciones = new List<Payment>();
+            lstPaymentRelacionadosATransacciones = await _context.Payments
                                                         //.Include(p => p.ExternalOriginPayment)
                                                         //.Include(p => p.OriginPayment)
                                                         //.Include(p => p.PayMethod)
                                                         //.Include(p => p.PaymentDetails)
-                                                        .Where(p => tmp.Contains(p.TransactionFolio))
+                                                        .Where(p => tmp.Contains(p.TransactionFolio))  //&& p.BranchOffice == BranchOffice.Name
                                                         .ToListAsync();
                                                         //.Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
                                                         //.FirstOrDefaultAsync();
 
-            //if (transactionPayment.Payment != null)
-            //{
+            var paymentsFacturados = _context.TaxReceipts.Select(tr => tr.PaymentId).ToList();
 
-            //    transactionPayment.Payment.PaymentDetails.ToList().ForEach(x =>
-            //    {
-            //        x.Debt = _context.Debts.Find(x.DebtId);
-            //        x.Prepaid = _context.Prepaids.Find(x.PrepaidId);
-            //    });
-            //}
+            transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones.Where(pp => !paymentsFacturados.Contains(pp.Id)).ToList();
 
-
-
+            if (transactionPayment.lstPayment == null)
+            {
+                return NotFound();
+            }
+                       
             return Ok(transactionPayment);
         }
 
