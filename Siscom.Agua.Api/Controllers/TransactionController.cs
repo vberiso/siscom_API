@@ -352,7 +352,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
             if (pPaymentConcepts.Transaction.Amount != _sumTransactionDetail)
-                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, pPaymentConcepts.Transaction.Amount) });
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción [{0}], no coincide con el total de la transacción [{1}]", _sumTransactionDetail, pPaymentConcepts.Transaction.Amount) });
 
             //Terminal
             TerminalUser terminalUser = new TerminalUser();
@@ -468,7 +468,7 @@ namespace Siscom.Agua.Api.Controllers
                         await _context.SaveChangesAsync();
                     }
 
-                    //await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+                    await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
                     //PAGOS                           
                     payment.PaymentDate = transaction.DateTransaction;
@@ -577,7 +577,7 @@ namespace Siscom.Agua.Api.Controllers
                                 }
                             }
                             else
-                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El estado: {0} de la deuda: {1}, no permite el pago", debtFind.Status, debtFind.Id) });
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El estado - {0} de la deuda - {1}, no permite el pago", debtFind.Status, debtFind.Id) });
                         }
                     }
 

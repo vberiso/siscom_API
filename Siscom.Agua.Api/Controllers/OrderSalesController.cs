@@ -233,6 +233,7 @@ namespace Siscom.Agua.Api.Controllers
         {
 
             var orderSale = await _context.OrderSales
+                                          .Include(x => x.OrderSaleDetails)
                                           .Include(x => x.TaxUser)
                                             .ThenInclude(user => user.TaxAddresses)
                                           .Where(x => x.Id == id)
