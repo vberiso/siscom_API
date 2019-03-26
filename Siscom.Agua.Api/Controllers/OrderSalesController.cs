@@ -188,7 +188,7 @@ namespace Siscom.Agua.Api.Controllers
                     var paramSystem = await _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL" && x.IsActive==true).FirstOrDefaultAsync();
                     if(paramSystem == null)
                         return StatusCode((int)TypeError.Code.Conflict, new { Error = "Falta parametro de configuración" });
-
+                                        
                     _orderSale.DateOrder = DateTime.UtcNow.ToLocalTime();
                     _orderSale.Amount = orderSale.Amount;
                     _orderSale.OnAccount = 0;

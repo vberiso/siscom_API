@@ -240,7 +240,61 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(entities);
         }
 
+        [HttpGet("TransactionPaymentWithoutFactura")]
+        public async Task<IActionResult> GetTransactionPaymentWithoutFactura()
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            TransactionPaymentWithoutFacturaVM transactionPayment = new TransactionPaymentWithoutFacturaVM();
+            transactionPayment.lstTransaction = await _context.Transactions
+                                                            //.Include(x => x.OriginPayment)
+                                                            //.Include(x => x.ExternalOriginPayment)
+                                                            ////.Include(x => x.PayMethod)
+                                                            //.Include(x => x.TerminalUser)
+                                                            //     .ThenInclude(y => y.Terminal)
+                                                            //           .ThenInclude(z => z.BranchOffice)
+                                                            //.Include(x => x.TransactionDetails)
+                                                            //.Include(x => x.TransactionFolios)
+                                                            //.Include(x => x.TypeTransaction)
+                                                            .Where(x => x.TypeTransactionId == 3).ToListAsync();
+                                                            //.FirstOrDefaultAsync(a => a.Id == 10);
 
+            if (transactionPayment.lstTransaction == null)
+            {
+                return NotFound();
+            }
+
+            //transactionPayment.Transaction.PayMethod = await _context.PayMethods.FindAsync(transactionPayment.Transaction.PayMethodId);
+
+
+            var tmp = transactionPayment.lstTransaction.Select(t => t.Folio).ToList();
+
+            transactionPayment.lstPayment = await _context.Payments
+                                                        //.Include(p => p.ExternalOriginPayment)
+                                                        //.Include(p => p.OriginPayment)
+                                                        //.Include(p => p.PayMethod)
+                                                        //.Include(p => p.PaymentDetails)
+                                                        .Where(p => tmp.Contains(p.TransactionFolio))
+                                                        .ToListAsync();
+                                                        //.Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
+                                                        //.FirstOrDefaultAsync();
+
+            //if (transactionPayment.Payment != null)
+            //{
+
+            //    transactionPayment.Payment.PaymentDetails.ToList().ForEach(x =>
+            //    {
+            //        x.Debt = _context.Debts.Find(x.DebtId);
+            //        x.Prepaid = _context.Prepaids.Find(x.PrepaidId);
+            //    });
+            //}
+
+
+
+            return Ok(transactionPayment);
+        }
 
 
 
@@ -409,7 +463,7 @@ namespace Siscom.Agua.Api.Controllers
                         await _context.SaveChangesAsync();
                     }
 
-                    await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+                    //await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
                     //PAGOS                           
                     payment.PaymentDate = transaction.DateTransaction;
@@ -715,8 +769,8 @@ namespace Siscom.Agua.Api.Controllers
                         _context.TransactionDetails.Add(transactionDetail);
                         await _context.SaveChangesAsync();
                     }
-
-                    await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+                    
+                    //await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
                     //PAGOS                           
                     payment.PaymentDate = transaction.DateTransaction;
@@ -759,12 +813,22 @@ namespace Siscom.Agua.Api.Controllers
                                 _context.Entry(orderFind).State = EntityState.Modified;
                                 await _context.SaveChangesAsync();
 
-                                //Conceptos
+
+
+
+
+
+
+
+
+
+
+                               //Conceptos
                                 foreach (var detail in order.OrderSaleDetails)
                                 {
                                     var conceptos = await _context.OrderSaleDetails.Where(x => x.OrderSaleId == order.Id &&
                                                                                           x.Id == detail.Id).FirstOrDefaultAsync();
-
+                                    
                                     //if (conceptos.OnAccount != detail.OnAccount)
                                     //    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a pagar del concepto: {0}, inválido", arg0: conceptos.NameConcept) });
 
