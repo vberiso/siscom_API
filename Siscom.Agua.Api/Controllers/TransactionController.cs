@@ -275,7 +275,12 @@ namespace Siscom.Agua.Api.Controllers
 
             //Obtengo la oficina
             var BranchOffice = _context.BranchOffices.Find(BranchOfficeId);
-                       
+
+            if (BranchOffice == null)
+            {
+                return NotFound();
+            }
+
             //Obtengo los pagos segun la lista de transacciones.
             var tmp = transactionPayment.lstTransaction.Select(t => t.Folio).ToList();
             List<Payment> lstPaymentRelacionadosATransacciones = new List<Payment>();
@@ -284,7 +289,7 @@ namespace Siscom.Agua.Api.Controllers
                                                         //.Include(p => p.OriginPayment)
                                                         //.Include(p => p.PayMethod)
                                                         //.Include(p => p.PaymentDetails)
-                                                        .Where(p => tmp.Contains(p.TransactionFolio))  //&& p.BranchOffice == BranchOffice.Name
+                                                        .Where(p => tmp.Contains(p.TransactionFolio) && p.BranchOffice == BranchOffice.Name)  //
                                                         .ToListAsync();
                                                         //.Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
                                                         //.FirstOrDefaultAsync();
