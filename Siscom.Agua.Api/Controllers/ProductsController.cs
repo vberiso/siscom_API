@@ -244,6 +244,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> PostProductAgreement([FromRoute]  int AgreementId, [FromBody]  Debt pDebt)
         {
             Agreement agreement = new Agreement();
+            Debt debt = new Debt();
 
             #region Validación
             if (!ModelState.IsValid)
@@ -304,7 +305,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    Debt debt = new Debt();
+
                     debt.DebitDate = DateTime.UtcNow.ToLocalTime();
                     debt.FromDate = DateTime.UtcNow.ToLocalTime().Date;
                     debt.UntilDate = DateTime.UtcNow.ToLocalTime().Date;
@@ -340,9 +341,32 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
 
-            return Ok(AgreementId);
+
+            //RedirectToActionResult redirect = new RedirectToActionResult("GetOrderSaleById", "OrderSales", new { @id = debt.Id });
+            //return redirect;
+
+            return Ok(debt.Id);
 
         }
+
+
+        [HttpGet("GetOrderSaleById/{id}")]
+        public async Task<IActionResult> GetOrderSaleById(int id)
+        {
+
+            var orderSale = await _context.Debts
+                                          .Include(x => x.DebtDetails)
+                                          .Where(x => x.Id == id)
+                                          .FirstOrDefaultAsync();
+
+            if (orderSale == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(orderSale);
+        }
+
 
         // DELETE: api/Products/5
         [HttpDelete("{id}")]
