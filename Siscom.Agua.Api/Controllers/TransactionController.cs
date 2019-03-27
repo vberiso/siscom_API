@@ -240,8 +240,8 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(entities);
         }
 
-        [HttpGet("TransactionPaymentWithoutFactura/{date}/{BranchOfficeId}")]
-        public async Task<IActionResult> GetTransactionPaymentWithoutFactura([FromRoute] string date, int BranchOfficeId)
+        [HttpGet("TransactionPaymentWithoutFactura/{date}/{BranchOfficeId}/{TypeTransactionId}")]
+        public async Task<IActionResult> GetTransactionPaymentWithoutFactura([FromRoute] string date, int BranchOfficeId, int TypeTransactionId)
         {
             if (!ModelState.IsValid)
             {
@@ -266,7 +266,7 @@ namespace Siscom.Agua.Api.Controllers
                                             //.Include(x => x.TransactionDetails)
                                             .Include(x => x.TransactionFolios)
                                             //.Include(x => x.TypeTransaction)
-                                            .Where(x => (x.TypeTransactionId == 3 || x.TypeTransactionId == 4) && x.DateTransaction >= tmpFechaStart && x.DateTransaction <= tmpFechaEnd).ToListAsync();
+                                            .Where(x => x.TypeTransactionId == TypeTransactionId && x.DateTransaction >= tmpFechaStart && x.DateTransaction <= tmpFechaEnd).ToListAsync();
                                             //.FirstOrDefaultAsync(a => a.Id == 10);
             if (lstTransations == null)
             {
@@ -295,9 +295,11 @@ namespace Siscom.Agua.Api.Controllers
 
             //Obtengo los id´s de Payments ya filtrado segun el BranchOffice
             var lstIdsBranch = lstPaymentRelacionadosATransacciones.Select(x => x.Id).ToList();
-            var paymentsFacturados = _context.TaxReceipts.Where(x => lstIdsBranch.Contains(x.PaymentId)).Select(tr => tr.PaymentId).ToList();
-
-            transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones.Where(pp => !paymentsFacturados.Contains(pp.Id)).ToList();
+            var paymentsFacturados = _context.TaxReceipts.Where(x => lstIdsBranch.Contains(x.PaymentId) && x.Status == "ET001").Select(tr => tr.PaymentId).ToList();
+            var paymentsFacturadosCancelados = _context.TaxReceipts.Where(x => lstIdsBranch.Contains(x.PaymentId) && x.Status == "ET002").Select(tr => tr.PaymentId).ToList();
+            var paymentsFacturadosFinal = paymentsFacturados.Where(x => !paymentsFacturadosCancelados.Contains(x)).ToList();
+            
+            transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones.Where(pp => !paymentsFacturadosFinal.Contains(pp.Id)).ToList();
 
             //Obtengo los id´s de folios en Payments para filtral los transactions.
             var lstIdsFoliosPayments = transactionPayment.lstPayment.Select(y => y.TransactionFolio).ToList();
@@ -311,6 +313,28 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(transactionPayment);
         }
 
+        [HttpGet("Consulta")]
+        public async Task<IActionResult> GetConsulta()
+        {
+            //var UserInRole = db.UsersInRoles.Include(u => u.UserProfile).Include(u => u.Roles)
+            //.Select(m => new
+            //{
+            //    UserName = u.UserProfile.UserName,
+            //    RoleName = u.Roles.RoleName
+            //});
+
+            var res1 = _context.Payments.Where(pay => pay.Status == "EP001").Select(x => x.PaymentDate)
+                .ToList();
+
+            var res2 = _context.Payments
+                .Join(_context.Agreements, (p => p.Id), (a => a.Id), ((p,a) => new { p, a } ))
+                .Where(x => x.p.Status == "EP001")
+                .Select(x => new { fecha_pago = x.p.PaymentDate, x.a.Account } )
+                .ToList();
+
+
+            return Ok("Listo");
+        }
 
 
         /// <summary>
