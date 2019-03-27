@@ -247,6 +247,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+            TransactionPaymentWithoutFacturaVM transactionPayment = new TransactionPaymentWithoutFacturaVM();
             int tmpAño = int.Parse(date.Split("-")[0]);
             int tmpMes = int.Parse(date.Split("-")[1]);
             int tmpDia = int.Parse(date.Split("-")[2]);
@@ -254,49 +255,53 @@ namespace Siscom.Agua.Api.Controllers
             DateTime tmpFechaEnd = new DateTime(tmpAño, tmpMes, tmpDia, 23, 59, 59);
 
             //obtengo el listado de Transacciones por TypeTransaction y Fecha
-            TransactionPaymentWithoutFacturaVM transactionPayment = new TransactionPaymentWithoutFacturaVM();
-            transactionPayment.lstTransaction = await _context.Transactions
-                                                            //.Include(x => x.OriginPayment)
-                                                            //.Include(x => x.ExternalOriginPayment)
-                                                            ////.Include(x => x.PayMethod)
-                                                            //.Include(x => x.TerminalUser)
-                                                            //     .ThenInclude(y => y.Terminal)
-                                                            //           .ThenInclude(z => z.BranchOffice)
-                                                            //.Include(x => x.TransactionDetails)
-                                                            //.Include(x => x.TransactionFolios)
-                                                            //.Include(x => x.TypeTransaction)
-                                                            .Where(x => x.TypeTransactionId == 3 && x.DateTransaction >= tmpFechaStart && x.DateTransaction <= tmpFechaEnd).ToListAsync();
-                                                            //.FirstOrDefaultAsync(a => a.Id == 10);
-
-            if (transactionPayment.lstTransaction == null)
+            List<DAL.Models.Transaction> lstTransations = new List<DAL.Models.Transaction>();
+            lstTransations = await _context.Transactions
+                                            //.Include(x => x.OriginPayment)
+                                            //.Include(x => x.ExternalOriginPayment)
+                                            ////.Include(x => x.PayMethod)
+                                            //.Include(x => x.TerminalUser)
+                                            //     .ThenInclude(y => y.Terminal)
+                                            //           .ThenInclude(z => z.BranchOffice)
+                                            //.Include(x => x.TransactionDetails)
+                                            //.Include(x => x.TransactionFolios)
+                                            //.Include(x => x.TypeTransaction)
+                                            .Where(x => x.TypeTransactionId == 3 && x.DateTransaction >= tmpFechaStart && x.DateTransaction <= tmpFechaEnd).ToListAsync();
+                                            //.FirstOrDefaultAsync(a => a.Id == 10);
+            if (lstTransations == null)
             {
                 return NotFound();
             }
 
             //Obtengo la oficina
             var BranchOffice = _context.BranchOffices.Find(BranchOfficeId);
-
             if (BranchOffice == null)
             {
                 return NotFound();
             }
 
-            //Obtengo los pagos segun la lista de transacciones.
-            var tmp = transactionPayment.lstTransaction.Select(t => t.Folio).ToList();
+            //Obtengo los id's de transactions para obtener los pagos segun esos id's.
+            var lstIds = lstTransations.Select(t => t.Folio).ToList();
             List<Payment> lstPaymentRelacionadosATransacciones = new List<Payment>();
             lstPaymentRelacionadosATransacciones = await _context.Payments
                                                         //.Include(p => p.ExternalOriginPayment)
                                                         //.Include(p => p.OriginPayment)
                                                         //.Include(p => p.PayMethod)
                                                         //.Include(p => p.PaymentDetails)
-                                                        .Where(p => tmp.Contains(p.TransactionFolio) && p.BranchOffice == BranchOffice.Name)  //
+                                                        .Where(p => lstIds.Contains(p.TransactionFolio) && p.BranchOffice == BranchOffice.Name)
                                                         .ToListAsync();
-                                                        //.Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
-                                                        //.FirstOrDefaultAsync();
+            //.Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
+            //.FirstOrDefaultAsync();
 
-            var paymentsFacturados = _context.TaxReceipts.Select(tr => tr.PaymentId).ToList();
+            //Obtengo los id´s de Payments ya filtrado segun el BranchOffice
+            var lstIdsBranch = lstPaymentRelacionadosATransacciones.Select(x => x.Id).ToList();
+            var paymentsFacturados = _context.TaxReceipts.Where(x => lstIdsBranch.Contains(x.PaymentId)).Select(tr => tr.PaymentId).ToList();
 
             transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones.Where(pp => !paymentsFacturados.Contains(pp.Id)).ToList();
+
+            //Obtengo los id´s de folios en Payments para filtral los transactions.
+            var lstIdsFoliosPayments = transactionPayment.lstPayment.Select(y => y.TransactionFolio).ToList();
+            transactionPayment.lstTransaction = lstTransations.Where(yy => lstIdsFoliosPayments.Contains(yy.Folio)).ToList();
 
             if (transactionPayment.lstPayment == null)
             {
