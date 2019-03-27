@@ -323,14 +323,73 @@ namespace Siscom.Agua.Api.Controllers
             //    RoleName = u.Roles.RoleName
             //});
 
-            var res1 = _context.Payments.Where(pay => pay.Status == "EP001").Select(x => x.PaymentDate)
-                .ToList();
+            DateTime FechaInicio = DateTime.Today;
+            DateTime FechaFin = DateTime.Today.AddDays(1);
 
-            var res2 = _context.Payments
-                .Join(_context.Agreements, (p => p.Id), (a => a.Id), ((p,a) => new { p, a } ))
-                .Where(x => x.p.Status == "EP001")
-                .Select(x => new { fecha_pago = x.p.PaymentDate, x.a.Account } )
-                .ToList();
+            //var res1 = _context.Payments.Where(pay => pay.Status == "EP001").Select(x => x.PaymentDate)
+            //    .ToList();
+
+            //var res2 = _context.Payments                
+            //    .Join(_context.Agreements, (p => p.AgreementId), (a => a.Id), ((p,a) => new { p, a } ))
+            //    .Where(x => x.p.Status == "EP001" && x.p.PaymentDate >= FechaInicio && x.p.PaymentDate <= FechaFin)
+            //    .Select(x => new {
+            //        fecha_pago = x.p.PaymentDate,
+            //        x.a.Account,
+            //        x.p.Total,
+            //        x.p.BranchOffice
+            //    } )
+            //    .ToList();
+
+            //var res3 = _context.Payments
+            //    .Join(_context.Agreements, (p => p.AgreementId), (a => a.Id), ((p, a) => new { p, a }))
+            //    .Join(_context.PayMethods, (root => root.p.PayMethodId), (py => py.Id), ((root, py) => new { root, py }))
+            //    .Where(x => x.root.p.Status == "EP001" && x.root.p.PaymentDate >= FechaInicio && x.root.p.PaymentDate <= FechaFin)
+            //    .Select(x => new
+            //    {
+            //        fecha_pago = x.root.p.PaymentDate,
+            //        x.root.a.Account,
+            //        x.root.p.Total,
+            //        x.root.p.BranchOffice,
+            //        metodo_pago = x.py.Name
+            //    })
+            //    .ToList();
+
+            //var res4 = _context.Payments
+            //    .Join(_context.Agreements, (p => p.AgreementId), (a => a.Id), ((p, a) => new { p, a }))
+            //    .Join(_context.PayMethods, (root => root.p.PayMethodId), (py => py.Id), ((root, py) => new { root, py }))
+            //    .Join(_context.OriginPayments, (root2 => root2.root.p.OriginPaymentId), (o => o.Id), ((root2, o) => new { root2, o}))
+            //    .Where(x => x.root2.root.p.Status == "EP001" && x.root2.root.p.PaymentDate >= FechaInicio && x.root2.root.p.PaymentDate <= FechaFin)
+            //    .Select(x => new
+            //    {
+            //        fecha_pago = x.root2.root.p.PaymentDate,
+            //        x.root2.root.a.Account,
+            //        x.root2.root.p.Total,
+            //        x.root2.root.p.BranchOffice,
+            //        metodo_pago = x.root2.py.Name,
+            //        origen_pago = x.o.Name
+            //    })
+            //    .ToList();
+
+
+
+
+            //////var balance = (from a in context.Accounts
+            //////               join c in context.Clients on a.UserID equals c.UserID
+            //////               join d in context.Descriptions on c.ClientID equals d.ClientID
+            //////               where d.DescriptionID == yourDescriptionID
+            //////               select a.Balance)
+            //////  .SingleOrDefault();
+
+            var tmp = from p in _context.Payments
+                      join a in _context.Agreements on p.AgreementId equals a.Id
+                      where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
+                      select p.PaymentDate;
+
+            var tmp2 = (from p in _context.Payments
+                      join a in _context.Agreements on p.AgreementId equals a.Id
+                      where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
+                      select new { fecha_pago = p.PaymentDate, a.Account, p.Total, p.BranchOffice })
+                      .ToList();
 
 
             return Ok("Listo");
