@@ -264,9 +264,9 @@ namespace Siscom.Agua.Api.Controllers
                                             //     .ThenInclude(y => y.Terminal)
                                             //           .ThenInclude(z => z.BranchOffice)
                                             //.Include(x => x.TransactionDetails)
-                                            //.Include(x => x.TransactionFolios)
+                                            .Include(x => x.TransactionFolios)
                                             //.Include(x => x.TypeTransaction)
-                                            .Where(x => x.TypeTransactionId == 3 && x.DateTransaction >= tmpFechaStart && x.DateTransaction <= tmpFechaEnd).ToListAsync();
+                                            .Where(x => (x.TypeTransactionId == 3 || x.TypeTransactionId == 4) && x.DateTransaction >= tmpFechaStart && x.DateTransaction <= tmpFechaEnd).ToListAsync();
                                             //.FirstOrDefaultAsync(a => a.Id == 10);
             if (lstTransations == null)
             {
@@ -290,8 +290,8 @@ namespace Siscom.Agua.Api.Controllers
                                                         //.Include(p => p.PaymentDetails)
                                                         .Where(p => lstIds.Contains(p.TransactionFolio) && p.BranchOffice == BranchOffice.Name)
                                                         .ToListAsync();
-            //.Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
-            //.FirstOrDefaultAsync();
+                                                        //.Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
+                                                        //.FirstOrDefaultAsync();
 
             //Obtengo los id´s de Payments ya filtrado segun el BranchOffice
             var lstIdsBranch = lstPaymentRelacionadosATransacciones.Select(x => x.Id).ToList();
