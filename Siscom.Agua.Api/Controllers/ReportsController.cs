@@ -141,6 +141,23 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok(mon);
         }
+        [HttpGet("GetOrderSaleByFolio/{id}")]
+        public async Task<IActionResult> GetOrderSaleByFolio([FromRoute]int id)
+        {
+            var orderSale = await _context.OrderSales
+                                         .Include(x => x.OrderSaleDetails)
+                                         .Include(x => x.TaxUser)
+                                           .ThenInclude(user => user.TaxAddresses)
+                                         .Where(x => x.Id == id)
+                                         .ToListAsync();
+
+            if (orderSale == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(orderSale);
+        }
 
         [HttpGet("Historic/{Date}")]
         public async Task<IActionResult> GetHistoric([FromRoute] string Date)

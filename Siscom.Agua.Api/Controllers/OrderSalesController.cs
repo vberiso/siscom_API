@@ -48,16 +48,16 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             var orderSale = await _context.OrderSales
-                                          .Include(x=> x.TaxUser)
+                                          .Include(x => x.TaxUser)
                                             .ThenInclude(user => user.TaxAddresses)
                                           .Include(x => x.OrderSaleDetails)
-                                          .Where(x=> x.Id== id)
+                                          .Where(x => x.Id == id)
                                           .FirstOrDefaultAsync();
 
             if (orderSale == null)
             {
                 return NotFound();
-            }            
+            }
 
             return Ok(orderSale);
         }
@@ -71,8 +71,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
-            if(string.IsNullOrWhiteSpace(folio))
+
+            if (string.IsNullOrWhiteSpace(folio))
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Folio incorrecto" });
 
             var orderSale = await _context.OrderSales
@@ -95,8 +95,8 @@ namespace Siscom.Agua.Api.Controllers
             orderSale.DescriptionType = await _context.Types
                                                         .Where(x => x.CodeName == orderSale.Type)
                                                         .Select(x => x.Description)
-                                                        .FirstOrDefaultAsync();           
-         
+                                                        .FirstOrDefaultAsync();
+
             return Ok(orderSale);
         }
 
@@ -152,7 +152,7 @@ namespace Siscom.Agua.Api.Controllers
             var param = await _context.SystemParameters
                                     .Where(x => x.Name == "DAYS_EXPIRE_ORDER").FirstOrDefaultAsync();
 
-            if(param==null)
+            if (param == null)
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
             #endregion
 
@@ -185,10 +185,10 @@ namespace Siscom.Agua.Api.Controllers
                         //}
                     }
 
-                    var paramSystem = await _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL" && x.IsActive==true).FirstOrDefaultAsync();
-                    if(paramSystem == null)
+                    var paramSystem = await _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL" && x.IsActive == true).FirstOrDefaultAsync();
+                    if (paramSystem == null)
                         return StatusCode((int)TypeError.Code.Conflict, new { Error = "Falta parametro de configuración" });
-                                        
+
                     _orderSale.DateOrder = DateTime.UtcNow.ToLocalTime();
                     _orderSale.Amount = orderSale.Amount;
                     _orderSale.OnAccount = 0;
@@ -200,7 +200,7 @@ namespace Siscom.Agua.Api.Controllers
                     _orderSale.IdOrigin = orderSale.IdOrigin;
                     _orderSale.TaxUserId = _taxUser.Id;
                     _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
-                    _orderSale.DivisionId = orderSale.DivisionId == 0 ? (paramSystem.TextColumn=="NO"? 1 : 15) : orderSale.DivisionId;
+                    _orderSale.DivisionId = orderSale.DivisionId == 0 ? (paramSystem.TextColumn == "NO" ? 1 : 15) : orderSale.DivisionId;
                     _orderSale.OrderSaleDetails = orderSale.OrderSaleDetails;
 
                     _context.OrderSales.Add(_orderSale);
@@ -246,6 +246,9 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(orderSale);
         }
+
+
+
 
         // DELETE: api/OrderSales/5
         [HttpDelete("{id}")]
