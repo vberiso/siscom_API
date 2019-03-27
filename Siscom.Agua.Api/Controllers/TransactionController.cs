@@ -287,7 +287,7 @@ namespace Siscom.Agua.Api.Controllers
                                                         //.Include(p => p.ExternalOriginPayment)
                                                         //.Include(p => p.OriginPayment)
                                                         //.Include(p => p.PayMethod)
-                                                        //.Include(p => p.PaymentDetails)
+                                                        .Include(p => p.PaymentDetails)
                                                         .Where(p => lstIds.Contains(p.TransactionFolio) && p.BranchOffice == BranchOffice.Name)
                                                         .ToListAsync();
                                                         //.Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
@@ -385,10 +385,48 @@ namespace Siscom.Agua.Api.Controllers
                       where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
                       select p.PaymentDate;
 
-            var tmp2 = (from p in _context.Payments
-                      join a in _context.Agreements on p.AgreementId equals a.Id
-                      where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
-                      select new { fecha_pago = p.PaymentDate, a.Account, p.Total, p.BranchOffice })
+            //var tmp2 = (from p in _context.Payments
+            //          join a in _context.Agreements on p.AgreementId equals a.Id
+            //          where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
+            //          select new { fecha_pago = p.PaymentDate, a.Account, p.Total, p.BranchOffice })
+            //          .ToList();
+
+            //var tmp3 = (from p in _context.Payments
+            //            join a in _context.Agreements on p.AgreementId equals a.Id
+            //            join py in _context.PayMethods on p.PayMethodId equals py.Id
+            //            where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
+            //            select new {
+            //                fecha_pago = p.PaymentDate,
+            //                a.Account,
+            //                p.Total,
+            //                p.BranchOffice,
+            //                metodo_pago = py.Name
+            //            })
+            //          .ToList();
+
+            var tmp4 = (from p in _context.Payments
+                        join a in _context.Agreements on p.AgreementId equals a.Id
+                        join py in _context.PayMethods on p.PayMethodId equals py.Id
+                        join o in _context.OriginPayments on p.OriginPaymentId equals o.Id
+                        join e in _context.ExternalOriginPayments on p.ExternalOriginPaymentId equals e.Id
+                        join c in _context.Clients on a.Id equals c.AgreementId
+                        join t in _context.Transactions on p.TransactionFolio equals t.Folio
+                        join tu in _context.TerminalUsers on t.TerminalUserId equals tu.Id
+                        join u in _context.Users on tu.UserId equals u.Id
+                        where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
+                        select new
+                        {
+                            fecha_pago = p.PaymentDate,
+                            a.Account,
+                            p.Total,
+                            p.BranchOffice,
+                            metodo_pago = py.Name,
+                            origen_pago = o.Name,
+                            banco = e.Name,
+                            folio = p.TransactionFolio,
+                            cajero = string.Format("{0} {1} {2}", u.UserName, u.Name ,u.LastName),
+                            cliente = string.Format("{0} {1} {2}", c.Name, c.LastName, c.SecondLastName)
+                        })
                       .ToList();
 
 
