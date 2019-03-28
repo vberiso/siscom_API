@@ -356,7 +356,7 @@ namespace Siscom.Agua.Api.Controllers
 
             var orderSale = await _context.Debts
                                           .Include(x => x.DebtDetails)
-                                          .Where(x => x.Id == id)
+                                          .Where(x => x.Id == id )
                                           .FirstOrDefaultAsync();
 
             if (orderSale == null)
