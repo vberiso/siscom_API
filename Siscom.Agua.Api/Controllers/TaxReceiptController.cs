@@ -56,7 +56,31 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(taxReceipt);
         }
 
-        
+        // GET: api/TaxReceipts/1
+        [HttpGet("TaxReceiptFromGroup")]
+        public async Task<IActionResult> GetTaxReceiptFromGroup()
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var lstGrupos = await _context.TaxReceipts.GroupBy(x => x.FielXML).Select(y => new { fieldXML = y.Key, total = y.Count() }).ToListAsync();
+
+            var lstFielsXML = lstGrupos.Where(x => x.total > 1).Select(y => y.fieldXML).ToList();
+                        
+            //var lstPrimeros = _context.TaxReceipts.GroupBy(x => x.FielXML, (key, g) => g.First());
+
+            var lstTaxReceip = _context.TaxReceipts.Where(x => lstFielsXML.Contains(x.FielXML)).ToList();
+            
+            if (lstTaxReceip == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(lstTaxReceip);
+        }
+
         // POST: api/TaxReceipts
         [HttpPost]
         public async Task<IActionResult> PostTaxReceipt(int TaxReceiptId, [FromBody] TaxReceipt taxReceipt)
