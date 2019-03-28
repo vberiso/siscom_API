@@ -56,7 +56,7 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(taxReceipt);
         }
 
-
+        
         // POST: api/TaxReceipts
         [HttpPost]
         public async Task<IActionResult> PostTaxReceipt(int TaxReceiptId, [FromBody] TaxReceipt taxReceipt)
@@ -200,6 +200,66 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(taxReceipt);
         }
 
+        // POST: Agrega un agrupado de pagos para una factura
+        [HttpPost("agruped")]
+        public async Task<IActionResult> PostTaxReceipt([FromBody] List<TaxReceipt> plstTax)
+        {
+            //Parametros
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                if (plstTax == null)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta" });
+
+                foreach (var item in plstTax)
+                {
+                    if (item.TaxReceiptDate == null)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Falta fecha de factura" });
+                    if (!(DateTime.UtcNow.ToLocalTime().Date <= item.TaxReceiptDate && DateTime.UtcNow.ToLocalTime().AddDays(1).Date > item.TaxReceiptDate))
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La fecha para crear la factura es incorrecta" });
+
+                    if (string.IsNullOrEmpty(item.XML))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar xml" });
+                    if (string.IsNullOrEmpty(item.FielXML))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar archivo xml" });
+                    if (string.IsNullOrEmpty(item.RFC))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar RFC" });
+                    if (string.IsNullOrEmpty(item.Type))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar tipo" });
+                    if (string.IsNullOrEmpty(item.Status))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar status" });
+                    if (string.IsNullOrEmpty(item.UserId))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, ingresa id de usuario" });
+
+                    if ( !_context.Payments.Any(x => x.Id == item.PaymentId) )
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "No existe el pago asociado." });
+                }
+
+                _context.TaxReceipts.AddRange(plstTax);
+                int res = _context.SaveChanges();
+
+                if (res < 1)
+                    return BadRequest("No se pudo realizar la inserción");
+                
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(plstTax);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar las facturas" });
+            }
+
+            var tmp = plstTax.Select(x => x.Id).ToList();
+            return Ok(await _context.TaxReceipts.Where(x => tmp.Contains(x.Id)).ToListAsync());
+        }
 
         private bool TaxReceiptExist(int id)
         {
