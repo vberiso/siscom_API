@@ -132,7 +132,11 @@ namespace Siscom.Agua.Api.Controllers
         {
             var today = DateTime.UtcNow.ToLocalTime().Date;
             var b = value.ToUpper();
-            var val = _context.SystemParameters.Where(x => x.Name == b && x.IsActive == true && (x.StartDate <= today && x.EndDate >= today)).FirstOrDefault();
+            SystemParameters val;
+            if(value == "ANUAL")
+                val = _context.SystemParameters.Where(x => x.Name == b && x.IsActive == true && (x.StartDate.Year <= today.Year && x.EndDate >= today)).FirstOrDefault();
+            else
+                val = _context.SystemParameters.Where(x => x.Name == b && x.IsActive == true && (x.StartDate <= today && x.EndDate >= today)).FirstOrDefault();
             return Ok(val);
         }
 

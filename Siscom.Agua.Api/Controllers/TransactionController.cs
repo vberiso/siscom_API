@@ -1212,7 +1212,8 @@ namespace Siscom.Agua.Api.Controllers
             DAL.Models.Transaction transaction = new DAL.Models.Transaction();
             Prepaid prepaid;
             decimal _sumTransactionDetail = 0;
-
+            string _accountNumber = String.Empty;
+            string _unitMeasurement = String.Empty;
 
             #region Validación
 
@@ -1284,6 +1285,27 @@ namespace Siscom.Agua.Api.Controllers
                                           .FirstOrDefaultAsync() != null)
                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Improcedente anticipo. La cuenta tiene adeudo") });
 
+            if(pTransactionVM.Type == "PAY04")
+            {
+                var _serviceParam = await _context.ServiceParams
+                                              .Where(x => x.ServiceId == 17 && x.IsActive == true)
+                                              .FirstOrDefaultAsync();
+
+                _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
+                _unitMeasurement = _serviceParam != null ? _serviceParam.UnitMeasurement : String.Empty;
+            }
+            if(pTransactionVM.Type == "PAY06")
+            {
+                var _serviceParam = await _context.ServiceParams
+                                              .Where(x => x.ServiceId == 18 && x.IsActive == true)
+                                              .FirstOrDefaultAsync();
+
+                _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
+                _unitMeasurement = _serviceParam != null ? _serviceParam.UnitMeasurement : String.Empty;
+            }
+            
+
+            
             #endregion
 
 
@@ -1360,12 +1382,15 @@ namespace Siscom.Agua.Api.Controllers
                     PaymentDetail paymentDetail = new PaymentDetail();
                     paymentDetail.CodeConcept = "ANT01";
                     paymentDetail.Amount = transaction.Amount;
+                    paymentDetail.AccountNumber = _accountNumber;
                     paymentDetail.Description = "PAGO ANTICIPADO";
                     paymentDetail.DebtId = 0;
                     paymentDetail.PrepaidId = prepaid.Id;
                     paymentDetail.PaymentId = payment.Id;
                     paymentDetail.HaveTax = false;
                     paymentDetail.Tax = 0;
+                    paymentDetail.Type = "TIP05";
+                    paymentDetail.UnitMeasurement = _unitMeasurement;
                     _context.PaymentDetails.Add(paymentDetail);
                     await _context.SaveChangesAsync();
 
@@ -1386,7 +1411,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
 
-            return CreatedAtAction("GetTransaction", new { id = transaction.Id }, transaction);
+            return Ok(transaction.Id);
         }
 
         /// <summary>

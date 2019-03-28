@@ -72,7 +72,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = "Las características del contrato no cuenta con lo necesario para asignar un descuento: [El contrato tiene adeudos]" });
                         if (!IsMunicipal)
                         {
-                            var b = debt.Where(t => t.Type == "TIP01" && t.Year == 2018 && t.DebtPeriodId == 12).ToList();
+                            var b = debt.Where(t => t.Type == "TIP01" && t.Year == DateTime.Now.Year - 1 && t.DebtPeriodId == 12).ToList();
                             if (b.Count > 0)
                                 IsValid = true;
                             else
@@ -80,7 +80,7 @@ namespace Siscom.Agua.Api.Controllers
                         }
                         else
                         {
-                            var b = debt.Where(t => t.Type == "TIP01" && t.Year == 2018 && t.DebtPeriodId == 1).ToList();
+                            var b = debt.Where(t => t.Type == "TIP01" && t.Year == 2019 && t.DebtPeriodId == 1).ToList();
                             if (b.Count > 0)
                                 IsValid = true;
                             else
