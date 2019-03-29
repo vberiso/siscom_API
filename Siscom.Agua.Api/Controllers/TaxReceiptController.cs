@@ -285,7 +285,92 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(await _context.TaxReceipts.Where(x => tmp.Contains(x.Id)).ToListAsync());
         }
 
-        private bool TaxReceiptExist(int id)
+        // POST: Agrega un agrupado de cancelacion de pagos para una factura
+        [HttpPost("CancelTaxReceipt")]
+        public async Task<IActionResult> PostCancelTaxReceipt([FromBody] List<TaxReceipt> plstTax)
+        {
+            //Parametros
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                if (plstTax == null)
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta" });
+
+                foreach (var item in plstTax)
+                {
+                    if (item.TaxReceiptDate == null)
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Falta fecha de factura" });
+                    if (!(DateTime.UtcNow.ToLocalTime().Date <= item.TaxReceiptDate && DateTime.UtcNow.ToLocalTime().AddDays(1).Date > item.TaxReceiptDate))
+                        return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "La fecha para crear la factura es incorrecta" });
+
+                    if (string.IsNullOrEmpty(item.XML))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar xml" });
+                    if (string.IsNullOrEmpty(item.FielXML))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar archivo xml" });
+                    if (string.IsNullOrEmpty(item.RFC))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar RFC" });
+                    if (string.IsNullOrEmpty(item.Type))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar tipo" });
+                    if (string.IsNullOrEmpty(item.Status))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, falta ingresar status" });
+                    if (string.IsNullOrEmpty(item.UserId))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Información incompleta, ingresa id de usuario" });
+
+                    if (!_context.Payments.Any(x => x.Id == item.PaymentId))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "No existe el pago asociado." });
+                }
+
+                _context.TaxReceipts.AddRange(plstTax);
+                int res = _context.SaveChanges();
+
+                if (res < 1)
+                    return BadRequest("No se pudo realizar la inserción");
+                else
+                {      //Si la insercion fue exitosa se actualizan los ET001 a ET003
+                    List<TaxReceipt> lstTaxActualizacion = new List<TaxReceipt>();
+                    foreach(var item in plstTax)
+                    {
+                        TaxReceipt tax = _context.TaxReceipts.FirstOrDefault(x => x.PaymentId == item.PaymentId && x.Status == "ET001");
+                        if(tax != null)
+                        {
+                            tax.Status = "ET003";
+                            lstTaxActualizacion.Add(tax);
+                        }                        
+                    }
+                    //Los registros a actualizar deben ser igual al los registros insertados.
+                    if(plstTax.Count == lstTaxActualizacion.Count)
+                    {
+                        _context.TaxReceipts.UpdateRange(lstTaxActualizacion);
+                        int regActualizados = _context.SaveChanges();
+                    }
+                    else
+                    {
+                        _context.TaxReceipts.RemoveRange(plstTax);
+                        _context.SaveChanges();
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "No se pudo realizar la cancelación, ya que no se encontraron los registros de pago correspondientes" });                        
+                    }                    
+                }
+            }
+            catch(Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(plstTax);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para cancelar factura agrupada" });
+            }
+
+            var tmp = plstTax.Select(x => x.Id).ToList();
+            return Ok(await _context.TaxReceipts.Where(x => tmp.Contains(x.Id)).ToListAsync());            
+        }
+
+            private bool TaxReceiptExist(int id)
         {
             return _context.TaxReceipts.Any(e => e.Id == id);
         }
