@@ -1139,7 +1139,7 @@ namespace Siscom.Agua.Api.Controllers
             var valueSystem =  await _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL").FirstOrDefaultAsync();
 
 
-            if(valueSystem.IsActive == false)
+            if(valueSystem.TextColumn == "NO")
             {
                 Agreement agreement = await _context.Agreements
                                                .Include(x => x.TypeIntake)
@@ -1176,7 +1176,6 @@ namespace Siscom.Agua.Api.Controllers
                 Agreement agreement = await _context.Agreements
                                              .Include(x => x.TypeIntake)
                                              .Include(x => x.TypeStateService)
-                                             //.Include(x => x.AgreementDiscounts.Where(z => z.IsActive == true))
                                              .Where(x => x.Id == AgreementId)
                                              .FirstOrDefaultAsync();
 
