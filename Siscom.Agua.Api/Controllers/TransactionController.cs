@@ -312,8 +312,94 @@ namespace Siscom.Agua.Api.Controllers
                        
             return Ok(transactionPayment);
         }
-        
-        
+
+        [HttpGet("TransactionPaymentWithTaxGrouped/{date}/{BranchOfficeId}/{TypeTransactionId}")]
+        public async Task<IActionResult> GetTransactionPaymentWithTaxGrouped([FromRoute] string date, int BranchOfficeId, int TypeTransactionId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            TransactionPaymentWithoutFacturaVM transactionPayment = new TransactionPaymentWithoutFacturaVM();
+            int tmpAño = int.Parse(date.Split("-")[0]);
+            int tmpMes = int.Parse(date.Split("-")[1]);
+            int tmpDia = int.Parse(date.Split("-")[2]);
+            DateTime tmpFechaStart = new DateTime(tmpAño, tmpMes, tmpDia, 0, 0, 0);
+            DateTime tmpFechaEnd = new DateTime(tmpAño, tmpMes, tmpDia, 23, 59, 59);
+
+            //obtengo el listado de Transacciones por TypeTransaction y Fecha
+            List<DAL.Models.Transaction> lstTransations = new List<DAL.Models.Transaction>();
+            lstTransations = await _context.Transactions                                            
+                                            .Include(x => x.TransactionFolios)                                            
+                                            .Where(x => x.TypeTransactionId == TypeTransactionId && x.DateTransaction >= tmpFechaStart && x.DateTransaction <= tmpFechaEnd).ToListAsync();            
+            if (lstTransations == null)
+            {
+                return NotFound();
+            }
+
+            //Obtengo la oficina
+            var BranchOffice = _context.BranchOffices.Find(BranchOfficeId);
+            if (BranchOffice == null)
+            {
+                return NotFound();
+            }
+
+            //Obtengo los id's de transactions para obtener los pagos segun esos id's.
+            var lstIds = lstTransations.Select(t => t.Folio).ToList();
+            List<Payment> lstPaymentRelacionadosATransacciones = new List<Payment>();
+            lstPaymentRelacionadosATransacciones = await _context.Payments                                                        
+                                                        .Include(p => p.PaymentDetails)
+                                                        .Include(p => p.TaxReceipts)
+                                                        .Where(p => lstIds.Contains(p.TransactionFolio) && p.BranchOffice == BranchOffice.Name)
+                                                        .ToListAsync();
+            
+            //Obtengo solo los taxReceipts para buscar los agrupados.
+            var lstIdsBranch = lstPaymentRelacionadosATransacciones.Select(x => x.Id).ToList();
+
+            //De los TaxReceipt verifico cuales son agrupados.
+            var lstTaxReceiptAgrupados = _context.TaxReceipts
+                                                .Where(x => lstIdsBranch.Contains(x.PaymentId) && (x.Status == "ET001" || x.Status == "ET002"))
+                                                .GroupBy(y => y.FielXML)
+                                                .Select(y => new { fieldXML = y.Key, total = y.Count(), grupo = y.ToList() }).ToList();
+
+            //Agrego los payment con mas de una factura.
+            List<Payment> lstPaymentFinal = new List<Payment>();
+            foreach (var item in lstTaxReceiptAgrupados)
+            {
+                if (item.total > 1)
+                {
+                    foreach(var elem in item.grupo)
+                    {
+                        Payment pay = lstPaymentRelacionadosATransacciones.Where(x => x.Id == elem.PaymentId).FirstOrDefault();
+                        lstPaymentFinal.Add(pay);
+                    }                    
+                }
+            }
+
+            transactionPayment.lstPayment = lstPaymentFinal;
+
+            //var paymentsFacturados = _context.TaxReceipts.Where(x => lstIdsBranch.Contains(x.PaymentId) && (x.Status == "ET001" || x.Status == "ET002")).Select(tr => tr.PaymentId).ToList();
+            //var paymentsFacturadosCancelados = _context.TaxReceipts.Where(x => lstIdsBranch.Contains(x.PaymentId) && x.Status == "ET002").Select(tr => tr.PaymentId).ToList();
+            //var paymentsFacturadosFinal = paymentsFacturados.Where(x => !paymentsFacturadosCancelados.Contains(x)).ToList();
+
+            ////falta obtener los primeros solo los agrupados.
+            //transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones.Where(pp => !paymentsFacturadosFinal.Contains(pp.Id)).ToList();
+
+
+
+            //Obtengo los id´s de folios en Payments para filtral los transactions.
+            var lstIdsFoliosPayments = lstPaymentFinal.Select(y => y.TransactionFolio).ToList();
+            transactionPayment.lstTransaction = lstTransations.Where(yy => lstIdsFoliosPayments.Contains(yy.Folio)).ToList();
+
+            if (transactionPayment.lstPayment == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(transactionPayment);
+        }
+
+
         /// <summary>
         /// This will provide capability add new Transaction
         /// </summary>       
