@@ -298,8 +298,11 @@ namespace Siscom.Agua.Api.Controllers
             var paymentsFacturados = _context.TaxReceipts.Where(x => lstIdsBranch.Contains(x.PaymentId) && x.Status == "ET001").Select(tr => tr.PaymentId).ToList();
             var paymentsFacturadosCancelados = _context.TaxReceipts.Where(x => lstIdsBranch.Contains(x.PaymentId) && x.Status == "ET002").Select(tr => tr.PaymentId).ToList();
             var paymentsFacturadosFinal = paymentsFacturados.Where(x => !paymentsFacturadosCancelados.Contains(x)).ToList();
-            
-            transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones.Where(pp => !paymentsFacturadosFinal.Contains(pp.Id)).ToList();
+
+            if (paymentsFacturadosFinal.Count > 0)
+                transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones.Where(pp => !paymentsFacturadosFinal.Contains(pp.Id)).ToList();
+            else
+                transactionPayment.lstPayment = new List<Payment>();
 
             //Obtengo los id´s de folios en Payments para filtral los transactions.
             var lstIdsFoliosPayments = transactionPayment.lstPayment.Select(y => y.TransactionFolio).ToList();
