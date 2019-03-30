@@ -261,12 +261,24 @@ namespace Siscom.Agua.Api.Controllers
                         return StatusCode((int)TypeError.Code.Conflict, new { Error = "No existe el pago asociado." });
                 }
 
+                //Antes de agregar los timbrados (facturas), verifico si existia una cancelacion previa, de ser asi, sus cancelados (ET002) cambian a ET004
+                var lstCancelacionesPrevias = _context.TaxReceipts.Where(x => plstTax.Select(y => y.PaymentId).Contains(x.PaymentId) && x.Status == "ET002").ToList();
+                if (lstCancelacionesPrevias.Count > 0)
+                {
+                    //En este caso es una SEGUNDA CANCELACION
+                    foreach (var item in lstCancelacionesPrevias)
+                    {
+                        item.Status = "ET004";
+                    }
+                    _context.TaxReceipts.UpdateRange(lstCancelacionesPrevias);
+                    int actualizaciones = _context.SaveChanges();
+                }
+                
                 _context.TaxReceipts.AddRange(plstTax);
                 int res = _context.SaveChanges();
 
                 if (res < 1)
                     return BadRequest("No se pudo realizar la inserción");
-                
             }
             catch (Exception e)
             {
@@ -322,36 +334,60 @@ namespace Siscom.Agua.Api.Controllers
                         return StatusCode((int)TypeError.Code.Conflict, new { Error = "No existe el pago asociado." });
                 }
 
-                _context.TaxReceipts.AddRange(plstTax);
-                int res = _context.SaveChanges();
+                //Antes de agregar la cancelacion verifico si previamente existia una cancelacion (ET002) para estos pagos, de ser asi las cancelaciones existentes pasara a estado ET004
+                var lstCancelacionesPrevias = _context.TaxReceipts.Where(x => plstTax.Select(y => y.PaymentId).Contains(x.PaymentId) && x.Status == "ET002").ToList();
+                if(lstCancelacionesPrevias.Count > 0)
+                {                    
+                    //En este caso es una SEGUNDA CANCELACION
+                    foreach(var item in lstCancelacionesPrevias)
+                    {
+                        item.Status = "ET004";
+                    }
+                    _context.TaxReceipts.UpdateRange(lstCancelacionesPrevias);
+                    int actualizaciones = _context.SaveChanges();
 
-                if (res < 1)
-                    return BadRequest("No se pudo realizar la inserción");
-                else
-                {      //Si la insercion fue exitosa se actualizan los ET001 a ET003
-                    List<TaxReceipt> lstTaxActualizacion = new List<TaxReceipt>();
-                    foreach(var item in plstTax)
-                    {
-                        TaxReceipt tax = _context.TaxReceipts.FirstOrDefault(x => x.PaymentId == item.PaymentId && x.Status == "ET001");
-                        if(tax != null)
-                        {
-                            tax.Status = "ET003";
-                            lstTaxActualizacion.Add(tax);
-                        }                        
-                    }
-                    //Los registros a actualizar deben ser igual al los registros insertados.
-                    if(plstTax.Count == lstTaxActualizacion.Count)
-                    {
-                        _context.TaxReceipts.UpdateRange(lstTaxActualizacion);
-                        int regActualizados = _context.SaveChanges();
-                    }
-                    else
-                    {
-                        _context.TaxReceipts.RemoveRange(plstTax);
-                        _context.SaveChanges();
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "No se pudo realizar la cancelación, ya que no se encontraron los registros de pago correspondientes" });                        
-                    }                    
+                    //Se agregan los nuevos registros.
+                    _context.TaxReceipts.AddRange(plstTax);
+                    int res = _context.SaveChanges();
+
+                    if (res < 1)
+                        return BadRequest("No se pudo realizar la inserción");
                 }
+                else
+                {
+                    //PRIMERA CANCELACION
+                    //Se agregan los nuevos registros.
+                    _context.TaxReceipts.AddRange(plstTax);
+                    int res = _context.SaveChanges();
+
+                    if (res < 1)
+                        return BadRequest("No se pudo realizar la inserción");
+                    else
+                    {      //Si la insercion fue exitosa se actualizan los ET001 a ET003
+                        List<TaxReceipt> lstTaxActualizacion = new List<TaxReceipt>();
+                        foreach (var item in plstTax)
+                        {
+                            TaxReceipt tax = _context.TaxReceipts.FirstOrDefault(x => x.PaymentId == item.PaymentId && x.Status == "ET001");
+                            if (tax != null)
+                            {
+                                tax.Status = "ET003";
+                                lstTaxActualizacion.Add(tax);
+                            }
+                        }
+                        //Los registros a actualizar deben ser igual al los registros insertados.
+                        if (plstTax.Count == lstTaxActualizacion.Count)
+                        {
+                            _context.TaxReceipts.UpdateRange(lstTaxActualizacion);
+                            int regActualizados = _context.SaveChanges();
+                        }
+                        else
+                        {
+                            _context.TaxReceipts.RemoveRange(plstTax);
+                            _context.SaveChanges();
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = "No se pudo realizar la cancelación, ya que no se encontraron los registros de pago correspondientes" });
+                        }
+                    }
+                }                
             }
             catch(Exception e)
             {
