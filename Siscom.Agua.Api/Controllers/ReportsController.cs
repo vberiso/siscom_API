@@ -146,10 +146,8 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("GetOrderSaleByFolio/{id}")]
         public async Task<IActionResult> GetOrderSaleByFolio([FromRoute]int id)
         {
-            var orderSale = await _context.OrderSales
-                                         .Include(x => x.OrderSaleDetails)
-                                         .Include(x => x.TaxUser)
-                                           .ThenInclude(user => user.TaxAddresses)
+            var orderSale = await _context.Debts
+                                         .Include(x => x.DebtDetails)
                                          .Where(x => x.Id == id)
                                          .ToListAsync();
 
