@@ -302,7 +302,7 @@ namespace Siscom.Agua.Api.Controllers
             if (paymentsFacturadosFinal.Count > 0)
                 transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones.Where(pp => !paymentsFacturadosFinal.Contains(pp.Id)).ToList();
             else
-                transactionPayment.lstPayment = new List<Payment>();
+                transactionPayment.lstPayment = lstPaymentRelacionadosATransacciones;
 
             //Obtengo los id´s de folios en Payments para filtral los transactions.
             var lstIdsFoliosPayments = transactionPayment.lstPayment.Select(y => y.TransactionFolio).ToList();
