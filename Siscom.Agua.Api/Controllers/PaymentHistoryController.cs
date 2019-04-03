@@ -32,7 +32,7 @@ namespace Siscom.Agua.Api.Controllers
                                          .Include(x => x.PaymentDetails)
                                          .Include(x=> x.PayMethod)
                                          .Where(a => a.AgreementId == id)
-                                         .OrderByDescending(f => f.Status)
+                                         .OrderByDescending(f => f.PaymentDate.Year)
                                          .ToListAsync();
 
             return new ObjectResult(payments);

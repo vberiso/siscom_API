@@ -986,6 +986,11 @@ namespace Siscom.Agua.Api.Controllers
             return StatusCode((int)TypeError.Code.Ok, new { Success = "El número de cuenta asignado fue: " + data.Account });
         }
 
+
+      
+
+
+
         [HttpPost("AddDiscount")]
         public async Task<IActionResult> AddDiscount([FromBody]  AgreementDiscounttVM agreementDiscountt)
         {

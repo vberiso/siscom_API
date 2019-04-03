@@ -31,6 +31,7 @@ namespace Siscom.Agua.Api.Controllers
             var notifications = await _context.Notifications
                                               .Include(x => x.NotificationDetails)
                                               .Where(i => i.AgreementId == AgreementId)
+                                              .OrderByDescending(o=>o.UntilDate.Year)
                                               .ToListAsync();
 
             return new ObjectResult(notifications);

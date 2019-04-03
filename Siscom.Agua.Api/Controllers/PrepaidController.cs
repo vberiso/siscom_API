@@ -32,6 +32,7 @@ namespace Siscom.Agua.Api.Controllers
                                         .Include(x => x.PrepaidDetails)
                                         .ThenInclude(x => x.DebtPrepaids)
                                         .Where(i => i.AgreementId == AgreementId)
+                                        .OrderByDescending(o=>o.PrepaidDate.Year)
                                         .ToListAsync();
             var description = await _context.Statuses.Where(x => x.GroupStatusId == 5).ToListAsync();
 
