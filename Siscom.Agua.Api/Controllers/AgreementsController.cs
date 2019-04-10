@@ -1454,5 +1454,21 @@ namespace Siscom.Agua.Api.Controllers
         {
             return _context.Agreements.Any(e => e.Id == id);
         }
+
+        [HttpGet("getRoutesFromAgreement")]
+        public async Task<IActionResult> getRoutesFromAgreement()
+        {
+            char[] caracteres = { '}', '{', '?', '!', '"', '#', '$', '%', '&', '/', '(', ')', '=', '¿', '¡', '\'', '\\', '*', '[', ']', '-', '_', ' ', '.', ':', ',', ';', '´', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'ñ', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+
+            try
+            {                
+                var res = _context.Agreements.Where(x => !x.Route.Intersect(caracteres).Any() && !string.IsNullOrEmpty(x.Route)).Select(y => int.Parse(y.Route)).OrderBy(z => z).Distinct().ToList();
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -207,8 +207,7 @@ namespace Siscom.Agua.Api.Controllers
                 command.CommandText = "[dbo].[sp_IncomeFromBox]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
-                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
-                command.Parameters.Add(new SqlParameter("@status", pData.statusIFB));
+                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));                
                 command.Parameters.Add(new SqlParameter("@CNombre", pData.CajeroNombre));
                 command.Parameters.Add(new SqlParameter("@CAPaterno", pData.CajeroAPaterno));
                 command.Parameters.Add(new SqlParameter("@CAMaterno", pData.CajeroAMaterno));
