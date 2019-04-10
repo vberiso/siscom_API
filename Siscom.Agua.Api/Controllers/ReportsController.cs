@@ -197,18 +197,21 @@ namespace Siscom.Agua.Api.Controllers
             //return Ok("Total:"+result);
         }
 
-        [HttpGet("IncomeTransactions/{dateInicio}/{dateFin}/{paymentStatus}")]
-        public async Task<IActionResult> GetIncomeTransactions([FromRoute] string dateInicio, string dateFin, string paymentStatus)
+        [HttpPost("IncomeFromBox")]
+        public async Task<IActionResult> GetIncomeFromBox([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
         {
             string error = string.Empty;
             var dataTable = new DataTable();
             using (var command = _context.Database.GetDbConnection().CreateCommand())
             {
-                command.CommandText = "[dbo].[sp_IngresosDeCaja]";
+                command.CommandText = "[dbo].[sp_IncomeFromBox]";
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add(new SqlParameter("@fechaInicio", dateInicio));
-                command.Parameters.Add(new SqlParameter("@fechaFin", dateFin));
-                command.Parameters.Add(new SqlParameter("@paymentStatus", paymentStatus));
+                command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
+                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
+                command.Parameters.Add(new SqlParameter("@status", pData.statusIFB));
+                command.Parameters.Add(new SqlParameter("@CNombre", pData.CajeroNombre));
+                command.Parameters.Add(new SqlParameter("@CAPaterno", pData.CajeroAPaterno));
+                command.Parameters.Add(new SqlParameter("@CAMaterno", pData.CajeroAMaterno));
 
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
@@ -217,65 +220,29 @@ namespace Siscom.Agua.Api.Controllers
                 }
             }
             return Ok(dataTable);
-
-            //var tmp2 = (from p in _context.Payments
-            //          join a in _context.Agreements on p.AgreementId equals a.Id
-            //          where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
-            //          select new { fecha_pago = p.PaymentDate, a.Account, p.Total, p.BranchOffice })
-            //          .ToList();
-
-            //var tmp4 = (from p in _context.Payments
-            //            join a in _context.Agreements on p.AgreementId equals a.Id
-            //            join py in _context.PayMethods on p.PayMethodId equals py.Id
-            //            join o in _context.OriginPayments on p.OriginPaymentId equals o.Id
-            //            join e in _context.ExternalOriginPayments on p.ExternalOriginPaymentId equals e.Id
-            //            join c in _context.Clients on a.Id equals c.AgreementId
-            //            join t in _context.Transactions on p.TransactionFolio equals t.Folio
-            //            join tu in _context.TerminalUsers on t.TerminalUserId equals tu.Id
-            //            join u in _context.Users on tu.UserId equals u.Id
-            //            join f in _context.TransactionFolios on t.Id equals f.TransactionId
-            //            where p.Status == "EP001" && p.PaymentDate >= FechaInicio && p.PaymentDate < FechaFin
-            //            select new
-            //            {
-            //                fecha_pago = p.PaymentDate,
-            //                a.Account,
-            //                p.Total,
-            //                p.BranchOffice,
-            //                metodo_pago = py.Name,
-            //                origen_pago = o.Name,
-            //                banco = e.Name,
-            //                folio = p.TransactionFolio,
-            //                folio_impresion = f.Folio,
-            //                cajero = string.Format("{0} {1} {2}", u.Name, u.UserName ,u.SecondLastName),
-            //                cliente = string.Format("{0} {1} {2}", c.Name, c.LastName, c.SecondLastName)
-            //            })
-            //          .ToList();
-
         }
 
-        [HttpGet("IncomeTransactions")]
-        public async Task<IActionResult> GetIncomeByConcept()
+        [HttpPost("IncomeByConcept")]
+        public async Task<IActionResult> GetIncomeByConcept([FromBody] Siscom.Agua.Api.Model.DataReportes pData )
         {
             string error = string.Empty;
-            //var dataTable = new DataTable();
-            //using (var command = _context.Database.GetDbConnection().CreateCommand())
-            //{
-            //    command.CommandText = "[dbo].[sp_IngresosDeCaja]";
-            //    command.CommandType = CommandType.StoredProcedure;
-            //    command.Parameters.Add(new SqlParameter("@fechaInicio", dateInicio));
-            //    command.Parameters.Add(new SqlParameter("@fechaFin", dateFin));
-            //    command.Parameters.Add(new SqlParameter("@paymentStatus", paymentStatus));
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "[dbo].[sp_IncomeByConcept]";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
+                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));                
+                command.Parameters.Add(new SqlParameter("@userId", pData.CajeroId));
 
-            //    this._context.Database.OpenConnection();
-            //    using (var result = await command.ExecuteReaderAsync())
-            //    {
-            //        dataTable.Load(result);
-            //    }
-            //}
-            //return Ok(dataTable);
-            return Ok();
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);            
         }
-
-
+                
     }
 }
