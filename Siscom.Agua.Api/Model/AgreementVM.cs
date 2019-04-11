@@ -19,6 +19,8 @@ namespace Siscom.Agua.Api.Model
 
         public int Id { get; set; }
         public string Account { get; set; }
+        [StringLength(50), Required]
+        public string Route { get; set; }
         [Required]
         public int Derivatives { get; set; }
         [Required]

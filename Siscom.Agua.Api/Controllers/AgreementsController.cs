@@ -272,8 +272,8 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TSS.name [Status] " +
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
-                                    "A.type_agreement Tipo" +
-                                    "B.num_derivatives Derivadas"+
+                                    ",A.type_agreement Tipo" +
+                                    ",A.num_derivatives Derivadas " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -281,7 +281,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE A.account = '" + search.StringSearch + "' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo, Derivadas";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -350,8 +350,8 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TSS.name [Status] " +
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
-                                    "A.type_agreement Tipo" +
-                                    "B.num_derivatives Derivadas"+
+                                    ",A.type_agreement Tipo" +
+                                    ",A.num_derivatives Derivadas " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -359,7 +359,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo, Derivadas";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -414,8 +414,8 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TSS.name [Status] " +
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
-                                    "A.type_agreement Tipo" +
-                                    "B.num_derivatives Derivadas"+
+                                    ",A.type_agreement Tipo" +
+                                    ",A.num_derivatives Derivadas " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -423,7 +423,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo, Derivadas";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     while (await result.ReadAsync())
@@ -477,8 +477,8 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TSS.name [Status] " +
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
-                                    "A.type_agreement Tipo" +
-                                    "B.num_derivatives Derivadas"+
+                                    ",A.type_agreement Tipo" +
+                                    ",A.num_derivatives Derivadas " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -486,7 +486,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) , Tipo, Derivadas";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     while (await result.ReadAsync())
@@ -630,6 +630,7 @@ namespace Siscom.Agua.Api.Controllers
                     var diam = await _context.Diameters.FindAsync(agreementvm.DiameterId);
                     var typeAgreement = await _context.Types.Where(z => z.CodeName == agreementvm.TypeAgreement).ToListAsync();
 
+                    agreement.Route = agreementvm.Route;
                     agreement.TypeService = service;
                     agreement.TypeServiceId = service.Id;
                     agreement.TypeIntake = intake;
@@ -824,6 +825,7 @@ namespace Siscom.Agua.Api.Controllers
                         NewAgreement.AccountDate = DateTime.UtcNow.ToLocalTime();
                         NewAgreement.StratDate = DateTime.UtcNow.ToLocalTime();
                         NewAgreement.NumDerivatives = agreementvm.Derivatives;
+                        NewAgreement.Route = agreementvm.Route;
                         NewAgreement.TypeAgreement = agreementvm.TypeAgreement;
                         NewAgreement.TypeService = service;
                         NewAgreement.TypeIntake = intake;
