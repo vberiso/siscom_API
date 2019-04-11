@@ -168,6 +168,10 @@ namespace Siscom.Agua.Api.Controllers
                                        .ThenInclude(prod=> prod.ProductParams)
                                      .Where(y => y.ProductId == Convert.ToInt32(x.CodeConcept) &&
                                                   y.IsActive == 1).SingleOrDefault();
+                if(product.Type == "TTP01")
+                {
+
+                }
                 if (product.HaveTax)
                 {
                     totalIva += Math.Round(((product.Amount * IVA) / 100), 2);

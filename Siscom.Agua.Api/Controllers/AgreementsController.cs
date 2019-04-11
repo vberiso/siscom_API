@@ -954,7 +954,9 @@ namespace Siscom.Agua.Api.Controllers
                                 Observation = agreementvm.Observations,
                                 NewValue = "",
                                 OldValue = "",
-                                Visible = false
+                                Visible = false,
+                                Action = "PostContoller",
+                                Controller = "AgreementController"
                             };
                             
                             await _context.AgreementLogs.AddAsync(agreementLogderivative);
@@ -987,7 +989,9 @@ namespace Siscom.Agua.Api.Controllers
                                 Observation = agreementvm.Observations,
                                 NewValue = "",
                                 OldValue = "",
-                                Visible = false
+                                Visible = false,
+                                Action = "PostContoller",
+                                Controller = "AgreementController",
                             };
                             await _context.AgreementLogs.AddAsync(agreementLog);
                         }
