@@ -107,6 +107,8 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
+
+
         [HttpGet("AgreementByAccount/{AcountNumber}")]
         public async Task<IActionResult> GetGetAgreementByAccount([FromRoute] string AcountNumber)
         {
@@ -223,6 +225,20 @@ namespace Siscom.Agua.Api.Controllers
                 return NotFound();
             }
             return Ok(agreement);
+        }
+
+        [HttpGet("GetDerivatives/{id}")]
+        public async Task<IActionResult> GetDerivatives([FromRoute] int id)
+        {
+            var deriv =  _context.Derivatives
+                                .Where(a => a.AgreementId == id).ToListAsync();
+        
+
+            if (deriv == null)
+            {
+                return NotFound();
+            }
+            return Ok(deriv);
         }
 
         /// <summary>
