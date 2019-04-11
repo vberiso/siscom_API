@@ -273,6 +273,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
                                     "A.type_agreement Tipo" +
+                                    "B.num_derivatives Derivadas"+
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -280,7 +281,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE A.account = '" + search.StringSearch + "' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo, Derivadas";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -311,6 +312,7 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
+                                            NumDerivades = Convert.ToInt32(result[9])
                                         });
                                     }
                                 }
@@ -349,6 +351,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
                                     "A.type_agreement Tipo" +
+                                    "B.num_derivatives Derivadas"+
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -356,7 +359,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo, Derivadas";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -373,6 +376,7 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
+                                            NumDerivades = Convert.ToInt32(result[9])
                                         });
                                     }
                                 }
@@ -411,6 +415,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
                                     "A.type_agreement Tipo" +
+                                    "B.num_derivatives Derivadas"+
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -418,7 +423,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), Tipo, Derivadas";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     while (await result.ReadAsync())
@@ -434,6 +439,7 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
+                                            NumDerivades =  Convert.ToInt32(result[9])
                                         });
                                     }
                                 }
@@ -472,6 +478,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
                                     "A.type_agreement Tipo" +
+                                    "B.num_derivatives Derivadas"+
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -479,7 +486,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) , Tipo";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) , Tipo, Derivadas";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     while (await result.ReadAsync())
@@ -495,6 +502,7 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
+                                            NumDerivades = Convert.ToInt32(result[9])
                                         });
                                     }
                                 }

@@ -16,5 +16,6 @@ namespace Siscom.Agua.Api.Model
         public int idStus { get; set; }
         public string Status { get; set; }
         public string Type { get; set; }
+        public int    NumDerivades { get; set; }
     }
 }
