@@ -60,7 +60,7 @@ namespace Siscom.Agua.Api.Controllers
                                             x.StratDate <= end);
 
                 var sql = a.ToSql();
-               // var f = a.Count();
+               //
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//2
@@ -81,7 +81,7 @@ namespace Siscom.Agua.Api.Controllers
                                             x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//3
@@ -102,7 +102,7 @@ namespace Siscom.Agua.Api.Controllers
                                             x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//4
@@ -121,7 +121,7 @@ namespace Siscom.Agua.Api.Controllers
                                             x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//5
@@ -142,7 +142,7 @@ namespace Siscom.Agua.Api.Controllers
                                             x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//6
@@ -162,7 +162,7 @@ namespace Siscom.Agua.Api.Controllers
                                             x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//7
@@ -183,7 +183,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//8
@@ -202,7 +202,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//9
@@ -222,7 +222,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//10
@@ -242,7 +242,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//11
@@ -260,7 +260,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//12
@@ -278,7 +278,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//13
@@ -294,7 +294,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//14
@@ -311,7 +311,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//15
@@ -328,7 +328,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//16
@@ -344,7 +344,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//17
@@ -360,7 +360,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//18
@@ -380,7 +380,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//19
@@ -399,7 +399,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeIntakeId == filter.TypeIntake);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//20
@@ -418,7 +418,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//21
@@ -435,7 +435,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//22
@@ -454,7 +454,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//23
@@ -472,7 +472,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeIntakeId == filter.TypeIntake);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//24
@@ -490,7 +490,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//25
@@ -506,7 +506,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star == DateTime.MinValue && end == DateTime.MinValue)//26
@@ -521,7 +521,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.TypeServiceId == filter.TypeService);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//27
@@ -536,7 +536,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.TypeIntakeId == filter.TypeIntake);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//28
@@ -555,7 +555,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeIntakeId == filter.TypeIntake);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//29
@@ -573,7 +573,7 @@ namespace Siscom.Agua.Api.Controllers
                                            select d).Sum(z => z.Amount) > filter.Amount);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//30
@@ -589,7 +589,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeIntakeId == filter.TypeIntake);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//31
@@ -607,7 +607,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeIntakeId == filter.TypeIntake);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//32
@@ -624,7 +624,7 @@ namespace Siscom.Agua.Api.Controllers
                                                        select d).Sum(z => z.Amount) > filter.Amount);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//33
@@ -639,7 +639,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.TypeIntakeId == filter.TypeIntake);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//34
@@ -657,7 +657,7 @@ namespace Siscom.Agua.Api.Controllers
                                            select d).Sum(z => z.Amount) > filter.Amount);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//35
@@ -672,7 +672,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star == DateTime.MinValue && end == DateTime.MinValue)//36
@@ -689,7 +689,7 @@ namespace Siscom.Agua.Api.Controllers
                                            select d).Sum(z => z.Amount) > filter.Amount);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume == 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//37
@@ -708,7 +708,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//38
@@ -728,7 +728,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService > 0 && star != DateTime.MinValue && end != DateTime.MinValue)//39
@@ -746,7 +746,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//40
@@ -764,7 +764,7 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (filter.TypeConsume > 0 && filter.Amount == 0 && filter.TypeIntake == 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//41
@@ -781,10 +781,23 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate <= end);
 
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
-            return null;
+            else
+            {
+                var a = _context.Agreements.Include(x => x.TypeConsume)
+                                          .Include(ti => ti.TypeIntake)
+                                          .Include(ts => ts.TypeService)
+                                          .Include(c => c.Clients)
+                                           .Include(ad => ad.Addresses)
+                                                .ThenInclude(s => s.Suburbs)
+                                          .Include(d => d.Debts);
+
+                var sql = a.ToSql();
+               
+                return a;
+            }
         }
 
         [HttpPost("Recaudacion")]
@@ -802,7 +815,7 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.Type == filter.Type &&
                                                      x.Status == filter.Status);
                 var sql = a.ToSql();
-                var f = a.Count();
+
                 return a;
             }
             else if (star != DateTime.MinValue && end != DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
@@ -812,7 +825,7 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.BranchOffice == filter.BranchOffice &&
                                                      x.Type == filter.Type);
                 var sql = a.ToSql();
-                var f = a.Count();
+
                 return a;
             }
             else if (star != DateTime.MinValue && end != DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
@@ -822,7 +835,7 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.BranchOffice == filter.BranchOffice &&
                                                      x.Status == filter.Status);
                 var sql = a.ToSql();
-                var f = a.Count();
+
                 return a;
             }
             else if (star != DateTime.MinValue && end != DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
@@ -832,7 +845,7 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.Type == filter.Type &&
                                                      x.Status == filter.Status);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (star != DateTime.MinValue && end != DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
@@ -841,7 +854,7 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.PaymentDate.Date <= end.Date &&
                                                      x.Status == filter.Status);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (star != DateTime.MinValue && end != DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
@@ -850,7 +863,7 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.PaymentDate.Date <= end.Date &&
                                                      x.Type == filter.Type);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (star != DateTime.MinValue && end != DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
@@ -859,7 +872,7 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.PaymentDate.Date <= end.Date &&
                                                      x.BranchOffice == filter.BranchOffice);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (star != DateTime.MinValue && end != DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
@@ -867,7 +880,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Payments.Where(x => x.PaymentDate.Date >= star.Date &&
                                                      x.PaymentDate.Date <= end.Date);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if(star == DateTime.MinValue && end == DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
@@ -876,7 +889,7 @@ namespace Siscom.Agua.Api.Controllers
                                                      x.Type == filter.Type &&
                                                      x.Status == filter.Status);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if(star == DateTime.MinValue && end == DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
@@ -884,7 +897,7 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Payments.Where(x => x.BranchOffice == filter.BranchOffice &&
                                                      x.Status == filter.Status);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (star == DateTime.MinValue && end == DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
@@ -892,28 +905,28 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Payments.Where(x => x.Type == filter.Type &&
                                                      x.Status == filter.Status);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (star == DateTime.MinValue && end == DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
             {
                 var a = _context.Payments.Where(x => x.Type == filter.Type);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (star == DateTime.MinValue && end == DateTime.MinValue && string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && !string.IsNullOrEmpty(filter.Status))
             {
                 var a = _context.Payments.Where(x => x.Status == filter.Status);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if(star == DateTime.MinValue && end == DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
             {
                 var a = _context.Payments.Where(x => x.BranchOffice == filter.BranchOffice);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
             else if (star == DateTime.MinValue && end == DateTime.MinValue && !string.IsNullOrEmpty(filter.BranchOffice) && !string.IsNullOrEmpty(filter.Type) && string.IsNullOrEmpty(filter.Status))
@@ -921,10 +934,16 @@ namespace Siscom.Agua.Api.Controllers
                 var a = _context.Payments.Where(x => x.BranchOffice == filter.BranchOffice &&
                                                      x.Type == filter.Type);
                 var sql = a.ToSql();
-                var f = a.Count();
+               
                 return a;
             }
-            return null;
+            else
+            {
+                var a = _context.Payments;
+                var sql = a.ToSql();
+
+                return a;
+            }
         }
       
     }

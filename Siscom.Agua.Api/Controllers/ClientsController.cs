@@ -36,7 +36,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<Client> GetClients([FromRoute] int AgreementId)
         {
-            var a = _context.Clients.Include(c => c.Contacts).Where(x => x.AgreementId == AgreementId);
+            var a = _context.Clients.Include(c => c.Contacts).Where(x => x.AgreementId == AgreementId && x.IsActive);
             a.ToList().ForEach(x =>
             {
                 x.Contacts = x.Contacts.Where(p => p.IsActive == 1).ToList();
@@ -102,7 +102,7 @@ namespace Siscom.Agua.Api.Controllers
                                 };
                                 c.Contacts.Add(con);
                             }
-
+                            _context.Clients.Add(c);
                             await _context.SaveChangesAsync();
                         }
                         else

@@ -303,6 +303,7 @@ namespace Siscom.Agua.Api.Controllers
 
             try
             {
+                var currentUserName = this.User.Claims.ToList()[1].Value;
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
 
@@ -325,6 +326,16 @@ namespace Siscom.Agua.Api.Controllers
 
                     _context.Debts.Add(debt);
                     await _context.SaveChangesAsync();
+
+                    DebtStatus debtStatus = new DebtStatus();
+                    debtStatus.Debt = debt;
+                    debtStatus.DebtId = debt.Id;
+                    debtStatus.id_status = debt.Status;
+                    debtStatus.DebtStatusDate = debt.DebitDate;
+                    debtStatus.User = currentUserName;
+
+                    _context.DebtStatuses.Add(debtStatus);
+                    _context.SaveChanges();
                     scope.Complete();
                 }
             }

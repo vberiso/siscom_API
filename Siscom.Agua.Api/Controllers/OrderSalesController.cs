@@ -79,7 +79,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(x => x.TaxUser)
                                             .ThenInclude(y => y.TaxAddresses)
                                           .Include(x => x.OrderSaleDetails)
-                                          .Where(x => x.Folio == folio)
+                                          .Where(x => x.Folio == folio && x.Status != "EOS02")
                                           .FirstOrDefaultAsync();
 
             if (orderSale == null)
@@ -143,6 +143,8 @@ namespace Siscom.Agua.Api.Controllers
         {
 
             OrderSale _orderSale = new OrderSale();
+            decimal totalIva = 0;
+            decimal total = 0;
 
             if (!ModelState.IsValid)
             {
@@ -154,6 +156,32 @@ namespace Siscom.Agua.Api.Controllers
 
             if (param == null)
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
+
+            decimal _sumTot = orderSale.OrderSaleDetails.Sum(x => (x.Amount + x.Tax));
+            decimal _sumIVA = orderSale.OrderSaleDetails.Sum(x => x.Tax);
+            decimal IVA = _context.SystemParameters.Where(x => x.Name == "IVA" && x.IsActive == true).FirstOrDefault().NumberColumn;
+
+            orderSale.OrderSaleDetails.ToList().ForEach(x =>
+            {
+                var product = _context.TariffProducts
+                                     .Include(y => y.Product)
+                                       .ThenInclude(prod=> prod.ProductParams)
+                                     .Where(y => y.ProductId == Convert.ToInt32(x.CodeConcept) &&
+                                                  y.IsActive == 1).SingleOrDefault();
+                if (product.HaveTax)
+                {
+                    totalIva += Math.Round(((product.Amount * IVA) / 100), 2);
+                }
+                total += x.Amount;
+            });
+            if(_sumIVA != totalIva)
+            {
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El IVA calculado no es correcto en su detalle ") });
+            }
+            if (_sumTot != (totalIva + total))
+            {
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos a pagar en el detalle no son correctos") });
+            }
             #endregion
 
 

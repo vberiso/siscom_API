@@ -10,8 +10,8 @@ using Siscom.Agua.DAL;
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190308175740_NumberBank")]
-    partial class NumberBank
+    [Migration("20190404001324_addtaxOrderSale")]
+    partial class addtaxOrderSale
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -206,6 +206,13 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("NumDerivatives")
                         .HasColumnName("num_derivatives");
+
+                    b.Property<string>("Route")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("route")
+                        .HasMaxLength(50)
+                        .HasDefaultValue("0");
 
                     b.Property<DateTime>("StratDate")
                         .HasColumnName("start_date")
@@ -507,6 +514,11 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<bool>("EmailConfirmed");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("is_active")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnName("middle_name")
@@ -568,26 +580,19 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("AssignmentDate")
                         .HasColumnName("date_assignment");
 
-                    b.Property<string>("Folio")
-                        .IsRequired()
-                        .HasColumnName("folio")
-                        .HasMaxLength(10);
-
-                    b.Property<string>("Serie")
-                        .HasColumnName("serie")
-                        .HasMaxLength(50);
+                    b.Property<int>("Folio")
+                        .HasColumnName("folio");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnName("status")
                         .HasMaxLength(5);
 
-                    b.Property<string>("UserId")
-                        .IsRequired();
+                    b.Property<int>("TransitPoliceId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TransitPoliceId");
 
                     b.ToTable("Assignment_Ticket");
                 });
@@ -664,10 +669,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateBreach")
                         .HasColumnName("date_breach");
 
-                    b.Property<string>("Folio")
-                        .IsRequired()
-                        .HasColumnName("folio")
-                        .HasMaxLength(10);
+                    b.Property<int>("Folio")
+                        .HasColumnName("folio");
 
                     b.Property<decimal>("Judge")
                         .HasColumnName("judge");
@@ -1222,6 +1225,12 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("on_account")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<decimal>("Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("quantity")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasDefaultValue(1m);
+
                     b.HasKey("Id");
 
                     b.HasIndex("DebtId");
@@ -1649,7 +1658,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 3, 8, 11, 57, 40, 116, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 4, 3, 18, 13, 23, 313, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -1669,6 +1678,37 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("BranchOfficeId");
 
                     b.ToTable("Folio");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.FolioOrderSale", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_folio_order_sale")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("is_active")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Prefix")
+                        .HasColumnName("prefix");
+
+                    b.Property<int>("Secuential")
+                        .HasColumnName("secuential");
+
+                    b.Property<string>("Suffixes")
+                        .HasColumnName("suffixes");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnName("type")
+                        .HasMaxLength(5);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FolioOrderSale");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.GroupCatalogue", b =>
@@ -1703,6 +1743,23 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Group_Status");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.GroupTranslationCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_group_translation_codes")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnName("name")
+                        .HasMaxLength(50);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Group_Translation_Code");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.GroupType", b =>
@@ -1904,7 +1961,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("Folio")
-                        .IsRequired()
                         .HasColumnName("folio")
                         .HasMaxLength(30);
 
@@ -1983,13 +2039,16 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("quantity")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<decimal>("Tax")
+                        .HasColumnName("tax");
+
                     b.Property<decimal>("UnitPrice")
                         .HasColumnName("unit_price");
 
                     b.Property<string>("Unity")
                         .IsRequired()
                         .HasColumnName("unity")
-                        .HasMaxLength(10);
+                        .HasMaxLength(18);
 
                     b.HasKey("Id");
 
@@ -2064,12 +2123,18 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_payment")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Account")
+                        .HasColumnName("account")
+                        .HasMaxLength(50);
+
                     b.Property<string>("AccountNumber")
                         .HasColumnName("account_number")
-                        .HasMaxLength(10);
+                        .HasMaxLength(25);
 
                     b.Property<int>("AgreementId")
-                        .HasColumnName("id_agreement");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_agreement")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("AuthorizationOriginPayment")
                         .HasColumnName("authorization_origin_payment")
@@ -2090,6 +2155,11 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<string>("NumberBank")
                         .HasColumnName("number_bank")
                         .HasMaxLength(33);
+
+                    b.Property<int>("OrderSaleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_order_sale")
+                        .HasDefaultValue(0);
 
                     b.Property<int>("OriginPaymentId");
 
@@ -2191,6 +2261,11 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("tax")
                         .HasDefaultValue(0m);
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnName("type")
+                        .HasMaxLength(5);
 
                     b.Property<string>("UnitMeasurement")
                         .IsRequired()
@@ -2307,6 +2382,11 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("DivisionId");
+
+                    b.Property<bool>("HaveAccount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("have_account")
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("HaveTariff")
                         .HasColumnName("have_tariff");
@@ -2970,9 +3050,13 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_transaction")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Account")
+                        .HasColumnName("account")
+                        .HasMaxLength(50);
+
                     b.Property<string>("AccountNumber")
                         .HasColumnName("account_number")
-                        .HasMaxLength(10);
+                        .HasMaxLength(25);
 
                     b.Property<decimal>("Amount")
                         .HasColumnName("amount")
@@ -3090,6 +3174,78 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("TransactionId");
 
                     b.ToTable("Transaction_Folio");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.TransitPolice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_transit_police")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Address")
+                        .HasColumnName("address")
+                        .HasMaxLength(300);
+
+                    b.Property<string>("EMail")
+                        .HasColumnName("email")
+                        .HasMaxLength(150);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("is_active")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(150);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnName("name")
+                        .HasMaxLength(100);
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnName("phone_number")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("Plate")
+                        .HasColumnName("plate")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("SecondLastName")
+                        .HasMaxLength(150);
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TransitPolices");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.TranslationCode", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnName("id_product");
+
+                    b.Property<int>("GroupTranslationCodeId")
+                        .HasColumnName("id_group_translation");
+
+                    b.Property<string>("Type")
+                        .HasColumnName("type")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnName("code")
+                        .HasMaxLength(500);
+
+                    b.HasKey("ProductId", "GroupTranslationCodeId", "Type");
+
+                    b.HasAlternateKey("GroupTranslationCodeId", "ProductId", "Type");
+
+                    b.ToTable("Translation_Code");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Type", b =>
@@ -3592,9 +3748,9 @@ namespace Siscom.Agua.DAL.Migrations
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.AssignmentTicket", b =>
                 {
-                    b.HasOne("Siscom.Agua.DAL.Models.ApplicationUser", "User")
+                    b.HasOne("Siscom.Agua.DAL.Models.TransitPolice", "TransitPolice")
                         .WithMany("AssignmentTickets")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("TransitPoliceId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -4026,6 +4182,21 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.Transaction", "Transaction")
                         .WithMany("TransactionFolios")
                         .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.TransitPolice", b =>
+                {
+                    b.HasOne("Siscom.Agua.DAL.Models.ApplicationUser", "User")
+                        .WithMany("TransitPolices")
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.TranslationCode", b =>
+                {
+                    b.HasOne("Siscom.Agua.DAL.Models.GroupTranslationCode", "GroupTranslationCode")
+                        .WithMany("TranslationCodes")
+                        .HasForeignKey("GroupTranslationCodeId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

@@ -1656,7 +1656,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 3, 22, 17, 54, 1, 205, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 4, 3, 18, 13, 23, 313, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2036,6 +2036,9 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnName("quantity")
                         .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnName("tax");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnName("unit_price");
