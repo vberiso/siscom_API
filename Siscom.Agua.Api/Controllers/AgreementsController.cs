@@ -230,11 +230,10 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("GetDerivatives/{id}")]
         public async Task<IActionResult> GetDerivatives([FromRoute] int id)
         {
-            var deriv =  _context.Derivatives
-                                .Where(a => a.AgreementId == id).ToListAsync();
+            var deriv = await _context.Derivatives.Where(a => a.AgreementId == id).ToListAsync();
         
 
-            if (deriv == null)
+            if (deriv == null )
             {
                 return NotFound();
             }
