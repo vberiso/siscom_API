@@ -240,6 +240,20 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(deriv);
         }
 
+        [HttpGet("GetDerivativesDos/{id}")]
+        public async Task<IActionResult> GetDerivativesDos([FromRoute] int id)
+        {
+            var deriv = await _context.Derivatives.Where(a => a.AgreementDerivative == id).ToListAsync();
+
+
+            if (deriv == null)
+            {
+                return NotFound();
+            }
+            return Ok(deriv);
+        }
+
+
         /// <summary>
         ///
         /// </summary>
