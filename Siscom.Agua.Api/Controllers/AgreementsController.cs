@@ -230,7 +230,9 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("GetDerivatives/{id}")]
         public async Task<IActionResult> GetDerivatives([FromRoute] int id)
         {
-            var deriv = await _context.Derivatives.Where(a => a.AgreementId == id).ToListAsync();
+            var deriv = await _context.Derivatives
+                                            .Include(x=>x.Agreement)
+                                            .Where(a => a.AgreementId == id).ToListAsync();
         
 
             if (deriv == null )
@@ -243,16 +245,32 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("GetDerivativesDos/{id}")]
         public async Task<IActionResult> GetDerivativesDos([FromRoute] int id)
         {
-            var deriv = await _context.Derivatives.Where(a => a.AgreementDerivative == id).ToListAsync();
+            List<DerivativesVM> dero = new List<DerivativesVM>();
+            var deriv = await _context.Derivatives
+                                        .Include(x => x.Agreement)
+                                        .Where(a => a.AgreementDerivative == id).ToListAsync();
 
 
-            if (deriv == null)
+
+            foreach (var client in deriv)
+            {
+                var accountDerivatives = _context.Agreements.Where(a => a.Id == client.AgreementDerivative).FirstOrDefault();
+                dero.Add(new DerivativesVM()
+                {
+                    Id = client.Id,
+                    AccountAgreement = client.Agreement.Account,
+                    AccountDerivative = accountDerivatives.Account,
+                    IsActive = client.IsActive
+                });
+
+            }
+
+            if (dero.Count == 0)
             {
                 return NotFound();
             }
-            return Ok(deriv);
+            return Ok(dero);
         }
-
 
         /// <summary>
         ///
