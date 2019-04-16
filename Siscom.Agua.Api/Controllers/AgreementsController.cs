@@ -253,7 +253,9 @@ namespace Siscom.Agua.Api.Controllers
                     Id = client.Id,
                     AccountAgreement = client.Agreement.Account,
                     AccountDerivative = accountDerivatives.Account,
-                    IsActive = client.IsActive
+                    IsActive = client.IsActive,
+                    IdDerivative = accountDerivatives.Id
+
                 });
 
             }
@@ -282,7 +284,8 @@ namespace Siscom.Agua.Api.Controllers
                     Id = client.Id,
                     AccountAgreement = client.Agreement.Account,
                     AccountDerivative = accountDerivatives.Account,
-                    IsActive = client.IsActive
+                    IsActive = client.IsActive,
+                    IdDerivative = accountDerivatives.Id
                 });
 
             }

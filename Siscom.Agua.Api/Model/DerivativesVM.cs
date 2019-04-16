@@ -9,6 +9,7 @@ namespace Siscom.Agua.Api.Model
         public int Id { get; set; }
         public string AccountAgreement { get; set; }
         public string AccountDerivative { get; set; }
+        public int IdDerivative { get; set; }
         public bool IsActive { get; set; }
        
     }
