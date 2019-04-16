@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 
@@ -67,6 +68,12 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     dataTable.Load(result);
                 }
+            }
+
+            if(dataTable == null )
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No existen datos" });
+
             }
             return Ok(dataTable);
         }
