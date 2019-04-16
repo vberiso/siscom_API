@@ -210,6 +210,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ti => ti.TypeIntake)
                                       .Include(di => di.Diameter)
+                                      .Include(c => c.Clients)
                                       .Include(tc => tc.TypeClassification)
                                       .Include(tss => tss.TypeStateService)
                                       .Include(ags => ags.AgreementServices)
