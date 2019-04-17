@@ -237,6 +237,12 @@ namespace Siscom.Agua.Api.Controllers
 
                 }
             }
+
+            if (entities.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay corte" });
+
+            }
             return Ok(entities);
         }
 
