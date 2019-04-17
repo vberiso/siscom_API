@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http.Cors;
@@ -61,12 +60,34 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var taxuser = await _context.TaxUsers.Where(n => n.Name == name).ToListAsync();
+            var taxuser = await _context.TaxUsers.Where(n => n.Name.Contains(name)).ToListAsync();
+           
 
             if (taxuser.Count == 0)
             {
 
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El usuario no existe" });
+
+            }
+
+            return Ok(taxuser);
+        }
+
+        [HttpGet("SearchAddress/{TaxUserId}")]
+        public async Task<IActionResult> GetSearchA([FromRoute] int TaxUserId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var taxuser = await _context.TaxAddresses.Where(n => n.TaxUserId == TaxUserId ).FirstOrDefaultAsync();
+
+
+            if (taxuser ==  null)
+            {
+
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "La dirección del usuario no se encontró favor de comunicarse con el administrador" });
 
             }
 

@@ -170,13 +170,21 @@ namespace Siscom.Agua.Api.Controllers
                                                   y.IsActive == 1).SingleOrDefault();
                 if(product.Type == "TTP01")
                 {
-
+                    if (product.HaveTax)
+                    {
+                        totalIva += Math.Round((((product.Amount * x.Quantity) * IVA) / 100), 2);
+                    }
+                    total += x.Amount;
                 }
-                if (product.HaveTax)
+                else
                 {
-                    totalIva += Math.Round(((product.Amount * IVA) / 100), 2);
+                    if (product.HaveTax)
+                    {
+                        totalIva += Math.Round(((x.Amount * IVA) / 100), 2);
+                    }
+                    total += x.Amount;
                 }
-                total += x.Amount;
+                
             });
             if(_sumIVA != totalIva)
             {

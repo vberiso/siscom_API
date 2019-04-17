@@ -54,7 +54,6 @@ namespace Siscom.Agua.Api.Controllers
                                     .Include(di => di.AgreementDiscounts)
                                         .ThenInclude(d => d.Discount)
                                     .Include(p => p.Prepaids)
-                                    .Include(a=> a.AgreementLogs)
                                     .Where(a => a.Account == Account).FirstOrDefaultAsync();
 
             summary.Clients = summary.Clients.Where(c => c.IsActive == true).ToList();
@@ -64,37 +63,37 @@ namespace Siscom.Agua.Api.Controllers
             var type = await _context.Types.ToListAsync();
 
             summary.Prepaids.ToList().ForEach(x =>
-            {  
-                if(!string.IsNullOrEmpty(x.Status))
-                x.StatusDescription = (from d in status
-                                       where d.CodeName == x.Status
-                                       select d).FirstOrDefault().Description;
+            {
+                if (!string.IsNullOrEmpty(x.Status))
+                    x.StatusDescription = (from d in status
+                                           where d.CodeName == x.Status
+                                           select d).FirstOrDefault().Description;
 
                 if (!string.IsNullOrEmpty(x.Type))
                     x.TypeDescription = (from d in type
-                                     where d.CodeName == x.Type
-                                     select d).FirstOrDefault().Description;
+                                         where d.CodeName == x.Type
+                                         select d).FirstOrDefault().Description;
             });
 
 
             summary.Debts = await _context.Debts
-                                          .Include( gs => gs.DebtDetails)
+                                          .Include(gs => gs.DebtDetails)
                                           .Where(gs => _context.Statuses
-                                          .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == summary.Id).ToListAsync();    
+                                          .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == summary.Id).ToListAsync();
 
             return Ok(summary);
         }
 
 
         // GET: api/Agreements/5
-        [HttpGet("{id}", Name = "GetAgreementById" )]
+        [HttpGet("{id}", Name = "GetAgreementById")]
         public async Task<IActionResult> GetAgreement([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            
+
             var currentUserName = this.User.Claims.ToList()[1].Value;
             var agreement = await GetAgreementData(id);
 
@@ -194,7 +193,7 @@ namespace Siscom.Agua.Api.Controllers
 
             }
             return NotFound();
-         
+
         }
         // GET: api/Agreements
         [HttpGet("AgreementsBasic/{id}")]
@@ -247,7 +246,7 @@ namespace Siscom.Agua.Api.Controllers
 
             List<DerivativesVM> dero = new List<DerivativesVM>();
             var deriv = await _context.Derivatives
-                                            .Include(x=>x.Agreement)
+                                            .Include(x => x.Agreement)
                                             .Where(a => a.AgreementId == id).ToListAsync();
 
             foreach (var client in deriv)
@@ -357,7 +356,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE A.account = '" + search.StringSearch + "' " +
+                                    "WHERE A.account = '" + search.StringSearch + "' AND type_address = 'DIR01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
@@ -406,14 +405,14 @@ namespace Siscom.Agua.Api.Controllers
                     break;
                 case 2:
                     search.StringSearch = search.StringSearch.ToUpper();
-                    if(search.StringSearch.Length < 5)
+                    if (search.StringSearch.Length < 5)
                     {
                         return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "No se pudo completar su busqueda, favor de ingresar un minimo de 5 caracteres para poder continuar" });
                     }
                     try
                     {
-                       
+
                         using (var connection = _context.Database.GetDbConnection())
                         {
                             await connection.OpenAsync();
@@ -435,7 +434,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' " +
+                                    "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' AND type_address = 'DIR01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
@@ -470,7 +469,7 @@ namespace Siscom.Agua.Api.Controllers
                     break;
                 case 3:
                     search.StringSearch = search.StringSearch.ToUpper();
-                   
+
                     if (search.StringSearch.Length < 5)
                     {
                         return StatusCode((int)TypeError.Code.BadRequest,
@@ -499,7 +498,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' " +
+                                    "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' AND type_address = 'DIR01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
@@ -516,7 +515,7 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
-                                            NumDerivades =  Convert.ToInt32(result[9])
+                                            NumDerivades = Convert.ToInt32(result[9])
                                         });
                                     }
                                 }
@@ -562,7 +561,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' " +
+                                    "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' AND type_address = 'DIR01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
@@ -641,9 +640,9 @@ namespace Siscom.Agua.Api.Controllers
                         Formatting = Formatting.Indented,
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                     });
-                   if(agreement.AgreementDetails.Count > 0)
+                    if (agreement.AgreementDetails.Count > 0)
                     {
-                        if(agreementvm.AgreementDetails.Count > 0)
+                        if (agreementvm.AgreementDetails.Count > 0)
                         {
                             var data = agreement.AgreementDetails.FirstOrDefault();
                             var newdata = agreementvm.AgreementDetails.FirstOrDefault();
@@ -657,7 +656,7 @@ namespace Siscom.Agua.Api.Controllers
                             data.Sector = newdata.Sector;
                             data.TaxableBase = newdata.TaxableBase;
                         }
-                      
+
                     }
                     var services = _context.AgreementServices.Where(xx => xx.IdAgreement == agreement.Id).ToList();
                     var ids = (from s in services
@@ -665,7 +664,7 @@ namespace Siscom.Agua.Api.Controllers
 
                     services.ForEach(x =>
                     {
-                        if(agreementvm.ServicesId.Contains(x.IdService))
+                        if (agreementvm.ServicesId.Contains(x.IdService))
                         {
                             x.IsActive = true;
                             _context.Entry(x).State = EntityState.Modified;
@@ -725,7 +724,7 @@ namespace Siscom.Agua.Api.Controllers
                     agreement.Diameter = diam;
                     agreement.DiameterId = diam.Id;
 
-                    log.NewValue = JsonConvert.SerializeObject(agreement,new JsonSerializerSettings
+                    log.NewValue = JsonConvert.SerializeObject(agreement, new JsonSerializerSettings
                     {
                         PreserveReferencesHandling = PreserveReferencesHandling.Objects,
                         Formatting = Formatting.Indented,
@@ -766,7 +765,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-           
+
 
             TypeCommercialBusiness cBusiness = null;
             Agreement NewAgreement = new Agreement();
@@ -794,7 +793,7 @@ namespace Siscom.Agua.Api.Controllers
             var typeClas = await _context.TypeClassifications.FindAsync(agreementvm.TypeClasificationId);
             if (service == null)
             {
-                return StatusCode((int)TypeError.Code.BadRequest, 
+                return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de servicio')]" });
             }
             if (intake == null)
@@ -852,7 +851,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe agregar por lo menos un cliente al contrato')]" });
             }
-            if(typeAgreement == null)
+            if (typeAgreement == null)
             {
                 return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe verificar el tipo de contrato (Principal / Derivado)')]" });
@@ -878,19 +877,19 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        if(await _context.Agreements.Where(x => x.Account == agreementvm.Account).FirstOrDefaultAsync() != null)
+                        if (await _context.Agreements.Where(x => x.Account == agreementvm.Account).FirstOrDefaultAsync() != null)
                         {
                             return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "El número de cuenta ya fue asignado a otro contrato, Favor de verificar " });
                         }
 
-                        if(agreementvm.AgreementPrincipalId != 0)
+                        if (agreementvm.AgreementPrincipalId != 0)
                         {
                             Principal = await _context.Agreements.Include(a => a.Addresses)
                                                                     .ThenInclude(s => s.Suburbs)
                                                                  .Where(x => x.Id == agreementvm.AgreementPrincipalId)
                                                                  .FirstOrDefaultAsync();
-                            if(Principal.TypeAgreement == "AGR02")
+                            if (Principal.TypeAgreement == "AGR02")
                             {
                                 return StatusCode((int)TypeError.Code.BadRequest,
                                    new { Error = "El número de cuenta es un contrato derivado, no se puede realizar esta operación, Favor de verificar " });
@@ -921,7 +920,7 @@ namespace Siscom.Agua.Api.Controllers
 
                             foreach (var item in agreementvm.Adresses)
                             {
-                                if(item.TypeAddress == "DIR01")
+                                if (item.TypeAddress == "DIR01")
                                 {
                                     var suburb = await _context.Suburbs.FindAsync(item.SuburbsId);
                                     if (Principal.Addresses.Where(p => p.TypeAddress == "DIR01").FirstOrDefault().Suburbs.Name != suburb.Name)
@@ -1019,11 +1018,11 @@ namespace Siscom.Agua.Api.Controllers
                                 Action = "PostContoller",
                                 Controller = "AgreementController"
                             };
-                            
+
                             await _context.AgreementLogs.AddAsync(agreementLogderivative);
-                            int a  = await _context.SaveChangesAsync();
+                            int a = await _context.SaveChangesAsync();
                         }
-                        
+
 
                         foreach (var aservice in agreementvm.ServicesId)
                         {
@@ -1056,7 +1055,7 @@ namespace Siscom.Agua.Api.Controllers
                             };
                             await _context.AgreementLogs.AddAsync(agreementLog);
                         }
-                       
+
 
 
                         scope.Complete();
@@ -1087,7 +1086,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
-      
+
 
 
 
@@ -1110,21 +1109,21 @@ namespace Siscom.Agua.Api.Controllers
 
 
             if (agreement == null || discount == null)
-            { 
+            {
                 return StatusCode((int)TypeError.Code.NotFound, new { Error = "El número de contrato o El tipo de descuento no se no se encuentran, favor de verificar" });
             }
 
-            if(agreement.TypeIntake.Acronym != "HA")
+            if (agreement.TypeIntake.Acronym != "HA")
             {
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
             }
 
-            if(agreement.TypeStateService.Id != 1 && agreement.TypeStateService.Id != 3)
+            if (agreement.TypeStateService.Id != 1 && agreement.TypeStateService.Id != 3)
             {
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
             }
 
-            if(agreement.AgreementDiscounts.Count >= 1)//suspendido
+            if (agreement.AgreementDiscounts.Count >= 1)//suspendido
             {
                 //if(agreement.AgreementDiscounts.)
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asignar más de un descuento, favor de verificar" });
@@ -1139,7 +1138,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El descuento no se encuentra dentro de un periodo valido, favor de verificar" });
             }
-          
+
 
             try
             {
@@ -1179,7 +1178,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPut("PutDiscount/{AgreementId}")]
         public async Task<IActionResult> PutDiscounts([FromRoute]int AgreementId, [FromBody]  AgreementDiscounttVM agreementDiscountt)
         {
-           
+
             if (AgreementId != agreementDiscountt.AgreementId)
             {
                 return BadRequest();
@@ -1209,14 +1208,14 @@ namespace Siscom.Agua.Api.Controllers
                         Description = "Actualización de Descuentos",
                         NewValue = ""
                     };
-                   
+
                     _context.Entry(agreementd).State = EntityState.Deleted;
                     _context.AgreementLogs.Add(log);
                     _context.SaveChanges();
                     scope.Complete();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 SystemLog systemLog = new SystemLog();
                 systemLog.Description = e.ToMessageAndCompleteStacktrace();
@@ -1241,10 +1240,10 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var valueSystem =  await _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL").FirstOrDefaultAsync();
+            var valueSystem = await _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL").FirstOrDefaultAsync();
 
 
-            if(valueSystem.TextColumn == "NO")
+            if (valueSystem.TextColumn == "NO")
             {
                 Agreement agreement = await _context.Agreements
                                                .Include(x => x.TypeIntake)
@@ -1286,7 +1285,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 var catalogue = await _context.GroupCatalogues.Include(x => x.Catalogues).Where(x => x.Id == agreement.TypeUse.Id).FirstOrDefaultAsync();
 
-                if(catalogue == null)
+                if (catalogue == null)
                 {
                     return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
 
@@ -1560,7 +1559,7 @@ namespace Siscom.Agua.Api.Controllers
             char[] caracteres = { '}', '{', '?', '!', '"', '#', '$', '%', '&', '/', '(', ')', '=', '¿', '¡', '\'', '\\', '*', '[', ']', '-', '_', ' ', '.', ':', ',', ';', '´', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'ñ', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
 
             try
-            {                
+            {
                 var res = _context.Agreements.Where(x => !x.Route.Intersect(caracteres).Any() && !string.IsNullOrEmpty(x.Route)).Select(y => int.Parse(y.Route)).OrderBy(z => z).Distinct().ToList();
                 return Ok(res);
             }
