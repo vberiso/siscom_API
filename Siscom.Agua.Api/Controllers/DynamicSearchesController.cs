@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Model;
 using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
@@ -59,9 +60,19 @@ namespace Siscom.Agua.Api.Controllers
                                             x.StratDate >= star &&
                                             x.StratDate <= end);
 
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
+
                 var sql = a.ToSql();
-               //
+                //
+
+
+
                 return a;
+
             }
             else if (filter.TypeConsume > 0 && filter.Amount > 0 && filter.TypeIntake > 0 && filter.TypeService == 0 && star != DateTime.MinValue && end != DateTime.MinValue)//2
             {
@@ -79,6 +90,11 @@ namespace Siscom.Agua.Api.Controllers
                                             x.TypeIntakeId == filter.TypeIntake &&
                                             x.StratDate >= star &&
                                             x.StratDate <= end);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
 
                 var sql = a.ToSql();
                
@@ -100,6 +116,11 @@ namespace Siscom.Agua.Api.Controllers
                                             x.TypeServiceId == filter.TypeService &&
                                             x.StratDate >= star &&
                                             x.StratDate <= end);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
 
                 var sql = a.ToSql();
                
@@ -119,7 +140,11 @@ namespace Siscom.Agua.Api.Controllers
                                             x.TypeServiceId == filter.TypeService &&
                                             x.StratDate >= star &&
                                             x.StratDate <= end);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -140,6 +165,11 @@ namespace Siscom.Agua.Api.Controllers
                                             x.TypeServiceId == filter.TypeService &&
                                             x.StratDate >= star &&
                                             x.StratDate <= end);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
 
                 var sql = a.ToSql();
                
@@ -160,6 +190,11 @@ namespace Siscom.Agua.Api.Controllers
                                              select d).Sum(z => z.Amount) > filter.Amount &&
                                             x.TypeIntakeId == filter.TypeIntake &&
                                             x.TypeServiceId == filter.TypeService);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
 
                 var sql = a.ToSql();
                
@@ -182,6 +217,11 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
 
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -200,7 +240,11 @@ namespace Siscom.Agua.Api.Controllers
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -221,6 +265,11 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -241,6 +290,11 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -259,6 +313,11 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -293,6 +352,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -310,6 +374,11 @@ namespace Siscom.Agua.Api.Controllers
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -326,7 +395,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.TypeServiceId == filter.TypeService &&
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -343,6 +416,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.StratDate >= star &&
                                           x.StratDate <= end);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -359,6 +437,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.StratDate >= star &&
                                           x.StratDate <= end);
 
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -378,7 +461,11 @@ namespace Siscom.Agua.Api.Controllers
                                             select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -397,7 +484,11 @@ namespace Siscom.Agua.Api.Controllers
                                            where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -416,7 +507,11 @@ namespace Siscom.Agua.Api.Controllers
                                            where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeServiceId == filter.TypeService);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -433,7 +528,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -453,6 +552,11 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -470,7 +574,11 @@ namespace Siscom.Agua.Api.Controllers
                                                        where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -488,7 +596,11 @@ namespace Siscom.Agua.Api.Controllers
                                                        where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeServiceId == filter.TypeService);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -504,7 +616,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeIntakeId == filter.TypeIntake &&
                                           x.TypeServiceId == filter.TypeService);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -519,7 +635,11 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeServiceId == filter.TypeService);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -534,7 +654,11 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeIntakeId == filter.TypeIntake);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -553,7 +677,10 @@ namespace Siscom.Agua.Api.Controllers
                                            where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake);
+                if (a == null) {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -572,6 +699,11 @@ namespace Siscom.Agua.Api.Controllers
                                            where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -587,7 +719,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                           x.TypeIntakeId == filter.TypeIntake);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -606,6 +742,11 @@ namespace Siscom.Agua.Api.Controllers
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.TypeIntakeId == filter.TypeIntake);
 
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
+
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -622,7 +763,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => (from d in x.Debts
                                                        where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                                        select d).Sum(z => z.Amount) > filter.Amount);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -637,7 +782,11 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeIntakeId == filter.TypeIntake);
+                if (a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -655,7 +804,11 @@ namespace Siscom.Agua.Api.Controllers
                                           (from d in x.Debts
                                            where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -670,7 +823,11 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts)
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -687,7 +844,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => (from d in x.Debts
                                            where _context.Statuses.Where(y => y.GroupStatusId == 4).Select(y => y.CodeName).Contains(d.Status)
                                            select d).Sum(z => z.Amount) > filter.Amount);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -706,7 +867,11 @@ namespace Siscom.Agua.Api.Controllers
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -726,7 +891,11 @@ namespace Siscom.Agua.Api.Controllers
                                                        select d).Sum(z => z.Amount) > filter.Amount &&
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -744,7 +913,11 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeServiceId == filter.TypeService &&
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -762,7 +935,11 @@ namespace Siscom.Agua.Api.Controllers
                                           x.TypeIntakeId == filter.TypeIntake &&
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -779,7 +956,11 @@ namespace Siscom.Agua.Api.Controllers
                                           .Where(x => x.TypeConsumeId == filter.TypeConsume &&
                                           x.StratDate >= star &&
                                           x.StratDate <= end);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
@@ -793,7 +974,11 @@ namespace Siscom.Agua.Api.Controllers
                                            .Include(ad => ad.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
                                           .Include(d => d.Debts);
+                if(a == null)
+                {
+                    return (System.Collections.Generic.IEnumerable<Siscom.Agua.DAL.Models.Agreement>)StatusCode((int)TypeError.Code.BadRequest, new { Error = "No hay datos" });
 
+                }
                 var sql = a.ToSql();
                
                 return a;
