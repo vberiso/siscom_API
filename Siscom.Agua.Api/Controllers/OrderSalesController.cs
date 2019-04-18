@@ -37,6 +37,32 @@ namespace Siscom.Agua.Api.Controllers
             return _context.OrderSales;
         }
 
+        [HttpGet("FindAllOrdersByDate/{date}")]
+        public async Task<IActionResult> GetOrderSales(string date)
+        {
+            DateTime dateTime = new DateTime();
+            DateTime.TryParse(date, out dateTime);
+            var orders = _context.OrderSales
+                                .Include(x => x.TaxUser)
+                                .ThenInclude(user => user.TaxAddresses)
+                                .Include(x => x.OrderSaleDetails)
+                                .Where(x => x.DateOrder.Date == dateTime.Date).ToList();
+            orders.ForEach(x =>
+            {
+                x.DescriptionStatus = (from d in _context.Statuses
+                                       where d.CodeName == x.Status && d.GroupStatusId == 10
+                                       select d).FirstOrDefault().Description;
+
+                x.DescriptionType = (from d in _context.Types
+                                       where d.CodeName == x.Type
+                                       select d).FirstOrDefault().Description;
+            });
+            if (orders.Count > 0)
+                return Ok(orders);
+            else
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "La fecha que ingreso no contiene datos favor de verificar" });
+        }
+
         // GET: api/OrderSales/5
         [HttpGet("{id}")]
         [Authorize]
