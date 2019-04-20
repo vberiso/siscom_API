@@ -85,7 +85,11 @@ namespace Siscom.Agua.Api.Controllers
             //var debtDis = await _context.DebtDiscounts.ToListAsync();
             //var payment = await _context.PaymentDetails.Where(id => id.DebtId == 118313).ToListAsync();
 
+            if (payment == null)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene valores" });
 
+            }
 
             return Ok(payment);
         }
