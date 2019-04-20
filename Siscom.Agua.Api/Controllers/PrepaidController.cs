@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.Api.Controllers
@@ -42,6 +43,14 @@ namespace Siscom.Agua.Api.Controllers
                                        where p.CodeName == x.Status
                                        select p).FirstOrDefault().Description;
             });
+
+
+            if(prepaid.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                  new { Error = "No tiene anticipos" });
+
+            }
 
             return new ObjectResult(prepaid);
         }

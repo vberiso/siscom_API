@@ -235,15 +235,6 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> GetDerivatives([FromRoute] int id)
         {
 
-
-
-
-
-
-            //change
-
-            //with fix
-
             List<DerivativesVM> dero = new List<DerivativesVM>();
             var deriv = await _context.Derivatives
                                             .Include(x => x.Agreement)
@@ -265,7 +256,8 @@ namespace Siscom.Agua.Api.Controllers
             }
             if (dero.Count == 0)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                                  new { Error = "No tiene derivadas" });
             }
             return Ok(dero);
         }
@@ -296,7 +288,8 @@ namespace Siscom.Agua.Api.Controllers
 
             if (dero.Count == 0)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                                                  new { Error = "No tiene derivadas" });
             }
             return Ok(dero);
         }

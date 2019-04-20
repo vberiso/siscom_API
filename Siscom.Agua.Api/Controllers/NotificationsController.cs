@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.Api.Controllers
@@ -34,6 +35,12 @@ namespace Siscom.Agua.Api.Controllers
                                               .OrderByDescending(o=>o.UntilDate.Year)
                                               .ToListAsync();
 
+            if (notifications.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                  new { Error = "No tiene notificaciones" });
+
+            }
             return new ObjectResult(notifications);
         }
 

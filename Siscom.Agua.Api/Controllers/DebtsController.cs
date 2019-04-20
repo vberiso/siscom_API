@@ -127,9 +127,10 @@ namespace Siscom.Agua.Api.Controllers
                                      select d).FirstOrDefault().Description;
             });
 
-            if (debt == null)
+            if (debt.Count == 0)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                                  new { Error = "No tiene recibos" });
             }
 
             return Ok(debt);
