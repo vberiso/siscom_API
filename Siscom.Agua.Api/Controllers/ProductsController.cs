@@ -121,6 +121,7 @@ namespace Siscom.Agua.Api.Controllers
                 return NotFound();
             }         
 
+            
             return Ok(childParent);
 
         }
@@ -175,7 +176,7 @@ namespace Siscom.Agua.Api.Controllers
                                      .Where(x => x.ProductId == ProductId &&
                                                   x.IsActive == 1).SingleOrDefaultAsync();
 
-            if (tariff ==null)
+            if (tariff == null)
                 return NotFound();
 
             return Ok(tariff);
@@ -355,7 +356,11 @@ namespace Siscom.Agua.Api.Controllers
 
             //RedirectToActionResult redirect = new RedirectToActionResult("GetOrderSaleById", "OrderSales", new { @id = debt.Id });
             //return redirect;
+            if (debt.Id == 0)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se genero orden" });
 
+            }
             return Ok(debt.Id);
 
         }

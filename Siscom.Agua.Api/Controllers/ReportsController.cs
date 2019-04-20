@@ -151,9 +151,10 @@ namespace Siscom.Agua.Api.Controllers
                                          .Where(x => x.Id == id)
                                          .ToListAsync();
 
-            if (orderSale == null)
+            if (orderSale.Count == 0)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No hay orden" });
+
             }
 
             return Ok(orderSale);
