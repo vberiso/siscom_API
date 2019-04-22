@@ -247,6 +247,51 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok(dataTable);            
         }
-                
+
+        [HttpPost("PadronWater")]
+        public async Task<IActionResult> GetPadronWater([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
+        {
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "[dbo].[sp_PadronWater]";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
+                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
+                command.Parameters.Add(new SqlParameter("@FiltrarPorFecha", pData.pwaFiltrarPorContrato));
+
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);
+        }
+
+        [HttpPost("Collection")]
+        public async Task<IActionResult> GetCollection([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
+        {
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "[dbo].[sp_Collection]";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
+                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
+                command.Parameters.Add(new SqlParameter("@CNombre", pData.CajeroNombre));
+                command.Parameters.Add(new SqlParameter("@CAPaterno", pData.CajeroAPaterno));
+                command.Parameters.Add(new SqlParameter("@CAMaterno", pData.CajeroAMaterno));
+
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);
+        }
     }
 }
