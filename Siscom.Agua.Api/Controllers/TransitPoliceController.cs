@@ -107,7 +107,7 @@ namespace Siscom.Agua.Api.Controllers
             };
             string password = CrearPassword(5);
             result = await UserManager.CreateAsync(user, password);
-            await UserManager.AddToRoleAsync(user, "Agente");
+            await UserManager.AddToRoleAsync(user, "Transito");
 
             if (result.Succeeded)
             {
