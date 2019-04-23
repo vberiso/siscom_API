@@ -46,7 +46,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if (taxuser == null)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontro" });
             }
 
             return Ok(taxuser);
