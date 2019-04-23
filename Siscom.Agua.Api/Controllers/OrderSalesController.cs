@@ -105,7 +105,7 @@ namespace Siscom.Agua.Api.Controllers
                                           .Include(x => x.TaxUser)
                                             .ThenInclude(y => y.TaxAddresses)
                                           .Include(x => x.OrderSaleDetails)
-                                          .Where(x => x.Folio == folio && x.Status != "EOS02")
+                                          .Where(x => x.Folio == folio && (x.Status != "EOS02" && x.Status != "EOS03"))
                                           .FirstOrDefaultAsync();
 
             if (orderSale == null)

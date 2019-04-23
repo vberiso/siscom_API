@@ -98,15 +98,32 @@ namespace Siscom.Agua.Api.Controllers
             {
                 Email = transitPolice.EMail,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = transitPolice.UserName,
+                UserName = transitPolice.Name.Substring(0, 1) + transitPolice.LastName,
                 Name = transitPolice.Name,
                 LastName = transitPolice.LastName,
                 SecondLastName = transitPolice.SecondLastName,
                 DivitionId = 14,
                 IsActive = true
             };
-            string password = CrearPassword(5);
+            string password = CrearPassword(6);
             result = await UserManager.CreateAsync(user, password);
+            while (!result.Succeeded)
+            {
+                if(result.Errors.Select(x => x.Code).Contains("DuplicateUserName"))
+                {
+                    int Fvalue = 0;
+                    int.TryParse(user.UserName.Last().ToString(), out Fvalue);
+                    user.UserName = Fvalue > 0 ? user.UserName.Remove(user.UserName.Count() - 1) + (Fvalue + 1) : user.UserName + 1;
+                    result = await UserManager.CreateAsync(user, password);
+                    if (result.Errors.Select(x => x.Code).Contains("DuplicateUserName"))
+                    {
+                        int value = 0; 
+                        int.TryParse(user.UserName.Last().ToString(), out value);
+                        user.UserName = user.UserName.Remove(user.UserName.Count() - 1) + (value + 1);
+                        result = await UserManager.CreateAsync(user, password);
+                    }
+                }
+            }
             await UserManager.AddToRoleAsync(user, "Transito");
 
             if (result.Succeeded)
@@ -127,11 +144,11 @@ namespace Siscom.Agua.Api.Controllers
 
                 await _context.TransitPolices.AddAsync(police);
                 await _context.SaveChangesAsync();
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito Contraseña [" + password + "]" });
+                return StatusCode((int)TypeError.Code.Ok, new { Error = $"Usuario creado con éxito {Environment.NewLine} Usuario: {user.UserName} {Environment.NewLine} Contraseña: {password} " });
             }
             else
             {
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(" ", result.Errors) });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(Environment.NewLine, result.Errors.Select(x => x.Description)) });
             }
         }
 
