@@ -625,6 +625,13 @@ namespace Siscom.Agua.DAL
 
             #endregion
 
+            #region DiscountAuthorizationDetail
+            builder.Entity<DiscountAuthorizationDetail>()
+                 .HasOne<DiscountAuthorization>(a => a.DiscountAuthorization)
+                 .WithMany(s => s.DiscountAuthorizationDetails)
+                 .HasForeignKey(s => s.DiscountAuthorizationId);
+            #endregion
+
             #region DiscountCampaign
             builder.Entity<DiscountCampaign>()
                   .Property(x => x.IsVariable)

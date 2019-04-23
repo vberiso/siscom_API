@@ -31,5 +31,8 @@ namespace Siscom.Agua.DAL.Models
         public int OrderSaleId { get; set; }
         [NotMapped]
         public OrderSale OrderSale { get; set; }
+
+        public int DiscountAuthorizationId { get; set; }
+        public DiscountAuthorization DiscountAuthorization { get; set; }
     }
 }

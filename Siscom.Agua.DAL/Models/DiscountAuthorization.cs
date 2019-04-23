@@ -41,5 +41,6 @@ namespace Siscom.Agua.DAL.Models
         [Required]
         public string UserRequestId { get; set; }
         public ApplicationUser UserRequest { get; set; }
+        public ICollection<DiscountAuthorizationDetail> DiscountAuthorizationDetails { get; set; }
     }
 }

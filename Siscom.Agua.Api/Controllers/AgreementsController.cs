@@ -349,7 +349,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' " +
+                                    "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
@@ -427,7 +427,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' " +
+                                    "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
@@ -491,7 +491,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' " +
+                                    "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
@@ -554,7 +554,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' " +
+                                    "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
