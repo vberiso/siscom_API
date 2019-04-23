@@ -65,7 +65,8 @@ namespace Siscom.Agua.Api.Controllers
 
             if (breach == null)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre la infracción" });
+
             }
 
             return Ok(breach);
