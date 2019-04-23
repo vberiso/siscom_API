@@ -260,9 +260,10 @@ namespace Siscom.Agua.Api.Controllers
 
             var breach = await _context.Breaches.Where(l => l.LicensePlate == license).ToListAsync();
 
-            if (breach == null)
+            if (breach.Count == 0)
             {
-                return NotFound();
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "No hay infracción" });
             }
 
             return Ok(breach);
