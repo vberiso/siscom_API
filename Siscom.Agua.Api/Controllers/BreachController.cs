@@ -307,14 +307,14 @@ namespace Siscom.Agua.Api.Controllers
 
                         }
                        
-                        var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.TransitPoliceId == breanch.TransitPoliceId && f.Folio == breanch.Folio).FirstOrDefaultAsync();
+                        var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.TransitPoliceId == breanch.TransitPoliceId && f.Folio == breanch.AssignmentTicketId).FirstOrDefaultAsync();
 
                         if (getf == null)
                         {
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "no existen folios disponibles" });
                         }
 
-                        if(getf.Folio != breanch.Folio)
+                        if(getf.Folio != breanch.AssignmentTicketId)
                         {
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto,favor de verificar" });
                         }
@@ -333,12 +333,12 @@ namespace Siscom.Agua.Api.Controllers
                         }
                         NewBreach.Series = breanch.Series;
                         
-                        NewBreach.Folio = getf.Folio;
-                        if (NewBreach.Folio == 0)
-                        {
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Problema para ingresar folio" });
+                        //NewBreach.Folio = getf.TransitPolice;
+                        //if (NewBreach.Folio == 0)
+                        //{
+                        //    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Problema para ingresar folio" });
 
-                        }
+                        //}
                         NewBreach.CaptureDate = breanch.CaptureDate;
                         if (NewBreach.CaptureDate == null)
                         {
@@ -546,14 +546,14 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de salario minimo") });
 
                 }
-                var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.TransitPoliceId == breanch.TransitPoliceId && f.Folio == breanch.Folio).FirstOrDefaultAsync();
+                var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.TransitPoliceId == breanch.TransitPoliceId && f.Folio == breanch.AssignmentTicketId).FirstOrDefaultAsync();
 
                 if (getf == null)
                 {
                     return StatusCode((int)TypeError.Code.Ok, new { Error = "no existen folios disponibles" });
                 }
 
-                if (getf.Folio != breanch.Folio)
+                if (getf.Folio != breanch.AssignmentTicketId)
                 {
                     return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El folio es incorrecto,favor de verificar" });
 
@@ -587,12 +587,12 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar la serie") });
 
                         }
-                        NewBreach.Folio = getf.Folio;
-                        if (NewBreach.Folio == 0)
-                        {
-                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Problema para agregar folio") });
+                        //NewBreach.Folio = getf.Folio;
+                        //if (NewBreach.Folio == 0)
+                        //{
+                        //    return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Problema para agregar folio") });
 
-                        }
+                        //}
                         NewBreach.CaptureDate = breanch.CaptureDate;
                         if (NewBreach.CaptureDate == null)
                         {
