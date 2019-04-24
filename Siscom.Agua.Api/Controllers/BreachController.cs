@@ -39,6 +39,8 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<Breach> GetBreach()
         {
+
+           
             return _context.Breaches;
 
         }
@@ -61,6 +63,7 @@ namespace Siscom.Agua.Api.Controllers
                                     .Include(t => t.TaxUser)
                                         .ThenInclude(ad => ad.TaxAddresses)
                                     .Include(b => b.BreachDetails)
+                                        .ThenInclude(l => l.BreachList)
                                     .FirstOrDefaultAsync(a => a.Id == id);
 
             if (breach == null)
@@ -294,32 +297,7 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        //TaxUser tax = new TaxUser
-                        //{
-                        //    Name = breanch.TaxUser.Name,
-                        //    RFC = breanch.TaxUser.RFC,
-                        //    CURP = breanch.TaxUser.CURP,
-                        //    PhoneNumber = breanch.TaxUser.PhoneNumber,
-                        //    EMail = breanch.TaxUser.EMail,
-                        //    IsActive = breanch.TaxUser.IsActive
-                        //};
-
-                        //TaxAddress address = new TaxAddress();
-
-                        //address.Street = breanch.TaxUser.TaxAddresses.FirstOrDefault().Street;
-                        //address.Outdoor = breanch.TaxUser.TaxAddresses.FirstOrDefault().Outdoor;
-                        //address.Indoor = breanch.TaxUser.TaxAddresses.FirstOrDefault().Indoor;
-                        //address.Zip = breanch.TaxUser.TaxAddresses.FirstOrDefault().Zip;
-                        //address.Suburb = breanch.TaxUser.TaxAddresses.FirstOrDefault().Suburb;
-                        //address.Town = breanch.TaxUser.TaxAddresses.FirstOrDefault().Town;
-                        //address.State = breanch.TaxUser.TaxAddresses.FirstOrDefault().State;
-
-
-                        //tax.TaxAddresses.Add(address);
-                        //_context.TaxUsers.Add(tax);
-
-
-
+                       
 
                         var param = await _context.SystemParameters
                                             .Where(x => x.Name == "FACTOR").FirstOrDefaultAsync();
@@ -328,28 +306,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de salario minimo") });
 
                         }
-                        //breanch.TaxUser = tax;
-
-                        //var uno = _context.BreachLists.Find(breanch.BreachDetails.FirstOrDefault().BreachListId);
-
-                        //BreachDetail breachlist = new BreachDetail();
-
-                        //List<BreachDetail> breachlist = new List<BreachDetail>();
-                        //breachlist = breanch.BreachDetails;
-
-
-                        //breachDetail.AplicationDays = breanch.BreachDetails.FirstOrDefault().AplicationDays;
-                        //breachDetail.Amount = breanch.BreachDetails.FirstOrDefault().Amount;
-                        //breachDetail.PercentBonification = breanch.BreachDetails.FirstOrDefault().PercentBonification;
-                        //breachDetail.Bonification = breanch.BreachDetails.FirstOrDefault().Bonification;
-                        //breachDetail.BreachListId = breanch.BreachDetails.FirstOrDefault().BreachListId;
-                        //breachDetail.BreachList = a;
-                        ////breachDetail.BreachId = NewBreach.Id;
-
-                        //breanch.BreachDetails.Add(breachDetail);
-                        //_context.BreachDetails.Add(breachDetail);
-                        //_context.SaveChanges();
-                        //var prueba =  _context.AssignmentTickets;
+                       
                         var getf = await _context.AssignmentTickets.OrderBy(i => i.Id).Where(f => f.Status == "EFT01" && f.TransitPoliceId == breanch.TransitPoliceId && f.Folio == breanch.Folio).FirstOrDefaultAsync();
 
                         if (getf == null)
@@ -366,10 +323,6 @@ namespace Siscom.Agua.Api.Controllers
 
                         _context.Entry(getf).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
-
-
-
-
 
 
                         //NewBreach.TaxUserId = tax.Id;
