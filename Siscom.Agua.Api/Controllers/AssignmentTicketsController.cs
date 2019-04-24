@@ -29,7 +29,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<AssignmentTicket> GetAssignmentTickets()
         {
-            return _context.AssignmentTickets;
+            return _context.AssignmentTickets.Include(c=>c.TransitPolice);
         }
 
         // GET: api/AssignmentTickets/5
