@@ -53,12 +53,6 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-
-            //var breach = await _context.Breaches
-                                    //.Include(t => t.TaxUser)
-                                    //.Where(i=>i.Id == id).FirstOrDefaultAsync();
-
             var breach = await _context.Breaches
                                     .Include(t => t.TaxUser)
                                         .ThenInclude(ad => ad.TaxAddresses)
@@ -73,6 +67,29 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             return Ok(breach);
+        }
+
+        [HttpGet("SearchFolio/{Folio}")]
+        public async Task<IActionResult> GetFolio([FromRoute] string folio)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var fol = await _context.Breaches.Include(t => t.TaxUser)
+                                                .ThenInclude(ad => ad.TaxAddresses)
+                                                .Include(b => b.BreachDetails)
+                                                .ThenInclude(l => l.BreachList)
+                                                .FirstOrDefaultAsync(a => a.Folio == folio);
+            if(fol == null)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre la infracción" });
+
+            }
+
+            return Ok(fol);
+
         }
 
         [HttpPost("OrderSale/{id}")]
@@ -333,12 +350,12 @@ namespace Siscom.Agua.Api.Controllers
                         }
                         NewBreach.Series = breanch.Series;
                         
-                        //NewBreach.Folio = getf.TransitPolice;
-                        //if (NewBreach.Folio == 0)
-                        //{
-                        //    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Problema para ingresar folio" });
+                        NewBreach.Folio = 'I' + getf.Status;
+                        if (NewBreach.Folio == null)
+                        {
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Problema para ingresar folio" });
 
-                        //}
+                        }
                         NewBreach.CaptureDate = breanch.CaptureDate;
                         if (NewBreach.CaptureDate == null)
                         {
@@ -432,7 +449,7 @@ namespace Siscom.Agua.Api.Controllers
                         }
 
                         _context.Breaches.Add(NewBreach);
-                        await _context.SaveChangesAsync();
+                        //await _context.SaveChangesAsync();
 
 
 
@@ -508,7 +525,7 @@ namespace Siscom.Agua.Api.Controllers
                         }
 
                         NewBreach.Judge = sumBreanch;
-                        _context.Entry(NewBreach).State = EntityState.Modified;
+                        //_context.Entry(NewBreach).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
 
                         scope.Complete();
@@ -587,12 +604,13 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar la serie") });
 
                         }
+                        NewBreach.Folio = 'I' + getf.Status;
                         //NewBreach.Folio = getf.Folio;
-                        //if (NewBreach.Folio == 0)
-                        //{
-                        //    return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Problema para agregar folio") });
+                        if (NewBreach.Folio == null)
+                        {
+                            return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Problema para agregar folio") });
 
-                        //}
+                        }
                         NewBreach.CaptureDate = breanch.CaptureDate;
                         if (NewBreach.CaptureDate == null)
                         {
@@ -675,7 +693,6 @@ namespace Siscom.Agua.Api.Controllers
 
 
                         _context.Breaches.Add(NewBreach);
-                        await _context.SaveChangesAsync();
 
                         decimal sumBreanch = 0;
 
@@ -741,7 +758,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
                         NewBreach.Judge = sumBreanch;
-                        _context.Entry(NewBreach).State = EntityState.Modified;
+                        //_context.Entry(NewBreach).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
 
                         scope.Complete();
