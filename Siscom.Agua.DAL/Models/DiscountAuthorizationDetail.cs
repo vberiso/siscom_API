@@ -21,10 +21,6 @@ namespace Siscom.Agua.DAL.Models
         public int OrderSaleId { get; set; }
         [NotMapped]
         public OrderSale OrderSale { get; set; }
-        [Column("id_breach"), Required]
-        public int BreachId { get; set; }
-        [NotMapped]
-        public Breach Breach { get; set; }
 
         public int DiscountAuthorizationId { get; set; }
         public DiscountAuthorization DiscountAuthorization { get; set; }
