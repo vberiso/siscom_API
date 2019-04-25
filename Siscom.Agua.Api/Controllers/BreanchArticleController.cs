@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 namespace Siscom.Agua.Api.Controllers
@@ -60,10 +65,39 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            _context.BreachArticles.Add(breachArticle);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBreachArticle", new { id = breachArticle.Id }, breachArticle);
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+
+                    _context.BreachArticles.Add(breachArticle);
+                    await _context.SaveChangesAsync();
+
+
+                    scope.Complete();
+
+                    return CreatedAtAction("GetBreachArticle", new { id = breachArticle.Id }, breachArticle);
+
+
+                }
+
+
+            }
+            catch(Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(breachArticle);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para crear articulo de infracción" });
+
+
+            }
         }
 
 
@@ -76,30 +110,52 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != breachArticle.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(breachArticle).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    if (id != breachArticle.Id)
+                    {
+                        return BadRequest();
+                    }
+
+                    _context.Entry(breachArticle).State = EntityState.Modified;
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!BreachArticleExist(id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    scope.Complete();
+                    return Ok(breachArticle);
+                }
+
             }
-            catch (DbUpdateConcurrencyException)
+            catch(Exception e)
             {
-                if (!BreachArticleExist(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(breachArticle);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para generar articulo de infraccion" });
+
             }
 
-            return Ok(breachArticle);
+
         }
 
 
