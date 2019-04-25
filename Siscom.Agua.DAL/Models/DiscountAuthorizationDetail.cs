@@ -13,16 +13,6 @@ namespace Siscom.Agua.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_authorization_detail")]
         public int Id { get; set; }
-        [Required, StringLength(5), Column("code_concept")]
-        public string CodeConcept { get; set; }
-        [Required, StringLength(500), Column("name_concept")]
-        public string NameConcept { get; set; }
-        [Column("original_amount"), Required]
-        public decimal OriginalAmount { get; set; }
-        [Column("discount_amount"), Required]
-        public decimal DiscountAmount { get; set; }
-        [Column("discount_percentage")]
-        public Int16 DiscountPercentage { get; set; }
         [Column("id_debt"), Required]
         public int DebtId { get; set; }
         [NotMapped]
@@ -31,6 +21,10 @@ namespace Siscom.Agua.DAL.Models
         public int OrderSaleId { get; set; }
         [NotMapped]
         public OrderSale OrderSale { get; set; }
+        [Column("id_breach"), Required]
+        public int BreachId { get; set; }
+        [NotMapped]
+        public Breach Breach { get; set; }
 
         public int DiscountAuthorizationId { get; set; }
         public DiscountAuthorization DiscountAuthorization { get; set; }
