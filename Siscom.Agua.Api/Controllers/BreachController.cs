@@ -461,6 +461,8 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).FirstOrDefaultAsync();
 
+                            value.HaveBonification = false;
+
 
                             var getLicense = await _context.Breaches.Where(z => z.LicensePlate.Contains(breanch.LicensePlate)).ToListAsync();
                             int cont = getLicense.Count;
@@ -479,8 +481,7 @@ namespace Siscom.Agua.Api.Controllers
                                     Amount = valueJudge * param.NumberColumn,
                                     Bonification = 0,
                                     PercentBonification = 0,
-                                    TimesFactor = valueJudge
-
+                                    TimesFactor = valueJudge,
 
                                 };
 
@@ -699,6 +700,8 @@ namespace Siscom.Agua.Api.Controllers
                         foreach (var list in breanch.BreachDetails)
                         {
                             var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).FirstOrDefaultAsync();
+                            value.HaveBonification = false;
+
                             var getLicense = await _context.Breaches.Where(z => z.LicensePlate.Contains(breanch.LicensePlate)).ToListAsync();
                             int cont = getLicense.Count;
 
