@@ -23,8 +23,12 @@ namespace Siscom.Agua.DAL.Models
         public decimal AmountDiscount { get; set; }
         [Column("discount_percentage")]
         public Int16 DiscountPercentage { get; set; }
+        [Required,Column("account"), StringLength(50)]
+        public string Account { get; set; }
         [Required, StringLength(30), Column("folio")]
         public string Folio { get; set; }
+        [Column("Key_Firebase"), StringLength(50)]
+        public string KeyFirebase { get; set; }
         [Column("id_origin")]
         public int IdOrigin { get; set; }       
         [Required, StringLength(5), Column("type")]
