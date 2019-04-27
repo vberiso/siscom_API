@@ -134,13 +134,13 @@ namespace Siscom.Agua.Api.Controllers
             }
 
 
-            var orderLast = await _context.OrderSales.Where(o => o.IdOrigin == breach.Id).FirstOrDefaultAsync();
+            //var orderLast = await _context.OrderSales.Where(o => o.IdOrigin == breach.Id).FirstOrDefaultAsync();
 
-            if (orderLast.Status == "EOS01")
-            {
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se puede agregar la infracción por el estado de estatus" });
+            //if (orderLast.Status == "EOS01")
+            //{
+            //    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se puede agregar la infracción por el estado de estatus" });
 
-            }
+            //}
 
             #endregion
 
@@ -179,7 +179,7 @@ namespace Siscom.Agua.Api.Controllers
                     order.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
                     var valueDate = order.ExpirationDate.DayOfYear;
                     var valDate = order.DateOrder.DayOfYear;
-                    if (valueDate > valDate)
+                    if (valueDate < valDate)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No puedes generar la orden por vigencia vence hasta " + order.ExpirationDate });
 
