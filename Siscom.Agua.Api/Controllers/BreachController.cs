@@ -133,6 +133,14 @@ namespace Siscom.Agua.Api.Controllers
 
             }
 
+           
+
+            if(breach.Status == "INF04")
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "La infracción ha sido pagada" });
+
+            }
+
             breach.Status = "INF03";
 
 
@@ -172,16 +180,20 @@ namespace Siscom.Agua.Api.Controllers
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene monto" });
 
                     }
+
                     order.OnAccount = 0;
                     order.Year = (short)DateTime.UtcNow.ToLocalTime().Year;
                     order.Period = 0;
                     order.Type = "OM001";
                     order.Status = "EOS01";
                     order.Observation = breach.Reason;
-                    order.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
-                    var valueDate = order.ExpirationDate.DayOfYear;
+                    order.ExpirationDate = DateTime.UtcNow.ToLocalTime();
+                    var valExpirationDate = Convert.ToInt32(param.NumberColumn);
+                    var endDate = order.ExpirationDate.AddDays(valExpirationDate);
+                    var valueDate = endDate.DayOfYear;
                     var valDate = order.DateOrder.DayOfYear;
-                    if (valueDate > valDate)
+                    order.ExpirationDate = endDate;
+                    if (valueDate < valDate)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No puedes generar la orden por vigencia vence hasta " + order.ExpirationDate });
 
@@ -256,7 +268,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
 
-            return StatusCode((int)TypeError.Code.InternalServerError, new { Success = "Orden de cobro generada" });
+            return StatusCode((int)TypeError.Code.Ok, new { Success = "Orden de cobro generada" });
         }
 
 
