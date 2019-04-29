@@ -133,6 +133,8 @@ namespace Siscom.Agua.Api.Controllers
 
             }
 
+            breach.Status = "INF03";
+
 
             //var orderLast = await _context.OrderSales.Where(o => o.IdOrigin == breach.Id).FirstOrDefaultAsync();
 
@@ -152,7 +154,7 @@ namespace Siscom.Agua.Api.Controllers
                     OrderSale order = new OrderSale();
 
                     //Temporal en lo que se crea trigger de asignacion de folio
-                    order.Folio = "F-" + breach.Folio;
+                    order.Folio =  breach.Folio;
                     if (order.Folio == null)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No tiene folio" });
@@ -179,7 +181,7 @@ namespace Siscom.Agua.Api.Controllers
                     order.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
                     var valueDate = order.ExpirationDate.DayOfYear;
                     var valDate = order.DateOrder.DayOfYear;
-                    if (valueDate < valDate)
+                    if (valueDate > valDate)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No puedes generar la orden por vigencia vence hasta " + order.ExpirationDate });
 
@@ -422,7 +424,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar dia de la infracción" });
 
                         }
-                        NewBreach.Status = breanch.Status;
+                        NewBreach.Status = "INF02";
                         if (NewBreach.Status == null)
                         {
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Falta ingresar estatus" });
@@ -673,7 +675,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el dia de alta de la infracción") });
 
                         }
-                        NewBreach.Status = breanch.Status;
+                        NewBreach.Status = "INF02";
                         if (NewBreach.Status == null)
                         {
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el estatus") });
