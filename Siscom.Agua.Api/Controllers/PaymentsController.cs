@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -95,6 +96,37 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             return Ok(payment);
+        }
+
+        [HttpGet("Resume/{folio}")]
+        public async Task<IActionResult> GetPaymentResume([FromRoute] string folio)
+        {
+            if (String.IsNullOrEmpty(folio))
+            {
+                return NotFound();
+            }
+
+            PaymentResume paymentResume = new PaymentResume();
+            paymentResume.payment = await _context.Payments
+                                        .Include(p => p.ExternalOriginPayment)
+                                        .Include(p => p.OriginPayment)
+                                        .Include(p => p.PayMethod)
+                                        .Include(p => p.PaymentDetails)
+                                        .FirstOrDefaultAsync(m => m.Account == folio);
+            if (paymentResume.payment == null)
+            {
+                return NotFound();
+            }
+
+            paymentResume.orderSale = await _context.OrderSales
+                                        .Include(os => os.OrderSaleDetails)
+                                        .Include(os => os.OrderSaleDiscounts)
+                                        .Include(os => os.TaxUser)
+                                        .ThenInclude(os => os.TaxAddresses)
+                                        .FirstOrDefaultAsync(x => x.Id == paymentResume.payment.OrderSaleId);
+                                        
+
+            return Ok(paymentResume);
         }
     }
 }

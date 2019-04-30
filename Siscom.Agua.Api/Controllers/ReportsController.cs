@@ -293,5 +293,13 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok(dataTable);
         }
+
+        // obtines los clientes que contienen un texto
+        [HttpGet("GetClientesContains")]
+        public IEnumerable<Client> GetClientsContains()
+        {
+            var a = _context.Clients.Where(x => x.IsActive == true).ToList();
+            return a;
+        }
     }
 }

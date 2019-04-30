@@ -76,7 +76,12 @@ namespace Siscom.Agua.Api.Controllers
             });
 
 
+            //summary.Debts = await _context.Debts
+            //                              .Include(gs => gs.DebtDetails)
+            //                              .Where(gs => _context.Statuses
+            //                              .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == summary.Id).ToListAsync();
             summary.Debts = await _context.Debts
+                                          .Include(ddis => ddis.DebtDiscounts)
                                           .Include(gs => gs.DebtDetails)
                                           .Where(gs => _context.Statuses
                                           .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == summary.Id).ToListAsync();
