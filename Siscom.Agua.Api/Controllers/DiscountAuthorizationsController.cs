@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.Api.Services.Security;
 using Siscom.Agua.Api.Services.Settings;
@@ -124,11 +126,38 @@ namespace Siscom.Agua.Api.Controllers
             var discountAuthorization = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscountAuthorization>(Request.Form["Data"].ToString());
 
             String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account);
+            if(string.IsNullOrEmpty(path))
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo al servidor, vuleva a intentarlo" });
+            discountAuthorization.FileName = path;
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    _context.DiscountAuthorizations.Add(discountAuthorization);
+                    await _context.SaveChangesAsync();
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
 
-            _context.DiscountAuthorizations.Add(discountAuthorization);
-            //await _context.SaveChangesAsync();
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = Request.Form["Data"].ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo" });
+            }
+            
 
-            return Ok(discountAuthorization.Id);
+            return Ok(new
+            {
+               Id = discountAuthorization.Id,
+               FileName = discountAuthorization.FileName
+            });
         }
 
         // DELETE: api/DiscountAuthorizations/5
