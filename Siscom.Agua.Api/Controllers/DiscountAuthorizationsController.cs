@@ -40,10 +40,21 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/DiscountAuthorizations
-        [HttpGet]
-        public IEnumerable<DiscountAuthorization> GetDiscountAuthorizations()
+        [HttpGet("UserId")]
+        public IEnumerable<DiscountAuthorization> GetDiscountAuthorizations(string UserId)
         {
-            return _context.DiscountAuthorizations;
+            var data =  _context.DiscountAuthorizations
+                                            .Include(x => x.DiscountAuthorizationDetails)
+                                            .Where(x => x.UserRequestId == UserId).ToList();
+            data.ForEach(x =>
+            {
+                string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                int start = name.Length - 4;
+                x.FileName = name.Remove(start, 4);
+                
+            });
+
+            return data;
         }
 
         // GET: api/DiscountAuthorizations/5

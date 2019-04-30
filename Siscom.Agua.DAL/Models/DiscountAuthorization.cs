@@ -37,14 +37,19 @@ namespace Siscom.Agua.DAL.Models
         public string Status { get; set; }
         [Column("observation")]
         public string Observation { get; set; }
+        [Column("observation_response")]
+        public string ObservationResponse { get; set; }
         [Column("branch_office"), StringLength(30), Required]
         public string BranchOffice { get; set; }
         public string UserAuthorizationId { get; set; }
         [Required]
+
         public string UserRequestId { get; set; }
 
         [Column("File_Name"), StringLength(200), Required]
         public string FileName { get; set; }
+        [NotMapped]
+        public string NameUserResponse { get; set; }
         public ApplicationUser UserRequest { get; set; }
         public ICollection<DiscountAuthorizationDetail> DiscountAuthorizationDetails { get; set; }
     }
