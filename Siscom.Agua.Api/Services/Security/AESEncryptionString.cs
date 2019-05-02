@@ -46,10 +46,13 @@ namespace Siscom.Agua.Api.Services.Security
             var fullCipher = Convert.FromBase64String(cipherText);
 
             var iv = new byte[16];
-            var cipher = new byte[16];
+            //var cipher = new byte[16];
+            var cipher = new byte[fullCipher.Length - iv.Length]; 
 
             Buffer.BlockCopy(fullCipher, 0, iv, 0, iv.Length);
-            Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, iv.Length);
+            //Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, iv.Length);
+            Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, fullCipher.Length - iv.Length);
+
             var key = Encoding.UTF8.GetBytes(keyString);
 
             using (var aesAlg = Aes.Create())

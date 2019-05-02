@@ -5,11 +5,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -32,27 +34,38 @@ namespace Siscom.Agua.Api.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly AppSettings appSettings;
-
-        public DiscountAuthorizationsController(ApplicationDbContext context, IOptions<AppSettings> appSettings)
+        private UserManager<ApplicationUser> userManager;
+        public DiscountAuthorizationsController(ApplicationDbContext context, IOptions<AppSettings> appSettings, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             this.appSettings = appSettings.Value;
+            this.userManager = userManager;
         }
 
         // GET: api/DiscountAuthorizations
-        [HttpGet("UserId")]
-        public IEnumerable<DiscountAuthorization> GetDiscountAuthorizations(string UserId)
+        [HttpGet("List/{UserId}")]
+        public async Task<IEnumerable<DiscountAuthorization>> GetDiscountAuthorizations([FromRoute] string UserId)
         {
+
             var data =  _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
                                             .Where(x => x.UserRequestId == UserId).ToList();
-            data.ForEach(x =>
+            try
             {
-                string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                int start = name.Length - 4;
-                x.FileName = name.Remove(start, 4);
-                
-            });
+                data.ForEach(x =>
+                {
+                    string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                    int start = name.Length - 4;
+                    x.FileName = name.Remove(start, 4);
+                    ApplicationUser FullName = userManager.FindByIdAsync(UserId).Result;
+                    x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                });
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
 
             return data;
         }
@@ -136,7 +149,7 @@ namespace Siscom.Agua.Api.Controllers
 
             var discountAuthorization = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscountAuthorization>(Request.Form["Data"].ToString());
 
-            String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account);
+            String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
             if(string.IsNullOrEmpty(path))
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo al servidor, vuleva a intentarlo" });
             discountAuthorization.FileName = path;
@@ -197,7 +210,7 @@ namespace Siscom.Agua.Api.Controllers
             return _context.DiscountAuthorizations.Any(e => e.Id == id);
         }
         
-        private async Task<string> UploadFileLocal(IFormFile file, string Account)
+        private async Task<string> UploadFileLocal(IFormFile file, string Account, string Folio)
         {
             try
             {
@@ -206,7 +219,8 @@ namespace Siscom.Agua.Api.Controllers
                 if (!Directory.Exists(uploadFilesPath))
                     Directory.CreateDirectory(uploadFilesPath);
 
-                var fileName = file.FileName;
+                //var fileName = CleanInput(file.FileName);
+                var fileName = "Autorizacion_"+ Folio;
                 var filePath = Path.Combine(uploadFilesPath, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -232,6 +246,22 @@ namespace Siscom.Agua.Api.Controllers
             catch (Exception)
             {
                 return "";
+            }
+        }
+
+        private string CleanInput(string strIn)
+        {
+            // Replace invalid characters with empty strings.
+            try
+            {
+                return Regex.Replace(strIn, @"[^\w\.@-]", "",
+                                     RegexOptions.None, TimeSpan.FromSeconds(1.5)).Replace("-","");
+            }
+            // If we timeout when replacing invalid characters, 
+            // we should return Empty.
+            catch (RegexMatchTimeoutException)
+            {
+                return String.Empty;
             }
         }
     }
