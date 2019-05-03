@@ -1250,6 +1250,8 @@ namespace Siscom.Agua.Api.Controllers
                                                .Where(x => x.Id == AgreementId)
                                                .FirstOrDefaultAsync();
 
+                List<AgreementFile> file = await _context.AgreementFiles.Where(x => x.AgreementId == agreement.Id).ToListAsync();
+
 
 
 
@@ -1271,7 +1273,7 @@ namespace Siscom.Agua.Api.Controllers
                                               .Where(x => x.IdAgreement == AgreementId &&
                                                           x.IsActive == true).ToListAsync();
 
-                return Ok(discounts);
+                return Ok(new { discounts , file });
             }
             else
             {
@@ -1280,6 +1282,8 @@ namespace Siscom.Agua.Api.Controllers
                                              .Include(x => x.TypeStateService)
                                              .Where(x => x.Id == AgreementId)
                                              .FirstOrDefaultAsync();
+
+                List<AgreementFile> file = await _context.AgreementFiles.Where(x => x.AgreementId == agreement.Id).ToListAsync();
 
                 var catalogue = await _context.GroupCatalogues.Include(x => x.Catalogues).Where(x => x.Id == agreement.TypeUse.Id).FirstOrDefaultAsync();
 
@@ -1295,7 +1299,7 @@ namespace Siscom.Agua.Api.Controllers
                                              .Where(x => x.IdAgreement == AgreementId &&
                                                          x.IsActive == true).ToListAsync();
 
-                return Ok(discounts);
+                return Ok(new { discounts, file });
 
             }
 
