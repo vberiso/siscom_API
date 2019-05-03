@@ -15,6 +15,7 @@ namespace Siscom.Agua.Api.Services.Settings
         public string Environment { get; set; }
         public string FilePath { get; set; }
         public string AccessKey { get; set; }
+        public bool Local { get; set; }
         public string AccountName { get; set; }
     }
 }
