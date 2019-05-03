@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Siscom.Agua.Api.Enums;
@@ -241,7 +242,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet(Name = "DownloadFileAzure")]
-        public async Task<IActionResult> DownloadFileAzure(string Account, string FileName)
+        public async Task<FileResult> DownloadFileAzure(string Account, string FileName)
         {
             string storageConnection = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", appSettings.AccountName, appSettings.AccessKey);
             CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(storageConnection);
@@ -250,14 +251,21 @@ namespace Siscom.Agua.Api.Controllers
             Account = Account.PadLeft(4, '0');
             string filename = AESEncryptionString.DecryptString(FileName, appSettings.IssuerName);
             CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
-            //CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(AESEncryptionString.DecryptString(FileName, appSettings.IssuerName));
+            CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(AESEncryptionString.DecryptString(FileName, appSettings.IssuerName));
+            string file = AESEncryptionString.DecryptString(FileName, appSettings.IssuerName);
+            //CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference(filename);
+            //Stream blobStream = await blob.OpenReadAsync();
+            //return File(blobStream, blob.Properties.ContentType, filename);
 
-            CloudBlockBlob blob = cloudBlobContainer.GetBlockBlobReference(filename);
-            Stream blobStream = await blob.OpenReadAsync();
-            return File(blobStream, blob.Properties.ContentType, filename);
-
-            //MemoryStream memStream = new MemoryStream();
-            //await blockBlob.DownloadToStreamAsync(memStream);
+            MemoryStream memStream = new MemoryStream();
+            await blockBlob.DownloadToStreamAsync(memStream);
+            memStream.Position = 0;
+            return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
+            {
+                FileDownloadName = file
+            };
+            //return File(memStream, GetContentType(file), file);
+            //HttpContext.Response.Body.Position = 0;
             //HttpContext.Response.ContentType = blockBlob.Properties.ContentType.ToString();
             //HttpContext.Response.Headers.Add("Content-Disposition", string.Format("Attachment; filename={0}", blockBlob.ToString()));
             //HttpContext.Response.Headers.Add("Content-Length", blockBlob.Properties.Length.ToString());
