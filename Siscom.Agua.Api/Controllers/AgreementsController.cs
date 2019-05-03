@@ -15,6 +15,7 @@ using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
 using Siscom.Agua.Api.Services.Extension;
+using Siscom.Agua.Api.Services.Security;
 using Siscom.Agua.Api.Services.Settings;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
@@ -1251,7 +1252,12 @@ namespace Siscom.Agua.Api.Controllers
                                                .FirstOrDefaultAsync();
 
                 List<AgreementFile> file = await _context.AgreementFiles.Where(x => x.AgreementId == agreement.Id).ToListAsync();
-
+                file.ForEach(x =>
+                {
+                    string name = AESEncryptionString.DecryptString(x.Name, appSettings.IssuerName);
+                    int start = name.Length - 4;
+                    x.Name = name.Remove(start, 4);
+                });
 
 
 
@@ -1284,6 +1290,13 @@ namespace Siscom.Agua.Api.Controllers
                                              .FirstOrDefaultAsync();
 
                 List<AgreementFile> file = await _context.AgreementFiles.Where(x => x.AgreementId == agreement.Id).ToListAsync();
+
+                file.ForEach(x =>
+                {
+                    string name = AESEncryptionString.DecryptString(x.Name, appSettings.IssuerName);
+                    int start = name.Length - 4;
+                    x.Name = name.Remove(start, 4);
+                });
 
                 var catalogue = await _context.GroupCatalogues.Include(x => x.Catalogues).Where(x => x.Id == agreement.TypeUse.Id).FirstOrDefaultAsync();
 
