@@ -107,6 +107,24 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(terminalUsers);
         }
 
+        [HttpGet("UsersByTerminal")]
+        public async Task<IActionResult> GetUserByTerminal()
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var res = await _context.TerminalUsers.GroupBy(x => new { x.TerminalId, x.UserId }).Select(y => y.Key).ToListAsync();
+               
+            if (res == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(res);
+        }
+
         /// <summary>
         /// This will provide capability add new TerminalUser
         /// </summary>

@@ -37,7 +37,15 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<BranchOffice> GetBranchOffice()
         {
-            return _context.BranchOffices;
+            return _context.BranchOffices;                            
+        }
+
+        [HttpGet("Terminals")]
+        public IEnumerable<BranchOffice> GetBranchOfficeWithTermnals()
+        {
+            return _context.BranchOffices
+                            .Include(bo => bo.Terminals)
+                            .Where(bo => bo.IsActive == true);
         }
 
         /// <summary>

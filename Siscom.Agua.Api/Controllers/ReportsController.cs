@@ -296,10 +296,25 @@ namespace Siscom.Agua.Api.Controllers
 
         // obtines los clientes que contienen un texto
         [HttpGet("GetClientesContains")]
-        public IEnumerable<Client> GetClientsContains()
+        public async Task<IActionResult> GetClientsContains()
         {
-            var a = _context.Clients.Where(x => x.IsActive == true).ToList();
-            return a;
+            //var a = _context.Clients.Where(x => x.IsActive == true).ToList();
+            //a.AddRange(_context.TaxUsers.Where(y => y.IsActive == true).Select(z => new Client { Name = z.Name, LastName = "", SecondLastName = "", RFC = z.RFC }));
+            //return a;
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "[dbo].[sp_UsersFinding]";
+                command.CommandType = CommandType.StoredProcedure;
+                
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);
         }
     }
 }
