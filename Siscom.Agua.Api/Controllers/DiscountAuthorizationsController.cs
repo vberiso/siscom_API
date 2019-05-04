@@ -148,6 +148,12 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El archivo supero el tamaño maximo permitido" });
 
             var discountAuthorization = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscountAuthorization>(Request.Form["Data"].ToString());
+            var discount = await _context.DiscountAuthorizations.Where(x => x.Account == discountAuthorization.Account).ToListAsync();
+
+            if(discount.Count >= 1)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta " });
+            }
 
             String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
             if(string.IsNullOrEmpty(path))
