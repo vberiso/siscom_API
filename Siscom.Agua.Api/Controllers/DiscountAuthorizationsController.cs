@@ -154,7 +154,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if(discount.Count >= 1)
             {
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia: {discount.FirstOrDefault().ExpirationDate.ToLocalTime().ToShortTimeString()}" });
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia" });
             }
 
             String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
@@ -256,6 +256,7 @@ namespace Siscom.Agua.Api.Controllers
                 return "";
             }
         }
+
         [HttpPost("{id}/{key}")]
         public async Task<IActionResult> ExectDiscount([FromRoute] int id, string key)
         {
