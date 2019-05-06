@@ -13,6 +13,7 @@ namespace Siscom.Agua.Api.Model
         public string CajeroNombre { get; set; }
         public string CajeroAPaterno { get; set; }
         public string CajeroAMaterno { get; set; }
+        public string Oficinas { get; set; }
         public string statusIFB { get; set; }
         public Boolean pwaFiltrarPorContrato { get; set; }
     }

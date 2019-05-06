@@ -212,10 +212,11 @@ namespace Siscom.Agua.Api.Controllers
                 command.CommandText = "[dbo].[sp_IncomeFromBox]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
-                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));                
-                command.Parameters.Add(new SqlParameter("@CNombre", pData.CajeroNombre));
-                command.Parameters.Add(new SqlParameter("@CAPaterno", pData.CajeroAPaterno));
-                command.Parameters.Add(new SqlParameter("@CAMaterno", pData.CajeroAMaterno));
+                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
+                command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
+                //command.Parameters.Add(new SqlParameter("@CNombre", pData.CajeroNombre));
+                //command.Parameters.Add(new SqlParameter("@CAPaterno", pData.CajeroAPaterno));
+                //command.Parameters.Add(new SqlParameter("@CAMaterno", pData.CajeroAMaterno));
 
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
