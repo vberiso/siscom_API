@@ -17,6 +17,8 @@ namespace Siscom.Agua.DAL.Models
         public DateTime RequestDate { get; set; }
         [Column("authorization_date")]
         public DateTime AuthorizationDate { get; set; }
+        [Column("expiration_date")]
+        public DateTime ExpirationDate { get; set; }
         [Column("amount"), Required]
         public decimal Amount { get; set; }
         [Column("amount_discount"), Required]

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -152,7 +154,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if(discount.Count >= 1)
             {
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta " });
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia: {discount.FirstOrDefault().ExpirationDate.ToLocalTime().ToShortTimeString()}" });
             }
 
             String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
@@ -254,7 +256,55 @@ namespace Siscom.Agua.Api.Controllers
                 return "";
             }
         }
-
+        [HttpPost("{id}/{key}")]
+        public async Task<IActionResult> ExectDiscount([FromRoute] int id, string key)
+        {
+            DiscountAuthorization discountAuthorizations = await _context.DiscountAuthorizations.Where(x => x.Id == id).FirstOrDefaultAsync();
+            if(discountAuthorizations.KeyFirebase != key)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "la llave no coincide con la que está en la base de datos, favor de verificar" });
+            }
+            foreach (var item in discountAuthorizations.DiscountAuthorizationDetails)
+            {
+                string error = string.Empty;
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "billing_Adjusment";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@id", item.DebtId != 0 ? item.DebtId : item.OrderSaleId));
+                    command.Parameters.Add(new SqlParameter("@porcentage_value", 0));
+                    command.Parameters.Add(new SqlParameter("@discount_value", discountAuthorizations.AmountDiscount));
+                    command.Parameters.Add(new SqlParameter("@text_discount", discountAuthorizations.ObservationResponse));
+                    command.Parameters.Add(new SqlParameter("@option", item.DebtId != 0 ? 1 : 2));
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@error",
+                        DbType = DbType.String,
+                        Size = 200,
+                        Direction = ParameterDirection.Output
+                    });
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        if (!result.HasRows)
+                        {
+                            error = command.Parameters["@error"].Value.ToString();
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        return Ok();
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
+                    }
+                }
+            }
+           
+            
+            return Ok();
+        }
         private string CleanInput(string strIn)
         {
             // Replace invalid characters with empty strings.
