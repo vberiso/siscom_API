@@ -17,9 +17,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.Api.Services.Extension;
+using Siscom.Agua.Api.Services.FirebaseService;
 using Siscom.Agua.Api.Services.Security;
 using Siscom.Agua.Api.Services.Settings;
 using Siscom.Agua.DAL;
@@ -36,7 +39,9 @@ namespace Siscom.Agua.Api.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly AppSettings appSettings;
-        private UserManager<ApplicationUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly FirebaseDB firebaseDB = new FirebaseDB("https://siscom-notifications.firebaseio.com/");
+        private FirebaseResponse response;
         public DiscountAuthorizationsController(ApplicationDbContext context, IOptions<AppSettings> appSettings, UserManager<ApplicationUser> userManager)
         {
             _context = context;
@@ -72,6 +77,18 @@ namespace Siscom.Agua.Api.Controllers
             return data;
         }
 
+        [HttpGet("Firebase/{Key}")]
+        public async Task<IActionResult> GetFirebase([FromRoute] string Key)
+        {
+            FirebaseDB firebaseDBNotificationsDiscount = firebaseDB.Node("DiscountAuthorization").Node(Key);
+            response = firebaseDBNotificationsDiscount.Get();
+            PushNotification notification = JsonConvert.DeserializeObject<PushNotification>(response.JSONContent);
+            notification.ResponseDate = DateTime.Now.ToLocalTime();
+            notification.IsReply = true;
+            notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Revision);
+            response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
+            return Ok(notification);
+        }
         // GET: api/DiscountAuthorizations/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDiscountAuthorization([FromRoute] int id)
@@ -154,7 +171,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if(discount.Count >= 1)
             {
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia" });
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia: " });
             }
 
             String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
@@ -257,52 +274,120 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
-        [HttpPost("{id}/{key}")]
-        public async Task<IActionResult> ExectDiscount([FromRoute] int id, string key)
+        [HttpPost("{id}")]
+        public async Task<IActionResult> ExectDiscount([FromRoute] int id, [FromBody] AuthorizationDiscountVM authorization)
         {
-            DiscountAuthorization discountAuthorizations = await _context.DiscountAuthorizations.Where(x => x.Id == id).FirstOrDefaultAsync();
-            if(discountAuthorizations.KeyFirebase != key)
+            DiscountAuthorization discount = await _context.DiscountAuthorizations.FindAsync(authorization.Id);
+
+            if (discount.KeyFirebase != authorization.Key)
             {
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "la llave no coincide con la que está en la base de datos, favor de verificar" });
             }
-            foreach (var item in discountAuthorizations.DiscountAuthorizationDetails)
+
+            FirebaseDB firebaseDBNotificationsDiscount = firebaseDB.Node("DiscountAuthorization").Node(authorization.Key);
+            response = firebaseDBNotificationsDiscount.Get();
+            PushNotification @notification = JsonConvert.DeserializeObject<PushNotification>(response.JSONContent);
+
+            if (authorization.Status == "EDE02")
             {
-                string error = string.Empty;
-                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                foreach (var item in discount.DiscountAuthorizationDetails)
                 {
-                    command.CommandText = "billing_Adjusment";
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.Add(new SqlParameter("@id", item.DebtId != 0 ? item.DebtId : item.OrderSaleId));
-                    command.Parameters.Add(new SqlParameter("@porcentage_value", 0));
-                    command.Parameters.Add(new SqlParameter("@discount_value", discountAuthorizations.AmountDiscount));
-                    command.Parameters.Add(new SqlParameter("@text_discount", discountAuthorizations.ObservationResponse));
-                    command.Parameters.Add(new SqlParameter("@option", item.DebtId != 0 ? 1 : 2));
-                    command.Parameters.Add(new SqlParameter
+                    string error = string.Empty;
+                    try
                     {
-                        ParameterName = "@error",
-                        DbType = DbType.String,
-                        Size = 200,
-                        Direction = ParameterDirection.Output
-                    });
-                    this._context.Database.OpenConnection();
-                    using (var result = await command.ExecuteReaderAsync())
-                    {
-                        if (!result.HasRows)
+                        using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                         {
-                            error = command.Parameters["@error"].Value.ToString();
+                            using (var command = _context.Database.GetDbConnection().CreateCommand())
+                            {
+                                command.CommandText = "billing_Adjusment";
+                                command.CommandType = CommandType.StoredProcedure;
+                                command.Parameters.Add(new SqlParameter("@id", item.DebtId != 0 ? item.DebtId : item.OrderSaleId));
+                                if (discount.Type == "TDI01")
+                                {
+                                    command.Parameters.Add(new SqlParameter("@porcentage_value", 0));
+                                    command.Parameters.Add(new SqlParameter("@discount_value", discount.AmountDiscount));
+                                }
+                                else if (discount.Type == "TDI02")
+                                {
+                                    command.Parameters.Add(new SqlParameter("@porcentage_value", discount.DiscountPercentage));
+                                    command.Parameters.Add(new SqlParameter("@discount_value", 0));
+                                }
+                                command.Parameters.Add(new SqlParameter("@text_discount", authorization.ResponseObservations));
+                                command.Parameters.Add(new SqlParameter("@option", item.DebtId != 0 ? 1 : 2));
+                                command.Parameters.Add(new SqlParameter
+                                {
+                                    ParameterName = "@error",
+                                    DbType = DbType.String,
+                                    Size = 200,
+                                    Direction = ParameterDirection.Output
+                                });
+                                this._context.Database.OpenConnection();
+                                using (var result = await command.ExecuteReaderAsync())
+                                {
+                                    if (!result.HasRows)
+                                    {
+                                        error = command.Parameters["@error"].Value.ToString();
+                                    }
+                                }
+                                if (!string.IsNullOrEmpty(error))
+                                {
+                                    discount.ObservationResponse = authorization.ResponseObservations;
+                                    discount.AuthorizationDate = DateTime.Now.ToLocalTime();
+                                    discount.UserAuthorizationId = authorization.UserId;
+                                    discount.Status = "EDE02";
+
+                                    _context.Entry(discount).State = EntityState.Modified;
+                                    await _context.SaveChangesAsync();
+
+                                    @notification.UserResponseId = authorization.UserId;
+                                    @notification.ResponseDate = DateTime.Now.ToLocalTime();
+                                    @notification.IsReply = true;
+                                    @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Autorizado);
+
+                                    response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
+
+                                    scope.Complete();
+                                    return Ok();
+                                }
+                                else
+                                {
+                                    return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
+                                }
+                            }
                         }
                     }
-                    if (!string.IsNullOrEmpty(error))
+                    catch (Exception e)
                     {
-                        return Ok();
+                        SystemLog systemLog = new SystemLog();
+                        systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                        systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                        systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                        systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                        systemLog.Parameter = JsonConvert.SerializeObject(authorization);
+                        CustomSystemLog helper = new CustomSystemLog(_context);
+                        helper.AddLog(systemLog);
+                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el contrato" });
                     }
-                    else
-                    {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
-                    }
+
                 }
             }
-           
+            else if(authorization.Status == "EDE04")
+            {
+                discount.ObservationResponse = authorization.ResponseObservations;
+                discount.AuthorizationDate = DateTime.Now.ToLocalTime();
+                discount.UserAuthorizationId = authorization.UserId;
+                discount.Status = authorization.Status;
+
+                _context.Entry(discount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                @notification.UserResponseId = authorization.UserId;
+                @notification.ResponseDate = DateTime.Now.ToLocalTime();
+                @notification.IsReply = true;
+                @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Autorizado);
+
+                response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
+            }
             
             return Ok();
         }
