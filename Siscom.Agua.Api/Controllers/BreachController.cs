@@ -222,7 +222,7 @@ namespace Siscom.Agua.Api.Controllers
                         OrderSaleDetail orderSaleDetail = new OrderSaleDetail
                         {
                             Quantity = 1,
-                            Unity = "",
+                            Unity = "SAN",
                             UnitPrice = factor.NumberColumn,
                             HaveTax = false,
                             Description = x.BreachList.Description,
