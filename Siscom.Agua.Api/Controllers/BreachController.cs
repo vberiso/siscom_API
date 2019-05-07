@@ -144,6 +144,21 @@ namespace Siscom.Agua.Api.Controllers
             breach.Status = "INF03";
 
 
+            var serv = await _context.Services.Include(x => x.Name == "TRANSITO").FirstOrDefaultAsync();
+
+            if(serv == null)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre valor para infracción" });
+
+            }
+
+            var serParam = await _context.ServiceParams.Include(p => p.ServiceId == serv.Id).FirstOrDefaultAsync();
+
+            if(serParam == null)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre valor para infracción " });
+
+            }
             //var orderLast = await _context.OrderSales.Where(o => o.IdOrigin == breach.Id).FirstOrDefaultAsync();
 
             //if (orderLast.Status == "EOS01")
@@ -219,6 +234,9 @@ namespace Siscom.Agua.Api.Controllers
 
                     List<OrderSaleDetail> orderSaleDetails = new List<OrderSaleDetail>();
                     breach.BreachDetails.ToList().ForEach(x => {
+
+
+
                         OrderSaleDetail orderSaleDetail = new OrderSaleDetail
                         {
                             Quantity = 1,
@@ -226,7 +244,7 @@ namespace Siscom.Agua.Api.Controllers
                             UnitPrice = factor.NumberColumn,
                             HaveTax = false,
                             Description = x.BreachList.Description,
-                            CodeConcept = "",
+                            CodeConcept = serParam.CodeConcept,
                             NameConcept = x.BreachList.Description,
                             Amount = x.Amount,
                             OnAccount = 0
