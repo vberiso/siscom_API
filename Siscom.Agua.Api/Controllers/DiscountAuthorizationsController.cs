@@ -64,7 +64,8 @@ namespace Siscom.Agua.Api.Controllers
                     int start = name.Length - 4;
                     x.FileName = name.Remove(start, 4);
                     ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
-                    x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                    if(FullName != null)
+                        x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
                 });
             }
             catch (Exception ex)
