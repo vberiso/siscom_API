@@ -49,6 +49,60 @@ namespace Siscom.Agua.Api.Controllers
             this.userManager = userManager;
         }
 
+        [HttpGet("GetPendindDiscountAuthorizationList")]
+        public async Task<IEnumerable<DiscountAuthorization>> GetListDiscountAuthorizations()
+        {
+
+            var data = _context.DiscountAuthorizations
+                                            .Include(x => x.DiscountAuthorizationDetails)
+                                            .Where(x => x.Status == "EDE01").ToList();
+            try
+            {
+                data.ForEach(x =>
+                {
+                    string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                    int start = name.Length - 4;
+                    x.FileName = name.Remove(start, 4);
+                    ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                    x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                });
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            return data;
+        }
+
+        [HttpGet("GetAllDiscountAuthorizationList")]
+        public async Task<IEnumerable<DiscountAuthorization>> GetAllListDiscountAuthorizations()
+        {
+
+            var data = _context.DiscountAuthorizations
+                                            .Include(x => x.DiscountAuthorizationDetails)
+                                            .ToList();
+            try
+            {
+                data.ForEach(x =>
+                {
+                    string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                    int start = name.Length - 4;
+                    x.FileName = name.Remove(start, 4);
+                    ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                    x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                });
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            return data;
+        }
+
         // GET: api/DiscountAuthorizations
         [HttpGet("List/{UserId}")]
         public async Task<IEnumerable<DiscountAuthorization>> GetDiscountAuthorizations([FromRoute] string UserId)
@@ -64,7 +118,7 @@ namespace Siscom.Agua.Api.Controllers
                     string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
                     int start = name.Length - 4;
                     x.FileName = name.Remove(start, 4);
-                    ApplicationUser FullName = userManager.FindByIdAsync(UserId).Result;
+                    ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
                     x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
                 });
             }
@@ -106,19 +160,6 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             return Ok(discountAuthorization);
-        }
-        [HttpPost("FileUpload")]
-        public async Task<IActionResult> FileUpload(IFormFile file)
-        {
-            //UploadFileLocal(file, )
-            var data = Request.Form.Files;
-            foreach (var fi in Request.Form.Files)
-            {
-                
-            }
-            var form = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscountAuthorization>(Request.Form["Data"].ToString());
-            //var a = Request.Form.ke
-            return Ok();
         }
 
         // PUT: api/DiscountAuthorizations/5
@@ -167,11 +208,11 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El archivo supero el tamaño maximo permitido" });
 
             var discountAuthorization = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscountAuthorization>(Request.Form["Data"].ToString());
-            var discount = await _context.DiscountAuthorizations.Where(x => x.Account == discountAuthorization.Account).ToListAsync();
+            var discount = await _context.DiscountAuthorizations.Where(x => x.Account == discountAuthorization.Account && x.ExpirationDate <= DateTime.Now.ToLocalTime()).ToListAsync();
 
             if(discount.Count >= 1)
             {
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia: " });
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia: {discount.FirstOrDefault().ExpirationDate}" });
             }
 
             String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
@@ -278,7 +319,8 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> ExectDiscount([FromRoute] int id, [FromBody] AuthorizationDiscountVM authorization)
         {
             DiscountAuthorization discount = await _context.DiscountAuthorizations.FindAsync(authorization.Id);
-
+            decimal valueDiscount = 0;
+            decimal valuePercentage = Math.Round(Convert.ToDecimal(discount.DiscountPercentage) / discount.DiscountAuthorizationDetails.Count, 2);
             if (discount.KeyFirebase != authorization.Key)
             {
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "la llave no coincide con la que está en la base de datos, favor de verificar" });
@@ -297,19 +339,31 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                         {
+                            if (item.DebtId != 0)
+                            {
+                                var debt = await _context.Debts.FindAsync(item.DebtId);
+                                valueDiscount = Math.Round((debt.Amount / discount.Amount) * discount.AmountDiscount, 2);
+                            }
+                            else
+                            {
+                                var order = await _context.OrderSales.FindAsync(item.OrderSaleId);
+                                valueDiscount = Math.Round((order.Amount / discount.Amount) * discount.AmountDiscount, 2);
+                            }
+
                             using (var command = _context.Database.GetDbConnection().CreateCommand())
                             {
                                 command.CommandText = "billing_Adjusment";
                                 command.CommandType = CommandType.StoredProcedure;
                                 command.Parameters.Add(new SqlParameter("@id", item.DebtId != 0 ? item.DebtId : item.OrderSaleId));
+                               
                                 if (discount.Type == "TDI01")
                                 {
                                     command.Parameters.Add(new SqlParameter("@porcentage_value", 0));
-                                    command.Parameters.Add(new SqlParameter("@discount_value", discount.AmountDiscount));
+                                    command.Parameters.Add(new SqlParameter("@discount_value", valueDiscount));
                                 }
                                 else if (discount.Type == "TDI02")
                                 {
-                                    command.Parameters.Add(new SqlParameter("@porcentage_value", discount.DiscountPercentage));
+                                    command.Parameters.Add(new SqlParameter("@porcentage_value", valuePercentage));
                                     command.Parameters.Add(new SqlParameter("@discount_value", 0));
                                 }
                                 command.Parameters.Add(new SqlParameter("@text_discount", authorization.ResponseObservations));
@@ -345,15 +399,13 @@ namespace Siscom.Agua.Api.Controllers
                                     @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Autorizado);
 
                                     response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
-
-                                    scope.Complete();
-                                    return Ok();
                                 }
                                 else
                                 {
                                     return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
                                 }
                             }
+                            scope.Complete();
                         }
                     }
                     catch (Exception e)
@@ -368,8 +420,9 @@ namespace Siscom.Agua.Api.Controllers
                         helper.AddLog(systemLog);
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el contrato" });
                     }
-
+                   
                 }
+                return Ok();
             }
             else if(authorization.Status == "EDE04")
             {
@@ -387,9 +440,14 @@ namespace Siscom.Agua.Api.Controllers
                 @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Autorizado);
 
                 response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
             }
             
-            return Ok();
+            //return Ok();
         }
         private string CleanInput(string strIn)
         {
