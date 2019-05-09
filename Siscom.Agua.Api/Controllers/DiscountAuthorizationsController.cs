@@ -482,7 +482,7 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     newName = AESEncryptionString.EncryptString(file.FileName, appSettings.IssuerName);
                 }
-                return file.FileName;
+                return newName;
             }
             catch (Exception e)
             {
