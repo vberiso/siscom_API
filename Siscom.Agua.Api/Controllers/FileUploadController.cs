@@ -111,6 +111,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("{AgreementId}/{TypeFile}/{description}"), DisableRequestSizeLimit]
         public async Task<IActionResult> FileUpload([FromRoute] int AgreementId, [FromRoute] string TypeFile, [FromRoute] string description)
         {
+            String upload = string.Empty;
             AgreementFile agreementFile = new AgreementFile();
             foreach (var file in Request.Form.Files)
             {
@@ -129,9 +130,11 @@ namespace Siscom.Agua.Api.Controllers
                         return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no soportado favor de verificar" });
 
                     var fileSize = FileConverterSize.SizeSuffix(file.Length);
+                    if(appSettings.Local)
+                        upload  = await UploadFileLocal(file, agreement.Account);
+                    else
+                       upload = await UploadFileAzure(file, agreement.Account);
 
-                    //var upload = await UploadFileLocal(file, agreement.Account);
-                    var upload = await UploadFileAzure(file, agreement.Account);
                     if (string.IsNullOrEmpty(upload))
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo al servidor, vuleva a intentarlo" });
 

@@ -17,6 +17,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
@@ -202,6 +205,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostDiscountAuthorization(IFormFile AttachedFile)
         {
+            String path = string.Empty;
             var MaxFileSize = (int)_context.SystemParameters.Where(n => n.Name == "FileMaxSize").FirstOrDefault().NumberColumn * 1024 * 1024;
             if (AttachedFile == null || AttachedFile.Length == 0)
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no seleccionado" });
@@ -215,8 +219,15 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia: {discount.FirstOrDefault().ExpirationDate}" });
             }
-
-            String path = await UploadFileLocal(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
+            if (appSettings.Local)
+            {
+                path = await UploadFileLocal(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
+            }
+            else
+            {
+                path = await UploadFileAzure(AttachedFile, discountAuthorization.Account, discountAuthorization.Folio);
+            }
+           
             if(string.IsNullOrEmpty(path))
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo al servidor, vuleva a intentarlo" });
             discountAuthorization.FileName = path;
@@ -450,20 +461,63 @@ namespace Siscom.Agua.Api.Controllers
             
             //return Ok();
         }
-        private string CleanInput(string strIn)
+
+        private async Task<string> UploadFileAzure(IFormFile file, string Account, string Folio)
         {
-            // Replace invalid characters with empty strings.
             try
             {
-                return Regex.Replace(strIn, @"[^\w\.@-]", "",
-                                     RegexOptions.None, TimeSpan.FromSeconds(1.5)).Replace("-","");
+                string storageConnection = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", appSettings.StorageDiscount, appSettings.DiscountKey);
+                CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(storageConnection);
+                CloudBlobClient cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
+                CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(Account.PadLeft(4, '0'));
+
+                if (await cloudBlobContainer.CreateIfNotExistsAsync())
+                    await cloudBlobContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
+
+                CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(file.FileName);
+                cloudBlockBlob.Properties.ContentType = file.ContentType;
+                await cloudBlockBlob.UploadFromStreamAsync(file.OpenReadStream());
+                var newName = AESEncryptionString.EncryptString(file.FileName, appSettings.IssuerName);
+                while (newName.Contains("\\") || newName.Contains("/"))
+                {
+                    newName = AESEncryptionString.EncryptString(file.FileName, appSettings.IssuerName);
+                }
+                return file.FileName;
             }
-            // If we timeout when replacing invalid characters, 
-            // we should return Empty.
-            catch (RegexMatchTimeoutException)
+            catch (Exception e)
             {
-                return String.Empty;
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = "SERVICE_AZURE";
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return "";
             }
+        }
+
+        [HttpGet("DownloadFileAzure/{Account}/{FileName}")]
+        public async Task<FileResult> DownloadFileAzure([FromRoute] string Account, string FileName)
+        {
+            string storageConnection = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", appSettings.StorageDiscount, appSettings.DiscountKey);
+            CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(storageConnection);
+            CloudBlobClient blobClient = cloudStorageAccount.CreateCloudBlobClient();
+
+            Account = Account.PadLeft(4, '0');
+            string filename = AESEncryptionString.DecryptString(FileName, appSettings.IssuerName);
+            CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
+            CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(AESEncryptionString.DecryptString(FileName, appSettings.IssuerName));
+            string file = AESEncryptionString.DecryptString(FileName, appSettings.IssuerName);
+
+            MemoryStream memStream = new MemoryStream();
+            await blockBlob.DownloadToStreamAsync(memStream);
+            memStream.Position = 0;
+            return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
+            {
+                FileDownloadName = file
+            };
         }
     }
 }
