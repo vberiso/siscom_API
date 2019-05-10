@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
@@ -58,14 +59,14 @@ namespace Siscom.Agua.Api.Controllers
 
             var data = _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
-                                            .Where(x => x.Status == "EDE01").ToList();
+                                            .Where(x => x.Status == "EDE01" && x.ExpirationDate >= DateTime.Now.ToLocalTime()).ToList();
             try
             {
                 data.ForEach(x =>
                 {
                     string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                    int start = name.Length - 4;
-                    x.FileName = name.Remove(start, 4);
+                    //int start = name.Length - 4;
+                    x.FileName = name;
                     ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
                     if(FullName != null)
                         x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
@@ -501,23 +502,29 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("DownloadFileAzure/{Account}/{FileName}")]
         public async Task<FileResult> DownloadFileAzure([FromRoute] string Account, string FileName)
         {
-            string storageConnection = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", appSettings.StorageDiscount, appSettings.DiscountKey);
-            CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(storageConnection);
-            CloudBlobClient blobClient = cloudStorageAccount.CreateCloudBlobClient();
+            CloudStorageAccount account = new CloudStorageAccount(new StorageCredentials(appSettings.StorageDiscount, appSettings.DiscountKey), true);
+            CloudBlobClient blobClient = account.CreateCloudBlobClient();
 
             Account = Account.PadLeft(4, '0');
-            string filename = AESEncryptionString.DecryptString(FileName, appSettings.IssuerName);
             CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
-            CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(AESEncryptionString.DecryptString(FileName, appSettings.IssuerName));
-            string file = AESEncryptionString.DecryptString(FileName, appSettings.IssuerName);
-
-            MemoryStream memStream = new MemoryStream();
-            await blockBlob.DownloadToStreamAsync(memStream);
-            memStream.Position = 0;
-            return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
+            CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(FileName);
+            try
             {
-                FileDownloadName = file
-            };
+                using (MemoryStream memStream = new MemoryStream())
+                {
+                    await blockBlob.DownloadToStreamAsync(memStream).ConfigureAwait(false);
+                    memStream.Position = 0;
+                    return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
+                    {
+                        FileDownloadName = FileName
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+           
         }
     }
 }
