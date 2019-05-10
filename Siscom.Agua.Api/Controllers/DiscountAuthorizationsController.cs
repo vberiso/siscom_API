@@ -62,15 +62,30 @@ namespace Siscom.Agua.Api.Controllers
                                             .Where(x => x.Status == "EDE01" && x.ExpirationDate >= DateTime.Now.ToLocalTime()).ToList();
             try
             {
-                data.ForEach(x =>
+                if (appSettings.Local)
                 {
-                    string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                    //int start = name.Length - 4;
-                    x.FileName = name;
-                    ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
-                    if(FullName != null)
-                        x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
-                });
+                    data.ForEach(x =>
+                    {
+                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                        int start = name.Length - 4;
+                        x.FileName = name.Remove(start, 4);
+                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                        if (FullName != null)
+                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                    });
+                }
+                else
+                {
+                    data.ForEach(x =>
+                    {
+                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                        x.FileName = name;
+                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                        if (FullName != null)
+                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                    });
+                }
+                
             }
             catch (Exception ex)
             {
@@ -90,14 +105,29 @@ namespace Siscom.Agua.Api.Controllers
                                             .ToList();
             try
             {
-                data.ForEach(x =>
+                if (appSettings.Local)
                 {
-                    string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                    int start = name.Length - 4;
-                    x.FileName = name.Remove(start, 4);
-                    ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
-                    x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
-                });
+                    data.ForEach(x =>
+                    {
+                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                        int start = name.Length - 4;
+                        x.FileName = name.Remove(start, 4);
+                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                        if (FullName != null)
+                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                    });
+                }
+                else
+                {
+                    data.ForEach(x =>
+                    {
+                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                        x.FileName = name;
+                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                        if (FullName != null)
+                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -118,14 +148,29 @@ namespace Siscom.Agua.Api.Controllers
                                             .Where(x => x.UserRequestId == UserId).ToList();
             try
             {
-                data.ForEach(x =>
+                if (appSettings.Local)
                 {
-                    string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                    int start = name.Length - 4;
-                    x.FileName = name.Remove(start, 4);
-                    ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
-                    x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
-                });
+                    data.ForEach(x =>
+                    {
+                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                        int start = name.Length - 4;
+                        x.FileName = name.Remove(start, 4);
+                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                        if (FullName != null)
+                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                    });
+                }
+                else
+                {
+                    data.ForEach(x =>
+                    {
+                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                        x.FileName = name;
+                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                        if (FullName != null)
+                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                    });
+                }
             }
             catch (Exception ex)
             {
