@@ -260,7 +260,7 @@ namespace Siscom.Agua.Api.Controllers
                 command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
                 command.Parameters.Add(new SqlParameter("@FiltrarPorFecha", pData.pwaFiltrarPorContrato));
-
+                
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
@@ -299,10 +299,7 @@ namespace Siscom.Agua.Api.Controllers
         // obtines los clientes que contienen un texto
         [HttpGet("GetClientesContains")]
         public async Task<IActionResult> GetClientsContains()
-        {
-            //var a = _context.Clients.Where(x => x.IsActive == true).ToList();
-            //a.AddRange(_context.TaxUsers.Where(y => y.IsActive == true).Select(z => new Client { Name = z.Name, LastName = "", SecondLastName = "", RFC = z.RFC }));
-            //return a;
+        {            
             string error = string.Empty;
             var dataTable = new DataTable();
             using (var command = _context.Database.GetDbConnection().CreateCommand())
@@ -318,5 +315,6 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok(dataTable);
         }
+               
     }
 }
