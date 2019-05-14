@@ -28,7 +28,7 @@ namespace Siscom.Agua.DAL.Models
         [Required,Column("account"), StringLength(50)]
         public string Account { get; set; }
         [Required, Column("account_adjusted "), StringLength(50)]
-        public string AccountAdjusted { get; set; }
+        public string AccountAdjusted { get; set; } 
         [Required, StringLength(30), Column("folio")]
         public string Folio { get; set; }
         [Column("Key_Firebase"), StringLength(50)]
