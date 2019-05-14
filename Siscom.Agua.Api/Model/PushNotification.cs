@@ -15,6 +15,7 @@ namespace Siscom.Agua.Api.Model
         public string Observation { get; set; }
         public string Status { get; set; }
         public string Account { get; set; }
+        public string AccountAdjusted { get; set; }
         public DateTime RequestDate { get; set; }
         public DateTime ResponseDate { get; set; }
         public DateTime ExpirationDate { get; set; }

@@ -1849,6 +1849,12 @@ namespace Siscom.Agua.Api.Controllers
                     _context.Transactions.Add(transaction);
                     await _context.SaveChangesAsync();
 
+                    //se modifica estado de pago
+                    payment = await _context.Payments.FindAsync(pCancelPayment.Payment.Id);
+                    payment.Status = "EP002";
+                    _context.Entry(payment).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
                     await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
                     var orderList = pCancelPayment.Payment.PaymentDetails.Select(x => x.OrderSaleId).Distinct();

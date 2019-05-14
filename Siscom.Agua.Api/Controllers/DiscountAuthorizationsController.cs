@@ -102,6 +102,7 @@ namespace Siscom.Agua.Api.Controllers
 
             var data = _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
+                                            .OrderByDescending(x => x.RequestDate)
                                             .ToList();
             try
             {
@@ -145,7 +146,9 @@ namespace Siscom.Agua.Api.Controllers
 
             var data =  _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
-                                            .Where(x => x.UserRequestId == UserId).ToList();
+                                            .Where(x => x.UserRequestId == UserId)
+                                            .OrderByDescending(x => x.AuthorizationDate)
+                                            .ToList();
             try
             {
                 if (appSettings.Local)
@@ -376,9 +379,15 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> ExectDiscount([FromRoute] int id, [FromBody] AuthorizationDiscountVM authorization)
         {
-            DiscountAuthorization discount = await _context.DiscountAuthorizations.FindAsync(authorization.Id);
+            DiscountAuthorization discount = await _context.DiscountAuthorizations
+                                                            .Include(x => x.DiscountAuthorizationDetails)
+                                                            .Where(x => x.Id == authorization.Id)
+                                                            .FirstOrDefaultAsync();
             decimal valueDiscount = 0;
             decimal valuePercentage = Math.Round(Convert.ToDecimal(discount.DiscountPercentage) / discount.DiscountAuthorizationDetails.Count, 2);
+            string error = string.Empty;
+            string account = string.Empty;
+
             if (discount.KeyFirebase != authorization.Key)
             {
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "la llave no coincide con la que está en la base de datos, favor de verificar" });
@@ -390,12 +399,11 @@ namespace Siscom.Agua.Api.Controllers
 
             if (authorization.Status == "EDE02")
             {
-                foreach (var item in discount.DiscountAuthorizationDetails)
+                try
                 {
-                    string error = string.Empty;
-                    try
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                        foreach (var item in discount.DiscountAuthorizationDetails)
                         {
                             if (item.DebtId != 0)
                             {
@@ -413,19 +421,55 @@ namespace Siscom.Agua.Api.Controllers
                                 command.CommandText = "billing_Adjusment";
                                 command.CommandType = CommandType.StoredProcedure;
                                 command.Parameters.Add(new SqlParameter("@id", item.DebtId != 0 ? item.DebtId : item.OrderSaleId));
-                               
+
                                 if (discount.Type == "TDI01")
                                 {
-                                    command.Parameters.Add(new SqlParameter("@porcentage_value", 0));
-                                    command.Parameters.Add(new SqlParameter("@discount_value", valueDiscount));
+                                    command.Parameters.Add(new SqlParameter
+                                    {
+                                        ParameterName = "@porcentage_value",
+                                        DbType = DbType.Int32,
+                                        Value = 0
+                                    });
+                                    command.Parameters.Add(new SqlParameter
+                                    {
+                                        ParameterName = "@discount_value",
+                                        DbType = DbType.Decimal,
+                                        Value = valueDiscount
+                                    });
                                 }
                                 else if (discount.Type == "TDI02")
                                 {
-                                    command.Parameters.Add(new SqlParameter("@porcentage_value", valuePercentage));
-                                    command.Parameters.Add(new SqlParameter("@discount_value", 0));
+                                    command.Parameters.Add(new SqlParameter
+                                    {
+                                        ParameterName = "@porcentage_value",
+                                        DbType = DbType.Int32,
+                                        Value = valuePercentage
+                                    });
+                                    command.Parameters.Add(new SqlParameter
+                                    {
+                                        ParameterName = "@discount_value",
+                                        DbType = DbType.Decimal,
+                                        Value = 0.0
+                                    });
                                 }
-                                command.Parameters.Add(new SqlParameter("@text_discount", authorization.ResponseObservations));
+                                command.Parameters.Add(new SqlParameter
+                                {
+                                    ParameterName = "@text_discount",
+                                    DbType = DbType.String,
+                                    Size = 50,
+                                    Value = authorization.ResponseObservations
+                                }
+                                );
                                 command.Parameters.Add(new SqlParameter("@option", item.DebtId != 0 ? 1 : 2));
+
+                                command.Parameters.Add(new SqlParameter
+                                {
+                                    ParameterName = "@account_folio",
+                                    DbType = DbType.String,
+                                    Size = 30,
+                                    Direction = ParameterDirection.Output
+                                });
+
                                 command.Parameters.Add(new SqlParameter
                                 {
                                     ParameterName = "@error",
@@ -433,54 +477,61 @@ namespace Siscom.Agua.Api.Controllers
                                     Size = 200,
                                     Direction = ParameterDirection.Output
                                 });
+
                                 this._context.Database.OpenConnection();
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
-                                    if (!result.HasRows)
+                                    if (result.HasRows)
                                     {
                                         error = command.Parameters["@error"].Value.ToString();
                                     }
-                                }
-                                if (!string.IsNullOrEmpty(error))
-                                {
-                                    discount.ObservationResponse = authorization.ResponseObservations;
-                                    discount.AuthorizationDate = DateTime.Now.ToLocalTime();
-                                    discount.UserAuthorizationId = authorization.UserId;
-                                    discount.Status = "EDE02";
 
-                                    _context.Entry(discount).State = EntityState.Modified;
-                                    await _context.SaveChangesAsync();
-
-                                    @notification.UserResponseId = authorization.UserId;
-                                    @notification.ResponseDate = DateTime.Now.ToLocalTime();
-                                    @notification.IsReply = true;
-                                    @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Autorizado);
-
-                                    response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
-                                }
-                                else
-                                {
-                                    return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
+                                    account = command.Parameters["@account_folio"].Value.ToString();
                                 }
                             }
+                        }
+                        if (string.IsNullOrEmpty(error))
+                        {
+                            discount.ObservationResponse = authorization.ResponseObservations;
+                            discount.AuthorizationDate = DateTime.Now.ToLocalTime();
+                            discount.UserAuthorizationId = authorization.UserId;
+                            discount.Status = authorization.Status;
+                            discount.AccountAdjusted = account;
+
+                            _context.Entry(discount).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+
+                            @notification.UserResponseId = authorization.UserId;
+                            @notification.ResponseDate = DateTime.Now.ToLocalTime();
+                            @notification.IsReply = true;
+                            @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Autorizado);
+                            if(account.Contains("-"))
+                                @notification.AccountAdjusted = account; 
+
+                            response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
                             scope.Complete();
                         }
+                        else
+                        {
+                            //return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format("No se pudo realizar el descuento favor de volver a intentarlo, si el problema continua favor de comunicarse con el administrador del sistema") });
+                            return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format($"No se pudo realizar el descuento por las siguientes razones: [{error}]") });
+                        }
                     }
-                    catch (Exception e)
-                    {
-                        SystemLog systemLog = new SystemLog();
-                        systemLog.Description = e.ToMessageAndCompleteStacktrace();
-                        systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
-                        systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
-                        systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                        systemLog.Parameter = JsonConvert.SerializeObject(authorization);
-                        CustomSystemLog helper = new CustomSystemLog(_context);
-                        helper.AddLog(systemLog);
-                        return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el contrato" });
-                    }
-                   
                 }
-                return Ok();
+                catch (Exception e)
+                {
+                    SystemLog systemLog = new SystemLog();
+                    systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                    systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                    systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                    systemLog.Parameter = JsonConvert.SerializeObject(authorization);
+                    CustomSystemLog helper = new CustomSystemLog(_context);
+                    helper.AddLog(systemLog);
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+                }
+
+                return Ok(account);
             }
             else if(authorization.Status == "EDE04")
             {
@@ -488,6 +539,7 @@ namespace Siscom.Agua.Api.Controllers
                 discount.AuthorizationDate = DateTime.Now.ToLocalTime();
                 discount.UserAuthorizationId = authorization.UserId;
                 discount.Status = authorization.Status;
+                discount.AccountAdjusted = account;
 
                 _context.Entry(discount).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
@@ -515,7 +567,7 @@ namespace Siscom.Agua.Api.Controllers
                 string storageConnection = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix=core.windows.net", appSettings.StorageDiscount, appSettings.DiscountKey);
                 CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(storageConnection);
                 CloudBlobClient cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
-                CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(Account.PadLeft(4, '0'));
+                CloudBlobContainer cloudBlobContainer = cloudBlobClient.GetContainerReference(Account.PadLeft(4, '0').Replace("-", "").ToLower());
 
                 if (await cloudBlobContainer.CreateIfNotExistsAsync())
                     await cloudBlobContainer.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Blob });
