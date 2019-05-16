@@ -44,13 +44,14 @@ namespace Siscom.Agua.Api.Controllers
         private readonly ApplicationDbContext _context;
         private readonly AppSettings appSettings;
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly FirebaseDB firebaseDB = new FirebaseDB("https://siscom-notifications.firebaseio.com/");
+        private readonly FirebaseDB firebaseDB;
         private FirebaseResponse response;
         public DiscountAuthorizationsController(ApplicationDbContext context, IOptions<AppSettings> appSettings, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             this.appSettings = appSettings.Value;
             this.userManager = userManager;
+            firebaseDB = new FirebaseDB(_context.SystemParameters.Where(x => x.Name == "STRINGURLFIREBASE").Select(x => x.TextColumn).FirstOrDefault());
         }
 
         [HttpGet("GetPendindDiscountAuthorizationList")]
