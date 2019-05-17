@@ -105,6 +105,14 @@
             <param name="id">Mandatory</param>
             <returns></returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.DiscountAuthorizationsController.GetAllListDiscountAuthorizations(System.String)">
+              /// <remarks>
+             Types request:
+            
+             string date example: 2019-05-14
+            
+             </remarks>
+        </member>
         <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "T:Siscom.Agua.Api.Controllers.FolioController" -->
         <member name="M:Siscom.Agua.Api.Controllers.FolioController.GetFolio">
             <summary>

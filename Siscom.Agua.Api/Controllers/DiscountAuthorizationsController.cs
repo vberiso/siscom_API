@@ -53,7 +53,7 @@ namespace Siscom.Agua.Api.Controllers
             this.userManager = userManager;
             firebaseDB = new FirebaseDB(_context.SystemParameters.Where(x => x.Name == "STRINGURLFIREBASE").Select(x => x.TextColumn).FirstOrDefault());
         }
-
+       
         [HttpGet("GetPendindDiscountAuthorizationList")]
         public async Task<IEnumerable<DiscountAuthorization>> GetListDiscountAuthorizations()
         {
@@ -96,14 +96,22 @@ namespace Siscom.Agua.Api.Controllers
 
             return data;
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
         ///  /// <remarks>
         /// Types request:
         ///
         /// string date example: 2019-05-14
         ///
         /// </remarks>
-        [HttpGet("GetAllDiscountAuthorizationList")]
-        public async Task<IEnumerable<DiscountAuthorization>> GetAllListDiscountAuthorizations(string date)
+        /// 
+        [HttpGet("GetAllDiscountAuthorizationList/{date}")]
+        public async Task<IEnumerable<DiscountAuthorization>> GetAllListDiscountAuthorizations([FromRoute]string date)
         {
             DateTime datee = new DateTime();
             DateTime.TryParse(date, out datee);
