@@ -96,48 +96,61 @@ namespace Siscom.Agua.Api.Controllers
 
             return data;
         }
-
+        ///  /// <remarks>
+        /// Types request:
+        ///
+        /// string date example: 2019-05-14
+        ///
+        /// </remarks>
         [HttpGet("GetAllDiscountAuthorizationList")]
-        public async Task<IEnumerable<DiscountAuthorization>> GetAllListDiscountAuthorizations()
+        public async Task<IEnumerable<DiscountAuthorization>> GetAllListDiscountAuthorizations(string date)
         {
-
-            var data = _context.DiscountAuthorizations
+            DateTime datee = new DateTime();
+            DateTime.TryParse(date, out datee);
+            if(datee != DateTime.MinValue)
+            {
+                var data = _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
                                             .OrderByDescending(x => x.RequestDate)
                                             .ToList();
-            try
-            {
-                if (appSettings.Local)
+                try
                 {
-                    data.ForEach(x =>
+                    if (appSettings.Local)
                     {
-                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                        int start = name.Length - 4;
-                        x.FileName = name.Remove(start, 4);
-                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
-                        if (FullName != null)
-                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
-                    });
+                        data.ForEach(x =>
+                        {
+                            string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                            int start = name.Length - 4;
+                            x.FileName = name.Remove(start, 4);
+                            ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                            if (FullName != null)
+                                x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                        });
+                    }
+                    else
+                    {
+                        data.ForEach(x =>
+                        {
+                            string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                            x.FileName = name;
+                            ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                            if (FullName != null)
+                                x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                        });
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    data.ForEach(x =>
-                    {
-                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                        x.FileName = name;
-                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
-                        if (FullName != null)
-                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
-                    });
+
+                    throw;
                 }
+
+                return data;
             }
-            catch (Exception ex)
+            else
             {
-
-                throw;
+                return new List<DiscountAuthorization>();
             }
-
-            return data;
         }
 
         // GET: api/DiscountAuthorizations
@@ -263,11 +276,45 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "El archivo supero el tamaño maximo permitido" });
 
             var discountAuthorization = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscountAuthorization>(Request.Form["Data"].ToString());
-            var discount = await _context.DiscountAuthorizations.Where(x => x.Account == discountAuthorization.Account && x.ExpirationDate <= DateTime.Now.ToLocalTime()).ToListAsync();
 
-            if(discount.Count >= 1)
+                                                                       
+            var discount = _context.DiscountAuthorizations.Where(x => x.Account == discountAuthorization.Account 
+                                                                                && x.ExpirationDate > DateTime.Now.ToLocalTime() 
+                                                                                && x.Status == "EDE01")
+                                                                                .ToListAsync();
+
+            var existDiscount = _context.DiscountAuthorizations.Where(x => x.Account == discountAuthorization.Account
+                                                                                    && x.ExpirationDate < DateTime.Now.ToLocalTime()
+                                                                                    && x.Status == "EDE01")
+                                                                                    .ToListAsync();
+
+            await Task.WhenAll(discount, existDiscount);
+
+            FirebaseDB firebaseDBNotificationsDiscount;
+            PushNotification @notification;
+
+            if (existDiscount.Result.Count > 0)
             {
-                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia: {discount.FirstOrDefault().ExpirationDate}" });
+                existDiscount.Result.ForEach(x =>
+                {
+                    x.Status = "EDE03";
+                    x.ObservationResponse = "LA SOLICITUD EXPIRO";
+                    _context.Entry(x).State = EntityState.Modified;
+                    _context.SaveChanges();
+
+                    firebaseDBNotificationsDiscount = firebaseDB.Node("DiscountAuthorization").Node(x.KeyFirebase);
+                    response = firebaseDBNotificationsDiscount.Get();
+                    @notification = JsonConvert.DeserializeObject<PushNotification>(response.JSONContent);
+
+                    notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Cancelado);
+
+                    response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(@notification));
+                });
+            }
+
+            if (discount.Result.Count >= 1)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = $"La cuenta ya cuenta con una solicitud de descuento pendiente, por lo cual no se puede solicitar otro más hasta el dia: {discount.Result.FirstOrDefault().ExpirationDate}" });
             }
             if (appSettings.Local)
             {
@@ -385,7 +432,7 @@ namespace Siscom.Agua.Api.Controllers
                                                             .Where(x => x.Id == authorization.Id)
                                                             .FirstOrDefaultAsync();
             decimal valueDiscount = 0;
-            decimal valuePercentage = Math.Round(Convert.ToDecimal(discount.DiscountPercentage) / discount.DiscountAuthorizationDetails.Count, 2);
+            //decimal valuePercentage = Math.Round(Convert.ToDecimal(discount.DiscountPercentage) / discount.DiscountAuthorizationDetails.Count, 2);
             string error = string.Empty;
             string account = string.Empty;
 
@@ -444,7 +491,7 @@ namespace Siscom.Agua.Api.Controllers
                                     {
                                         ParameterName = "@porcentage_value",
                                         DbType = DbType.Int32,
-                                        Value = valuePercentage
+                                        Value = discount.DiscountPercentage
                                     });
                                     command.Parameters.Add(new SqlParameter
                                     {
