@@ -119,6 +119,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 var data = _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
+                                            .Where(y => y.RequestDate.Date >= datee.Date)
                                             .OrderByDescending(x => x.RequestDate)
                                             .ToList();
                 try
@@ -162,48 +163,56 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/DiscountAuthorizations
-        [HttpGet("List/{UserId}")]
-        public async Task<IEnumerable<DiscountAuthorization>> GetDiscountAuthorizations([FromRoute] string UserId)
+        [HttpGet("List/{UserId}/{date}")]
+        public async Task<IEnumerable<DiscountAuthorization>> GetDiscountAuthorizations([FromRoute] string UserId, [FromRoute] string date)
         {
-
-            var data =  _context.DiscountAuthorizations
-                                            .Include(x => x.DiscountAuthorizationDetails)
-                                            .Where(x => x.UserRequestId == UserId)
-                                            .OrderByDescending(x => x.AuthorizationDate)
-                                            .ToList();
-            try
+            DateTime datee = new DateTime();
+            DateTime.TryParse(date, out datee);
+            if (datee != DateTime.MinValue)
             {
-                if (appSettings.Local)
+                var data = _context.DiscountAuthorizations
+                                           .Include(x => x.DiscountAuthorizationDetails)
+                                           .Where(x => x.UserRequestId == UserId && x.RequestDate.Date >= datee.Date)
+                                           .OrderByDescending(x => x.AuthorizationDate)
+                                           .ToList();
+                try
                 {
-                    data.ForEach(x =>
+                    if (appSettings.Local)
                     {
-                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                        int start = name.Length - 4;
-                        x.FileName = name.Remove(start, 4);
-                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
-                        if (FullName != null)
-                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
-                    });
+                        data.ForEach(x =>
+                        {
+                            string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                            int start = name.Length - 4;
+                            x.FileName = name.Remove(start, 4);
+                            ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                            if (FullName != null)
+                                x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                        });
+                    }
+                    else
+                    {
+                        data.ForEach(x =>
+                        {
+                            string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
+                            x.FileName = name;
+                            ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
+                            if (FullName != null)
+                                x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                        });
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    data.ForEach(x =>
-                    {
-                        string name = AESEncryptionString.DecryptString(x.FileName, appSettings.IssuerName);
-                        x.FileName = name;
-                        ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
-                        if (FullName != null)
-                            x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
-                    });
+
+                    throw;
                 }
+
+                return data;
             }
-            catch (Exception ex)
+            else
             {
-
-                throw;
-            }
-
-            return data;
+                return new List<DiscountAuthorization>();
+            }  
         }
 
         [HttpGet("Firebase/{Key}")]

@@ -641,7 +641,7 @@ namespace Siscom.Agua.Api.Controllers
                                     if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
                                     {
                                         var _serviceParam = await _context.ServiceParams
-                                                                          .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0") && x.IsActive == true)
+                                                                          .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0"))
                                                                           .FirstOrDefaultAsync();
 
                                         _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
@@ -650,7 +650,7 @@ namespace Siscom.Agua.Api.Controllers
                                     else
                                     {
                                         var _productParam = await _context.ProductParams
-                                                                          .Where(x => x.ProductId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0") && x.IsActive == true)
+                                                                          .Where(x => x.ProductId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0"))
                                                                           .FirstOrDefaultAsync();
                                         _accountNumber = _productParam != null ? _productParam.CodeConcept : String.Empty;
                                         _unitMeasurement = _productParam != null ? _productParam.UnitMeasurement : String.Empty;
