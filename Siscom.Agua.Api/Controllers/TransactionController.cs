@@ -500,7 +500,12 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             _sumTaxDebtDetail += y.Tax;
                             if (y.Tax == 0)
-                                _validation = false;                                
+                            {
+                                var validIva = Convert.ToDecimal((Math.Round(y.OnPayment * Convert.ToDecimal(.16), 2)));
+                                if(validIva != y.Tax)
+                                    _validation = false;
+                            }
+                                                              
                         }
                     });
                     if (x.OnAccount != _sumDebtDetail)
