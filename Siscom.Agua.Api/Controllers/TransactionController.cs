@@ -641,7 +641,7 @@ namespace Siscom.Agua.Api.Controllers
                                     if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
                                     {
                                         var _serviceParam = await _context.ServiceParams
-                                                                          .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0"))
+                                                                          .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0")) 
                                                                           .FirstOrDefaultAsync();
 
                                         _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
