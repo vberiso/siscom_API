@@ -296,6 +296,27 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(dataTable);
         }
 
+        [HttpPost("Historial")]
+        public async Task<IActionResult> GetHistorial([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
+        {
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "[dbo].[sp_Historial]";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fecha", pData.FechaIni));                
+                command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
+                
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);
+        }
+
         // obtines los clientes que contienen un texto
         [HttpGet("GetClientesContains")]
         public async Task<IActionResult> GetClientsContains()

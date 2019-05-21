@@ -1006,6 +1006,42 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(transaction.Id);
         }
 
+
+        [HttpPost("ResumeTransactions/{date}")]
+        public async Task<IActionResult> ResumeTansactions([FromRoute] string date, [FromBody] string idUsers)
+        {
+            int tmpAño = int.Parse(date.Split("-")[0]);
+            int tmpMes = int.Parse(date.Split("-")[1]);
+            int tmpDia = int.Parse(date.Split("-")[2]);
+            DateTime tmpFechaStart = new DateTime(tmpAño, tmpMes, tmpDia, 0, 0, 0);
+            DateTime tmpFechaEnd = new DateTime(tmpAño, tmpMes, tmpDia, 23, 59, 59);
+
+            string[] lstIds = idUsers.Split(',');
+
+            try
+            {
+                List<DAL.Models.Transaction> res = new List<DAL.Models.Transaction>();
+                    res = await _context.Transactions
+                        .Include(x => x.TypeTransaction)                       
+                        .Include(x => x.TerminalUser)
+                        .Include(x => x.TransactionDetails)
+                        .Where(x => x.DateTransaction >= tmpFechaStart && x.DateTransaction < tmpFechaEnd && lstIds.Contains(x.TerminalUser.UserId))
+                        .ToListAsync();
+
+                foreach (var item in res)
+                {
+                    item.PayMethod = _context.PayMethods.Where(p => p.Id == item.PayMethodId).FirstOrDefault();
+                }
+
+                return Ok(res);
+            }
+            catch(Exception ex)
+            {
+                var tmp = ex.Message;
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la consulta." });
+            }            
+        }
+
         /// <summary>
         /// This will provide capability add new Transaction
         /// </summary>       
