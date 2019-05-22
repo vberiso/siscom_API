@@ -496,7 +496,7 @@ namespace Siscom.Agua.Api.Controllers
                         _sumPayDebtDetail += y.OnPayment;
                         _sumDebtDetail += y.OnAccount;
 
-                        if (y.HaveTax)
+                         if (y.HaveTax)
                         {
                             _sumTaxDebtDetail += y.Tax;
                             if (y.Tax == 0)
@@ -1058,6 +1058,7 @@ namespace Siscom.Agua.Api.Controllers
             decimal _sumTransactionDetail = 0;
             decimal sumPayDetail = 0;
             decimal _saldo = 0;
+            bool removeItem = false;
 
             #region Validación
             //Parametros
@@ -1188,15 +1189,15 @@ namespace Siscom.Agua.Api.Controllers
                     transaction.Total = pCancelPayment.Transaction.Total;
                     transaction.Account = pCancelPayment.Transaction.Account;
                     transaction.AccountNumber = pCancelPayment.Transaction.AccountNumber;
-                    transaction.NumberBank = pCancelPayment.Transaction.NumberBank;                    
-                    _context.Transactions.Add(transaction);
-                    await _context.SaveChangesAsync();
+                    transaction.NumberBank = pCancelPayment.Transaction.NumberBank;
+                    _context.Transactions.Add(transaction);           //<-----------------------------------------------------------
+                    await _context.SaveChangesAsync();                //<-----------------------------------------------------------
 
                     //se modifica estado de pago
                     payment = await _context.Payments.FindAsync(pCancelPayment.Payment.Id);
                     payment.Status = "EP002";
-                    _context.Entry(payment).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();
+                    _context.Entry(payment).State = EntityState.Modified;     //<-----------------------------------------------------------
+                    await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
 
                     var debtList = pCancelPayment.Payment.PaymentDetails.Select(x => x.DebtId).Distinct();
 
@@ -1214,7 +1215,7 @@ namespace Siscom.Agua.Api.Controllers
 
                             if (statusDebt != null)
                             {
-                                if (statusDebt.Count >= 2)
+                                if (statusDebt.Count >= 1)
                                 {
                                     for (int i = 0; i < statusDebt.Count; i++)
                                     {
@@ -1249,18 +1250,27 @@ namespace Siscom.Agua.Api.Controllers
                             debt.Status = statusAnterior;
                             debt.OnAccount = debt.OnAccount - sumPaymentDetails;
 
-                            _context.Entry(debt).State = EntityState.Modified;
-                            await _context.SaveChangesAsync();
+                            _context.Entry(debt).State = EntityState.Modified;        //<-----------------------------------------------------------
+                            await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
 
-                            DebtStatus debtStatus = new DebtStatus()
+                            if (!removeItem)
                             {
-                                id_status = debt.Status,
-                                DebtStatusDate = transaction.DateTransaction,
-                                User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
-                                DebtId = debt.Id
-                            };
-                            _context.DebtStatuses.Add(debtStatus);
-                            await _context.SaveChangesAsync();
+                                _context.Entry(await _context.DebtStatuses.FindAsync(statusDebt.First().Id)).State = EntityState.Deleted;
+                                await _context.SaveChangesAsync();
+                                removeItem = true;
+                            }
+
+                            //DebtStatus debtStatus = new DebtStatus()
+                            //{
+                            //    id_status = debt.Status,
+                            //    DebtStatusDate = transaction.DateTransaction,
+                            //    User = terminalUser.User.Name + ' ' + terminalUser.User.LastName,
+                            //    DebtId = debt.Id
+                            //};
+                            //_context.DebtStatuses.Add(debtStatus);                    //<-----------------------------------------------------------
+                            //await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
+
+                            removeItem = false;
                         }
                     }
                     else
@@ -1274,8 +1284,8 @@ namespace Siscom.Agua.Api.Controllers
                         transactionDetail.Amount = pay.Amount;
                         transactionDetail.Description = pay.Description;
                         transactionDetail.Transaction = transaction;
-                        _context.TransactionDetails.Add(transactionDetail);
-                        await _context.SaveChangesAsync();
+                        _context.TransactionDetails.Add(transactionDetail);       //<-----------------------------------------------------------
+                        await _context.SaveChangesAsync();                        //<----------------------------------------------------------- 
 
                         DebtDetail debtDetail = new DebtDetail();
                         debtDetail = await _context.DebtDetails.Where(x => x.DebtId == pay.DebtId &&
@@ -1285,7 +1295,7 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: pay.Description) });
 
                         debtDetail.OnAccount -= pay.Amount;
-                        await _context.SaveChangesAsync();
+                        await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
                     }
                     scope.Complete();
                 }
