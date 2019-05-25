@@ -65,7 +65,7 @@ namespace Siscom.Agua.Api.Controllers
             //{
 
             //}
-            return Ok();
+           // return Ok();
         }
 
         private async Task<string> ExectSP(PushNotifications discount)

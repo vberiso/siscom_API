@@ -111,7 +111,7 @@ namespace Siscom.Agua.Api.Controllers
         /// </remarks>
         /// 
         [HttpGet("GetAllDiscountAuthorizationList/{date}")]
-        public async Task<IEnumerable<DiscountAuthorization>> GetAllListDiscountAuthorizations([FromRoute]string date)
+        public async Task<IEnumerable<DiscountAuthorizationVM>> GetAllListDiscountAuthorizations([FromRoute]string date)
         {
             DateTime datee = new DateTime();
             DateTime.TryParse(date, out datee);
@@ -119,6 +119,32 @@ namespace Siscom.Agua.Api.Controllers
             {
                 var data = _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
+                                            .Select(x => new DiscountAuthorizationVM()
+                                            {
+                                                Status = x.Status,
+                                                FileName = x.FileName,
+                                                FileNameDB = x.FileName,
+                                                KeyFirebase = x.KeyFirebase,
+                                                Folio = x.Folio,
+                                                Account = x.Account,
+                                                AccountAdjusted = x.AccountAdjusted,
+                                                Amount = x.Amount,
+                                                AmountDiscount = x.AmountDiscount,
+                                                AuthorizationDate = x.AuthorizationDate,
+                                                BranchOffice = x.BranchOffice,
+                                                DiscountAuthorizationDetails = x.DiscountAuthorizationDetails,
+                                                DiscountPercentage = x.DiscountPercentage,
+                                                ExpirationDate = x.ExpirationDate,
+                                                Id = x.Id,
+                                                IdOrigin = x.IdOrigin,
+                                                Observation = x.Observation,
+                                                ObservationResponse = x.ObservationResponse,
+                                                RequestDate = x.RequestDate,
+                                                Type = x.Type,
+                                                UserRequestId = x.UserRequestId,
+                                                UserRequest = x.UserRequest,
+                                                UserAuthorizationId = x.UserAuthorizationId,
+                                            })
                                             .Where(y => y.RequestDate.Date >= datee.Date)
                                             .OrderByDescending(x => x.RequestDate)
                                             .ToList();
@@ -134,6 +160,40 @@ namespace Siscom.Agua.Api.Controllers
                             ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
                             if (FullName != null)
                                 x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                            ApplicationUser requestName = userManager.FindByIdAsync(x.UserRequestId).Result;
+                            x.NameUserRequest = $"{requestName.Name} {requestName.LastName} {requestName.SecondLastName}";
+                            if (x.DiscountAuthorizationDetails.First().DebtId != 0)
+                            {
+                                var debt = _context.Debts.Include(dd => dd.DebtDetails)
+                                                                .Where(gs => _context.Statuses
+                                                                    .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) &&
+                                                                                gs.AgreementId == _context.Agreements.Where(p => p.Account == x.Account).Select(p => p.Id)
+                                                                                .FirstOrDefault())
+                                                                                    .OrderBy(p => p.FromDate)
+                                                                                    .ToListAsync();
+
+                                //var deb = debt.Result.Where(z => (z.Status == "ED005" || z.Status == "ED004")).ToList();
+                                if (debt.Result.Count == 0)
+                                {
+                                    x.IsApplied = true;
+                                }
+                                else
+                                {
+                                    x.IsApplied = false;
+                                }
+                            }
+                            else
+                            {
+                                if (_context.OrderSales.Where(z => z.Status == "EOS02" && z.Id == x.DiscountAuthorizationDetails.First().OrderSaleId).ToList().Count > 0)
+                                {
+                                    x.IsApplied = true;
+                                }
+                                else
+                                {
+                                    x.IsApplied = false;
+                                }
+                            }
+
                         });
                     }
                     else
@@ -145,6 +205,39 @@ namespace Siscom.Agua.Api.Controllers
                             ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
                             if (FullName != null)
                                 x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                            ApplicationUser requestName = userManager.FindByIdAsync(x.UserRequestId).Result;
+                            x.NameUserRequest = $"{requestName.Name} {requestName.LastName} {requestName.SecondLastName}";
+                            if (x.DiscountAuthorizationDetails.First().DebtId != 0)
+                            {
+                                var debt = _context.Debts.Include(dd => dd.DebtDetails)
+                                                                .Where(gs => _context.Statuses
+                                                                    .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) &&
+                                                                                gs.AgreementId == _context.Agreements.Where(p => p.Account == x.Account).Select(p => p.Id)
+                                                                                .FirstOrDefault())
+                                                                                    .OrderBy(p => p.FromDate)
+                                                                                    .ToListAsync();
+
+                                //var deb = debt.Result.Where(z => (z.Status == "ED005" || z.Status == "ED004")).ToList();
+                                if (debt.Result.Count == 0)
+                                {
+                                    x.IsApplied = true;
+                                }
+                                else
+                                {
+                                    x.IsApplied = false;
+                                }
+                            }
+                            else
+                            {
+                                if (_context.OrderSales.Where(z => z.Status == "EOS02" && z.Folio == x.AccountAdjusted).ToList().Count > 0)
+                                {
+                                    x.IsApplied = true;
+                                }
+                                else
+                                {
+                                    x.IsApplied = false;
+                                }
+                            }
                         });
                     }
                 }
@@ -158,23 +251,62 @@ namespace Siscom.Agua.Api.Controllers
             }
             else
             {
-                return new List<DiscountAuthorization>();
+                return new List<DiscountAuthorizationVM>();
             }
         }
 
         // GET: api/DiscountAuthorizations
         [HttpGet("List/{UserId}/{date}")]
-        public async Task<IEnumerable<DiscountAuthorization>> GetDiscountAuthorizations([FromRoute] string UserId, [FromRoute] string date)
+        public async Task<IEnumerable<DiscountAuthorizationVM>> GetDiscountAuthorizations([FromRoute] string UserId, [FromRoute] string date)
         {
             DateTime datee = new DateTime();
             DateTime.TryParse(date, out datee);
+
+            var requests = _context.DiscountAuthorizations
+                                    .Where(x => x.UserRequestId == UserId && 
+                                                x.ExpirationDate < DateTime.Now.ToLocalTime() &&
+                                                x.Status == "EDE01").ToList();
+            requests.ForEach(x =>
+            {
+                x.Status = "EDE03";
+                x.Observation = "LA_SOLICITUD_EXPIRO";
+                _context.Entry(x).State = EntityState.Modified;
+                _context.SaveChanges();
+            });
+
             if (datee != DateTime.MinValue)
             {
                 var data = _context.DiscountAuthorizations
                                            .Include(x => x.DiscountAuthorizationDetails)
+                                           .Select(x => new DiscountAuthorizationVM()
+                                           {
+                                               Status = x.Status,
+                                               FileName = x.FileName,
+                                               KeyFirebase = x.KeyFirebase,
+                                               Folio = x.Folio,
+                                               Account = x.Account,
+                                               AccountAdjusted = x.AccountAdjusted,
+                                               Amount = x.Amount,
+                                               AmountDiscount = x.AmountDiscount,
+                                               AuthorizationDate = x.AuthorizationDate,
+                                               BranchOffice = x.BranchOffice,
+                                               DiscountAuthorizationDetails = x.DiscountAuthorizationDetails,
+                                               DiscountPercentage = x.DiscountPercentage,
+                                               ExpirationDate = x.ExpirationDate,
+                                               Id = x.Id,
+                                               IdOrigin = x.IdOrigin,
+                                               Observation = x.Observation,
+                                               ObservationResponse = x.ObservationResponse,
+                                               RequestDate = x.RequestDate,
+                                               Type = x.Type,
+                                               UserRequestId = x.UserRequestId,
+                                               UserRequest = x.UserRequest,
+                                               UserAuthorizationId = x.UserAuthorizationId,
+                                           })
                                            .Where(x => x.UserRequestId == UserId && x.RequestDate.Date >= datee.Date)
                                            .OrderByDescending(x => x.AuthorizationDate)
                                            .ToList();
+
                 try
                 {
                     if (appSettings.Local)
@@ -187,6 +319,41 @@ namespace Siscom.Agua.Api.Controllers
                             ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
                             if (FullName != null)
                                 x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                            ApplicationUser requestName = userManager.FindByIdAsync(x.UserRequestId).Result;
+                            x.NameUserRequest = $"{requestName.Name} {requestName.LastName} {requestName.SecondLastName}";
+                            if(x.DiscountAuthorizationDetails.First().DebtId != 0)
+                            {
+                                var debt = _context.Debts.Include(dd => dd.DebtDetails)
+                                                                .Where(gs => _context.Statuses
+                                                                    .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) &&
+                                                                                gs.AgreementId == _context.Agreements.Where(p => p.Account == x.Account).Select(p => p.Id)
+                                                                                .FirstOrDefault())
+                                                                                    .OrderBy(p => p.FromDate)
+                                                                                    .ToListAsync();
+
+                                //var deb = debt.Result.Where(z => (z.Status == "ED005" || z.Status == "ED004")).ToList();
+                                if (debt.Result.Count == 0)
+                                {
+                                    x.IsApplied = true;
+                                }
+                                else
+                                {
+                                    x.IsApplied = false;
+                                }
+                            }
+                            else
+                            {
+                                if(_context.OrderSales.Where(z => z.Status == "EOS02" && z.Id == x.DiscountAuthorizationDetails.First().OrderSaleId).ToList().Count > 0)
+                                {
+                                    x.IsApplied = true;
+                                }
+                                else
+                                {
+                                    x.IsApplied = false;
+                                }
+                            }
+                           
+                            //if(_context.Debts.Find(x.DiscountAuthorizationDetails.Any(x => x.DebtId)))
                         });
                     }
                     else
@@ -198,6 +365,39 @@ namespace Siscom.Agua.Api.Controllers
                             ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
                             if (FullName != null)
                                 x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                            ApplicationUser requestName = userManager.FindByIdAsync(x.UserRequestId).Result;
+                            x.NameUserRequest = $"{requestName.Name} {requestName.LastName} {requestName.SecondLastName}";
+                            if (x.DiscountAuthorizationDetails.First().DebtId != 0)
+                            {
+                                var debt = _context.Debts.Include(dd => dd.DebtDetails)
+                                                                .Where(gs => _context.Statuses
+                                                                    .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && 
+                                                                                gs.AgreementId == _context.Agreements.Where(p => p.Account == x.Account).Select(p => p.Id)
+                                                                                .FirstOrDefault())
+                                                                                    .OrderBy(p => p.FromDate)
+                                                                                    .ToListAsync();
+
+                                //var deb = debt.Result.Where(z => (z.Status == "ED005" || z.Status == "ED004")).ToList();
+                                if (debt.Result.Count == 0)
+                                {
+                                    x.IsApplied = true;
+                                }
+                                else
+                                {
+                                    x.IsApplied = false;
+                                }
+                            }
+                            else
+                            {
+                                if (_context.OrderSales.Where(z => z.Status == "EOS02" && z.Folio == x.AccountAdjusted).ToList().Count > 0)
+                                {
+                                    x.IsApplied = true;
+                                }
+                                else
+                                {
+                                    x.IsApplied = false;
+                                }
+                            }
                         });
                     }
                 }
@@ -211,7 +411,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             else
             {
-                return new List<DiscountAuthorization>();
+                return new List<DiscountAuthorizationVM>();
             }  
         }
 
@@ -412,7 +612,7 @@ namespace Siscom.Agua.Api.Controllers
                     Directory.CreateDirectory(uploadFilesPath);
 
                 //var fileName = CleanInput(file.FileName);
-                var fileName = "Autorizacion_"+ Folio;
+                var fileName = "Solicitud_"+ Folio;
                 var filePath = Path.Combine(uploadFilesPath, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -427,10 +627,10 @@ namespace Siscom.Agua.Api.Controllers
 
                 System.IO.File.Delete(filePath);
                 FileInfo fileInfo = new FileInfo(filePath + ".aes");
-                var newName = AESEncryptionString.EncryptString(file.FileName + ".aes", appSettings.IssuerName);
+                var newName = AESEncryptionString.EncryptString(fileName + ".aes", appSettings.IssuerName);
                 while (newName.Contains("\\") || newName.Contains("/"))
                 {
-                    newName = AESEncryptionString.EncryptString(file.FileName + ".aes", appSettings.IssuerName);
+                    newName = AESEncryptionString.EncryptString(fileName + ".aes", appSettings.IssuerName);
                 }
                 fileInfo.Rename(newName);
                 return fileInfo.Name;
@@ -662,31 +862,83 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet("DownloadFileAzure/{Account}/{FileName}")]
-        public async Task<FileResult> DownloadFileAzure([FromRoute] string Account, string FileName)
+        public async Task<IActionResult> DownloadFileAzure([FromRoute] string Account, string FileName)
         {
-            CloudStorageAccount account = new CloudStorageAccount(new StorageCredentials(appSettings.StorageDiscount, appSettings.DiscountKey), true);
-            CloudBlobClient blobClient = account.CreateCloudBlobClient();
-
-            Account = Account.PadLeft(4, '0');
-            CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
-            CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(FileName);
-            try
+            if (appSettings.Local)
             {
-                using (MemoryStream memStream = new MemoryStream())
+                string name = AESEncryptionString.EncryptString(FileName+".aes", appSettings.IssuerName);
+                var path = Path.Combine(appSettings.FilePath, Account, name);
+                var pathd = Path.Combine(appSettings.FilePath, Account, FileName);
+                if (!System.IO.File.Exists(path))
                 {
-                    await blockBlob.DownloadToStreamAsync(memStream).ConfigureAwait(false);
-                    memStream.Position = 0;
-                    return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
+                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no se encuentra favor de verificar" });
+                }
+                else
+                {
+                    GCHandle gch = GCHandle.Alloc(appSettings.IssuerExpedient, GCHandleType.Pinned);
+                    AESEncryption.FileDecrypt(path, pathd, appSettings.IssuerExpedient);
+                    AESEncryption.ZeroMemory(gch.AddrOfPinnedObject(), appSettings.IssuerExpedient.Length * 2);
+                    gch.Free();
+
+                    var memory = new MemoryStream();
+                    using (var stream = new FileStream(pathd, FileMode.Open))
                     {
-                        FileDownloadName = FileName
-                    };
+                        await stream.CopyToAsync(memory);
+                    }
+                    memory.Position = 0;
+                    System.IO.File.Delete(pathd);
+                    return File(memory, GetContentType(System.IO.Path.GetExtension(FileName)), FileName);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                return null;
+                CloudStorageAccount account = new CloudStorageAccount(new StorageCredentials(appSettings.StorageDiscount, appSettings.DiscountKey), true);
+                CloudBlobClient blobClient = account.CreateCloudBlobClient();
+
+                Account = Account.PadLeft(4, '0');
+                CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
+                CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(FileName);
+                try
+                {
+                    using (MemoryStream memStream = new MemoryStream())
+                    {
+                        await blockBlob.DownloadToStreamAsync(memStream).ConfigureAwait(false);
+                        memStream.Position = 0;
+                        return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
+                        {
+                            FileDownloadName = FileName
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
             }
-           
+        }
+
+        private string GetContentType(string ext)
+        {
+            var types = GetMimeTypes();
+            return types[ext];
+        }
+
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+            {
+                {".txt", "text/plain"},
+                {".pdf", "application/pdf"},
+                {".doc", "application/vnd.ms-word"},
+                {".docx", "application/vnd.ms-word"},
+                {".xls", "application/vnd.ms-excel"},
+                {".xlsx", "application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet"},
+                {".png", "image/png"},
+                {".jpg", "image/jpeg"},
+                {".jpeg", "image/jpeg"},
+                {".gif", "image/gif"},
+                {".csv", "text/csv"}
+            };
         }
     }
 }
