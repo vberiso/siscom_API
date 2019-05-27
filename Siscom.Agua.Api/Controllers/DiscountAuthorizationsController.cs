@@ -612,7 +612,7 @@ namespace Siscom.Agua.Api.Controllers
                     Directory.CreateDirectory(uploadFilesPath);
 
                 //var fileName = CleanInput(file.FileName);
-                var fileName = "Solicitud_"+ Folio;
+                var fileName = string.Format("Solicitud_{0}{1}" , Folio, System.IO.Path.GetExtension(file.FileName));
                 var filePath = Path.Combine(uploadFilesPath, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -864,11 +864,14 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("DownloadFileAzure/{Account}/{FileName}")]
         public async Task<IActionResult> DownloadFileAzure([FromRoute] string Account, string FileName)
         {
+            var replacename = FileName.Replace("[ ]", "+");
+            string name = AESEncryptionString.DecryptString(replacename, appSettings.IssuerName);
+            string removeencript = name.Remove(name.Length - 4, 4);
+
             if (appSettings.Local)
             {
-                string name = AESEncryptionString.EncryptString(FileName+".aes", appSettings.IssuerName);
-                var path = Path.Combine(appSettings.FilePath, Account, name);
-                var pathd = Path.Combine(appSettings.FilePath, Account, FileName);
+                var path = Path.Combine(appSettings.FilePath, "Descuentos", Account, replacename);
+                var pathd = Path.Combine(appSettings.FilePath, "Descuentos", Account, removeencript);
                 if (!System.IO.File.Exists(path))
                 {
                     return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no se encuentra favor de verificar" });
@@ -886,8 +889,9 @@ namespace Siscom.Agua.Api.Controllers
                         await stream.CopyToAsync(memory);
                     }
                     memory.Position = 0;
+                    string ext = System.IO.Path.GetExtension(pathd);
                     System.IO.File.Delete(pathd);
-                    return File(memory, GetContentType(System.IO.Path.GetExtension(FileName)), FileName);
+                    return File(memory, GetContentType(System.IO.Path.GetExtension(removeencript)), removeencript);
                 }
             }
             else
@@ -897,7 +901,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 Account = Account.PadLeft(4, '0');
                 CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
-                CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(FileName);
+                CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(removeencript);
                 try
                 {
                     using (MemoryStream memStream = new MemoryStream())
@@ -906,7 +910,7 @@ namespace Siscom.Agua.Api.Controllers
                         memStream.Position = 0;
                         return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
                         {
-                            FileDownloadName = FileName
+                            FileDownloadName = removeencript
                         };
                     }
                 }
