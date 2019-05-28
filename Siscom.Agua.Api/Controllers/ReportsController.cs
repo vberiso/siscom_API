@@ -303,11 +303,35 @@ namespace Siscom.Agua.Api.Controllers
             var dataTable = new DataTable();
             using (var command = _context.Database.GetDbConnection().CreateCommand())
             {
-                command.CommandText = "[dbo].[sp_Historial]";
+                command.CommandText = "[dbo].[sp_RecordDetails]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@fecha", pData.FechaIni));                
                 command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
                 
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);
+        }
+
+        [HttpPost("IncomeOfTreasury")]
+        public async Task<IActionResult> GetIncomeOfTreasury([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
+        {
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "[dbo].[sp_IncomeOfTreasury]";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fechaIni", pData.FechaIni));
+                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
+                command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
+                command.Parameters.Add(new SqlParameter("@Areas", pData.Oficinas));
+
+
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
