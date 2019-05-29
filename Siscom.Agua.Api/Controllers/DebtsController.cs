@@ -74,6 +74,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             var debt = await _context.Debts
+                                    .Include(x => x.DebtDetails)
                                     .Where(gs => gs.AgreementId == idAgreement).OrderByDescending(x => x.FromDate).ToListAsync();
             var status = await _context.Statuses.ToListAsync();
             var type = await _context.Types.ToListAsync();

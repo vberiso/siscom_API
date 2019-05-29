@@ -96,8 +96,7 @@ namespace Siscom.Agua.Api.Controllers
 
             return data;
         }
-
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -427,58 +426,74 @@ namespace Siscom.Agua.Api.Controllers
             response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
             return Ok(notification);
         }
-        // GET: api/DiscountAuthorizations/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetDiscountAuthorization([FromRoute] int id)
+
+        [HttpGet("GetDiscountAuthorizationByAccount/{Account}")]
+        public async Task<IActionResult> GetDiscountAuthorizationByAccount([FromRoute] string Account)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var discountAuthorization = await _context.DiscountAuthorizations.FindAsync(id);
-
-            if (discountAuthorization == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(discountAuthorization);
+            return Ok(await _context.DiscountAuthorizations.Where(x => x.Account == Account &&
+                                                                            x.Status == "EDE01" &&
+                                                                            x.ExpirationDate >= DateTime.Now.ToLocalTime()).ToListAsync());
+           
         }
 
-        // PUT: api/DiscountAuthorizations/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDiscountAuthorization([FromRoute] int id, [FromBody] DiscountAuthorization discountAuthorization)
+        [HttpGet("DownloadFileAzure/{Account}/{FileName}")]
+        public async Task<IActionResult> DownloadFileAzure([FromRoute] string Account, string FileName)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var replacename = FileName.Replace("[ ]", "+");
+            string name = AESEncryptionString.DecryptString(replacename, appSettings.IssuerName);
+            string removeencript = name.Remove(name.Length - 4, 4);
 
-            if (id != discountAuthorization.Id)
+            if (appSettings.Local)
             {
-                return BadRequest();
-            }
-
-            _context.Entry(discountAuthorization).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DiscountAuthorizationExists(id))
+                var path = Path.Combine(appSettings.FilePath, "Descuentos", Account, replacename);
+                var pathd = Path.Combine(appSettings.FilePath, "Descuentos", Account, removeencript);
+                if (!System.IO.File.Exists(path))
                 {
-                    return NotFound();
+                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no se encuentra favor de verificar" });
                 }
                 else
                 {
-                    throw;
+                    GCHandle gch = GCHandle.Alloc(appSettings.IssuerExpedient, GCHandleType.Pinned);
+                    AESEncryption.FileDecrypt(path, pathd, appSettings.IssuerExpedient);
+                    AESEncryption.ZeroMemory(gch.AddrOfPinnedObject(), appSettings.IssuerExpedient.Length * 2);
+                    gch.Free();
+
+                    var memory = new MemoryStream();
+                    using (var stream = new FileStream(pathd, FileMode.Open))
+                    {
+                        await stream.CopyToAsync(memory);
+                    }
+                    memory.Position = 0;
+                    string ext = System.IO.Path.GetExtension(pathd);
+                    System.IO.File.Delete(pathd);
+                    return File(memory, GetContentType(System.IO.Path.GetExtension(removeencript)), removeencript);
                 }
             }
+            else
+            {
+                CloudStorageAccount account = new CloudStorageAccount(new StorageCredentials(appSettings.StorageDiscount, appSettings.DiscountKey), true);
+                CloudBlobClient blobClient = account.CreateCloudBlobClient();
 
-            return NoContent();
+                Account = Account.PadLeft(4, '0');
+                CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
+                CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(removeencript);
+                try
+                {
+                    using (MemoryStream memStream = new MemoryStream())
+                    {
+                        await blockBlob.DownloadToStreamAsync(memStream).ConfigureAwait(false);
+                        memStream.Position = 0;
+                        return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
+                        {
+                            FileDownloadName = removeencript
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+            }
         }
 
         // POST: api/DiscountAuthorizations
@@ -574,72 +589,7 @@ namespace Siscom.Agua.Api.Controllers
                Id = discountAuthorization.Id,
                FileName = discountAuthorization.FileName
             });
-        }
-
-        // DELETE: api/DiscountAuthorizations/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDiscountAuthorization([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var discountAuthorization = await _context.DiscountAuthorizations.FindAsync(id);
-            if (discountAuthorization == null)
-            {
-                return NotFound();
-            }
-
-            _context.DiscountAuthorizations.Remove(discountAuthorization);
-            await _context.SaveChangesAsync();
-
-            return Ok(discountAuthorization);
-        }
-
-        private bool DiscountAuthorizationExists(int id)
-        {
-            return _context.DiscountAuthorizations.Any(e => e.Id == id);
-        }
-        
-        private async Task<string> UploadFileLocal(IFormFile file, string Account, string Folio)
-        {
-            try
-            {
-                var uploadFilesPath = Path.Combine(appSettings.FilePath, "Descuentos", Account);
-
-                if (!Directory.Exists(uploadFilesPath))
-                    Directory.CreateDirectory(uploadFilesPath);
-
-                //var fileName = CleanInput(file.FileName);
-                var fileName = string.Format("Solicitud_{0}{1}" , Folio, System.IO.Path.GetExtension(file.FileName));
-                var filePath = Path.Combine(uploadFilesPath, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                GCHandle gch = GCHandle.Alloc(appSettings.IssuerExpedient, GCHandleType.Pinned);
-                AESEncryption.FileEncrypt(filePath, appSettings.IssuerExpedient);
-                AESEncryption.ZeroMemory(gch.AddrOfPinnedObject(), appSettings.IssuerExpedient.Length * 2);
-                gch.Free();
-
-                System.IO.File.Delete(filePath);
-                FileInfo fileInfo = new FileInfo(filePath + ".aes");
-                var newName = AESEncryptionString.EncryptString(fileName + ".aes", appSettings.IssuerName);
-                while (newName.Contains("\\") || newName.Contains("/"))
-                {
-                    newName = AESEncryptionString.EncryptString(fileName + ".aes", appSettings.IssuerName);
-                }
-                fileInfo.Rename(newName);
-                return fileInfo.Name;
-            }
-            catch (Exception)
-            {
-                return "";
-            }
-        }
+        }  
 
         [HttpPost("{id}")]
         public async Task<IActionResult> ExectDiscount([FromRoute] int id, [FromBody] AuthorizationDiscountVM authorization)
@@ -811,8 +761,27 @@ namespace Siscom.Agua.Api.Controllers
 
                 @notification.UserResponseId = authorization.UserId;
                 @notification.ResponseDate = DateTime.Now.ToLocalTime();
-                @notification.IsReply = true;
-                @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Autorizado);
+                @notification.IsReply = false;
+                @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Rechazado);
+
+                response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
+                return Ok();
+            }
+            else if (authorization.Status == "EDE03")
+            {
+                discount.ObservationResponse = authorization.ResponseObservations;
+                discount.AuthorizationDate = DateTime.Now.ToLocalTime();
+                discount.UserAuthorizationId = authorization.UserId;
+                discount.Status = authorization.Status;
+                discount.AccountAdjusted = account;
+
+                _context.Entry(discount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                @notification.UserResponseId = authorization.UserId;
+                @notification.ResponseDate = DateTime.Now.ToLocalTime();
+                @notification.IsReply = false;
+                @notification.Status = Enum.GetName(typeof(TypeStatus), TypeStatus.Cancelado);
 
                 response = firebaseDBNotificationsDiscount.Put(JsonConvert.SerializeObject(notification));
                 return Ok();
@@ -823,6 +792,80 @@ namespace Siscom.Agua.Api.Controllers
             }
             
             //return Ok();
+        }
+
+        // PUT: api/DiscountAuthorizations/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutDiscountAuthorization([FromRoute] int id, [FromBody] DiscountAuthorization discountAuthorization)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != discountAuthorization.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(discountAuthorization).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!DiscountAuthorizationExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        private async Task<string> UploadFileLocal(IFormFile file, string Account, string Folio)
+        {
+            try
+            {
+                var uploadFilesPath = Path.Combine(appSettings.FilePath, "Descuentos", Account);
+
+                if (!Directory.Exists(uploadFilesPath))
+                    Directory.CreateDirectory(uploadFilesPath);
+
+                //var fileName = CleanInput(file.FileName);
+                var fileName = string.Format("Solicitud_{0}{1}", Folio, System.IO.Path.GetExtension(file.FileName));
+                var filePath = Path.Combine(uploadFilesPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                GCHandle gch = GCHandle.Alloc(appSettings.IssuerExpedient, GCHandleType.Pinned);
+                AESEncryption.FileEncrypt(filePath, appSettings.IssuerExpedient);
+                AESEncryption.ZeroMemory(gch.AddrOfPinnedObject(), appSettings.IssuerExpedient.Length * 2);
+                gch.Free();
+
+                System.IO.File.Delete(filePath);
+                FileInfo fileInfo = new FileInfo(filePath + ".aes");
+                var newName = AESEncryptionString.EncryptString(fileName + ".aes", appSettings.IssuerName);
+                while (newName.Contains("\\") || newName.Contains("/"))
+                {
+                    newName = AESEncryptionString.EncryptString(fileName + ".aes", appSettings.IssuerName);
+                }
+                fileInfo.Rename(newName);
+                return fileInfo.Name;
+            }
+            catch (Exception)
+            {
+                return "";
+            }
         }
 
         private async Task<string> UploadFileAzure(IFormFile file, string Account, string Folio)
@@ -861,66 +904,6 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
-        [HttpGet("DownloadFileAzure/{Account}/{FileName}")]
-        public async Task<IActionResult> DownloadFileAzure([FromRoute] string Account, string FileName)
-        {
-            var replacename = FileName.Replace("[ ]", "+");
-            string name = AESEncryptionString.DecryptString(replacename, appSettings.IssuerName);
-            string removeencript = name.Remove(name.Length - 4, 4);
-
-            if (appSettings.Local)
-            {
-                var path = Path.Combine(appSettings.FilePath, "Descuentos", Account, replacename);
-                var pathd = Path.Combine(appSettings.FilePath, "Descuentos", Account, removeencript);
-                if (!System.IO.File.Exists(path))
-                {
-                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Archivo no se encuentra favor de verificar" });
-                }
-                else
-                {
-                    GCHandle gch = GCHandle.Alloc(appSettings.IssuerExpedient, GCHandleType.Pinned);
-                    AESEncryption.FileDecrypt(path, pathd, appSettings.IssuerExpedient);
-                    AESEncryption.ZeroMemory(gch.AddrOfPinnedObject(), appSettings.IssuerExpedient.Length * 2);
-                    gch.Free();
-
-                    var memory = new MemoryStream();
-                    using (var stream = new FileStream(pathd, FileMode.Open))
-                    {
-                        await stream.CopyToAsync(memory);
-                    }
-                    memory.Position = 0;
-                    string ext = System.IO.Path.GetExtension(pathd);
-                    System.IO.File.Delete(pathd);
-                    return File(memory, GetContentType(System.IO.Path.GetExtension(removeencript)), removeencript);
-                }
-            }
-            else
-            {
-                CloudStorageAccount account = new CloudStorageAccount(new StorageCredentials(appSettings.StorageDiscount, appSettings.DiscountKey), true);
-                CloudBlobClient blobClient = account.CreateCloudBlobClient();
-
-                Account = Account.PadLeft(4, '0');
-                CloudBlobContainer cloudBlobContainer = blobClient.GetContainerReference(Account);
-                CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(removeencript);
-                try
-                {
-                    using (MemoryStream memStream = new MemoryStream())
-                    {
-                        await blockBlob.DownloadToStreamAsync(memStream).ConfigureAwait(false);
-                        memStream.Position = 0;
-                        return new FileContentResult(memStream.ToArray(), new MediaTypeHeaderValue(blockBlob.Properties.ContentType.ToString()))
-                        {
-                            FileDownloadName = removeencript
-                        };
-                    }
-                }
-                catch (Exception ex)
-                {
-                    return null;
-                }
-            }
-        }
-
         private string GetContentType(string ext)
         {
             var types = GetMimeTypes();
@@ -943,6 +926,11 @@ namespace Siscom.Agua.Api.Controllers
                 {".gif", "image/gif"},
                 {".csv", "text/csv"}
             };
+        }
+
+        private bool DiscountAuthorizationExists(int id)
+        {
+            return _context.DiscountAuthorizations.Any(e => e.Id == id);
         }
     }
 }
