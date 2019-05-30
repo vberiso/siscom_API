@@ -225,14 +225,14 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(dataTable);
         }
 
-        [HttpPost("IncomeByConcept")]
-        public async Task<IActionResult> GetIncomeByConcept([FromBody] Siscom.Agua.Api.Model.DataReportes pData )
+        [HttpPost("IncomeGrouped")]
+        public async Task<IActionResult> GetIncomeGrouped([FromBody] Siscom.Agua.Api.Model.DataReportes pData )
         {
             string error = string.Empty;
             var dataTable = new DataTable();
             using (var command = _context.Database.GetDbConnection().CreateCommand())
             {
-                command.CommandText = "[dbo].[sp_IncomeByConcept]";
+                command.CommandText = "[dbo].[sp_IncomeGrouped]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));                
@@ -270,23 +270,20 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(dataTable);
         }
 
-        [HttpPost("Collection")]
-        public async Task<IActionResult> GetCollection([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
+        [HttpPost("IncomeByConcept")]
+        public async Task<IActionResult> GetIncomeByConcept([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
         {
             string error = string.Empty;
             var dataTable = new DataTable();
             using (var command = _context.Database.GetDbConnection().CreateCommand())
             {
-                command.CommandText = "[dbo].[sp_Collection]";
+                command.CommandText = "[dbo].[sp_IncomeByConcept]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
                 command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
                 command.Parameters.Add(new SqlParameter("@Oficinas", pData.Oficinas));
-                //command.Parameters.Add(new SqlParameter("@CNombre", pData.CajeroNombre));
-                //command.Parameters.Add(new SqlParameter("@CAPaterno", pData.CajeroAPaterno));
-                //command.Parameters.Add(new SqlParameter("@CAMaterno", pData.CajeroAMaterno));
-
+               
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
