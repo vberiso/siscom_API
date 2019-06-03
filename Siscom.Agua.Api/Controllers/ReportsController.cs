@@ -338,17 +338,37 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(dataTable);
         }
 
-        [HttpGet("Debts/{IdsCol}")]
-        public async Task<IActionResult> GetIncomeOfTreasury([FromRoute] string IdsCol)
+        [HttpGet("DebtsCouncil/{IdsCol}")]
+        public async Task<IActionResult> GetDebtsCouncil([FromRoute] string IdsCol)
         {
             string error = string.Empty;
             var dataTable = new DataTable();
             using (var command = _context.Database.GetDbConnection().CreateCommand())
             {
-                command.CommandText = "[dbo].[sp_Debts]";
+                command.CommandText = "[dbo].[sp_DebtsAyunt]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@idColonias", IdsCol));
                 
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);
+        }
+
+        [HttpGet("DebtsWater/{IdsCol}")]
+        public async Task<IActionResult> GetDebtsWater([FromRoute] string IdsCol)
+        {
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "[dbo].[sp_DebtsAgua]";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@idColonias", IdsCol));
+
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
