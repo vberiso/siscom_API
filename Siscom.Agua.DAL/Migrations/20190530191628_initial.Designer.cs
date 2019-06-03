@@ -10,8 +10,8 @@ using Siscom.Agua.DAL;
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190424220216_ChangeFieldTypeFolioBreach")]
-    partial class ChangeFieldTypeFolioBreach
+    [Migration("20190530191628_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1473,6 +1473,16 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_discount_authorization")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Account")
+                        .IsRequired()
+                        .HasColumnName("account")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("AccountAdjusted")
+                        .IsRequired()
+                        .HasColumnName("account_adjusted ")
+                        .HasMaxLength(50);
+
                     b.Property<decimal>("Amount")
                         .HasColumnName("amount")
                         .HasColumnType("decimal(18, 2)");
@@ -1494,6 +1504,14 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("discount_percentage")
                         .HasDefaultValue((short)0);
 
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnName("expiration_date");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnName("File_Name")
+                        .HasMaxLength(200);
+
                     b.Property<string>("Folio")
                         .IsRequired()
                         .HasColumnName("folio")
@@ -1502,8 +1520,15 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("IdOrigin")
                         .HasColumnName("id_origin");
 
+                    b.Property<string>("KeyFirebase")
+                        .HasColumnName("Key_Firebase")
+                        .HasMaxLength(50);
+
                     b.Property<string>("Observation")
                         .HasColumnName("observation");
+
+                    b.Property<string>("ObservationResponse")
+                        .HasColumnName("observation_response");
 
                     b.Property<DateTime>("RequestDate")
                         .HasColumnName("request_date");
@@ -1537,32 +1562,13 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_authorization_detail")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("CodeConcept")
-                        .IsRequired()
-                        .HasColumnName("code_concept")
-                        .HasMaxLength(5);
-
                     b.Property<int>("DebtId")
                         .HasColumnName("id_debt");
 
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnName("discount_amount");
-
                     b.Property<int>("DiscountAuthorizationId");
-
-                    b.Property<short>("DiscountPercentage")
-                        .HasColumnName("discount_percentage");
-
-                    b.Property<string>("NameConcept")
-                        .IsRequired()
-                        .HasColumnName("name_concept")
-                        .HasMaxLength(500);
 
                     b.Property<int>("OrderSaleId")
                         .HasColumnName("id_order_sale");
-
-                    b.Property<decimal>("OriginalAmount")
-                        .HasColumnName("original_amount");
 
                     b.HasKey("Id");
 
@@ -1664,7 +1670,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 4, 24, 17, 2, 15, 197, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 5, 30, 14, 16, 27, 722, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2248,7 +2254,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnName("description")
-                        .HasMaxLength(150);
+                        .HasMaxLength(800);
 
                     b.Property<bool>("HaveTax")
                         .ValueGeneratedOnAdd()

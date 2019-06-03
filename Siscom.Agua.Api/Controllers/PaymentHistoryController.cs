@@ -32,6 +32,7 @@ namespace Siscom.Agua.Api.Controllers
             var payments = await _context.Payments
                                          .Include(x => x.PaymentDetails)
                                          .Include(x=> x.PayMethod)
+                                         .Include(x => x.TaxReceipts)
                                          .Where(a => a.AgreementId == id)
                                          .OrderByDescending(f => f.PaymentDate.Year)
                                          .ToListAsync();

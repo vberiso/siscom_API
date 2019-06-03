@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Siscom.Agua.DAL.Migrations
 {
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -192,25 +192,6 @@ namespace Siscom.Agua.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Discount", x => x.id_discount);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Discount_Authorization_Detail",
-                columns: table => new
-                {
-                    id_authorization_detail = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    code_concept = table.Column<string>(maxLength: 5, nullable: false),
-                    name_concept = table.Column<string>(maxLength: 500, nullable: false),
-                    original_amount = table.Column<decimal>(nullable: false),
-                    discount_amount = table.Column<decimal>(nullable: false),
-                    discount_percentage = table.Column<short>(nullable: false),
-                    id_debt = table.Column<int>(nullable: false),
-                    id_order_sale = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Discount_Authorization_Detail", x => x.id_authorization_detail);
                 });
 
             migrationBuilder.CreateTable(
@@ -769,17 +750,23 @@ namespace Siscom.Agua.DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     request_date = table.Column<DateTime>(nullable: false),
                     authorization_date = table.Column<DateTime>(nullable: false),
+                    expiration_date = table.Column<DateTime>(nullable: false),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     amount_discount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     discount_percentage = table.Column<short>(nullable: false, defaultValue: (short)0),
+                    account = table.Column<string>(maxLength: 50, nullable: false),
+                    account_adjusted = table.Column<string>(name: "account_adjusted ", maxLength: 50, nullable: false),
                     folio = table.Column<string>(maxLength: 30, nullable: false),
+                    Key_Firebase = table.Column<string>(maxLength: 50, nullable: true),
                     id_origin = table.Column<int>(nullable: false),
                     type = table.Column<string>(maxLength: 5, nullable: false),
                     status = table.Column<string>(maxLength: 5, nullable: false),
                     observation = table.Column<string>(nullable: true),
+                    observation_response = table.Column<string>(nullable: true),
                     branch_office = table.Column<string>(maxLength: 30, nullable: false),
                     UserAuthorizationId = table.Column<string>(nullable: true),
-                    UserRequestId = table.Column<string>(nullable: false)
+                    UserRequestId = table.Column<string>(nullable: false),
+                    File_Name = table.Column<string>(maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -828,7 +815,7 @@ namespace Siscom.Agua.DAL.Migrations
                     range = table.Column<string>(nullable: false),
                     initial = table.Column<int>(nullable: false),
                     secuential = table.Column<int>(nullable: false),
-                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2019, 4, 1, 11, 23, 21, 65, DateTimeKind.Local)),
+                    date_current = table.Column<DateTime>(nullable: false, defaultValue: new DateTime(2019, 5, 30, 14, 16, 27, 722, DateTimeKind.Local)),
                     is_active = table.Column<int>(nullable: false),
                     BranchOfficeId = table.Column<int>(nullable: false)
                 },
@@ -1095,7 +1082,7 @@ namespace Siscom.Agua.DAL.Migrations
                     id_breach = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     series = table.Column<string>(maxLength: 50, nullable: false),
-                    folio = table.Column<int>(nullable: false),
+                    folio = table.Column<string>(maxLength: 25, nullable: false),
                     date_capture = table.Column<DateTime>(nullable: false),
                     place = table.Column<string>(maxLength: 256, nullable: false),
                     sector = table.Column<string>(maxLength: 50, nullable: true),
@@ -1396,6 +1383,27 @@ namespace Siscom.Agua.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Discount_Authorization_Detail",
+                columns: table => new
+                {
+                    id_authorization_detail = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    id_debt = table.Column<int>(nullable: false),
+                    id_order_sale = table.Column<int>(nullable: false),
+                    DiscountAuthorizationId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Discount_Authorization_Detail", x => x.id_authorization_detail);
+                    table.ForeignKey(
+                        name: "FK_Discount_Authorization_Detail_Discount_Authorization_DiscountAuthorizationId",
+                        column: x => x.DiscountAuthorizationId,
+                        principalTable: "Discount_Authorization",
+                        principalColumn: "id_discount_authorization",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Assignment_Ticket",
                 columns: table => new
                 {
@@ -1526,7 +1534,7 @@ namespace Siscom.Agua.DAL.Migrations
                     code_concept = table.Column<string>(maxLength: 10, nullable: true),
                     account_number = table.Column<string>(maxLength: 20, nullable: false),
                     unit_measurement = table.Column<string>(maxLength: 10, nullable: false),
-                    description = table.Column<string>(maxLength: 150, nullable: true),
+                    description = table.Column<string>(maxLength: 800, nullable: true),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     id_debt = table.Column<int>(nullable: false),
                     id_prepaid = table.Column<int>(nullable: false),
@@ -1648,6 +1656,7 @@ namespace Siscom.Agua.DAL.Migrations
                     name_concept = table.Column<string>(maxLength: 500, nullable: false),
                     amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
                     on_account = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    tax = table.Column<decimal>(nullable: false),
                     OrderSaleId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -2609,6 +2618,11 @@ namespace Siscom.Agua.DAL.Migrations
                 column: "UserRequestId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Discount_Authorization_Detail_DiscountAuthorizationId",
+                table: "Discount_Authorization_Detail",
+                column: "DiscountAuthorizationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Folio_BranchOfficeId",
                 table: "Folio",
                 column: "BranchOfficeId");
@@ -2906,9 +2920,6 @@ namespace Siscom.Agua.DAL.Migrations
                 name: "Derivative");
 
             migrationBuilder.DropTable(
-                name: "Discount_Authorization");
-
-            migrationBuilder.DropTable(
                 name: "Discount_Authorization_Detail");
 
             migrationBuilder.DropTable(
@@ -3012,6 +3023,9 @@ namespace Siscom.Agua.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Debt");
+
+            migrationBuilder.DropTable(
+                name: "Discount_Authorization");
 
             migrationBuilder.DropTable(
                 name: "Notification");

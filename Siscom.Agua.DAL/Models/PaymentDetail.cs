@@ -19,7 +19,7 @@ namespace Siscom.Agua.DAL.Models
         public string AccountNumber { get; set; }
         [Column("unit_measurement"), StringLength(10), Required]
         public string UnitMeasurement { get; set; }
-        [Column("description"), StringLength(150)]
+        [Column("description"), StringLength(800)]
         public string Description { get; set; }
         [Column("amount"), Required]
         public decimal Amount { get; set; }

@@ -144,17 +144,20 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var DebtDiscount = await _context.DebtDiscounts
+                                        .Where(x => x.DebtId == DebtId)
+                                        .ToListAsync();
 
-            var debt = await _context.DebtDetails
+            var Detail = await _context.DebtDetails
                                      .Where(d => d.DebtId== DebtId)
                                      .OrderBy(x => x.NameConcept).ToListAsync();
 
-            if (debt == null)
+            if (Detail == null)
             {
                 return NotFound();
             }
 
-            return Ok(debt);
+            return Ok(new { Detail, DebtDiscount });
         }
 
     }
