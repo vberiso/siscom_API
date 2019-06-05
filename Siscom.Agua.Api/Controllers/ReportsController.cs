@@ -399,6 +399,28 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(dataTable);
         }
 
+        [HttpGet("Orders/{FechaIni}/{FechaFin}/{IdsArea}")]
+        public async Task<IActionResult> GetOrders([FromRoute] string FechaIni, string FechaFin, string IdsArea)
+        {
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "[dbo].[sp_Orders]";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@fechaIni", FechaIni));
+                command.Parameters.Add(new SqlParameter("@fechaFin", FechaFin));
+                command.Parameters.Add(new SqlParameter("@IdsArea", IdsArea));
+
+                this._context.Database.OpenConnection();
+                using (var result = await command.ExecuteReaderAsync())
+                {
+                    dataTable.Load(result);
+                }
+            }
+            return Ok(dataTable);
+        }
+
         // obtines los clientes que contienen un texto
         [HttpGet("GetClientesContains")]
         public async Task<IActionResult> GetClientsContains()
