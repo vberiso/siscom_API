@@ -55,11 +55,37 @@ namespace Siscom.Agua.Api.Controllers
         }
        
         [HttpGet("GetPendindDiscountAuthorizationList")]
-        public async Task<IEnumerable<DiscountAuthorization>> GetListDiscountAuthorizations()
+        public async Task<IEnumerable<DiscountAuthorizationVM>> GetListDiscountAuthorizations()
         {
 
             var data = _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
+                                            .Select(x => new DiscountAuthorizationVM()
+                                            {
+                                                Status = x.Status,
+                                                FileName = x.FileName,
+                                                FileNameDB = x.FileName,
+                                                KeyFirebase = x.KeyFirebase,
+                                                Folio = x.Folio,
+                                                Account = x.Account,
+                                                AccountAdjusted = x.AccountAdjusted,
+                                                Amount = x.Amount,
+                                                AmountDiscount = x.AmountDiscount,
+                                                AuthorizationDate = x.AuthorizationDate,
+                                                BranchOffice = x.BranchOffice,
+                                                DiscountAuthorizationDetails = x.DiscountAuthorizationDetails,
+                                                DiscountPercentage = x.DiscountPercentage,
+                                                ExpirationDate = x.ExpirationDate,
+                                                Id = x.Id,
+                                                IdOrigin = x.IdOrigin,
+                                                Observation = x.Observation,
+                                                ObservationResponse = x.ObservationResponse,
+                                                RequestDate = x.RequestDate,
+                                                Type = x.Type,
+                                                UserRequestId = x.UserRequestId,
+                                                UserRequest = x.UserRequest,
+                                                UserAuthorizationId = x.UserAuthorizationId,
+                                            })
                                             .Where(x => x.Status == "EDE01" && x.ExpirationDate >= DateTime.Now.ToLocalTime()).ToList();
             try
             {
@@ -73,6 +99,42 @@ namespace Siscom.Agua.Api.Controllers
                         ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
                         if (FullName != null)
                             x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                        ApplicationUser requestName = userManager.FindByIdAsync(x.UserRequestId).Result;
+                        if(requestName != null)
+                            x.NameUserRequest = $"{requestName.Name} {requestName.LastName} {requestName.SecondLastName}";
+
+                        if (x.DiscountAuthorizationDetails.First().DebtId != 0)
+                        {
+                            var debt = _context.Debts.Include(dd => dd.DebtDetails)
+                                                            .Where(gs => _context.Statuses
+                                                                .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) &&
+                                                                            gs.AgreementId == _context.Agreements.Where(p => p.Account == x.Account).Select(p => p.Id)
+                                                                            .FirstOrDefault())
+                                                                                .OrderBy(p => p.FromDate)
+                                                                                .ToListAsync();
+
+                            //var deb = debt.Result.Where(z => (z.Status == "ED005" || z.Status == "ED004")).ToList();
+                            if (debt.Result.Count == 0)
+                            {
+                                x.IsApplied = true;
+                            }
+                            else
+                            {
+                                x.IsApplied = false;
+                            }
+                        }
+                        else
+                        {
+                            if (_context.OrderSales.Where(z => z.Status == "EOS02" && z.Id == x.DiscountAuthorizationDetails.First().OrderSaleId).ToList().Count > 0)
+                            {
+                                x.IsApplied = true;
+                            }
+                            else
+                            {
+                                x.IsApplied = false;
+                            }
+                        }
+
                     });
                 }
                 else
@@ -84,6 +146,40 @@ namespace Siscom.Agua.Api.Controllers
                         ApplicationUser FullName = userManager.FindByIdAsync(x.UserAuthorizationId).Result;
                         if (FullName != null)
                             x.NameUserResponse = $"{FullName.Name} {FullName.LastName} {FullName.SecondLastName}";
+                        ApplicationUser requestName = userManager.FindByIdAsync(x.UserRequestId).Result;
+                        if (requestName != null)
+                            x.NameUserRequest = $"{requestName.Name} {requestName.LastName} {requestName.SecondLastName}";
+                        if (x.DiscountAuthorizationDetails.First().DebtId != 0)
+                        {
+                            var debt = _context.Debts.Include(dd => dd.DebtDetails)
+                                                            .Where(gs => _context.Statuses
+                                                                .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) &&
+                                                                            gs.AgreementId == _context.Agreements.Where(p => p.Account == x.Account).Select(p => p.Id)
+                                                                            .FirstOrDefault())
+                                                                                .OrderBy(p => p.FromDate)
+                                                                                .ToListAsync();
+
+                            //var deb = debt.Result.Where(z => (z.Status == "ED005" || z.Status == "ED004")).ToList();
+                            if (debt.Result.Count == 0)
+                            {
+                                x.IsApplied = true;
+                            }
+                            else
+                            {
+                                x.IsApplied = false;
+                            }
+                        }
+                        else
+                        {
+                            if (_context.OrderSales.Where(z => z.Status == "EOS02" && z.Folio == x.AccountAdjusted).ToList().Count > 0)
+                            {
+                                x.IsApplied = true;
+                            }
+                            else
+                            {
+                                x.IsApplied = false;
+                            }
+                        }
                     });
                 }
                 
@@ -466,7 +562,7 @@ namespace Siscom.Agua.Api.Controllers
                     memory.Position = 0;
                     string ext = System.IO.Path.GetExtension(pathd);
                     System.IO.File.Delete(pathd);
-                    return File(memory, GetContentType(System.IO.Path.GetExtension(removeencript)), removeencript);
+                    return File(memory, GetContentType(System.IO.Path.GetExtension(removeencript)), name.Remove(name.Length - 4, 4));
                 }
             }
             else
