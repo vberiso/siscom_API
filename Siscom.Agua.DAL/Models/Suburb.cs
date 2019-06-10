@@ -20,7 +20,10 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("name"), StringLength(100), Required]
         public string Name { get; set; }
-
+        [Column("registration_date")]
+        public DateTime RegistrationDate { get; set; }
+        [Column("last_update_date")]
+        public DateTime LastUpdateDate { get; set; }
         //[ForeignKey("Towns")]
         public int TownsId { get; set; }
         public Town Towns { get; set; }

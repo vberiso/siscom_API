@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         public Payment()
         {
             PaymentDetails = new HashSet<PaymentDetail>();
+            DetailOfPaymentMethods = new HashSet<DetailOfPaymentMethods>();
         }
 
         [Key]
@@ -67,7 +68,16 @@ namespace Siscom.Agua.DAL.Models
         public int PayMethodId { get; set; }
         public PayMethod PayMethod { get; set; }
 
+        [Column("cash_payment")]
+        public decimal CashPayment { get; set; }
+        [Column("caed_payment")]
+        public decimal CardPayment { get; set; }
+        [Column("bank_draft_payment")]
+        public decimal BankDraftPayment { get; set; }
+        [Column("transference_payment")]
+        public decimal TansferencePayment { get; set; }
         public ICollection<PaymentDetail> PaymentDetails { get; set; }
         public ICollection<TaxReceipt> TaxReceipts { get; set; }
+        public ICollection<DetailOfPaymentMethods> DetailOfPaymentMethods { get; set; }
     }
 }

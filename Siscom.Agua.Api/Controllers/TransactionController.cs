@@ -596,6 +596,8 @@ namespace Siscom.Agua.Api.Controllers
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
+
+
                     //Movimientos a deuda
                     foreach (var debt in pPaymentConcepts.Debt)
                     {

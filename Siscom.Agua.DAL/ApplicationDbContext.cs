@@ -361,7 +361,17 @@ namespace Siscom.Agua.DAL
             builder.Entity<ApplicationUser>()
                 .Property(x => x.IsActive)
                 .HasDefaultValue(false);
-            #endregion            
+            #endregion
+
+            #region BenefitedCampaign
+            builder.Entity<BenefitedCampaign>()
+                 .Property(x => x.ApplicationDate)
+                 .HasColumnType("date");
+
+            builder.Entity<BenefitedCampaign>()
+                  .Property(p => p.AmountDiscount)
+                  .HasColumnType("decimal(18, 2)");
+            #endregion
 
             #region BranchOffice
             builder.Entity<BranchOffice>()
@@ -593,6 +603,15 @@ namespace Siscom.Agua.DAL
                    .HasForeignKey(s => s.AgreementId);
             #endregion
 
+            #region DetailOfPaymentMethods
+
+            //builder.Entity<DetailOfPaymentMethods>()
+            //      .HasOne<Payment>(a => a.Payment)
+            //      .WithMany(s => s.DetailOfPaymentMethods)
+            //      .HasForeignKey(s => s.ExternalOriginPaymentId);
+
+            #endregion
+
             #region Diameter
             builder.Entity<Diameter>()
                    .Property(x => x.IsActive)
@@ -636,6 +655,14 @@ namespace Siscom.Agua.DAL
             builder.Entity<DiscountCampaign>()
                   .Property(x => x.IsVariable)
                   .HasDefaultValue(false);
+
+            builder.Entity<DiscountCampaign>()
+                  .Property(x => x.EndDate)
+                  .HasColumnType("date");
+
+            builder.Entity<DiscountCampaign>()
+                 .Property(x => x.StartDate)
+                 .HasColumnType("date");
             #endregion
 
             #region Division
@@ -929,6 +956,14 @@ namespace Siscom.Agua.DAL
                    .HasOne<Clasification>(a => a.Clasifications)
                    .WithMany(s => s.Suburbs)
                    .HasForeignKey(s => s.ClasificationsId);
+
+            builder.Entity<Suburb>()
+                   .Property(x => x.RegistrationDate)
+                   .HasColumnType("date");
+
+            builder.Entity<Suburb>()
+                   .Property(x => x.LastUpdateDate)
+                   .HasColumnType("date");
             #endregion
 
             #region SystemParameters

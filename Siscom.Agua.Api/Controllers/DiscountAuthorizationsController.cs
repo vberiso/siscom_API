@@ -763,14 +763,15 @@ namespace Siscom.Agua.Api.Controllers
                                         Value = 0.0
                                     });
                                 }
+
                                 command.Parameters.Add(new SqlParameter
                                 {
                                     ParameterName = "@text_discount",
                                     DbType = DbType.String,
                                     Size = 50,
                                     Value = authorization.ResponseObservations
-                                }
-                                );
+                                });
+
                                 command.Parameters.Add(new SqlParameter("@option", item.DebtId != 0 ? 1 : 2));
 
                                 command.Parameters.Add(new SqlParameter

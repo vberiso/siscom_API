@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190607165517_PayMix_DiscountCamping_BenefitedCamping")]
+    partial class PayMix_DiscountCamping_BenefitedCamping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1738,7 +1740,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 6, 7, 13, 28, 15, 544, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 6, 7, 11, 55, 16, 377, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2712,20 +2714,12 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("ClasificationsId");
 
-                    b.Property<DateTime>("LastUpdateDate")
-                        .HasColumnName("last_update_date")
-                        .HasColumnType("date");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnName("name")
                         .HasMaxLength(100);
 
                     b.Property<int>("RegionsId");
-
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnName("registration_date")
-                        .HasColumnType("date");
 
                     b.Property<int>("TownsId");
 

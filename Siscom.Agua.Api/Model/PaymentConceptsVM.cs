@@ -11,5 +11,6 @@ namespace Siscom.Agua.Api.Model
     {
         public TransactionVM Transaction { get; set; }
         public List<Debt> Debt { get; set; }
+        public List<DetailOfPaymentMethods> DetailOfPaymentMethods { get; set; }
     }
 }

@@ -106,6 +106,7 @@ namespace Siscom.Agua.Api.Controllers
             suburbcontent.Regions = region;
             suburbcontent.Towns = town;
             suburbcontent.Name = suburbvm.Name;
+            suburbcontent.LastUpdateDate = DateTime.Now.ToLocalTime();
             _context.Entry(suburbcontent).State = EntityState.Modified;
 
             try
@@ -158,7 +159,8 @@ namespace Siscom.Agua.Api.Controllers
                 Name = suburb.Name,
                 Towns = town,
                 Clasifications = await _context.Clasifications.FindAsync(suburb.ClasificationId),
-                Regions = await _context.Regions.FindAsync(suburb.RegionId)
+                Regions = await _context.Regions.FindAsync(suburb.RegionId),
+                RegistrationDate = DateTime.Now.ToLocalTime()
             };
             _context.Suburbs.Add(NewSuburb);
             await _context.SaveChangesAsync();

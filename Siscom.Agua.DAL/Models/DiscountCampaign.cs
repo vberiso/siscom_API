@@ -26,5 +26,9 @@ namespace Siscom.Agua.DAL.Models
 
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
+        [Column("start_date")]
+        public DateTime StartDate { get; set; }
+        [Column("end_date")]
+        public DateTime EndDate { get; set; }
     }
 }
