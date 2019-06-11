@@ -399,8 +399,8 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(dataTable);
         }
 
-        [HttpGet("Orders/{FechaIni}/{FechaFin}/{IdsArea}")]
-        public async Task<IActionResult> GetOrders([FromRoute] string FechaIni, string FechaFin, string IdsArea)
+        [HttpPost("Orders")]
+        public async Task<IActionResult> GetOrders([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
         {
             string error = string.Empty;
             var dataTable = new DataTable();
@@ -408,10 +408,11 @@ namespace Siscom.Agua.Api.Controllers
             {
                 command.CommandText = "[dbo].[sp_Orders]";
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add(new SqlParameter("@fechaIni", FechaIni));
-                command.Parameters.Add(new SqlParameter("@fechaFin", FechaFin));
-                command.Parameters.Add(new SqlParameter("@IdsArea", IdsArea));
-
+                command.Parameters.Add(new SqlParameter("@fechaIni", pData.FechaIni));
+                command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
+                command.Parameters.Add(new SqlParameter("@idsArea", pData.Oficinas));
+                command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
+                
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
