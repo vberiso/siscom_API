@@ -163,7 +163,7 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(orderSale);
         }
-
+                
         [HttpGet("Historic/{Date}")]
         public async Task<IActionResult> GetHistoric([FromRoute] string Date)
         {
@@ -293,6 +293,7 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(dataTable);
         }
 
+        //Obtiene los movimientos hechos por un cajero
         [HttpPost("Historial")]
         public async Task<IActionResult> GetHistorial([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
         {
