@@ -391,21 +391,9 @@ namespace Siscom.Agua.Api.Controllers
                                         });
                                     }
                                 }
-                                var types = clientsFilter.GroupBy(x => x.Type).Select(x => x.First()).ToList();
-                                var codetraslation = clientsFilter.Select(x => new CodeTraslator
-                                {
-                                    Type = x.Type,
-                                    Description = ""
-                                }).ToList();
-
-                                codetraslation.ForEach(x =>
-                                {
-                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
-                                });
-
                                 clientsFilter.ForEach(x =>
                                 {
-                                    x.Type = codetraslation.Where(y => y.Type == x.Type).FirstOrDefault().Description;
+                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
                                 });
                             }
                         }
@@ -471,18 +459,6 @@ namespace Siscom.Agua.Api.Controllers
                                         });
                                     }
                                 }
-                                //var types = clientsFilter.GroupBy(x => x.Type).Select(x => x.First()).ToList();
-                                //var codetraslation = new List<CodeTraslator>();
-                                //codetraslation = clientsFilter.Select(x => new CodeTraslator
-                                //{
-                                //    Type = x.Type,
-                                //    Description = ""
-                                //}).ToList();
-
-                                //codetraslation.ForEach(x =>
-                                //{
-                                //    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
-                                //});
 
                                 clientsFilter.ForEach(x =>
                                 {
@@ -551,21 +527,9 @@ namespace Siscom.Agua.Api.Controllers
                                         });
                                     }
                                 }
-                                var types = clientsFilter.GroupBy(x => x.Type).Select(x => x.First()).ToList();
-                                var codetraslation = clientsFilter.Select(x => new CodeTraslator
-                                {
-                                    Type = x.Type,
-                                    Description = ""
-                                }).ToList();
-
-                                codetraslation.ForEach(x =>
-                                {
-                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
-                                });
-
                                 clientsFilter.ForEach(x =>
                                 {
-                                    x.Type = codetraslation.Where(y => y.Type == x.Type).FirstOrDefault().Description;
+                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
                                 });
                             }
                         }
@@ -630,21 +594,9 @@ namespace Siscom.Agua.Api.Controllers
                                         });
                                     }
                                 }
-                                var types = clientsFilter.GroupBy(x => x.Type).Select(x => x.First()).ToList();
-                                var codetraslation = clientsFilter.Select(x => new CodeTraslator
-                                {
-                                    Type = x.Type,
-                                    Description = ""
-                                }).ToList();
-
-                                codetraslation.ForEach(x =>
-                                {
-                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
-                                });
-
                                 clientsFilter.ForEach(x =>
                                 {
-                                    x.Type = codetraslation.Where(y => y.Type == x.Type).FirstOrDefault().Description;
+                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
                                 });
                             }
                         }
