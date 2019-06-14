@@ -55,6 +55,8 @@ namespace Siscom.Agua.DAL.Models
         public int? DebtPeriodId { get; set; }
         [Column("expiration_date"), Required]
         public DateTime ExpirationDate { get; set; }
+        [Column("recharges_date")]
+        public DateTime RechargesDate { get; set; }
 
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }

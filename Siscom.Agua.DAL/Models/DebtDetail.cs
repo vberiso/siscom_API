@@ -29,6 +29,10 @@ namespace Siscom.Agua.DAL.Models
         [NotMapped]
         [Column("tax"), Required]
         public decimal Tax { get; set; }
+        [Column("old_value")]
+        public decimal OldValue { get; set; }
+        [Column("number_period")]
+        public int NumberPeriod { get; set; }
         //[ForeignKey("Debt")]
         public int DebtId { get; set; }
         public Debt Debt { get; set; }

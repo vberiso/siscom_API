@@ -29,6 +29,8 @@ namespace Siscom.Agua.DAL.Models
         public decimal Amount { get; set; }
         [Required, Column("on_account")]
         public decimal OnAccount { get; set; }
+        [NotMapped]
+        public decimal OnPayment { get; set; }
         //[NotMapped]
         [Column("tax"), Required]
         public decimal Tax { get; set; }

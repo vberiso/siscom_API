@@ -686,23 +686,6 @@ namespace Siscom.Agua.Api.Controllers
                         }
                     }
 
-                    //Toma folio
-                    //Folio folio = new Folio();
-                    //folio = await _context.Folios
-                    //                      .Where(x => x.BranchOffice == transaction.TerminalUser.Terminal.BranchOffice &&
-                    //                                   x.IsActive == 1).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
-
-                    //TransactionFolio transactionFolio = new TransactionFolio();
-                    //transactionFolio.Folio = folio.Range + folio.BranchOffice.Id + "00" + folio.Secuential;
-                    //transactionFolio.DatePrint = DateTime.UtcNow.ToLocalTime();
-                    //transactionFolio.Transaction = transaction;
-                    //_context.TransactionFolios.Add(transactionFolio);
-                    //await _context.SaveChangesAsync();
-
-                    //folio.Secuential += 1;
-                    //_context.Entry(folio).State = EntityState.Modified;
-                    //await _context.SaveChangesAsync();
-
                     scope.Complete();
                 }
             }

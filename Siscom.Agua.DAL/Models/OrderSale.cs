@@ -12,6 +12,7 @@ namespace Siscom.Agua.DAL.Models
         {
             OrderSaleDetails = new HashSet<OrderSaleDetail>();
             OrderSaleDiscounts = new HashSet<OrderSaleDiscount>();
+            OrderSaleStatuses = new HashSet<OrderSaleStatus>();
         }
 
         [Key]
@@ -53,6 +54,7 @@ namespace Siscom.Agua.DAL.Models
 
         public ICollection<OrderSaleDetail> OrderSaleDetails { get; set; }
         public ICollection<OrderSaleDiscount> OrderSaleDiscounts { get; set; }
+        public ICollection<OrderSaleStatus> OrderSaleStatuses { get; set; }
 
     }
 }

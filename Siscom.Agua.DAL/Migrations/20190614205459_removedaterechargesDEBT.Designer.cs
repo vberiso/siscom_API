@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190614205459_removedaterechargesDEBT")]
+    partial class removedaterechargesDEBT
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1222,12 +1224,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("on_account")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<DateTime>("RechargesDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("recharges_date")
-                        .HasColumnType("date")
-                        .HasDefaultValue(new DateTime(1900, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnName("status")
@@ -1814,7 +1810,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 6, 14, 16, 5, 50, 795, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 6, 14, 15, 54, 58, 508, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");

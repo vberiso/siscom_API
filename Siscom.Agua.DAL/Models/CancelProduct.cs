@@ -7,7 +7,7 @@ using System.Text;
 namespace Siscom.Agua.DAL.Models
 {
     [Table("Cancel_Product")]
-    class CancelProduct
+    public class CancelProduct
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -127,6 +127,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PaymentDetail> PaymentDetails { get; set; }
         public DbSet<TaxReceipt> TaxReceipts { get; set; }
+        public DbSet<DetailOfPaymentMethods> DetailOfPaymentMethods { get; set; }
 
         /// <summary>
         /// System
@@ -163,6 +164,7 @@ namespace Siscom.Agua.DAL
         public DbSet<DiscountAuthorization> DiscountAuthorizations { get; set; }
         public DbSet<DiscountAuthorizationDetail> DiscountAuthorizationDetails { get; set; }
         public DbSet<TransitPolice> TransitPolices { get; set; }
+        public DbSet<OrderSaleStatus> OrderSaleStatuses { get; set; }
 
         /// <summary>
         /// Cancelations
@@ -515,6 +517,14 @@ namespace Siscom.Agua.DAL
             builder.Entity<Debt>()
                   .Property(x => x.ExpirationDate)
                   .HasColumnType("date");
+
+            builder.Entity<Debt>()
+                  .Property(x => x.RechargesDate)
+                  .HasColumnType("date");
+
+            builder.Entity<Debt>()
+                 .Property(x => x.RechargesDate)
+                 .HasDefaultValue("1900-01-01");
             #endregion
 
             #region DebtDetail
@@ -538,6 +548,10 @@ namespace Siscom.Agua.DAL
             builder.Entity<DebtDetail>()
                   .Property(x => x.Quantity)
                   .HasDefaultValue(1);
+
+            builder.Entity<DebtDetail>()
+               .Property(p => p.OldValue)
+               .HasColumnType("decimal(18, 2)");
 
             #endregion           
 
@@ -813,6 +827,14 @@ namespace Siscom.Agua.DAL
             builder.Entity<OrderSaleDiscount>()
                    .Property(p => p.DiscountAmount)
                    .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region OrderSaleStatus
+            builder.Entity<OrderSaleStatus>()
+                 .HasOne<OrderSale>(a => a.OrderSale)
+                 .WithMany(s => s.OrderSaleStatuses)
+                 .HasForeignKey(s => s.OrderSaleId);
+
             #endregion
 
             #region OriginPayment
