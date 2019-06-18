@@ -18,7 +18,7 @@ namespace Siscom.Agua.Api.Controllers
     [Route("api/Reports/")]
     [Produces("application/json")]
     [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
-    [ApiController]
+    [ApiController]    
     [Authorize]
     public class ReportsController : ControllerBase
     {
@@ -215,7 +215,8 @@ namespace Siscom.Agua.Api.Controllers
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
                 command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
                 command.Parameters.Add(new SqlParameter("@Oficinas", pData.Oficinas));
-                
+                command.CommandTimeout = 300;
+
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
@@ -238,6 +239,7 @@ namespace Siscom.Agua.Api.Controllers
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));                
                 command.Parameters.Add(new SqlParameter("@userId", pData.CajeroId));
                 command.Parameters.Add(new SqlParameter("@Oficinas", pData.Oficinas));
+                command.CommandTimeout = 300;
 
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
@@ -260,7 +262,8 @@ namespace Siscom.Agua.Api.Controllers
                 command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
                 command.Parameters.Add(new SqlParameter("@FiltrarPorFecha", pData.pwaFiltrarPorContrato));
-                
+                command.CommandTimeout = 300;
+
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
@@ -283,7 +286,8 @@ namespace Siscom.Agua.Api.Controllers
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
                 command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
                 command.Parameters.Add(new SqlParameter("@Oficinas", pData.Oficinas));
-               
+                command.CommandTimeout = 300;
+
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
@@ -305,7 +309,8 @@ namespace Siscom.Agua.Api.Controllers
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@fecha", pData.FechaIni));                
                 command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
-                
+                command.CommandTimeout = 300;
+
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
@@ -328,7 +333,7 @@ namespace Siscom.Agua.Api.Controllers
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
                 command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
                 command.Parameters.Add(new SqlParameter("@Areas", pData.Oficinas));
-
+                command.CommandTimeout = 300;
 
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
@@ -349,7 +354,8 @@ namespace Siscom.Agua.Api.Controllers
                 command.CommandText = "[dbo].[sp_DebtsAyunt]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@idColonias", IdsCol));
-                
+                command.CommandTimeout = 300;
+
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {
@@ -369,6 +375,7 @@ namespace Siscom.Agua.Api.Controllers
                 command.CommandText = "[dbo].[sp_DebtsAgua]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@idColonias", IdsCol));
+                command.CommandTimeout = 300;
 
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
@@ -382,22 +389,30 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("IncomeNewAccounts/{FechaIni}/{FechaFin}")]
         public async Task<IActionResult> GetIncomeNewAccounts([FromRoute] string FechaIni, string FechaFin)
         {
-            string error = string.Empty;
-            var dataTable = new DataTable();
-            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            try
             {
-                command.CommandText = "[dbo].[sp_IncomeNewAccounts]";
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add(new SqlParameter("@fechaIni", FechaIni));
-                command.Parameters.Add(new SqlParameter("@fechaFin", FechaFin));
-
-                this._context.Database.OpenConnection();
-                using (var result = await command.ExecuteReaderAsync())
+                string error = string.Empty;
+                var dataTable = new DataTable();
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
                 {
-                    dataTable.Load(result);
+                    command.CommandText = "[dbo].[sp_IncomeNewAccounts]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@fechaIni", FechaIni));
+                    command.Parameters.Add(new SqlParameter("@fechaFin", FechaFin));
+                    command.CommandTimeout = 300;
+
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        dataTable.Load(result);
+                    }
                 }
+                return Ok(dataTable);
             }
-            return Ok(dataTable);
+            catch (Exception e)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No encontrado" });
+            }            
         }
 
         [HttpPost("Orders")]
@@ -413,7 +428,8 @@ namespace Siscom.Agua.Api.Controllers
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));
                 command.Parameters.Add(new SqlParameter("@idsArea", pData.Oficinas));
                 command.Parameters.Add(new SqlParameter("@CId", pData.CajeroId));
-                
+                command.CommandTimeout = 300;
+
                 this._context.Database.OpenConnection();
                 using (var result = await command.ExecuteReaderAsync())
                 {

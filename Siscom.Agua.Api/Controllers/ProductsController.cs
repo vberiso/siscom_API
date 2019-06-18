@@ -405,6 +405,23 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(product);
         }
 
+        [HttpPost("RequestCancellation")]
+        public async Task<IActionResult> RequestCancellation([FromBody] int id)
+        {
+
+            var orderSale = await _context.Debts
+                                          .Include(x => x.DebtDetails)
+                                          .Where(x => x.Id == id)
+                                          .FirstOrDefaultAsync();
+
+            if (orderSale == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(orderSale);
+        }
+
         private Product FindProduct(int id)
         {            
             return _context.Products.Find(id); 
