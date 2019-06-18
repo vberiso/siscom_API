@@ -144,7 +144,10 @@ namespace Siscom.Agua.Api.Controllers
             breach.Status = "INF03";
 
 
-            var serv = await _context.Services.Include(x => x.Name == "TRANSITO").FirstOrDefaultAsync();
+            //var ser = await _context.Services.ToListAsync();
+
+
+            var serv =  _context.Services.FirstOrDefault(x => x.Name == "INFRACCIONES");
 
             if(serv == null)
             {
@@ -152,7 +155,7 @@ namespace Siscom.Agua.Api.Controllers
 
             }
 
-            var serParam = await _context.ServiceParams.Include(p => p.ServiceId == serv.Id).FirstOrDefaultAsync();
+            var serParam = await _context.ServiceParams.FirstOrDefaultAsync(p => p.ServiceId == serv.Id);
 
             if(serParam == null)
             {
