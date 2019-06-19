@@ -89,6 +89,23 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "La fecha que ingreso no contiene datos favor de verificar" });
         }
 
+
+        [HttpGet("FindAllOrderTaxUser/{userId}")]
+        public async Task<IActionResult> GetOrderSalesBreach(int userId)
+        {
+           
+            var orders = _context.OrderSales
+                                .Include(x => x.TaxUser)
+                                .ThenInclude(user => user.TaxAddresses)
+                                .Include(x => x.OrderSaleDetails)
+                                .Where(x => x.TaxUserId == userId).ToList();
+           
+            if (orders.Count > 0)
+                return Ok(orders);
+            else
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No tiene ordenes asociadas" });
+        }
+
         //[HttpGet("FindAllOrdersByAccount/{account}")]
         //public async Task<IActionResult> GetOrderSalesByAccount([FromRoute]string account)
         //{
