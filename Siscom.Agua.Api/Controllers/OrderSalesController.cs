@@ -63,6 +63,32 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "La fecha que ingreso no contiene datos favor de verificar" });
         }
 
+        [HttpGet("FindAllOrdersByDateBreach/{date}")]
+        public async Task<IActionResult> GetOrderSalesBreach(string date)
+        {
+            DateTime dateTime = new DateTime();
+            DateTime.TryParse(date, out dateTime);
+            var orders = _context.OrderSales
+                                .Include(x => x.TaxUser)
+                                .ThenInclude(user => user.TaxAddresses)
+                                .Include(x => x.OrderSaleDetails)
+                                .Where(x => x.DateOrder.Date == dateTime.Date && x.Type == "OM001").ToList();
+            orders.ForEach(x =>
+            {
+                x.DescriptionStatus = (from d in _context.Statuses
+                                       where d.CodeName == x.Status && d.GroupStatusId == 10
+                                       select d).FirstOrDefault().Description;
+
+                x.DescriptionType = (from d in _context.Types
+                                     where d.CodeName == x.Type 
+                                     select d).FirstOrDefault().Description;
+            });
+            if (orders.Count > 0)
+                return Ok(orders);
+            else
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "La fecha que ingreso no contiene datos favor de verificar" });
+        }
+
         //[HttpGet("FindAllOrdersByAccount/{account}")]
         //public async Task<IActionResult> GetOrderSalesByAccount([FromRoute]string account)
         //{
