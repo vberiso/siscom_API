@@ -90,15 +90,15 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
-        [HttpGet("FindAllOrderTaxUser/{userId}")]
-        public async Task<IActionResult> GetOrderSalesBreach(int userId)
+        [HttpGet("FindAllOrderTaxUser/{userId}/{folio}")]
+        public async Task<IActionResult> GetOrderSalesTaxUser(int userId,string folio)
         {
            
             var orders = _context.OrderSales
                                 .Include(x => x.TaxUser)
                                 .ThenInclude(user => user.TaxAddresses)
                                 .Include(x => x.OrderSaleDetails)
-                                .Where(x => x.TaxUserId == userId).ToList();
+                                .Where(x => x.TaxUserId == userId && x.Folio != folio ).ToList();
            
             if (orders.Count > 0)
                 return Ok(orders);
