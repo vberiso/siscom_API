@@ -119,10 +119,11 @@ namespace Siscom.Agua.Api.Controllers
             if (product == null)
             {
                 return NotFound();
-            }         
+            }
 
-            
+
             return Ok(childParent);
+            //return Ok(product);
 
         }
 

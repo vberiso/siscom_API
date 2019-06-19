@@ -140,6 +140,16 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(val);
         }
 
+        [HttpGet("Campaign")]
+        public async Task<IActionResult> ExistDiscount()
+        {
+            var campaign = await _context.DiscountCampaigns.Where(x => x.IsActive &&
+                                                            x.StartDate <= DateTime.Now.Date &&
+                                                            x.EndDate >= DateTime.Now.Date)
+                                                            .ToListAsync();
+            return Ok(campaign);
+        } 
+
         [HttpGet("{mac}")]
         public async Task<IActionResult> FindTerminalMac([FromRoute] string mac)
         {
