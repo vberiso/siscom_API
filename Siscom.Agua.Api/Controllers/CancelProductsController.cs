@@ -42,12 +42,27 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(cancels);
         }
 
-        [HttpGet("{pAccount}")]
+        [HttpGet("account/{pAccount}")]
         public async Task<IActionResult> GetCancelsFromAccount([FromRoute] string pAccount)
         {
             var cancels = await _context.CancelProduct
                                     .Where(c => c.Account == pAccount).ToListAsync();
                                  
+            if (cancels == null)
+            {
+                return NotFound();
+            }
+            return Ok(cancels);
+        }
+
+        [HttpGet("date/{pDate}")]
+        public async Task<IActionResult> GetCancelsFromDate([FromRoute] string pDate)
+        {
+            DateTime fechaIni = new DateTime(int.Parse(pDate.Split('-')[0]), int.Parse(pDate.Split('-')[1]), int.Parse(pDate.Split('-')[2]), 0, 0, 0);
+            DateTime fechaFin = new DateTime(int.Parse(pDate.Split('-')[0]), int.Parse(pDate.Split('-')[1]), int.Parse(pDate.Split('-')[2]), 23, 59, 59);
+
+            var cancels = await _context.CancelProduct.Where(c => c.RequestDate > fechaIni && c.RequestDate < fechaFin).ToListAsync();
+
             if (cancels == null)
             {
                 return NotFound();
@@ -61,7 +76,7 @@ namespace Siscom.Agua.Api.Controllers
 
         //}
 
-                
+
         [HttpPut("Cancels/{id}")]
         [Authorize]
         public async Task<IActionResult> PutCancelProduct([FromRoute] int id, [FromBody] CancelProduct cancel)
