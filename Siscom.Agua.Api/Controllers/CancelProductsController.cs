@@ -27,8 +27,104 @@ namespace Siscom.Agua.Api.Controllers
 
         public CancelProductsController(ApplicationDbContext context)
         {
-            _context = context;            
+            _context = context;
         }
+
+        [HttpGet()]
+        public async Task<IActionResult> GetCancels([FromRoute] string pAccount)
+        {
+            var cancels = await _context.CancelProduct.ToListAsync();
+                                    
+            if (cancels == null)
+            {
+                return NotFound();
+            }
+            return Ok(cancels);
+        }
+
+        [HttpGet("{pAccount}")]
+        public async Task<IActionResult> GetCancelsFromAccount([FromRoute] string pAccount)
+        {
+            var cancels = await _context.CancelProduct
+                                    .Where(c => c.Account == pAccount).ToListAsync();
+                                 
+            if (cancels == null)
+            {
+                return NotFound();
+            }
+            return Ok(cancels);
+        }
+
+        //[HttpGet("PagosPrevios")]
+        //public async Task<IActionResult> GetPagosPreviosFromProduct()
+        //{
+
+        //}
+
+                
+        [HttpPut("Cancels/{id}")]
+        [Authorize]
+        public async Task<IActionResult> PutCancelProduct([FromRoute] int id, [FromBody] CancelProduct cancel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != cancel.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(cancel).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                if (cancel.Type == "TCA01") //con cuenta
+                {
+                    //Se edita el estado en los debt
+                    var debt = _context.Debts.Find(cancel.DebtId);
+                    debt.Status = "ED006"; //Cancelado
+                    _context.Entry(debt).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    //se agrega el registro de esta edicion en debt_status
+                    DebtStatus ds = new DebtStatus()
+                    {
+                        id_status = "ED006",
+                        DebtStatusDate = DateTime.Now,
+                        User = cancel.SupervisorId,
+                        DebtId = cancel.DebtId
+                    };
+                    _context.DebtStatuses.Add(ds);
+                    await _context.SaveChangesAsync();
+
+                }
+                else
+                {
+                    var order = _context.OrderSales.Find(cancel.OrderSaleId);
+                    order.Status = "EOS05"; //Cancelado
+                    _context.Entry(order).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!cancelProductExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
 
         // POST: api/Products
         [HttpPost("add")]
@@ -42,7 +138,7 @@ namespace Siscom.Agua.Api.Controllers
             try
             {
                 CancelProduct elem = _context.CancelProduct.FirstOrDefault(x => x.Account == pCP.Account && x.DebtId == pCP.DebtId && x.CodeConcept == pCP.CodeConcept);
-                if(elem != null)
+                if(elem == null)
                 {
                     _context.CancelProduct.Add(pCP);
                     await _context.SaveChangesAsync();
@@ -63,5 +159,12 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(pCP.Id);
         }
+
+
+        private bool cancelProductExists(int id)
+        {
+            return _context.CancelProduct.Any(e => e.Id == id);
+        }
+
     }
 }

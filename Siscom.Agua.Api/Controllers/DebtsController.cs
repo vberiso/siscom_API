@@ -28,6 +28,29 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
+        [HttpGet("id/{idDebt}")]
+        public async Task<IActionResult> getDebtId([FromRoute] int idDebt)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var debt = await _context.Debts
+                        .Include(d => d.DebtDetails)
+                        .Include(d => d.DebtDiscounts)
+                        .Include(d => d.DebtStatuses)
+                        .Where(d => d.Id == idDebt)
+                        .FirstOrDefaultAsync() ;
+
+            if (debt == null)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se ha encontrado deuda activa para esta cuenta" });
+            }
+
+            return Ok(debt);
+        }
+
         // GET: api/Debts/5
         [HttpGet("{idAgreement}")]
         public async Task<IActionResult> GetDebt([FromRoute] int idAgreement)
