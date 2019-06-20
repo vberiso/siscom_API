@@ -326,12 +326,34 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
+        [HttpGet("SearchTicket/{license}")]
+        public async Task<IActionResult> GetTicketLicense([FromRoute] int license)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var breach = await _context.Breaches.Where(l => l.AssignmentTicketId == license).ToListAsync();
+
+
+            if (breach.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "No hay infracción" });
+            }
+
+            return Ok(breach);
+        }
 
 
 
-       
 
- //POST: API/BREACH
+
+
+
+
+        //POST: API/BREACH
         [HttpPost]
         public async Task<IActionResult> PostBreach(int BreachId, [FromBody] Breach breanch)
         {
