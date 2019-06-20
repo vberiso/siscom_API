@@ -15,10 +15,12 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("account"), StringLength(50)]
         public string Account { get; set; }
-        [Required, StringLength(5), Column("code_concept")]
+        [Required, StringLength(100), Column("code_concept")]
         public string CodeConcept { get; set; }
-        [Required, StringLength(500), Column("name_concept")]
+        [Required, StringLength(5000), Column("name_concept")]
         public string NameConcept { get; set; }
+        [Column("typeConcept"), StringLength(5), Required]
+        public string TypeConcept { get; set; }
         [Required, Column("amount")]
         public decimal Amount { get; set; }
         [Column("request_date"), Required]
