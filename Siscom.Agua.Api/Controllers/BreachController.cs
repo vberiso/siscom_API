@@ -302,7 +302,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("GetList")]
         public IEnumerable<BreachList> GetList()
         {
-            return _context.BreachLists;
+            return _context.BreachLists.Include(x => x.BreachArticle).OrderBy(a => a.Description);
 
         }
 
@@ -509,6 +509,31 @@ namespace Siscom.Agua.Api.Controllers
                         //await _context.SaveChangesAsync();
 
 
+                        foreach(var wa in breanch.BreachWarranties)
+                        {
+                            BreachWarranty warranty = new BreachWarranty
+                            {
+                                BreachId = NewBreach.Id,
+                                WarrantyId = wa.WarrantyId,
+                                References = wa.References,
+                                Observations = wa.Observations,
+                            };
+
+                            _context.Add(warranty);
+                            _context.SaveChanges();
+
+                        }
+
+                        //BreachWarranty warranty = new BreachWarranty
+                        //{
+                        //    BreachId = NewBreach.Id,
+                        //    WarrantyId = breanch.BreachWarranties,
+                        //    References = breanch.BreachWarranties,
+                        //    Observations = NewBreach.Place
+                        //};
+
+                        //_context.Add(warranty);
+                        //_context.SaveChanges();
 
 
 
@@ -751,6 +776,22 @@ namespace Siscom.Agua.Api.Controllers
 
 
                         _context.Breaches.Add(NewBreach);
+
+                        foreach (var wa in breanch.BreachWarranties)
+                        {
+                            BreachWarranty warranty = new BreachWarranty
+                            {
+                                BreachId = NewBreach.Id,
+                                WarrantyId = wa.WarrantyId,
+                                References = wa.References,
+                                Observations = wa.Observations,
+                            };
+
+                            _context.Add(warranty);
+                            _context.SaveChanges();
+
+                        }
+
 
                         decimal sumBreanch = 0;
 
