@@ -113,7 +113,7 @@ namespace Siscom.Agua.Api.Controllers
                     //se agrega el registro de esta edicion en debt_status
                     DebtStatus ds = new DebtStatus()
                     {
-                        id_status = "ED006",
+                        id_status = debt.Status,
                         DebtStatusDate = DateTime.Now,
                         User = cancel.SupervisorId,
                         DebtId = cancel.DebtId

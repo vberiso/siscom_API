@@ -973,7 +973,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<string>("TypeConcept")
                         .IsRequired()
                         .HasColumnName("typeConcept")
-                        .HasMaxLength(5);
+                        .HasMaxLength(15);
 
                     b.HasKey("Id");
 
@@ -1822,7 +1822,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 6, 20, 17, 21, 33, 716, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 6, 21, 14, 54, 5, 662, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
