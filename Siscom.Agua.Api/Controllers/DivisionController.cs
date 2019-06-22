@@ -44,5 +44,13 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(Divisions);
         }
 
+
+        [HttpGet("roles")]
+        public IEnumerable<ApplicationRol> GetRoles()
+        {
+            return _context.Roles;
+        }
+
+
     }
 }

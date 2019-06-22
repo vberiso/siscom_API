@@ -38,6 +38,28 @@ namespace Siscom.Agua.Api.Controllers
             return _context.BreachArticles;
         }
 
+
+        [HttpGet("Search/{idArticle}/{fraction}")]
+        public async Task<IActionResult> GetBreachArticleSearch([FromRoute] int id, string fraction)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var breachArticle =  _context.BreachLists
+                                    .Include(x => x.BreachArticle)
+                                    .Where(x =>x.BreachArticleId == id && x.Fraction == fraction).ToArray();
+
+            if (breachArticle == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(breachArticle);
+        }
+
+
         // GET: api/BreachArticle/1
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBreachArticle([FromRoute] int id)

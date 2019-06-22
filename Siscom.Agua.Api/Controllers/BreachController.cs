@@ -58,6 +58,9 @@ namespace Siscom.Agua.Api.Controllers
                                         .ThenInclude(ad => ad.TaxAddresses)
                                     .Include(b => b.BreachDetails)
                                         .ThenInclude(l => l.BreachList)
+                                            .ThenInclude(s => s.BreachArticle)
+                                    .Include(w => w.BreachWarranties)
+                                        
                                     .FirstOrDefaultAsync(a => a.Id == id);
 
             if (breach == null)
@@ -68,6 +71,8 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(breach);
         }
+
+
 
         [HttpGet("SearchFolio/{Folio}")]
         public async Task<IActionResult> GetFolio([FromRoute] string folio)
