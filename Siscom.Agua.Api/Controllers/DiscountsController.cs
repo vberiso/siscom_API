@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -174,6 +176,57 @@ namespace Siscom.Agua.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(discount);
+        }
+
+        [HttpPost("{idAgreement}")]
+        public async Task<IActionResult> PostDiscount([FromRoute] int idAgreement)
+        {
+            string error = string.Empty;
+            try
+            {
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[campaing_recharges]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@id_agreement", idAgreement));
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@error",
+                        DbType = DbType.String,
+                        Size = 200,
+                        Direction = ParameterDirection.Output
+                    });
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        if (result.HasRows)
+                        {
+                            error = command.Parameters["@error"].Value.ToString();
+                        }
+                    }
+                    if (string.IsNullOrEmpty(error))
+                    {
+                        return Ok();
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format($"No se pudo realizar la condonación de recargos por las siguientes razones: [{error}]") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = idAgreement.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para cancelar recargos" });
+            }
+           
         }
 
         private bool DiscountExists(int id)

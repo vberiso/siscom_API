@@ -49,7 +49,7 @@ namespace Siscom.Agua.Api.Controllers
                 DivitionId = addUser.DivitionId,
                 IsActive = true
             };
-            string password = CrearPassword(5);
+            string password = CrearPassword(6);
             result = await UserManager.CreateAsync(user, password);
             await UserManager.AddToRoleAsync(user, addUser.RoleName);
 
