@@ -55,7 +55,7 @@ namespace Siscom.Agua.Api.Controllers
 
             if (result.Succeeded)
             {
-                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito Contraseña [" + password + "]" });
+                return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito Contraseña: " + password  });
             }
             else
             {
