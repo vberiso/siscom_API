@@ -203,6 +203,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             error = command.Parameters["@error"].Value.ToString();
                         }
+                        error = command.Parameters["@error"].Value.ToString();
                     }
                     if (string.IsNullOrEmpty(error))
                     {
@@ -210,7 +211,7 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     else
                     {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format($"No se pudo realizar la condonación de recargos por las siguientes razones: [{error}]") });
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo realizar la condonación de recargos por las siguientes razones: [{error}]") });
                     }
                 }
             }

@@ -51,16 +51,24 @@ namespace Siscom.Agua.Api.Controllers
             };
             string password = CrearPassword(6);
             result = await UserManager.CreateAsync(user, password);
-            await UserManager.AddToRoleAsync(user, addUser.RoleName);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(Environment.NewLine, result.Errors.Select(x => x.Description)) });
+            }
+            result = await UserManager.AddToRoleAsync(user, addUser.RoleName);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(Environment.NewLine, result.Errors.Select(x => x.Description)) });
+            }
 
             if (result.Succeeded)
             {
                 return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito Contraseña: " + password  });
             }
-            else
-            {
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(" ", result.Errors) });
-            }
+
+            return BadRequest();
         }
 
         [HttpPost("AddUsersTransitPolice")]
