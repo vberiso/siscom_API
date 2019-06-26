@@ -415,6 +415,35 @@ namespace Siscom.Agua.Api.Controllers
             }            
         }
 
+        [HttpGet("IncomeNewAccountsAyunt/{FechaIni}/{FechaFin}")]
+        public async Task<IActionResult> GetIncomeNewAccountsAyunt([FromRoute] string FechaIni, string FechaFin)
+        {
+            try
+            {
+                string error = string.Empty;
+                var dataTable = new DataTable();
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[sp_IncomeNewAccountsAyunt]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@fechaIni", FechaIni));
+                    command.Parameters.Add(new SqlParameter("@fechaFin", FechaFin));
+                    command.CommandTimeout = 6000;
+
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        dataTable.Load(result);
+                    }
+                }
+                return Ok(dataTable);
+            }
+            catch (Exception e)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No encontrado" });
+            }
+        }
+
         [HttpPost("Orders")]
         public async Task<IActionResult> GetOrders([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
         {
