@@ -67,6 +67,11 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 if (await userManager.CheckPasswordAsync(user, model.Password))
                 {
+                    if (!user.IsActive)
+                    {
+                        return StatusCode(409, new { Error = "Su cuenta ha sido bloqueada permanentemente. Favor de comunicarse con el administrador" });
+                    }
+
                     if (userManager.SupportsUserLockout && await userManager.GetAccessFailedCountAsync(user) > 0)
                     {
                         await userManager.ResetAccessFailedCountAsync(user);
