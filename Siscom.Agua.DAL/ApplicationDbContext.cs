@@ -67,9 +67,12 @@ namespace Siscom.Agua.DAL
         public DbSet<AgreementFile> AgreementFiles { get; set; }
 
         /// <summary>
-        /// AccountingCode
+        /// Accounting
         /// </summary>
         public DbSet<AccountingCode> AccountingCodes { get; set; }
+        public DbSet<AccountingStatus> AccountingStatuses { get; set; }
+        public DbSet<AccountingPayment> AccountingPayments { get; set; }
+
 
 
         /// <summary> 
