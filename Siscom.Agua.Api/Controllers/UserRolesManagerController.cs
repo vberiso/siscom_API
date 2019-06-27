@@ -156,6 +156,75 @@ namespace Siscom.Agua.Api.Controllers
             }
             return res.ToString();
         }
+
+
+        [HttpGet("AllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+
+            List<ViewUsersVM> newlistUsers = new List<ViewUsersVM>();
+            var users = _context.Users.ToList();
+
+            foreach (var list in users)
+            {
+                if (list.DivitionId == 0)
+                {
+                    var divition = "SIN DIVISION";
+                    //var idnameRol = _context.UserRoles.Where(n => n.UserId == list.Id).FirstOrDefault();
+                    var temp = _context.UserRoles.FirstOrDefault(x => x.UserId.Equals(list.Id));
+                    if(temp != null)
+                    {
+                        var nameRol = _context.Roles.FirstOrDefault(r => r.Id.Equals(temp.RoleId));
+
+
+                        //newlistUsers.lastname = list.LastName;
+                        //newlistUsers.secondlastname = list.SecondLastName;
+                        //newlistUsers.name = list.Name;
+                        //newlistUsers.divitionName = divition;
+                        //newlistUsers.id = list.Id;
+                        //newlistUsers.rolName = nameRol.Name;
+
+                        newlistUsers.Add(new ViewUsersVM()
+                        {
+                            lastname = list.LastName,
+                            secondlastname = list.SecondLastName,
+                            name = list.Name,
+                            divitionName = divition,
+                            id = list.Id,
+                            nameRol = nameRol.Name,
+                        });
+                    }                    
+                }
+                else
+                {
+                    var divition = _context.Divisions.Where(a => a.Id == list.DivitionId).FirstOrDefault();
+                    //var idnameRol = _context.UserRoles.Where(n => n.UserId == list.Id).FirstOrDefault();
+                    var temp = _context.UserRoles.FirstOrDefault(x => x.UserId.Equals(list.Id));
+                    if(temp != null)
+                    {
+                        var nameRol = _context.Roles.FirstOrDefault(r => r.Id.Equals(temp.RoleId));
+
+                        newlistUsers.Add(new ViewUsersVM()
+                        {
+                            lastname = list.LastName,
+                            secondlastname = list.SecondLastName,
+                            name = list.Name,
+                            divitionName = divition.Name,
+                            id = list.Id,
+                            nameRol = nameRol.Name,
+                        });
+                    }
+                    //newlistUsers.lastname = list.LastName;
+                    //newlistUsers.secondlastname = list.SecondLastName;
+                    //newlistUsers.name = list.Name;
+                    //newlistUsers.divitionName = divition.Name;
+                    //newlistUsers.id = list.Id;
+                    //newlistUsers.rolName = "prueba";
+                }
+            }
+            return Ok(newlistUsers);
+        }
+
     }
 
     public class ChangePwdViewModel
