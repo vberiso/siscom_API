@@ -31,7 +31,7 @@ namespace Siscom.Agua.DAL.Models
         public DateTime RequestDate { get; set; }
         [Column("is_dispatched")]
         public int IsDispatched { get; set; }
-        [Column("movement_type")]
+        [Column("movement_type"), StringLength(10)]
         public string MovementType { get; set; }
     }
 }
