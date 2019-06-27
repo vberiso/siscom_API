@@ -66,8 +66,10 @@ namespace Siscom.Agua.DAL
         public DbSet<AgreementDetail> AgreementDetails { get; set; }
         public DbSet<AgreementFile> AgreementFiles { get; set; }
 
-
-        
+        /// <summary>
+        /// AccountingCode
+        /// </summary>
+        public DbSet<AccountingCode> AccountingCodes { get; set; }
 
 
         /// <summary> 
@@ -171,6 +173,11 @@ namespace Siscom.Agua.DAL
         /// </summary>
         public DbSet<CancelProduct> CancelProduct { get; set; }
 
+        /// <summary>
+        /// BrandModel
+        /// </summary>
+        public DbSet<BrandModel> BrandModels { get; set; }
+
         public ApplicationDbContext()
         {
         }
@@ -208,7 +215,13 @@ namespace Siscom.Agua.DAL
             builder.Entity<Address>()
                    .HasOne<Suburb>(a => a.Suburbs)
                    .WithMany(s => s.Addresses)
-                   .HasForeignKey(s => s.SuburbsId);          
+                   .HasForeignKey(s => s.SuburbsId);
+            #endregion
+
+            #region AccountingCode
+            builder.Entity<AccountingCode>()
+               .Property(x => x.IsActive)
+               .HasDefaultValue(true);
             #endregion
 
             #region Agreement

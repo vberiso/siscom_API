@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -97,6 +102,28 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(payment);
         }
+        [HttpGet("TaxReceipt/{Account}")]
+        public async Task<IActionResult> GetPaymentByAccount([FromRoute] string Account)
+        {
+            if (String.IsNullOrEmpty(Account))
+            {
+                return NotFound();
+            }
+
+            var payment = await _context.Payments
+                                        .Include(p => p.ExternalOriginPayment)
+                                        .Include(p => p.OriginPayment)
+                                        .Include(p => p.PayMethod)
+                                        .Include(p => p.PaymentDetails)
+                                        .Include(p => p.TaxReceipts)
+                                        .FirstOrDefaultAsync(m => m.Account == Account);
+            if (payment == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(payment);
+        }
 
         [HttpGet("Resume/{folio}")]
         public async Task<IActionResult> GetPaymentResume([FromRoute] string folio)
@@ -128,6 +155,40 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(paymentResume);
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Payment payment)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
+            if (id != payment.Id)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    _context.Entry(payment).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                    scope.Complete();
+                    return Ok();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(payment);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el pago" });
+            }
+        }
     }
 }
