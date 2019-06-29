@@ -27,5 +27,7 @@ namespace Siscom.Agua.DAL.Models
         public int CodeSac { get; set; }
         [Column("is_active")]
         public bool IsActive { get; set; }
+        [Column("accounting_account"), StringLength(20)]
+        public string AccountingAccount { get; set; }
     }
 }

@@ -33,5 +33,7 @@ namespace Siscom.Agua.DAL.Models
         public int IsDispatched { get; set; }
         [Column("movement_type"), StringLength(10)]
         public string MovementType { get; set; }
+        [Column("accounting_account"), StringLength(20)]
+        public string AccountingAccount { get; set; }
     }
 }
