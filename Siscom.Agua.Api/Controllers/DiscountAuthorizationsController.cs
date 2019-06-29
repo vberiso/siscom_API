@@ -60,6 +60,7 @@ namespace Siscom.Agua.Api.Controllers
 
             var data = _context.DiscountAuthorizations
                                             .Include(x => x.DiscountAuthorizationDetails)
+                                           
                                             .Select(x => new DiscountAuthorizationVM()
                                             {
                                                 Status = x.Status,
@@ -86,7 +87,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 UserRequest = x.UserRequest,
                                                 UserAuthorizationId = x.UserAuthorizationId,
                                             })
-                                            .Where(x => x.Status == "EDE01" && x.ExpirationDate >= DateTime.Now.ToLocalTime()).ToList();
+                                            .Where(x => x.Status == "EDE01"  && x.ExpirationDate >= DateTime.Now.ToLocalTime()).ToList();
             try
             {
                 if (appSettings.Local)

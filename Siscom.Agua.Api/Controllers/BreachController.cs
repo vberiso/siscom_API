@@ -45,6 +45,10 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+
+
+       
+
         // GET: api/Breach/1
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBreaches([FromRoute] int id)
@@ -71,6 +75,51 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(breach);
         }
+
+
+        [HttpGet("getCarModels")]
+        public async Task<IActionResult> GetModelsCar()
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var breach =  _context.BrandModels.ToArray();
+
+
+
+            if (breach == null)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No hay "});
+
+            }
+
+            return Ok(breach);
+        }
+
+
+        [HttpGet("getCar/{model}")]
+        public async Task<IActionResult> GetCar([FromRoute] string model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var mol = _context.BrandModels.Where(x =>x.Brand == model).ToArray();
+
+
+
+            if (mol == null)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No hay modelos " });
+
+            }
+
+            return Ok(mol);
+        }
+
+
+
 
 
 

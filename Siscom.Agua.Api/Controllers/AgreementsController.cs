@@ -1320,13 +1320,15 @@ namespace Siscom.Agua.Api.Controllers
                     x.Name = name.Remove(start, 4);
                 });
 
-                var catalogue = await _context.GroupCatalogues.Include(x => x.Catalogues).Where(x => x.Id == agreement.TypeUse.Id).FirstOrDefaultAsync();
+                //var catalogue = await _context.GroupCatalogues.Include(x => x.Catalogues).Where(x => x.Id == agreement.TypeUse.Id).FirstOrDefaultAsync();
 
-                if (catalogue == null)
-                {
-                    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
 
-                }
+
+                //if (catalogue != null)
+                //{
+                //    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
+
+                //}
 
                 var discounts = await _context.AgreementDiscounts
 
@@ -1621,13 +1623,13 @@ namespace Siscom.Agua.Api.Controllers
 
                 var info = _context.Agreements.Where(a => a.Id == idAgreement).FirstOrDefault();
 
-                //var email = _context.Clients.Where(c => c.AgreementId == idAgreement).FirstOrDefault();
+                var email = _context.Clients.Where(c => c.AgreementId == idAgreement).FirstOrDefault();
 
-                //if(email.EMail == null || email.EMail == " " || string.IsNullOrEmpty(email.EMail) )
-                //{
-                //    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No cuenta con email, favor de ingresar uno en la parte de contacto" });
+                if(email.EMail == null || email.EMail == " " || string.IsNullOrEmpty(email.EMail) )
+                {
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No cuenta con email, favor de ingresar uno en la parte de contacto" });
 
-                //}
+                }
 
                 var municipal = _context.SystemParameters.Where(a => a.Name == "ISMUNICIPAL").FirstOrDefault();
 
@@ -1637,8 +1639,8 @@ namespace Siscom.Agua.Api.Controllers
                     MailMessage mail = new MailMessage();
                     SmtpClient SmtpServer = new SmtpClient("cuautlancingo.gob.mx");
                     mail.From = new MailAddress("facturacion@cuautlancingo.gob.mx");
-                    //mail.To.Add(email.EMail);
-                    mail.To.Add("romero.urielj@gmail.com");
+                    mail.To.Add(email.EMail);
+                    //mail.To.Add("romero.urielj@gmail.com");
                     mail.Subject = "Envió de comprobante fiscal CFDI";
                     mail.AlternateViews.Add(getEmbeddedImage());
                     //mail.Body = string.Format(@"<!DOCTYPE html><html lang=""es""><head><meta charset=""UTF-8""><title>Facturación - Cuautlancingo</title><meta name=""viewport"" content=""width=device-width, initial-scale=1.0""/><link href=""https://fonts.googleapis.com/css?family=Montserrat|Roboto&display=swap"" rel=""stylesheet""></head><body style=""margin: 0; padding: 0;""><table style=""width: 100%; font-family: 'Roboto', sans-serif; letter-spacing: 0.50px;""><th style=""width: 7%;""><img src=""https://i.ibb.co/BGRJZGD/ayuntamiento-sistema.png"" alt=""Logo""></th><th style=""width: 93%;""><div style =""position: absolute !important; top: 26px; left:145px; color: #691A1B text-align: left;""><div><h2> Sistema de Facturación</h2></div><div style=""margin-bottom:25px;""><h5> Comprobante Fiscal CFDI</h5></div></div><div style=""background-color: #691A1B; width: 100%; height: 5px; position: relative; top: 35px;""></div></th><tr style=""font-family: 'Montserrat', sans-serif; ""><th colspan=""2"" style=""text-align: left; font-size: 15px; padding-left: 30px;""><br><br><p>Estimado Contribuyente:&nbsp;&nbsp; <strong></strong></p><p>Cuenta:&nbsp;&nbsp; <strong>{info.Account}</strong></p></p><br></th></tr><tr style=""font-family: 'Montserrat', sans-serif;""><th colspan=""2"" style=""text-align: justify; padding: 0px 80px 0px 80px;""><p> Usted está recibiendo un comprobante fiscal digital (FACTURA ELECTRÓNICA) del municipio de Cuautlancingo, Puebla 2018 - 2021. De acuerdo a la reglamentación del servicio de administración tributaria (SAT), publicada en el diario oficial de la federación (RMISC 2004)el 31 de Mayo del 2004, la factura electrónica es 100% valida y legal a partir de ahora, la entrega del documento fiscal (FACTURA ELECTRÓNICA)sera emitida y entregada por correo electrónico, cabe destacar que la factura electrónica se entregara en formato<small style=""color:#691A1B"">PDF</small> y archivo <small style=""color:#691A1B"">XML</small>, el cual podra imprimir libremente e incluirlaen su contabilidad (ARTICULO 29, FRACCION IV DE CFF), resguardar la impresión y archivo <small style=""color:#691A1B"">XML</small> por un periodode 5 años.<br><br><small style = ""font-size: 11px;""> Importante: contenido de la factura electrónica en el anexo 20 del diario oficial de la federación, publicadoel 1 de Septiembre de 2004, en el parrafo 2.22.8, se estipula que la impresión de la factura electrónica, que ademasde los datos fiscales y comerciales, deberá contener la cadena original, el certificado de sello digital, el sello digital y la leyenda: 'Este documento es una representación impresa de un CFD/CFDI'.</ small ></p></th></tr><tr style=""text-align: left; font-size: 15px; padding-left: 30px;""><th colspan=""2""><p>Observaciones</p><p></p></th></tr><tr><th colspan=""2""><br><br> <p style=""text-align: right; padding-right: 80px; font-size: 13px;""> **ESTE CORREO ES UNICAMENTE PARA ENVIOS, FAVOR DE NO RESPONDER</p> </th></tr><tr style=""background: url('https://i.ibb.co/2Kd9dfG/breadcrumb-bg1.jpg')""><th colspan=""2"" style=""width: 100%; height: 300px;""></th></tr></table></body></html>");
@@ -1662,8 +1664,8 @@ namespace Siscom.Agua.Api.Controllers
                     MailMessage mail = new MailMessage();
                     SmtpClient SmtpServer = new SmtpClient("sosapac.gob.mx");
                     mail.From = new MailAddress("facturacion@sosapac.gob.mx");
-                    //mail.To.Add(email.EMail);
-                    mail.To.Add("romero.urielj@gmail.com");
+                    mail.To.Add(email.EMail);
+                    //mail.To.Add("romero.urielj@gmail.com");
                     mail.Subject = "Envió de comprobante fiscal CFDI";
                     mail.AlternateViews.Add(getEmbeddedImage());
                     //mail.Body = string.Format(@"<!DOCTYPE html><html lang=""es""><head><meta charset=""UTF-8""><title>Facturación - Cuautlancingo</title><meta name=""viewport"" content=""width=device-width, initial-scale=1.0""/><link href=""https://fonts.googleapis.com/css?family=Montserrat|Roboto&display=swap"" rel=""stylesheet""></head><body style=""margin: 0; padding: 0;""><table style=""width: 100%; font-family: 'Roboto', sans-serif; letter-spacing: 0.50px;""><th style=""width: 7%;""><img src=""https://i.ibb.co/BGRJZGD/ayuntamiento-sistema.png"" alt=""Logo""></th><th style=""width: 93%;""><div style =""position: absolute !important; top: 26px; left:145px; color: #691A1B text-align: left;""><div><h2> Sistema de Facturación</h2></div><div style=""margin-bottom:25px;""><h5> Comprobante Fiscal CFDI</h5></div></div><div style=""background-color: #691A1B; width: 100%; height: 5px; position: relative; top: 35px;""></div></th><tr style=""font-family: 'Montserrat', sans-serif; ""><th colspan=""2"" style=""text-align: left; font-size: 15px; padding-left: 30px;""><br><br><p>Estimado Contribuyente:&nbsp;&nbsp; <strong></strong></p><p>Cuenta:&nbsp;&nbsp; <strong>{info.Account}</strong></p></p><br></th></tr><tr style=""font-family: 'Montserrat', sans-serif;""><th colspan=""2"" style=""text-align: justify; padding: 0px 80px 0px 80px;""><p> Usted está recibiendo un comprobante fiscal digital (FACTURA ELECTRÓNICA) del municipio de Cuautlancingo, Puebla 2018 - 2021. De acuerdo a la reglamentación del servicio de administración tributaria (SAT), publicada en el diario oficial de la federación (RMISC 2004)el 31 de Mayo del 2004, la factura electrónica es 100% valida y legal a partir de ahora, la entrega del documento fiscal (FACTURA ELECTRÓNICA)sera emitida y entregada por correo electrónico, cabe destacar que la factura electrónica se entregara en formato<small style=""color:#691A1B"">PDF</small> y archivo <small style=""color:#691A1B"">XML</small>, el cual podra imprimir libremente e incluirlaen su contabilidad (ARTICULO 29, FRACCION IV DE CFF), resguardar la impresión y archivo <small style=""color:#691A1B"">XML</small> por un periodode 5 años.<br><br><small style = ""font-size: 11px;""> Importante: contenido de la factura electrónica en el anexo 20 del diario oficial de la federación, publicadoel 1 de Septiembre de 2004, en el parrafo 2.22.8, se estipula que la impresión de la factura electrónica, que ademasde los datos fiscales y comerciales, deberá contener la cadena original, el certificado de sello digital, el sello digital y la leyenda: 'Este documento es una representación impresa de un CFD/CFDI'.</ small ></p></th></tr><tr style=""text-align: left; font-size: 15px; padding-left: 30px;""><th colspan=""2""><p>Observaciones</p><p></p></th></tr><tr><th colspan=""2""><br><br> <p style=""text-align: right; padding-right: 80px; font-size: 13px;""> **ESTE CORREO ES UNICAMENTE PARA ENVIOS, FAVOR DE NO RESPONDER</p> </th></tr><tr style=""background: url('https://i.ibb.co/2Kd9dfG/breadcrumb-bg1.jpg')""><th colspan=""2"" style=""width: 100%; height: 300px;""></th></tr></table></body></html>");
@@ -1754,7 +1756,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpPost("addDebt/{idAgreement}/{dateAgreement}/{month}/{year}")]
-        public async Task<IActionResult> PostDiscount([FromRoute] int idAgreement, string dateAgreeement, int month, int year)
+        public async Task<IActionResult> PostDiscount([FromRoute] int idAgreement, int dateAgreement, int month, int year)
         {
             string error = string.Empty;
             try
@@ -1764,7 +1766,7 @@ namespace Siscom.Agua.Api.Controllers
                     command.CommandText = "[dbo].[billing_period]";
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add(new SqlParameter("@id_agreement", idAgreement));
-                    command.Parameters.Add(new SqlParameter("@date_agreement", dateAgreeement));
+                    command.Parameters.Add(new SqlParameter("@date_agreement", dateAgreement));
                     command.Parameters.Add(new SqlParameter("@from_month", month));
                     command.Parameters.Add(new SqlParameter("@from_year", year));
 
@@ -1786,11 +1788,13 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     if (string.IsNullOrEmpty(error))
                     {
-                        return Ok();
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo agregar la deuda: [{error}]") });
+
                     }
                     else
                     {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo agregar la deuda: [{error}]") });
+                        return Ok("Se genero la factura");
+
                     }
                 }
             }
