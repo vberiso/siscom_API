@@ -98,7 +98,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 transactionPayment.Payment.PaymentDetails.ToList().ForEach(x =>
                {
-                   x.Debt = _context.Debts.Find(x.DebtId);
+                   x.Debt = _context.Debts.Include(dd => dd.DebtDiscounts).Where(d => d.Id == x.DebtId).FirstOrDefault();
                    x.Prepaid = _context.Prepaids.Find(x.PrepaidId);
                });
             }
