@@ -209,7 +209,7 @@ namespace Siscom.Agua.Api.Controllers
 
             }
 
-            var serParam = await _context.ServiceParams.FirstOrDefaultAsync(p => p.ServiceId == serv.Id);
+            var serParam = await _context.SystemParameters.FirstOrDefaultAsync(p => p.Name == "Sanciones Vialidad");
 
             if(serParam == null)
             {
@@ -301,7 +301,7 @@ namespace Siscom.Agua.Api.Controllers
                             UnitPrice = factor.NumberColumn,
                             HaveTax = false,
                             Description = x.BreachList.Description,
-                            CodeConcept = serParam.CodeConcept,
+                            CodeConcept = serParam.TextColumn,
                             NameConcept = x.BreachList.Description,
                             Amount = x.Amount,
                             OnAccount = 0

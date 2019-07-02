@@ -1137,10 +1137,10 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotFound, new { Error = "El número de contrato o El tipo de descuento no se no se encuentran, favor de verificar" });
             }
 
-            if (agreement.TypeIntake.Acronym != "HA")
-            {
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
-            }
+            //if (agreement.TypeIntake.Acronym != "HA" || agreement.TypeIntake.Acronym != "UR")
+            //{
+            //    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
+            //}
 
             if (agreement.TypeStateService.Id != 1 && agreement.TypeStateService.Id != 3)
             {
@@ -1158,10 +1158,10 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El descuento no se encuentra activo, favor de verificar" });
             }
 
-            if (discount.EndDate.Value < DateTime.UtcNow.ToLocalTime())
-            {
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El descuento no se encuentra dentro de un periodo valido, favor de verificar" });
-            }
+            //if (discount.EndDate.Value < DateTime.UtcNow.ToLocalTime())
+            //{
+            //    return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El descuento no se encuentra dentro de un periodo valido, favor de verificar" });
+            //}
 
 
             try
@@ -1196,7 +1196,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el descuento" });
 
             }
-            return Ok();
+            return Ok("Descuento realizado");
         }
 
         [HttpPut("PutDiscount/{AgreementId}")]
