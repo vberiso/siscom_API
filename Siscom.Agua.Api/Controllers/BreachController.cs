@@ -124,7 +124,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
         [HttpGet("SearchFolio/{Folio}")]
-        public async Task<IActionResult> GetFolio([FromRoute] string folio)
+        public async Task<IActionResult> GetFolio([FromRoute] string Folio)
         {
             if (!ModelState.IsValid)
             {
@@ -135,7 +135,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .ThenInclude(ad => ad.TaxAddresses)
                                                 .Include(b => b.BreachDetails)
                                                 .ThenInclude(l => l.BreachList)
-                                                .FirstOrDefaultAsync(a => a.Folio == folio);
+                                                .FirstOrDefaultAsync(a => a.Folio == Folio);
             if(fol == null)
             {
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre la infracción" });
@@ -388,7 +388,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var breach = await _context.Breaches.Where(l => l.AssignmentTicketId == license).ToListAsync();
+            var breach = await _context.Breaches.Where(l => l.AssignmentTicketId == license && l.Series == "C").ToListAsync();
 
 
             if (breach.Count == 0)

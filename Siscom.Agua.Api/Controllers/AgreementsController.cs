@@ -57,7 +57,10 @@ namespace Siscom.Agua.Api.Controllers
                                     .Include(c => c.Clients)
                                     .Include(ti => ti.TypeIntake)
                                     .Include(ts => ts.TypeStateService)
+                                    .Include(sd => sd.TypeService)
+                                    .Include(ad => ad.AgreementDetails)
                                     .Include(di => di.AgreementDiscounts)
+                                    
                                         .ThenInclude(d => d.Discount)
                                     .Include(p => p.Prepaids)
                                     .Where(a => a.Account == Account).FirstOrDefaultAsync();

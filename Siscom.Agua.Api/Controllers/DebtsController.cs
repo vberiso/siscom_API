@@ -133,7 +133,11 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             var debt = await _context.Debts
+                                     .Include(a => a.Agreement)
+                                        .ThenInclude(ad => ad.AgreementDetails)
                                      .Include(dd => dd.DebtDetails)
+                                        
+
                                      .Where(gs => gs.AgreementId == idAgreement)
                                      .OrderByDescending(x => x.DebitDate.Year).ToListAsync();
 
