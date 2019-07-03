@@ -25,7 +25,7 @@ namespace Siscom.Agua.Api.Controllers
     /// End Points Transaction
     /// </summary>
     [Route("api/Transaction")]
-   // [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
+    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [Produces("application/json")]
     [ApiController]
     [Authorize]
