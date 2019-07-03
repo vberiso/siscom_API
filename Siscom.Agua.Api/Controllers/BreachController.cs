@@ -224,6 +224,8 @@ namespace Siscom.Agua.Api.Controllers
 
             //}
 
+            //var valueUnity = _context.
+
             #endregion
 
             try
@@ -296,7 +298,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         OrderSaleDetail orderSaleDetail = new OrderSaleDetail
                         {
-                            Quantity = 1,
+                            
                             Unity = "SAN",
                             UnitPrice = factor.NumberColumn,
                             HaveTax = false,
@@ -304,7 +306,9 @@ namespace Siscom.Agua.Api.Controllers
                             CodeConcept = serParam.TextColumn,
                             NameConcept = x.BreachList.Description,
                             Amount = x.Amount,
-                            OnAccount = 0
+                            OnAccount = 0,
+                            Quantity = x.Amount/factor.NumberColumn,
+
                         };
                         orderSaleDetails.Add(orderSaleDetail);
                     });
@@ -611,7 +615,7 @@ namespace Siscom.Agua.Api.Controllers
                                 {
                                     //Breach = NewBreach,
                                     BreachId = NewBreach.Id,
-
+                                    
                                     //BreachList = value,
                                     BreachListId = value.Id,
                                     Amount = valueJudge * param.NumberColumn,
