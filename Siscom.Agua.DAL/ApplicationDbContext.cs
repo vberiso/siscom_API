@@ -181,6 +181,10 @@ namespace Siscom.Agua.DAL
         /// BrandModel
         /// </summary>
         public DbSet<BrandModel> BrandModels { get; set; }
+        /// <summary>
+        /// VersionApp
+        /// </summary>
+        public DbSet<VersionApp> VersionApps { get; set; }
 
         public ApplicationDbContext()
         {
@@ -1307,6 +1311,12 @@ namespace Siscom.Agua.DAL
             builder.Entity<TypeUse>()
                    .Property(x => x.IsActive)
                    .HasDefaultValue(true);
+            #endregion
+
+            #region Version
+            builder.Entity<VersionApp>()
+                   .Property(x => x.PublishDate)
+                   .HasColumnType("date");
             #endregion
 
             #region ViewProfile
