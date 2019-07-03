@@ -12,11 +12,11 @@ namespace Siscom.Agua.DAL.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        [Column("version"), StringLength(6)]
+        [Column("version"), StringLength(10)]
         public string Version { get; set; }
         [Column("is_active")]
         public bool IsActive { get; set; }
-        [Column("platform"), StringLength(6)]
+        [Column("platform"), StringLength(10)]
         public string Platform { get; set; }
         [Column("publish_date")]
         public DateTime PublishDate { get; set; }
