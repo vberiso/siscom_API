@@ -76,6 +76,39 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         /// <summary>
+        /// Obtendo los pagos a partir del id iddebt.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("fromDebt/{idDebt}")]
+        public async Task<IActionResult> GetPaymentsFromDebt([FromRoute] int idDebt)
+        {
+            if (idDebt == 0)
+            {
+                return NotFound();
+            }
+
+            var idsPayment = _context.PaymentDetails.Where(x => x.DebtId == idDebt).Select(y => y.PaymentId).Distinct().ToList();
+            if (idsPayment == null || idsPayment.Count == 0)
+                return NoContent();
+            
+            var payment = await _context.Payments
+                .Include(p => p.ExternalOriginPayment)
+                .Include(p => p.OriginPayment)
+                .Include(p => p.PayMethod)
+                .Include(p => p.PaymentDetails)
+                .Include(p => p.TaxReceipts)
+                .Where(m => idsPayment.Contains(m.Id) && m.HaveTaxReceipt == true).ToListAsync();
+
+            if (payment == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(payment);
+        }
+
+        /// <summary>
         /// This will provide details for the specific ID, of Payments which is being passed
         /// </summary>
         /// <param name="folio">Mandatory</param>

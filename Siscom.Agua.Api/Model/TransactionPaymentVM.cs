@@ -11,5 +11,6 @@ namespace Siscom.Agua.Api.Model
         public Transaction Transaction { get; set; }
         public Payment Payment { get; set; }
         public OrderSale OrderSale { get; set; }
+        public List<ClavesProductoServicioSAT> ClavesProdServ { get; set; }
     }
 }

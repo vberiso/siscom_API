@@ -81,6 +81,25 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(lstTaxReceip);
         }
 
+        // GET: api/TaxReceipts/UUIDFromTaxReceipt/1
+        [HttpGet("UUIDFromTaxReceipt/{idPayment}")]
+        public async Task<IActionResult> GetUUIDFromTaxReceipt([FromRoute] int idPayment)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var tmpTaxReceip = await _context.TaxReceipts.FirstOrDefaultAsync(x => x.PaymentId == idPayment);
+
+            if (tmpTaxReceip == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(tmpTaxReceip.FielXML);
+        }
+
         // POST: api/TaxReceipts
         [HttpPost]
         public async Task<IActionResult> PostTaxReceipt(int TaxReceiptId, [FromBody] TaxReceipt taxReceipt)

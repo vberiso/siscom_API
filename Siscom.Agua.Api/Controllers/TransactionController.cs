@@ -25,7 +25,7 @@ namespace Siscom.Agua.Api.Controllers
     /// End Points Transaction
     /// </summary>
     [Route("api/Transaction")]
-    [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
+   // [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [Produces("application/json")]
     [ApiController]
     [Authorize]
@@ -93,17 +93,47 @@ namespace Siscom.Agua.Api.Controllers
                                                         .Where(m => m.TransactionFolio == ((transactionPayment.Transaction.TypeTransaction.Id != 4) ? transactionPayment.Transaction.Folio : transactionPayment.Transaction.CancellationFolio))
                                                         .FirstOrDefaultAsync();
 
-            if (transactionPayment.Payment != null)
+            //Determino si fue pago de adeudo o producto.
+            if (transactionPayment.Payment.OrderSaleId != 0) //Order Sale
             {
-
-                transactionPayment.Payment.PaymentDetails.ToList().ForEach(x =>
-               {
-                   x.Debt = _context.Debts.Include(dd => dd.DebtDiscounts).Where(d => d.Id == x.DebtId).FirstOrDefault();
-                   x.Prepaid = _context.Prepaids.Find(x.PrepaidId);
-               });
+                if (transactionPayment.Payment != null)
+                {
+                    transactionPayment.OrderSale = _context.OrderSales
+                                                        .Include(os => os.OrderSaleDetails)
+                                                        .Include(os => os.OrderSaleDiscounts)
+                                                    .Where(os => os.Id == transactionPayment.Payment.OrderSaleId)
+                                                    .FirstOrDefault();
+                }
+                transactionPayment.ClavesProdServ = transactionPayment.OrderSale.OrderSaleDetails.Select(o => new ClavesProductoServicioSAT() { CodeConcep = o.CodeConcept, Tipo = "TIP02", ClaveProdServ = _context.ProductParams.FirstOrDefault(x => x.ProductId == int.Parse(o.CodeConcept)).CodeConcept }).ToList();
             }
+            else //Servicio
+            {
+                if (transactionPayment.Payment != null)
+                {
+                    transactionPayment.Payment.PaymentDetails.ToList().ForEach(x =>
+                    {
+                        x.Debt = _context.Debts.Include(dd => dd.DebtDiscounts).Include(dd => dd.DebtDetails).Where(d => d.Id == x.DebtId).FirstOrDefault();
+                        x.Prepaid = _context.Prepaids.Find(x.PrepaidId);
+                    });
+                }
 
-           
+                List<ClavesProductoServicioSAT> tmpClaves = new List<ClavesProductoServicioSAT>();
+                foreach(var item in transactionPayment.Payment.PaymentDetails)
+                {
+                    if (item.Type != "TIP02")
+                    {
+                        var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)).CodeConcept });
+                        tmpClaves.AddRange(tmpConceptos.ToList());
+                    }
+                    else    //Producto con cuenta.
+                    {
+                        var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ProductParams.FirstOrDefault(x => x.ProductId == int.Parse(d.CodeConcept)).CodeConcept });
+                        tmpClaves.AddRange(tmpConceptos.ToList());
+                    }
+                    
+                }
+                transactionPayment.ClavesProdServ = tmpClaves.GroupBy(c => new { c.ClaveProdServ, c.Tipo, c.CodeConcep }).Select(x => x.First()).ToList();
+            }
 
             return Ok(transactionPayment);
         }
