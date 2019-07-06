@@ -165,6 +165,29 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(transaction);
         }
 
+        //Obtiene las transacciones de un usuario para un dia especifico.
+        [HttpGet("FromUserInDay/{date}/{idUser}")]
+        public async Task<IActionResult> FindTransactionsFromUserInDay([FromRoute] string date, string idUser)
+        {
+            var idTerminal = _context.TerminalUsers.Where(t => t.UserId == idUser && t.OpenDate.ToString("yyyy-MM-dd") == date).Select(t => t.Id).FirstOrDefault();
+
+            var transaction = await _context.Transactions
+                                     .Include(x => x.TypeTransaction)
+                                     .Include(x => x.TransactionFolios)
+                                     .Where(x => x.TerminalUser.Id == idTerminal)
+                                     .OrderBy(x => x.Id).ToListAsync();
+            transaction.ToList().ForEach(x =>
+            {
+                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
+            });
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(transaction);
+        }
+
         /// <summary>
         /// Get state operation terminal user
         /// </summary>       
