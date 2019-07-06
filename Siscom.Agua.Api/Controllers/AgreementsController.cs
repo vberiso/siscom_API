@@ -59,10 +59,10 @@ namespace Siscom.Agua.Api.Controllers
                                     .Include(ts => ts.TypeStateService)
                                     .Include(sd => sd.TypeService)
                                     .Include(ad => ad.AgreementDetails)
-                                    .Include(di => di.AgreementDiscounts)
-                                    
+                                    .Include(di => di.AgreementDiscounts)                                    
                                         .ThenInclude(d => d.Discount)
                                     .Include(p => p.Prepaids)
+                                    .Include(z=> z.TypeConsume)
                                     .Where(a => a.Account == Account).FirstOrDefaultAsync();
 
             summary.Clients = summary.Clients.Where(c => c.IsActive == true).ToList();
