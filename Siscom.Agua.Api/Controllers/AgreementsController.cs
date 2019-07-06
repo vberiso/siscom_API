@@ -186,6 +186,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 var agreement = await _context.Agreements
                                      .Include(x => x.Clients)
+                                     .Include(x=> x.AgreementDetails)
                                      .Include(x => x.Addresses)
                                        .ThenInclude(s => s.Suburbs)
                                            .ThenInclude(t => t.Towns)
