@@ -27,6 +27,8 @@ namespace Siscom.Agua.DAL.Models
         public string Status { get; set; }
         [Column("IdXmlFacturama"), StringLength(250)]
         public string IdXmlFacturama { get; set; }
+        [Column("UsoCFDI"), StringLength(50)]
+        public string UsoCFDI { get; set; }
 
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
