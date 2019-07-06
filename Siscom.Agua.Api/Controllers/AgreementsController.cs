@@ -355,16 +355,17 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TSS.name [Status] " +
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
-                                    ",A.type_agreement Tipo" +
+                                    ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
