@@ -17,6 +17,7 @@ using Siscom.Agua.DAL.Models;
 namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
+    [Produces("application/json")]
     [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
     public class TransitPoliceController : ControllerBase

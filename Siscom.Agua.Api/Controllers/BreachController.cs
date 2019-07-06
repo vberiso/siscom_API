@@ -176,6 +176,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
             var breach = await _context.Breaches
+                                      
                                        .Include(x => x.BreachDetails)
                                         .ThenInclude(y => y.BreachList)
                                        .Where(x => x.Id == id)
@@ -216,6 +217,12 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre valor para infracción " });
 
             }
+
+            var ticket = await _context.AssignmentTickets
+                                                .Include(s => s.TransitPolice)
+                                                .Where(s => s.Id == breach.AssignmentTicketId).FirstOrDefaultAsync(); 
+
+            
             //var orderLast = await _context.OrderSales.Where(o => o.IdOrigin == breach.Id).FirstOrDefaultAsync();
 
             //if (orderLast.Status == "EOS01")
@@ -260,7 +267,7 @@ namespace Siscom.Agua.Api.Controllers
                     order.Period = 0;
                     order.Type = "OM001";
                     order.Status = "EOS01";
-                    order.Observation = breach.Reason;
+                    order.Observation = "FOLIO"+ breach.Series+ticket.Folio+","+"AGENTE"+ ticket.TransitPolice.Plate;
                     order.ExpirationDate = DateTime.UtcNow.ToLocalTime();
                     var valExpirationDate = Convert.ToInt32(param.NumberColumn);
                     var endDate = order.ExpirationDate.AddDays(valExpirationDate);
@@ -295,6 +302,9 @@ namespace Siscom.Agua.Api.Controllers
                     breach.BreachDetails.ToList().ForEach(x => {
 
 
+                        var article =  _context.BreachArticles.Where( v => v.Id == x.BreachList.BreachArticleId).FirstOrDefault();
+                        var  na = "Articulo";
+
 
                         OrderSaleDetail orderSaleDetail = new OrderSaleDetail
                         {
@@ -302,7 +312,7 @@ namespace Siscom.Agua.Api.Controllers
                             Unity = "SAN",
                             UnitPrice = factor.NumberColumn,
                             HaveTax = false,
-                            Description = x.BreachList.Description,
+                            Description = na +' ' +article.Article + ' ' + x.BreachList.Fraction +' '+ x.BreachList.Description,
                             CodeConcept = serParam.TextColumn,
                             NameConcept = x.BreachList.Description,
                             Amount = x.Amount,
