@@ -114,8 +114,8 @@ namespace Siscom.Agua.Api.Controllers
                                                         x.IsActive == true).ToListAsync();
             }
 
-            //var childParent = Preorder(product);
-            var childParent = product;
+            var childParent = Preorder(product);
+            //var childParent = product;
 
             if (product == null)
             {

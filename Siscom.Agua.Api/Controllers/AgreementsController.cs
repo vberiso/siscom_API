@@ -58,11 +58,11 @@ namespace Siscom.Agua.Api.Controllers
                                     .Include(ti => ti.TypeIntake)
                                     .Include(ts => ts.TypeStateService)
                                     .Include(sd => sd.TypeService)
+                                    .Include(tc => tc.TypeConsume)
                                     .Include(ad => ad.AgreementDetails)
                                     .Include(di => di.AgreementDiscounts)                                    
                                         .ThenInclude(d => d.Discount)
-                                    .Include(p => p.Prepaids)
-                                    .Include(z=> z.TypeConsume)
+                                    .Include(p => p.Prepaids)                                    
                                     .Where(a => a.Account == Account).FirstOrDefaultAsync();
 
             summary.Clients = summary.Clients.Where(c => c.IsActive == true).ToList();
@@ -401,10 +401,10 @@ namespace Siscom.Agua.Api.Controllers
                                         });
                                     }
                                 }
-                                clientsFilter.ForEach(x =>
-                                {
-                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
-                                });
+                                //clientsFilter.ForEach(x =>
+                                //{
+                                //    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
+                                //});
                             }
                         }
                         if (clientsFilter.Count > 0)
@@ -418,10 +418,10 @@ namespace Siscom.Agua.Api.Controllers
                     break;
                 case 2:
                     search.StringSearch = search.StringSearch.ToUpper();
-                    if (search.StringSearch.Length < 5)
+                    if (search.StringSearch.Length < 2)
                     {
                         return StatusCode((int)TypeError.Code.BadRequest,
-                                   new { Error = "No se pudo completar su busqueda, favor de ingresar un minimo de 5 caracteres para poder continuar" });
+                                   new { Error = "No se pudo completar su busqueda, favor de ingresar un minimo de 2 caracteres para poder continuar" });
                     }
                     try
                     {
@@ -439,16 +439,17 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TSS.name [Status] " +
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
-                                    ",A.type_agreement Tipo" +
+                                    ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -470,10 +471,10 @@ namespace Siscom.Agua.Api.Controllers
                                     }
                                 }
 
-                                clientsFilter.ForEach(x =>
-                                {
-                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
-                                });
+                                //clientsFilter.ForEach(x =>
+                                //{
+                                //    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
+                                //});
                             }
                         }
                         if (clientsFilter.Count > 0)
@@ -508,16 +509,17 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TSS.name [Status] " +
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
-                                    ",A.type_agreement Tipo" +
+                                    ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     while (await result.ReadAsync())
@@ -537,10 +539,10 @@ namespace Siscom.Agua.Api.Controllers
                                         });
                                     }
                                 }
-                                clientsFilter.ForEach(x =>
-                                {
-                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
-                                });
+                                //clientsFilter.ForEach(x =>
+                                //{
+                                //    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
+                                //});
                             }
                         }
                         if (clientsFilter.Count > 0)
@@ -575,16 +577,17 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TSS.name [Status] " +
                                     ",COUNT(ADI.id_discount) " +
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
-                                    ",A.type_agreement Tipo" +
+                                    ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), A.type_agreement, A.num_derivatives";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     while (await result.ReadAsync())
@@ -604,10 +607,10 @@ namespace Siscom.Agua.Api.Controllers
                                         });
                                     }
                                 }
-                                clientsFilter.ForEach(x =>
-                                {
-                                    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
-                                });
+                                //clientsFilter.ForEach(x =>
+                                //{
+                                //    x.Type = _context.Types.Where(y => y.CodeName == x.Type).FirstOrDefault().Description;
+                                //});
                             }
                         }
                         if (clientsFilter.Count > 0)
