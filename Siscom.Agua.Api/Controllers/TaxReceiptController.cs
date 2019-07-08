@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Http.Cors;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -220,6 +222,40 @@ namespace Siscom.Agua.Api.Controllers
 
 
             return Ok(tax);
+        }
+
+        [HttpPost("AddPDF")]
+        public async Task<IActionResult> addPDF(IFormFile AttachedFile)
+        {
+            var TaxReceipt = Newtonsoft.Json.JsonConvert.DeserializeObject<TaxReceipt>(Request.Form["Data"].ToString());
+            using (var memoryStream = new MemoryStream())
+            {
+                await AttachedFile.CopyToAsync(memoryStream);
+                TaxReceipt.PDFInvoce = memoryStream.ToArray();
+            }
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    _context.Entry(TaxReceipt).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                    scope.Complete();
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(TaxReceipt);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir la factura" });
+            }
+
         }
 
         // DELETE: api/TaxReceipts/1

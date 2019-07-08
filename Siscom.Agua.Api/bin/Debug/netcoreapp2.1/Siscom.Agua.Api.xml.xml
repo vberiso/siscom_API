@@ -166,6 +166,13 @@
             <param name="id">Mandatory</param>
             <returns>BranchOffice Model</returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.PaymentsController.GetPaymentsFromDebt(System.Int32)">
+            <summary>
+            Obtendo los pagos a partir del id iddebt.
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
         <member name="M:Siscom.Agua.Api.Controllers.PaymentsController.GetPaymentFolio(System.String)">
             <summary>
             This will provide details for the specific ID, of Payments which is being passed
