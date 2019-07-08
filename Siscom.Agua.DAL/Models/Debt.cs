@@ -57,6 +57,8 @@ namespace Siscom.Agua.DAL.Models
         public DateTime ExpirationDate { get; set; }
         [Column("recharges_date")]
         public DateTime RechargesDate { get; set; }
+        [Column("observations"), StringLength(1000)]
+        public string observations { get; set; }
 
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
