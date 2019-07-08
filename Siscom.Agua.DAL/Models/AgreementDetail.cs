@@ -33,6 +33,8 @@ namespace Siscom.Agua.DAL.Models
         public string Observation { get; set; }
         [Column("manifest")]
         public Boolean Manifest { get; set; }
+        [Column("catastral_key"), StringLength(50)]
+        public string CatastralKey { get; set; }
 
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }

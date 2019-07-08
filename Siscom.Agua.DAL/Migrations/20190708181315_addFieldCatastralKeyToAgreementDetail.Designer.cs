@@ -3,19 +3,21 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190708181315_addFieldCatastralKeyToAgreementDetail")]
+    partial class addFieldCatastralKeyToAgreementDetail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.8-servicing-32085")
+                .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -1422,10 +1424,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<short>("Year")
                         .HasColumnName("year");
 
-                    b.Property<string>("observations")
-                        .HasColumnName("observations")
-                        .HasMaxLength(1000);
-
                     b.HasKey("Id");
 
                     b.HasIndex("AgreementId");
@@ -1985,7 +1983,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-
+                        .HasDefaultValue(new DateTime(2019, 7, 8, 13, 13, 14, 765, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
