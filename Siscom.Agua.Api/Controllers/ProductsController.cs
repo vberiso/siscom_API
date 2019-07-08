@@ -324,6 +324,7 @@ namespace Siscom.Agua.Api.Controllers
                     debt.Status = "ED001";
                     debt.DebtPeriodId = 0;
                     debt.AgreementId = agreement.Id;
+                    debt.observations = pDebt.observations;
                     debt.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
                     debt.DebtDetails = pDebt.DebtDetails;
 

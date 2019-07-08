@@ -1107,6 +1107,78 @@ namespace Siscom.Agua.Api.Controllers
             return redirect;
         }
 
+
+
+        [HttpPut("agreementDetail/{id}")]
+        public async Task<IActionResult> PutAgreementDetail([FromRoute] int id, [FromBody]    AgreementDetail agree)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+
+                    if (id != agree.AgreementId)
+                    {
+                        return BadRequest();
+                    }
+
+                    _context.Entry(agree).State = EntityState.Modified;
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!AgreementListExist(id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+
+                    scope.Complete();
+                    return Ok(agree);
+
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(agree);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para editar detalle del contrato" });
+            }
+
+
+
+            return Ok(agree);
+        }
+
+        private bool AgreementListExist(int id)
+        {
+            return _context.AgreementDetails.Any(e => e.AgreementId == id);
+        }
+
+
+
+
         [HttpGet(Name = "GetAccountById")]
         public async Task<IActionResult> GetAccountById(int id)
         {
@@ -1115,6 +1187,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
+       
 
 
 
@@ -1822,6 +1895,11 @@ namespace Siscom.Agua.Api.Controllers
         }
 
     }
+
+
+
+
+
 
     public class CodeTraslator
     {
