@@ -47,7 +47,10 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var taxuser = await _context.TaxUsers.FindAsync(id);
+            var taxuser = await _context.TaxUsers
+                .Include(t => t.TaxAddresses)
+                .Where(t => t.Id == id && t.IsActive == true)
+                .FirstOrDefaultAsync();
 
             if (taxuser == null)
             {
