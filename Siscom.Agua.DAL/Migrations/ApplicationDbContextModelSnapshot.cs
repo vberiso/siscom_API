@@ -1984,7 +1984,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
-                        .HasColumnName("date_current")
+                        .HasColumnName("date_current");
 
 
                     b.Property<int>("Initial")
