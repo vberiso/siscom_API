@@ -120,7 +120,7 @@ namespace Siscom.Agua.Api.Controllers
                 List<ClavesProductoServicioSAT> tmpClaves = new List<ClavesProductoServicioSAT>();
                 foreach(var item in transactionPayment.Payment.PaymentDetails)
                 {
-                    if (item.Type != "TIP02")
+                    if (item.Type != "TIP02" && item.Type != "TIP03")
                     {
                         var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)).CodeConcept });
                         tmpClaves.AddRange(tmpConceptos.ToList());
