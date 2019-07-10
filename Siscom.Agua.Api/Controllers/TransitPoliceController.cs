@@ -110,9 +110,8 @@ namespace Siscom.Agua.Api.Controllers
             };
             string password = CrearPassword(6);
             result = await UserManager.CreateAsync(user, password);
-            while (!result.Succeeded)
-            {
-                if(result.Errors.Select(x => x.Code).Contains("DuplicateUserName"))
+           
+                 if(result.Errors.Select(x => x.Code).Contains("DuplicateUserName"))
                 {
                     int Fvalue = 0;
                     int.TryParse(user.UserName.Last().ToString(), out Fvalue);
@@ -124,30 +123,58 @@ namespace Siscom.Agua.Api.Controllers
                         int.TryParse(user.UserName.Last().ToString(), out value);
                         user.UserName = user.UserName.Remove(user.UserName.Count() - 1) + (value + 1);
                         result = await UserManager.CreateAsync(user, password);
-                    }
-                }
-            }
+                    }}
+            
             await UserManager.AddToRoleAsync(user, "Transito");
 
             if (result.Succeeded)
             {
-                TransitPolice police = new TransitPolice
+                if (transitPolice.EMail == "N/A" || transitPolice.EMail == "n/a")
                 {
-                    Name = transitPolice.Name,
-                    LastName = transitPolice.LastName,
-                    SecondLastName = transitPolice.SecondLastName,
-                    EMail = transitPolice.EMail,
-                    PhoneNumber = transitPolice.PhoneNumber,
-                    Plate = transitPolice.Plate,
-                    IsActive = true,
-                    Address = transitPolice.Address,
-                    User = user,
-                    UserId = user.Id,
-                };
+                    TransitPolice police = new TransitPolice
+                    {
+                        Name = transitPolice.Name,
+                        LastName = transitPolice.LastName,
+                        SecondLastName = transitPolice.SecondLastName,
+                        EMail = transitPolice.Name+transitPolice.LastName+"@gmail.com",
+                        PhoneNumber = transitPolice.PhoneNumber,
+                        Plate = transitPolice.Plate,
+                        IsActive = true,
+                        Address = transitPolice.Address,
+                        User = user,
+                        UserId = user.Id,
+                    };
 
-                await _context.TransitPolices.AddAsync(police);
-                await _context.SaveChangesAsync();
-                return StatusCode((int)TypeError.Code.Ok, new { Error = $"Usuario creado con éxito {Environment.NewLine} Usuario: {user.UserName} {Environment.NewLine} Contraseña: {password} " });
+
+                    await _context.TransitPolices.AddAsync(police);
+                    await _context.SaveChangesAsync();
+                    return StatusCode((int)TypeError.Code.Ok, new { Error = $"Usuario creado con éxito {Environment.NewLine} Usuario: {user.UserName} {Environment.NewLine} Contraseña: {password} " });
+
+
+                }
+                else
+                {
+                    TransitPolice police = new TransitPolice
+                    {
+                        Name = transitPolice.Name,
+                        LastName = transitPolice.LastName,
+                        SecondLastName = transitPolice.SecondLastName,
+                        EMail = transitPolice.EMail,
+                        PhoneNumber = transitPolice.PhoneNumber,
+                        Plate = transitPolice.Plate,
+                        IsActive = true,
+                        Address = transitPolice.Address,
+                        User = user,
+                        UserId = user.Id,
+                    };
+
+                    await _context.TransitPolices.AddAsync(police);
+                    await _context.SaveChangesAsync();
+                    return StatusCode((int)TypeError.Code.Ok, new { Error = $"Usuario creado con éxito {Environment.NewLine} Usuario: {user.UserName} {Environment.NewLine} Contraseña: {password} " });
+
+                }
+
+
             }
             else
             {

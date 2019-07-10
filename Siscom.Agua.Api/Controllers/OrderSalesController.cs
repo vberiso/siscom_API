@@ -193,6 +193,31 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(orderSale);
         }
 
+
+        [HttpGet("RFC/{rfc}")]
+        [Authorize]
+        public async Task<IActionResult> GetOrderSaleRFC([FromRoute] string rfc)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+           
+
+            var orderSale = await _context.TaxUsers
+                                          .Include(x => x.TaxAddresses)
+                                          .Where(x => x.RFC == rfc)
+                                          .FirstOrDefaultAsync();
+
+            if (orderSale == null)
+            {
+                return NotFound();
+            }
+
+          
+            return Ok(orderSale);
+        }
         // PUT: api/OrderSales/5
         [HttpPut("{id}")]
         [Authorize]
