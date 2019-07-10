@@ -18,7 +18,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_town"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
-        [Column("name"), StringLength(30), Required]
+        [Column("name"), StringLength(100), Required]
         public string Name { get; set; }
 
         public int StateId { get; set; }

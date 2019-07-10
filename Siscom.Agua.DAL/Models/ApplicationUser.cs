@@ -29,6 +29,8 @@ namespace Siscom.Agua.DAL.Models
         public int DivitionId { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
+        [Column("can_stamp"), Required]
+        public bool CanStamp { get; set; }
 
         public ICollection<TerminalUser> TerminalUsers { get; set; }
         public ICollection<AgreementLog> AgreementLogs { get; set; }
