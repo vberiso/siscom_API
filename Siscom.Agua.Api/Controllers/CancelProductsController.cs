@@ -102,9 +102,9 @@ namespace Siscom.Agua.Api.Controllers
                     //Se edita el estado en los debt
                     var debt = _context.Debts.Find(cancel.DebtId);
 
-                    if(debt.Type == "TIP01")
+                    if(debt.Type == "TIP01" || debt.Type == "TIP04")
                         debt.Status = "ED009"; //Condonado
-                    else if(debt.Type == "TIP02")
+                    else
                         debt.Status = "ED006"; //Cancelado
 
                     _context.Entry(debt).State = EntityState.Modified;
