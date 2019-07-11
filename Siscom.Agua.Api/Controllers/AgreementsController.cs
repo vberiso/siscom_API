@@ -45,6 +45,8 @@ namespace Siscom.Agua.Api.Controllers
             this.appSettings = appSettings.Value;
         }
 
+     
+
         // GET: api/Agreements
         [HttpGet("GetSummary/{Account}")]
         public async Task<IActionResult> GetAgreements([FromRoute] string Account)
@@ -119,6 +121,47 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(agreement);
         }
+
+
+
+        [HttpGet("comparateAccount/{account}/{idIntake}")]
+        public async Task<IActionResult> CompareteAccount([FromRoute] string account, int idIntake)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
+            var agreement =  _context.Agreements
+                                        .Include(c => c.TypeIntake)
+                                        .Where(x => x.Account == account).FirstOrDefault();
+
+
+            if (agreement == null)
+            {
+                return Ok("Numero de cuenta valido: "+ account);
+            }
+            else
+            {
+                if (agreement.TypeIntake.Id == idIntake)
+                {
+
+                    return NotFound("Ya existe esta numero de cuenta con tipo "+ agreement.TypeIntake.Name);
+                }
+                else
+                {
+                    return Ok("Numero de cuenta valido: " + account);
+
+                }
+
+            }
+
+
+
+        }
+
+
 
 
 
