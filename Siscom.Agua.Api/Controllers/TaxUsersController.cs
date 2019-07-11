@@ -68,8 +68,11 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var taxuser = await _context.TaxUsers.Where(n => n.Name.Contains(name)).ToListAsync();
-           
+            //var taxuser = await _context.TaxUsers.Where(n => n.Name.Contains(name)).ToListAsync();
+            var taxuser = await (from tx in _context.TaxUsers
+                                 where EF.Functions.Like(tx.Name, $"%{name}%")
+                                 select tx).ToListAsync();
+
 
             if (taxuser.Count == 0)
             {
