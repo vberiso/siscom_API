@@ -21,6 +21,8 @@ namespace Siscom.Agua.DAL.Models
         public decimal OriginalAmount { get; set; }
         [Column("discount_amount"), Required]
         public decimal DiscountAmount { get; set; }
+        [Column("DebtDetailId")]
+        public int DebtDetailId { get; set; }
 
         public int DebtId { get; set; }
         public Debt Debt { get; set; }

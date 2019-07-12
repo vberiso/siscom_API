@@ -140,6 +140,7 @@ namespace Siscom.Agua.DAL
         /// </summary>
         public DbSet<SystemLog> SystemLogs { get; set; }
         public DbSet<SystemParameters> SystemParameters { get; set; }
+        public DbSet<LogginLog> LogginLogs { get; set; }
 
         /// <summary>
         /// Notifications

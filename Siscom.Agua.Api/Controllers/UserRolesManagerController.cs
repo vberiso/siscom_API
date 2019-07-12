@@ -152,6 +152,15 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(res);
         }
 
+        [HttpGet("teller")]
+        public async Task<IActionResult> GetTeller()
+        {
+            var idRole = _context.Roles.Where(r => r.Name == "User").FirstOrDefault();
+            var lstUsersInRol = _context.UserRoles.Where(ur => ur.RoleId == idRole.Id).Select(ur => ur.UserId).ToList();
+            var res = _context.Users.Where(u => lstUsersInRol.Contains(u.Id) && u.IsActive == true).Select(x => new { Id = x.Id, Name = x.Name, LastName = x.LastName, SecondLastName = x.SecondLastName }).ToList();
+            return Ok(res);
+        }
+
         private string CrearPassword(int longitud)
         {
             string caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";

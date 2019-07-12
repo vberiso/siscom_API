@@ -23,6 +23,8 @@ namespace Siscom.Agua.DAL.Models
         public decimal DiscountAmount { get; set; }
         [Column("discount_percentage"), Required]
         public Int16 DiscountPercentage { get; set; }
+        [Column("OrderSaleDetailsId")]
+        public int OrderSaleDetailId { get; set; }
 
         public int OrderSaleId { get; set; }
         public OrderSale OrderSale { get; set; }
