@@ -289,6 +289,23 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
+
+        [HttpGet("AgreementsDerivate/{account}")]
+        public async Task<IActionResult> GetAgreementsDerivate([FromRoute] string account)
+        {
+            var agreement = await _context.Agreements
+                                      .Include(c => c.Clients)
+                                      .Include(a => a.Addresses)
+                                      .FirstOrDefaultAsync(a => a.Account == account);
+          
+
+            if (agreement == null)
+            {
+                return NotFound("No se encontro contrato");
+            }
+            return Ok(agreement);
+        }
+
         [HttpGet("GetDerivatives/{id}")]
         public async Task<IActionResult> GetDerivatives([FromRoute] int id)
         {
