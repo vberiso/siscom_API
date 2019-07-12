@@ -127,6 +127,7 @@ namespace Siscom.Agua.Api.Controllers
                                         .Include(p => p.OriginPayment)
                                         .Include(p => p.PayMethod)
                                         .Include(p => p.PaymentDetails)
+                                        .Include(p => p.TaxReceipts)
                                         .FirstOrDefaultAsync(m => m.TransactionFolio== folio);
             if (payment == null)
             {
