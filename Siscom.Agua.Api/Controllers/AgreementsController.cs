@@ -255,6 +255,7 @@ namespace Siscom.Agua.Api.Controllers
         }
         // GET: api/Agreements
         [HttpGet("AgreementsBasic/{id}")]
+
         public async Task<IActionResult> GetAgreementsBasic([FromRoute] int id)
         {
             var agreement = await _context.Agreements
@@ -294,8 +295,26 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> GetAgreementsDerivate([FromRoute] string account)
         {
             var agreement = await _context.Agreements
+                                     .Include(ts => ts.TypeService)
+                                      .Include(tu => tu.TypeUse)
+                                      .Include(tc => tc.TypeConsume)
+                                      .Include(tr => tr.TypeRegime)
+                                      .Include(tp => tp.TypePeriod)
+                                      .Include(tcb => tcb.TypeCommertialBusiness)
+                                      .Include(tss => tss.TypeStateService)
+                                      .Include(ti => ti.TypeIntake)
+                                      .Include(di => di.Diameter)
                                       .Include(c => c.Clients)
                                       .Include(a => a.Addresses)
+                                        .ThenInclude(s => s.Suburbs)
+                                         .ThenInclude(t => t.Towns)
+                                            .ThenInclude(st => st.States)
+                                      .Include(tc => tc.TypeClassification)
+                                      .Include(tss => tss.TypeStateService)
+                                      .Include(ags => ags.AgreementServices)
+                                        .ThenInclude(x => x.Service)
+                                      .Include(ad => ad.AgreementDetails)
+                                      .Include(af => af.AgreementFiles)
                                       .FirstOrDefaultAsync(a => a.Account == account);
           
 
