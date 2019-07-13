@@ -69,6 +69,9 @@ namespace Siscom.Agua.DAL.Models
         public int ExternalOriginPaymentId { get; set; }
         public ExternalOriginPayment ExternalOriginPayment { get; set; }        
 
+        [NotMapped]
+        public Payment Payment { get; set; }
+
         public ICollection<TransactionFolio> TransactionFolios { get; set; }
         public ICollection<TransactionDetail> TransactionDetails { get; set; }        
     }

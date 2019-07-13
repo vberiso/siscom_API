@@ -153,6 +153,7 @@ namespace Siscom.Agua.Api.Controllers
                                      .Include(x => x.TransactionFolios)
                                      .Where(x => x.TerminalUser.Id == terminalUserId)
                                      .OrderBy(x => x.Id).ToListAsync();
+
             transaction.ToList().ForEach(x =>
             {
                 x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
@@ -165,6 +166,72 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(transaction);
         }
 
+        // GET: api/TerminalUser
+        [HttpGet("Find/{date}/{terminalUserId}")]
+        public async Task<IActionResult> FindTransactionsDate([FromRoute] string date, int terminalUserId)
+        {
+            var transactionn = await (from t 
+                                        in _context.Transactions
+                                                    .Include(x => x.TypeTransaction)
+                                                    .Include(x => x.TransactionFolios)
+                                        join p in _context.Payments
+                                                          .Include(x => x.TaxReceipts) 
+                                               on t.Folio equals p.TransactionFolio 
+                                        into tran
+                                            from defaultVal 
+                                                in tran.DefaultIfEmpty()
+                                        orderby t.Id
+                                        where t.TerminalUserId == terminalUserId
+                                      select new
+                                      {
+                                          t,
+                                          p = defaultVal
+                                      }).ToListAsync();
+
+            var transaction = transactionn.Select(x => new Siscom.Agua.DAL.Models.Transaction
+            {
+                Account = x.t.Account,
+                AccountNumber = x.t.AccountNumber,
+                Amount = x.t.Amount,
+                Aplication = x.t.Aplication,
+                AuthorizationOriginPayment = x.t.AuthorizationOriginPayment,
+                CancelAuthorizationId = x.t.CancelAuthorizationId,
+                CancellationFolio = x.t.CancellationFolio,
+                DateTransaction = x.t.DateTransaction,
+                ExternalOriginPayment = x.t.ExternalOriginPayment,
+                ExternalOriginPaymentId = x.t.ExternalOriginPaymentId,
+                Folio = x.t.Folio,
+                Id = x.t.Id,
+                NumberBank = x.t.NumberBank,
+                OriginPayment = x.t.OriginPayment,
+                OriginPaymentId = x.t.OriginPaymentId,
+                Payment = x.p,
+                PayMethod = x.t.PayMethod,
+                PayMethodId = x.t.PayMethodId,
+                PayMethodNumber = x.t.PayMethodNumber,
+                Rounding = x.t.Rounding,
+                Sign = x.t.Sign,
+                Tax = x.t.Tax,
+                TerminalUser = x.t.TerminalUser,
+                TerminalUserId = x.t.TerminalUserId,
+                Total = x.t.Total,
+                TransactionDetails = x.t.TransactionDetails,
+                TransactionFolios = x.t.TransactionFolios,
+                TypeTransaction = x.t.TypeTransaction,
+                TypeTransactionId = x.t.TypeTransactionId,
+            }).ToList();
+
+            transaction.ToList().ForEach(x =>
+            {
+                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
+            });
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(transaction);
+        }
         //Obtiene las transacciones de un usuario para un dia especifico.
         [HttpGet("FromUserInDay/{date}/{idUser}")]
         public async Task<IActionResult> FindTransactionsFromUserInDay([FromRoute] string date, string idUser)
