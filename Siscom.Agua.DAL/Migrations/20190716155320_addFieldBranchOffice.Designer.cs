@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190716155320_addFieldBranchOffice")]
+    partial class addFieldBranchOffice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1221,11 +1223,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("second_last_name")
                         .HasMaxLength(80);
 
-                    b.Property<bool>("TaxRegime")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("tax_regime")
-                        .HasDefaultValue(false);
-
                     b.Property<string>("TypeUser")
                         .IsRequired()
                         .HasColumnName("type_user")
@@ -1996,7 +1993,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 7, 16, 11, 43, 17, 3, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 7, 16, 10, 53, 19, 93, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2165,10 +2162,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<string>("User")
                         .HasColumnName("User")
                         .HasMaxLength(30);
-
-                    b.Property<string>("UserName")
-                        .HasColumnName("UserName")
-                        .HasMaxLength(150);
 
                     b.Property<string>("VersionSiscom")
                         .HasColumnName("VersionSiscom")

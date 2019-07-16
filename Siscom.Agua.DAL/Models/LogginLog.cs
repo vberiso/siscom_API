@@ -21,5 +21,9 @@ namespace Siscom.Agua.DAL.Models
         public string User { get; set; }
         [Column("VersionSiscom"), StringLength(30)]
         public string VersionSiscom { get; set; }
+        [Column("BranchOffice"), StringLength(50)]
+        public string BranchOffice { get; set; }
+        [Column("UserName"), StringLength(150)]
+        public string UserName { get; set; }
     }
 }

@@ -37,7 +37,8 @@ namespace Siscom.Agua.DAL.Models
         public string TypeUser { get; set; }
         [Required, Column("is_active")]
         public bool IsActive { get; set; }
-
+        [Required, Column("tax_regime")]
+        public bool TaxRegime { get; set; }
         //[ForeignKey("Agreement")]
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }

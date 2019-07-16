@@ -137,5 +137,17 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Unauthorized();
         }
+
+        [HttpPost("Logger")]
+        public async Task<IActionResult> LoginLog([FromBody] LogginLog log)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            _context.LogginLogs.Add(log);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
     }
 }

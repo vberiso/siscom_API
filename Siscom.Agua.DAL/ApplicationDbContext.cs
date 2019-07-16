@@ -484,7 +484,11 @@ namespace Siscom.Agua.DAL
             builder.Entity<Client>()
                    .HasOne<Agreement>(a => a.Agreement)
                    .WithMany(s => s.Clients)
+
                    .HasForeignKey(s => s.AgreementId);
+            builder.Entity<Client>()
+                   .Property(x => x.TaxRegime)
+                   .HasDefaultValue(false);
             #endregion
 
             #region Consumption
