@@ -325,6 +325,52 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
+        [HttpGet("Notification/{idAgreement}")]
+        public async Task<IActionResult> GetNotification([FromRoute] int idAgreement)
+        {
+
+            //DateTime sDate = DateTime.Now.ToString();
+            //DateTime datevalue = (Convert.ToDateTime(sDate.ToString()));
+
+            //DateTime dy = datevalue.Day.ToString();
+            //DateTime mn = datevalue.Month.ToString();
+            //DateTime yy = datevalue.Year.ToString();
+
+
+
+            var agreement = await _context.Debts.Include(d => d.DebtDetails)
+                                                .Where(a =>a.AgreementId == idAgreement).OrderByDescending(e =>e.DebitDate).ToListAsync();
+
+            if (agreement == null)
+            {
+                foreach (var debt in agreement)
+                {
+                    if (debt.DebitDate.Year == 2019)
+                    {
+                        if (debt.DebitDate.Month == 5 || debt.DebitDate.Month == 5)
+                        {
+                            //if (debt.DebtDetails.)
+                            //{
+
+                            //}
+                        }
+                    }
+
+                }
+            }
+            else
+            {
+                return NotFound("No se encontro notificacion");
+            }
+
+
+
+
+          
+
+            return Ok(agreement);
+        }
+
         [HttpGet("GetDerivatives/{id}")]
         public async Task<IActionResult> GetDerivatives([FromRoute] int id)
         {
@@ -1081,7 +1127,9 @@ namespace Siscom.Agua.Api.Controllers
                                 INE = client.INE,
                                 EMail = client.EMail,
                                 TypeUser = client.TypeUser,
-                                IsActive = true
+                                IsActive = true,
+                                TaxRegime = client.TaxRegime,
+
                             };
 
                             foreach (var item in client.Contacts)

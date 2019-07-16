@@ -21,6 +21,7 @@ namespace Siscom.Agua.Api.Controllers
     [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [Produces("application/json")]
     [ApiController]
+    [Authorize]
     public class ValueParametersController : ControllerBase
     {
 

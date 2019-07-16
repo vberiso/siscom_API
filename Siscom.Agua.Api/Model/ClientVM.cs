@@ -25,6 +25,9 @@ namespace Siscom.Agua.Api.Model
         public string EMail { get; set; }
         [StringLength(5)]
         public string TypeUser { get; set; }
+
+        public bool TaxRegime { get; set; }
+
         public bool IsMale { get; set; }
         public bool IsActive { get; set; }
 

@@ -21,6 +21,7 @@ namespace Siscom.Agua.Api.Controllers
     [Produces("application/json")]
     [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
+    [Authorize]
     public class OrderSalesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -43,6 +44,7 @@ namespace Siscom.Agua.Api.Controllers
             DateTime dateTime = new DateTime();
             DateTime.TryParse(date, out dateTime);
             var orders = _context.OrderSales
+                                
                                 .Include(x => x.TaxUser)
                                 .ThenInclude(user => user.TaxAddresses)
                                 .Include(x => x.OrderSaleDetails)

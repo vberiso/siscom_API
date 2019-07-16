@@ -248,6 +248,8 @@ namespace Siscom.Agua.Api.Controllers
         {
             Agreement agreement = new Agreement();
             Debt debt = new Debt();
+            decimal totalIva = 0;
+            decimal total = 0;
 
             #region Validación
             if (!ModelState.IsValid)
@@ -293,6 +295,11 @@ namespace Siscom.Agua.Api.Controllers
                     if (_product == null) _validaProducto = false;
                     if (!_product.IsActive) _validaProducto = false;
                 });
+
+                decimal _sumTot = pDebt.DebtDetails.Sum(x => (x.Amount + x.Tax));
+                decimal _sumIVA = pDebt.DebtDetails.Sum(x => x.Tax);
+                decimal IVA = _context.SystemParameters.Where(x => x.Name == "IVA" && x.IsActive == true).FirstOrDefault().NumberColumn;
+
 
                 if (!_validaProducto)
                     return StatusCode((int)TypeError.Code.NotFound, new { Message = string.Format("No se encontró concepto o no se encuentra habilitado") });
@@ -364,7 +371,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se genero orden" });
 
             }
-            return Ok(debt.Id);
+            return Ok(debt);
 
         }
 

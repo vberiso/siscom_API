@@ -92,6 +92,7 @@ namespace Siscom.Agua.Api.Controllers
                             c.RFC = item.RFC;
                             c.SecondLastName = item.SecondLastName;
                             c.TypeUser = item.TypeUser;
+                            c.TaxRegime = item.TaxRegime;
                             foreach (var contac in item.Contacts)
                             {
                                 var con = new Contact
@@ -120,6 +121,7 @@ namespace Siscom.Agua.Api.Controllers
                             clientBase.RFC = item.RFC;
                             clientBase.SecondLastName = item.SecondLastName;
                             clientBase.TypeUser = item.TypeUser;
+                            clientBase.TaxRegime = item.TaxRegime;
                             clientBase.Contacts.Where(z => z.IsActive == 1).ToList().ForEach(x =>
                             {
                                 var contact = item.Contacts.Where(i => i.Id == x.Id).FirstOrDefault();
