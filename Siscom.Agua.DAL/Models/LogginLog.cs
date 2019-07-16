@@ -17,7 +17,7 @@ namespace Siscom.Agua.DAL.Models
         public DateTime Fecha { get; set; }
         [Column("Terminal"), StringLength(30)]
         public string Terminal { get; set; }
-        [Column("User"), StringLength(30)]
+        [Column("User"), StringLength(50)]
         public string User { get; set; }
         [Column("VersionSiscom"), StringLength(30)]
         public string VersionSiscom { get; set; }
