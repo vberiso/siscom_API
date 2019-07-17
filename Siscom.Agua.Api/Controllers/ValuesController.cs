@@ -10,7 +10,6 @@ namespace Siscom.Agua.Api.Controllers
 {
     
     //[Authorize]
-    [Authorize]
     [Route("api/[controller]")]
     [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
 
