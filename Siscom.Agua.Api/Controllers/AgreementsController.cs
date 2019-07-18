@@ -330,38 +330,77 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> GetNotification([FromRoute] int idAgreement)
         {
 
-            //DateTime sDate = DateTime.Now.ToString();
-            //DateTime datevalue = (Convert.ToDateTime(sDate.ToString()));
+            var sDate = DateTime.Now.ToString();
+            var datevalue = (Convert.ToDateTime(sDate.ToString()));
 
             //DateTime dy = datevalue.Day.ToString();
-            //DateTime mn = datevalue.Month.ToString();
-            //DateTime yy = datevalue.Year.ToString();
+            var mn = datevalue.Month.ToString();
+            var yy = datevalue.Year.ToString();
+
+            int year = 0;
+
+            int month = 0;
+
+            year = Convert.ToInt32(yy);
+            List<ConstanciaVm> pi = new List<ConstanciaVm>();
+
+            month = Convert.ToInt32(mn);
+
+            month = month - 2;
+
 
 
 
             var agreement = await _context.Debts.Include(d => d.DebtDetails)
-                                                .Where(a =>a.AgreementId == idAgreement).OrderByDescending(e =>e.DebitDate).ToListAsync();
+                                                .Where(a =>a.AgreementId == idAgreement && a.Status != "ED005" && a.ExpirationDate.Year == year ).OrderByDescending(e =>e.DebitDate).ToListAsync();
 
-            if (agreement == null)
+            if (agreement == null || agreement.Count == 0)
             {
-                foreach (var debt in agreement)
-                {
-                    if (debt.DebitDate.Year == 2019)
-                    {
-                        if (debt.DebitDate.Month == 5 || debt.DebitDate.Month == 5)
-                        {
-                            //if (debt.DebtDetails.)
-                            //{
+                var pay = await _context.Payments.Include(p => p.PaymentDetails).Where(pa => pa.AgreementId == idAgreement && pa.PaymentDate.Year == year && pa.PaymentDate.Month == month).ToListAsync();
 
-                            //}
+                if (pay == null)
+                {
+                    return NotFound("no existen pagos");
+                }
+
+                //var deta = await _context.PaymentDetails.Where(xa => xa.PaymentId == pay.Id ).ToListAsync();
+
+               
+
+                foreach(var payment in pay)
+                {
+
+                    foreach(var detail  in payment.PaymentDetails)
+                    {
+                        if (detail.Description == "Constancia de no adeudo (servicio doméstico)")
+                        {
+
+                            pi.Add(new ConstanciaVm()
+                            {
+                                Id = detail.Id,
+                                Description = detail.Description
+                             });
+
                         }
                     }
-
+                   
+                   
                 }
+
+               if(pi == null || pi.Count == 0)
+                {
+                    return NotFound("No tiene la constancia de no adeudo");
+                }
+                else
+                {
+                    return Ok("Obtener constancia de no adeudo");
+                }
+
+
             }
             else
             {
-                return NotFound("No se encontro notificacion");
+                return NotFound("No contiene una constancia de no adeudo");
             }
 
 
@@ -369,7 +408,7 @@ namespace Siscom.Agua.Api.Controllers
 
           
 
-            return Ok(agreement);
+
         }
 
         [HttpGet("GetDerivatives/{id}")]

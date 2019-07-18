@@ -9,7 +9,7 @@ namespace Siscom.Agua.Api.Model
     public class ClientVM
     {
         public int Id { get; set; }
-        [StringLength(50), Required]
+        [StringLength(200), Required]
         public string Name { get; set; }
         [StringLength(80), Required]
         public string LastName { get; set; }
