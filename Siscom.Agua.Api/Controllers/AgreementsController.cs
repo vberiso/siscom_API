@@ -2061,6 +2061,113 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+
+        [HttpPost("addDiscountAyuntamiento/{idAgreement}/")]
+        public async Task<IActionResult> AddDiscountAgreement([FromRoute] int idAgreement)
+        {
+            var sDate = DateTime.Now.ToString();
+            var datevalue = (Convert.ToDateTime(sDate.ToString()));
+
+            //DateTime dy = datevalue.Day.ToString();
+            var mn = datevalue.Month.ToString();
+            var yy = datevalue.Year.ToString();
+
+            int year = 0;
+
+            int month = 0;
+
+            year = Convert.ToInt32(yy);
+            string error = string.Empty;
+            try
+            {
+                var debt = await _context.Debts.Where(x => x.AgreementId == idAgreement && x.ExpirationDate.Year == year && x.Status == "ED001" ).ToListAsync();
+
+                if( debt.Count == 0)
+                {
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se encontro deuda por pagar en este año") });
+
+                }
+                var discount =  _context.AgreementDiscounts.Where(sd => sd.IdAgreement == idAgreement).FirstOrDefault();
+
+                if(discount == null)
+                {
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El contrato no tiene agregado algun descuento") });
+                }
+
+                var valueD = _context.Discounts.Where(d => d.Id == discount.IdDiscount).FirstOrDefault();
+
+                if(valueD == null)
+                {
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se encontraron descuentos") });
+
+                }
+
+
+                foreach (var one in debt)
+                {
+                    using (var command = _context.Database.GetDbConnection().CreateCommand())
+                    {
+                        command.CommandText = "[dbo].[billing_Adjustment]";
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.Add(new SqlParameter("@id", one.AgreementId));
+                        command.Parameters.Add(new SqlParameter("@porcentage_value", valueD.Percentage));
+                        command.Parameters.Add(new SqlParameter("@discount_value", 0));
+                        command.Parameters.Add(new SqlParameter("@text_discount", valueD.Name));
+                        command.Parameters.Add(new SqlParameter("@option", 1));
+                        command.Parameters.Add(new SqlParameter("@account_folio", 0));
+                        //command.Parameters.Add(new SqlParameter("@error", 0));
+
+
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@error",
+                            DbType = DbType.String,
+                            Size = 200,
+                            Direction = ParameterDirection.Output
+                        });
+                        this._context.Database.OpenConnection();
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            if (result.HasRows)
+                            {
+                                error = command.Parameters["@error"].Value.ToString();
+                            }
+                            error = command.Parameters["@error"].Value.ToString();
+                        }
+                        if (string.IsNullOrEmpty(error))
+                        {
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo agregar el descuento: [{error}]") });
+
+                        }
+
+                    }
+                }
+
+
+
+
+                return Ok("Se genero correctamente el descuento");
+
+
+
+
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = idAgreement.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar descuento" });
+            }
+
+        }
+
+
     }
 
 
