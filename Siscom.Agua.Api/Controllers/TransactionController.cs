@@ -167,6 +167,32 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/TerminalUser
+        [HttpGet("{date}/{UserId}")]
+        public async Task<IActionResult> FindTransactionsFromDate([FromRoute] string date, string UserId)
+        {
+
+            DateTime fromDate;
+            DateTime.TryParse(date, out fromDate);
+
+            var transaction = await _context.Transactions
+                                     .Include(x => x.TypeTransaction)
+                                     .Include(x => x.TransactionFolios)
+                                     .Where(x => x.TerminalUser.UserId == UserId  && x.DateTransaction.Date == fromDate)
+                                     .OrderBy(x => x.Id).ToListAsync();
+
+            transaction.ToList().ForEach(x =>
+            {
+                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
+            });
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(transaction);
+        }
+
+        // GET: api/TerminalUser
         [HttpGet("Find/{date}/{terminalUserId}")]
         public async Task<IActionResult> FindTransactionsDate([FromRoute] string date, int terminalUserId)
         {
