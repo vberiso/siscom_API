@@ -2080,7 +2080,7 @@ namespace Siscom.Agua.Api.Controllers
             string error = string.Empty;
             try
             {
-                var debt = await _context.Debts.Where(x => x.AgreementId == idAgreement && x.ExpirationDate.Year == year && x.Status == "ED001" ).ToListAsync();
+                var debt = await _context.Debts.Where(x => x.AgreementId == idAgreement && x.ExpirationDate.Year == year && x.Status == "ED001" && x.Type != "TIP02" && x.Type != "TIP03" && x.Type != "TIP05" ).ToListAsync();
 
                 if( debt.Count == 0)
                 {
