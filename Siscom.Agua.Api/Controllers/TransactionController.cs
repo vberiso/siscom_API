@@ -261,7 +261,7 @@ namespace Siscom.Agua.Api.Controllers
         //Obtiene las transacciones de un usuario para un dia especifico.
         [HttpGet("FromUserInDay/{date}/{idUser}")]
         public async Task<IActionResult> FindTransactionsFromUserInDay([FromRoute] string date, string idUser)
-        {
+        { 
             var idTerminal = _context.TerminalUsers.Where(t => t.UserId == idUser && t.OpenDate.ToString("yyyy-MM-dd") == date).Select(t => t.Id).FirstOrDefault();
 
             var transaction = await _context.Transactions
@@ -269,18 +269,37 @@ namespace Siscom.Agua.Api.Controllers
                                      .Include(x => x.TransactionFolios)
                                      .Where(x => x.TerminalUser.Id == idTerminal)
                                      .OrderBy(x => x.Id).ToListAsync();
-            transaction.ToList().ForEach(x =>
-            {
-                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
-            });
+            
             if (transaction == null)
             {
                 return NotFound();
             }
 
-            return Ok(transaction);
-        }
+            List<TransactionMovimientosCaja> lstMovs = transaction
+                .Select(t => new TransactionMovimientosCaja() {
+                    IdTransaction = t.Id,
+                    FolioTransaccion = t.Folio,
+                    Cuenta = t.Account,
+                    Operacion = t.TypeTransaction.Name,
+                    FolioImpresion = t.TransactionFolios.Count > 0 ? t.TransactionFolios.FirstOrDefault().Folio : "",
+                    Hora = t.DateTransaction.ToString("hh:mm tt"),
+                    Total = t.Total,
+                    Signo = t.Sign
+                })
+                .ToList();
 
+            lstMovs.ToList().ForEach(x =>
+            {
+                if (x.Operacion == "Cobro" || x.Operacion == "Cancelación")
+                    x.HaveInvoice = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().HaveTaxReceipt;
+                else
+                    x.HaveInvoice = false;
+            });
+
+            return Ok(lstMovs);
+        }
+        
+        
         /// <summary>
         /// Get state operation terminal user
         /// </summary>       
