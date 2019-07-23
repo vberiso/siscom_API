@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190723182246_addFieldAspUserSuburbAccountingPayment")]
+    partial class addFieldAspUserSuburbAccountingPayment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -217,10 +219,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("Secuential")
                         .HasColumnName("secuential");
-
-                    b.Property<string>("Status")
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
 
                     b.HasKey("Id");
 
@@ -2007,7 +2005,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 7, 23, 14, 25, 28, 302, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 7, 23, 13, 22, 45, 900, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");

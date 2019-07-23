@@ -24,6 +24,12 @@ namespace Siscom.Agua.DAL.Models
         public DateTime RegistrationDate { get; set; }
         [Column("last_update_date")]
         public DateTime LastUpdateDate { get; set; }
+        [Column("zip"), StringLength(8)]
+        public string Zip { get; set; }
+        [Column("settlement"), StringLength(100)]
+        public string Settlement { get; set; }
+        [Column("zone"), StringLength(20)]
+        public string Zone { get; set; }
         //[ForeignKey("Towns")]
         public int TownsId { get; set; }
         public Town Towns { get; set; }

@@ -35,5 +35,9 @@ namespace Siscom.Agua.DAL.Models
         public string MovementType { get; set; }
         [Column("accounting_account"), StringLength(20)]
         public string AccountingAccount { get; set; }
+        [Column("idSolPago")]
+        public int IdSolPago { get; set; }
+        [Column("status"), StringLength(5)]
+        public string Status { get; set; }
     }
 }

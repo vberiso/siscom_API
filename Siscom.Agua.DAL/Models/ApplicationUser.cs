@@ -31,6 +31,8 @@ namespace Siscom.Agua.DAL.Models
         public bool IsActive { get; set; }
         [Column("can_stamp"), Required]
         public bool CanStamp { get; set; }
+        [Column("serial"), StringLength(5)]
+        public string Serial { get; set; }
 
         public ICollection<TerminalUser> TerminalUsers { get; set; }
         public ICollection<AgreementLog> AgreementLogs { get; set; }
