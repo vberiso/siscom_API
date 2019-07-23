@@ -1129,6 +1129,7 @@ namespace Siscom.Agua.Api.Controllers
                                     paymentDetail.Tax = detail.Tax;
                                     paymentDetail.Type = order.Type;
                                     _context.PaymentDetails.Add(paymentDetail);
+                                   
                                     await _context.SaveChangesAsync();
                                 }
                             }

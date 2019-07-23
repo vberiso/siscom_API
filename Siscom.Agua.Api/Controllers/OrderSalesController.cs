@@ -21,7 +21,7 @@ namespace Siscom.Agua.Api.Controllers
     [Produces("application/json")]
     [EnableCors(origins: Model.Global.global, headers: "*", methods: "*")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class OrderSalesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
