@@ -179,16 +179,16 @@ namespace Siscom.Agua.Api.Controllers
                                      .Include(x => x.TransactionFolios)
                                      .Where(x => x.TerminalUser.UserId == UserId  && x.DateTransaction.Date == fromDate)
                                      .OrderBy(x => x.Id).ToListAsync();
-
-            transaction.ToList().ForEach(x =>
-            {
-                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
-            });
             if (transaction == null)
             {
                 return NotFound();
             }
 
+            transaction.ToList().ForEach(x =>
+            {
+                x.PayMethod = _context.PayMethods.Find(x.PayMethodId);
+            });
+                        
             return Ok(transaction);
         }
 
@@ -264,18 +264,24 @@ namespace Siscom.Agua.Api.Controllers
         { 
             var idTerminal = _context.TerminalUsers.Where(t => t.UserId == idUser && t.OpenDate.ToString("yyyy-MM-dd") == date).Select(t => t.Id).FirstOrDefault();
 
+            //Obtengo los correspondientes a la terminal del usuario y que son cobros (TypeTransactionId == 3)
             var transaction = await _context.Transactions
                                      .Include(x => x.TypeTransaction)
                                      .Include(x => x.TransactionFolios)
-                                     .Where(x => x.TerminalUser.Id == idTerminal)
+                                     .Where(x => x.TerminalUser.Id == idTerminal && x.TypeTransactionId == 3)
                                      .OrderBy(x => x.Id).ToListAsync();
             
             if (transaction == null)
             {
                 return NotFound();
             }
-
-            List<TransactionMovimientosCaja> lstMovs = transaction
+            
+            //Obtengo los pagos correspondientes a las transacciones, que esten activos.
+            var lstFolios = transaction.Select(t => t.Folio).ToList();
+            var pays = await _context.Payments.Where(p => lstFolios.Contains(p.TransactionFolio) && p.Status != "EP002").Select(pp => pp.TransactionFolio).ToListAsync();
+            var TransactionsFiltrados = transaction.Where(t => pays.Contains(t.Folio)).ToList();
+                       
+            List<TransactionMovimientosCaja> lstMovs = TransactionsFiltrados
                 .Select(t => new TransactionMovimientosCaja() {
                     IdTransaction = t.Id,
                     FolioTransaccion = t.Folio,
@@ -295,7 +301,7 @@ namespace Siscom.Agua.Api.Controllers
                 else
                     x.HaveInvoice = false;
             });
-
+             
             return Ok(lstMovs);
         }
         
