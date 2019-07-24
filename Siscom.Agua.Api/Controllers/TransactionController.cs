@@ -262,15 +262,19 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("FromUserInDay/{date}/{idUser}")]
         public async Task<IActionResult> FindTransactionsFromUserInDay([FromRoute] string date, string idUser)
         { 
-            var idTerminal = _context.TerminalUsers.Where(t => t.UserId == idUser && t.OpenDate.ToString("yyyy-MM-dd") == date).Select(t => t.Id).FirstOrDefault();
+            var idTerminal = _context.TerminalUsers.Where(t => t.UserId == idUser && t.OpenDate.ToString("yyyy-MM-dd") == date).Select(t => t.Id).ToList();
 
-            //Obtengo los correspondientes a la terminal del usuario y que son cobros (TypeTransactionId == 3)
-            var transaction = await _context.Transactions
-                                     .Include(x => x.TypeTransaction)
-                                     .Include(x => x.TransactionFolios)
-                                     .Where(x => x.TerminalUser.Id == idTerminal && x.TypeTransactionId == 3)
-                                     .OrderBy(x => x.Id).ToListAsync();
-            
+            List<DAL.Models.Transaction> transaction = new List<DAL.Models.Transaction>();
+            foreach (var item in idTerminal)
+            {
+                //Obtengo los correspondientes a la terminal del usuario y que son cobros (TypeTransactionId == 3)
+                transaction.AddRange(await _context.Transactions
+                                         .Include(x => x.TypeTransaction)
+                                         .Include(x => x.TransactionFolios)
+                                         .Where(x => x.TerminalUser.Id == item && x.TypeTransactionId == 3)
+                                         .OrderBy(x => x.Id).ToListAsync());
+            }
+             
             if (transaction == null)
             {
                 return NotFound();
@@ -297,7 +301,23 @@ namespace Siscom.Agua.Api.Controllers
             lstMovs.ToList().ForEach(x =>
             {
                 if (x.Operacion == "Cobro" || x.Operacion == "Cancelación")
+                {
                     x.HaveInvoice = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().HaveTaxReceipt;
+                    x.IdPayment = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().Id;
+                    if( _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().AgreementId != 0)
+                    {
+                        var idAgreement = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().AgreementId;
+                        var Cliente = _context.Clients.Where(c => c.AgreementId == idAgreement && c.TypeUser == "CLI01").FirstOrDefault();
+                        x.Cliente = Cliente != null ? Cliente.Name + " " + Cliente.LastName + " " + Cliente.SecondLastName : "Contribuyente";
+                    }
+                    else
+                    {
+                        var idOS = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().OrderSaleId;
+                        var OS = _context.OrderSales.Where(o => o.Id == idOS).FirstOrDefault();
+                        var taxUser = _context.TaxUsers.Where(t => t.Id == OS.TaxUserId && t.IsActive == true).FirstOrDefault();
+                        x.Cliente = taxUser != null ? taxUser.Name : "Contribuyente";
+                    }                    
+                }                    
                 else
                     x.HaveInvoice = false;
             });
