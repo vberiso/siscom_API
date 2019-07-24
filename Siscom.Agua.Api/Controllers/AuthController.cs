@@ -108,7 +108,8 @@ namespace Siscom.Agua.Api.Controllers
                         expiration = token.ValidTo.ToLocalTime(),
                         RolName = listRoles,
                         Divition = user.DivitionId,
-                        CanStamp = user.CanStamp
+                        CanStamp = user.CanStamp,
+                        Serial = user.Serial
                     });
                 }
                 else
