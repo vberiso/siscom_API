@@ -2062,6 +2062,64 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
+        [HttpPost("addDebtAyuntamiento/{idAgreement}/")]
+        public async Task<IActionResult> PostDebtAyuntamiento([FromRoute] int idAgreement)
+        {
+            string error = string.Empty;
+            try
+            {
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[billing_period]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@id_agreement", idAgreement));
+                   
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@error",
+                        DbType = DbType.String,
+                        Size = 200,
+                        Direction = ParameterDirection.Output
+                    });
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        if (result.HasRows)
+                        {
+                            error = command.Parameters["@error"].Value.ToString();
+                        }
+                        error = command.Parameters["@error"].Value.ToString();
+                    }
+                    if (string.IsNullOrEmpty(error))
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo agregar la deuda: [{error}]") });
+
+                    }
+                    else
+                    {
+                        return Ok("Se genero la factura");
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = idAgreement.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para cancelar recargos" });
+            }
+
+        }
+
+
+
+
         [HttpPost("addDiscountAyuntamiento/{idAgreement}/")]
         public async Task<IActionResult> AddDiscountAgreement([FromRoute] int idAgreement)
         {
