@@ -2092,12 +2092,13 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     if (string.IsNullOrEmpty(error))
                     {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo agregar la deuda: [{error}]") });
+                        return Ok("Se genero adeudo");
 
                     }
                     else
                     {
-                        return Ok("Se genero la factura");
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo agregar la deuda: [{error}]") });
+
 
                     }
                 }
