@@ -2113,7 +2113,7 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.Parameter = idAgreement.ToString();
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para cancelar recargos" });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar adeudo" });
             }
 
         }
