@@ -86,7 +86,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var taxReceipt = await _context.TaxReceipts.FirstOrDefaultAsync(x => x.PaymentId == id);
+            var taxReceipt = await _context.TaxReceipts.FirstOrDefaultAsync(x => x.PaymentId == id && x.Status == "ET001");
 
             if (taxReceipt == null)
             {
