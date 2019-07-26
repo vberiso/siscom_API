@@ -296,6 +296,39 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+        [HttpPost("TaxReceiptCancel/{idXmlFacturama}")]
+        public async Task<IActionResult> addCancel([FromRoute] string idXmlFacturama, [FromBody] TaxReceiptCancel taxReceiptCancel)
+        {
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    taxReceiptCancel.AcuseXml = taxReceiptCancel.AcuseXml;
+                    TaxReceipt tax = await _context.TaxReceipts.Where(x => x.IdXmlFacturama == idXmlFacturama).FirstOrDefaultAsync();
+                    tax.Status = "ET002";
+                    taxReceiptCancel.TaxReceipt = tax;
+                    taxReceiptCancel.TaxReceiptId = tax.Id;
+                    tax.TaxReceiptCancels.Add(taxReceiptCancel);
+                    await _context.SaveChangesAsync();
+                    scope.Complete();
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(taxReceiptCancel);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir la factura" });
+            }
+           
+        }
+
         // DELETE: api/TaxReceipts/1
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTaxReceipt([FromRoute] int id)
@@ -499,7 +532,7 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(await _context.TaxReceipts.Where(x => tmp.Contains(x.Id)).ToListAsync());            
         }
 
-            private bool TaxReceiptExist(int id)
+        private bool TaxReceiptExist(int id)
         {
             return _context.TaxReceipts.Any(e => e.Id == id);
         }

@@ -133,6 +133,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PaymentDetail> PaymentDetails { get; set; }
         public DbSet<TaxReceipt> TaxReceipts { get; set; }
+        public DbSet<TaxReceiptCancel> TaxReceiptCancels { get; set; }
         public DbSet<DetailOfPaymentMethods> DetailOfPaymentMethods { get; set; }
 
         /// <summary>
@@ -1131,7 +1132,14 @@ namespace Siscom.Agua.DAL
                   .HasOne<ApplicationUser>(a => a.User)
                   .WithMany(s => s.TaxReceipts)
                   .HasForeignKey(s => s.UserId);
-            #endregion            
+            #endregion
+
+            #region TaxReceiptCancel
+            builder.Entity<TaxReceiptCancel>()
+                .HasOne<TaxReceipt>(t => t.TaxReceipt)
+                .WithMany(r => r.TaxReceiptCancels)
+                .HasForeignKey(f => f.TaxReceiptId);
+            #endregion
 
             #region Terminal
             builder.Entity<Terminal>()

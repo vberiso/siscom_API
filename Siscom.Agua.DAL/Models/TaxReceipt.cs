@@ -9,6 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Tax_Receipt")]
     public class TaxReceipt
     {
+        public TaxReceipt()
+        {
+            TaxReceiptCancels = new HashSet<TaxReceiptCancel>();
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_tax_receipt")]
@@ -35,5 +40,6 @@ namespace Siscom.Agua.DAL.Models
         public ApplicationUser User { get; set; }
         public int PaymentId { get; set; }
         public Payment Payment { get; set; }
+        public ICollection<TaxReceiptCancel> TaxReceiptCancels { get; set; }
     }
 }

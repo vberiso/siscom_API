@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -223,6 +225,58 @@ namespace Siscom.Agua.Api.Controllers
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar el pago" });
             }
+        }
+
+        [HttpPost("SistemaAdministracionContable/{idPayment}")]
+        public async Task<IActionResult> PostSAC([FromRoute] int idPayment)
+        {
+            string error = string.Empty;
+            try
+            {
+                var payments = _context.AccountingPayments.Where(x => x.PaymentId == idPayment).OrderBy(x => x.Secuential).ToList();
+                foreach (var item in payments)
+                {
+                    using (var command = _context.Database.GetDbConnection().CreateCommand())
+                    {
+                        command.CommandText = "[dbo].[AccountingSAC]";
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.Add(new SqlParameter("@idAccountingPayment", item.Id));
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@Error",
+                            DbType = DbType.String,
+                            Size = 200,
+                            Direction = ParameterDirection.Output
+                        });
+                        this._context.Database.OpenConnection();
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            error += !string.IsNullOrEmpty(command.Parameters["@error"].Value.ToString()) ? command.Parameters["@error"].Value.ToString() + " -- " : "";
+                        }
+                    }
+                }
+                if (string.IsNullOrEmpty(error))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = "Error al ejecutar el SP_SAC con el id de pago:" + idPayment;
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+            }
+
         }
     }
 }
