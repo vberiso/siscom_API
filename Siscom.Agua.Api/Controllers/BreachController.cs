@@ -303,6 +303,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
                         var article =  _context.BreachArticles.Where( v => v.Id == x.BreachList.BreachArticleId).FirstOrDefault();
+                        var list = _context.BreachLists.Where(xa => xa.BreachArticleId == article.Id).FirstOrDefault();
                         var  na = "Articulo";
 
 
@@ -318,6 +319,7 @@ namespace Siscom.Agua.Api.Controllers
                             Amount = x.Amount,
                             OnAccount = 0,
                             Quantity = x.Amount/factor.NumberColumn,
+                            idBreachList = list.Id
 
                         };
                         orderSaleDetails.Add(orderSaleDetail);
