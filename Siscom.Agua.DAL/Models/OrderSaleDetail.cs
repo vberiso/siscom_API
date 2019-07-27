@@ -34,6 +34,8 @@ namespace Siscom.Agua.DAL.Models
         //[NotMapped]
         [Column("tax"), Required]
         public decimal Tax { get; set; }
+        [Column("id_breach_list")]
+        public int idBreachList { get; set; }
 
         public int OrderSaleId { get; set; }
         public OrderSale OrderSale { get; set; }
