@@ -109,7 +109,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             else //Servicio
             {
-                if (transactionPayment.Payment != null)
+                if (transactionPayment.Payment != null && transactionPayment.Payment.Type != "PAY04")
                 {
                     transactionPayment.Payment.PaymentDetails.ToList().ForEach(x =>
                     {
@@ -121,17 +121,24 @@ namespace Siscom.Agua.Api.Controllers
                 List<ClavesProductoServicioSAT> tmpClaves = new List<ClavesProductoServicioSAT>();
                 foreach(var item in transactionPayment.Payment.PaymentDetails)
                 {
-                    if (item.Type != "TIP02" && item.Type != "TIP03")
+                    if(transactionPayment.Payment.Type == "PAY04")
                     {
-                        var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)).CodeConcept });
-                        tmpClaves.AddRange(tmpConceptos.ToList());
+                        var tmpConceptos = new ClavesProductoServicioSAT() { CodeConcep = item.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(item.CodeConcept)).CodeConcept };
+                        tmpClaves.Add(tmpConceptos);
                     }
-                    else    //Producto con cuenta.
-                    {
-                        var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ProductParams.FirstOrDefault(x => x.ProductId == int.Parse(d.CodeConcept)).CodeConcept });
-                        tmpClaves.AddRange(tmpConceptos.ToList());
+                    else
+                    {                   
+                        if (item.Type != "TIP02" && item.Type != "TIP03")
+                        {
+                            var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)).CodeConcept });
+                            tmpClaves.AddRange(tmpConceptos.ToList());
+                        }
+                        else    //Producto con cuenta.
+                        {
+                            var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ProductParams.FirstOrDefault(x => x.ProductId == int.Parse(d.CodeConcept)).CodeConcept });
+                            tmpClaves.AddRange(tmpConceptos.ToList());
+                        }
                     }
-                    
                 }
                 transactionPayment.ClavesProdServ = tmpClaves.GroupBy(c => new { c.ClaveProdServ, c.Tipo, c.CodeConcep }).Select(x => x.First()).ToList();
             }
