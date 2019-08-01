@@ -93,7 +93,7 @@ namespace Siscom.Agua.Api.Controllers
             var idsPayment = _context.PaymentDetails.Where(x => x.DebtId == idDebt).Select(y => y.PaymentId).Distinct().ToList();
             if (idsPayment == null || idsPayment.Count == 0)
                 return NoContent();
-            
+
             var payment = await _context.Payments
                 .Include(p => p.ExternalOriginPayment)
                 .Include(p => p.OriginPayment)
@@ -130,7 +130,7 @@ namespace Siscom.Agua.Api.Controllers
                                         .Include(p => p.PayMethod)
                                         .Include(p => p.PaymentDetails)
                                         .Include(p => p.TaxReceipts)
-                                        .FirstOrDefaultAsync(m => m.TransactionFolio== folio);
+                                        .FirstOrDefaultAsync(m => m.TransactionFolio == folio);
             if (payment == null)
             {
                 return NotFound();
@@ -187,7 +187,7 @@ namespace Siscom.Agua.Api.Controllers
                                         .Include(os => os.TaxUser)
                                         .ThenInclude(os => os.TaxAddresses)
                                         .FirstOrDefaultAsync(x => x.Id == paymentResume.payment.OrderSaleId);
-                                        
+
 
             return Ok(paymentResume);
         }
@@ -233,7 +233,7 @@ namespace Siscom.Agua.Api.Controllers
             string error = string.Empty;
             try
             {
-                var payments = _context.AccountingPayments.Where(x => x.PaymentId == idPayment && x.Status == "CB0003").OrderBy(x => x.Secuential).ToList();
+                var payments = _context.AccountingPayments.Where(x => x.PaymentId == idPayment && x.Status == "SAC03").OrderBy(x => x.Secuential).ToList();
                 foreach (var item in payments)
                 {
                     using (var command = _context.Database.GetDbConnection().CreateCommand())
@@ -277,6 +277,56 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
 
+        }
+        [HttpPost("SistemaAdministracionContable/Cancel/{idPayment}")]
+        public async Task<IActionResult> CancelSAC([FromRoute] int idPayment)
+        {
+            string error = string.Empty;
+            try
+            {
+                var payments = _context.AccountingPayments.Where(x => x.PaymentId == idPayment && x.Status == "SAC01").OrderBy(x => x.Secuential).ToList();
+                foreach (var item in payments)
+                {
+                    using (var command = _context.Database.GetDbConnection().CreateCommand())
+                    {
+                        command.CommandText = "[dbo].[CancelacionSAC]";
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.Add(new SqlParameter("@idAccountingPayment", item.Id));
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@Error",
+                            DbType = DbType.String,
+                            Size = 200,
+                            Direction = ParameterDirection.Output
+                        });
+                        this._context.Database.OpenConnection();
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            error += !string.IsNullOrEmpty(command.Parameters["@error"].Value.ToString()) ? command.Parameters["@error"].Value.ToString() + " -- " : "";
+                        }
+                    }
+                }
+                if (string.IsNullOrEmpty(error))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode((int)TypeError.Code.Conflict, new { Error = error });
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = "Error al ejecutar el SP_SAC con el id de pago:" + idPayment;
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+            }
         }
     }
 }
