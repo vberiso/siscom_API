@@ -67,7 +67,7 @@ namespace Siscom.Agua.Api.Controllers
                 .Include(p => p.OriginPayment)
                 .Include(p => p.PayMethod)
                 .Include(p => p.PaymentDetails)
-                .Include(p =>p.TaxReceipts)
+                .Include(p => p.TaxReceipts)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (payment == null)
             {
@@ -233,7 +233,7 @@ namespace Siscom.Agua.Api.Controllers
             string error = string.Empty;
             try
             {
-                var payments = _context.AccountingPayments.Where(x => x.PaymentId == idPayment).OrderBy(x => x.Secuential).ToList();
+                var payments = _context.AccountingPayments.Where(x => x.PaymentId == idPayment && x.Status == "CB0003").OrderBy(x => x.Secuential).ToList();
                 foreach (var item in payments)
                 {
                     using (var command = _context.Database.GetDbConnection().CreateCommand())
