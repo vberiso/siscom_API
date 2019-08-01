@@ -159,7 +159,7 @@ namespace Siscom.Agua.Api.Controllers
         // GET: api/OrderSales/5
         [HttpGet("Folio/{folio}")]
         [Authorize]
-        public async Task<IActionResult> GetOrderSaleFolio([FromRoute] string folio)
+        public async Task<IActionResult> GetOrderSaleFolio([FromRoute] string folio, bool soloPagadas=true)
         {
             if (!ModelState.IsValid)
             {
@@ -168,13 +168,18 @@ namespace Siscom.Agua.Api.Controllers
 
             if (string.IsNullOrWhiteSpace(folio))
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Folio incorrecto" });
-
-            var orderSale = await _context.OrderSales
+           
+            var query = _context.OrderSales
                                           .Include(x => x.TaxUser)
                                             .ThenInclude(y => y.TaxAddresses)
-                                          .Include(x => x.OrderSaleDetails)
-                                          .Where(x => x.Folio == folio && (x.Status != "EOS02" && x.Status != "EOS03"))
+                                          .Include(x => x.OrderSaleDetails);
+            Siscom.Agua.DAL.Models.OrderSale orderSale;
+            if (soloPagadas)
+                 orderSale = await query.Where(x => x.Folio == folio && (x.Status != "EOS02" && x.Status != "EOS03"))
                                           .FirstOrDefaultAsync();
+            else
+                 orderSale = await query.Where(x => x.Folio == folio)
+                                           .FirstOrDefaultAsync();
 
             if (orderSale == null)
             {
@@ -193,7 +198,12 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(orderSale);
         }
-
+        [HttpGet("All/Folio/{folio}")]
+        [Authorize]
+        public async Task<IActionResult> GetOrderSaleByFolio([FromRoute] string folio)
+        {
+            return await this.GetOrderSaleFolio(folio, false);
+        }
 
         [HttpGet("RFC/{rfc}")]
         [Authorize]
