@@ -48,8 +48,8 @@ namespace Siscom.Agua.Api.Controllers
      
 
         // GET: api/Agreements
-        [HttpGet("GetSummary/{Account}")]
-        public async Task<IActionResult> GetAgreements([FromRoute] string Account)
+        [HttpGet("GetSummary/{AgreementId}")]
+        public async Task<IActionResult> GetAgreements([FromRoute] int AgreementId)
         {
             var summary = await _context.Agreements
                                     .Include(a => a.Addresses)
@@ -65,7 +65,7 @@ namespace Siscom.Agua.Api.Controllers
                                     .Include(di => di.AgreementDiscounts)                                    
                                         .ThenInclude(d => d.Discount)
                                     .Include(p => p.Prepaids)                                    
-                                    .Where(a => a.Account == Account).FirstOrDefaultAsync();
+                                    .Where(a => a.Id == AgreementId).FirstOrDefaultAsync();
 
             summary.Clients = summary.Clients.Where(c => c.IsActive == true).ToList();
             summary.Addresses = summary.Addresses.Where(a => a.TypeAddress == "DIR01" && a.IsActive == true).ToList();
@@ -218,8 +218,8 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // GET: api/Agreements/
-        [HttpGet("AgreementByAccount/Cash/{AcountNumber}")]
-        public async Task<IActionResult> GetGetAgreementByAccountCash([FromRoute] string AcountNumber)
+        [HttpGet("AgreementByAccount/Cash/{AcountNumber}/{agreementID?}")]
+        public async Task<IActionResult> GetGetAgreementByAccountCash([FromRoute] string AcountNumber, [FromRoute] string agreementID = "")
         {
             if (!ModelState.IsValid)
             {
@@ -227,23 +227,40 @@ namespace Siscom.Agua.Api.Controllers
             }
             try
             {
-                var agreement = await _context.Agreements
+                var query =  _context.Agreements
                                      .Include(x => x.Clients)
-                                     .Include(x=> x.AgreementDetails)
+                                     .Include(x => x.TypeStateService)
+                                     .Include(x => x.AgreementDetails)
                                      .Include(x => x.TypeIntake)
                                      .Include(x => x.Addresses)
                                        .ThenInclude(s => s.Suburbs)
                                            .ThenInclude(t => t.Towns)
-                                               .ThenInclude(st => st.States)
-                                     .FirstOrDefaultAsync(a => a.Account == AcountNumber);
+                                               .ThenInclude(st => st.States);
+                List<Siscom.Agua.DAL.Models.Agreement> agreement;
+
+                if (string.IsNullOrEmpty(agreementID))
+                {
+                    agreement= await query.Where(a => a.Account == AcountNumber).ToListAsync();
+                }
+                else
+                {
+                    agreement = await query.Where(a => a.Id == Convert.ToInt32(agreementID)).ToListAsync();
+                }
+                
+                
                 if (agreement == null)
                 {
                     return StatusCode((int)TypeError.Code.NotFound, new { Error = "No hay datos para este número de cuenta" });
                 }
+                agreement.ForEach(x =>
+                {
+                    x.Clients = x.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();
+                    x.Addresses = x.Addresses.Where(c => c.TypeAddress == "DIR01" && c.IsActive == true).ToList();
 
-                agreement.Clients = agreement.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();
-                agreement.Addresses = agreement.Addresses.Where(c => c.TypeAddress == "DIR01" && c.IsActive == true).ToList();
+                });
 
+                    ;
+                
                 return Ok(agreement);
 
             }
