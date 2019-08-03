@@ -48,10 +48,10 @@ namespace Siscom.Agua.Api.Controllers
      
 
         // GET: api/Agreements
-        [HttpGet("GetSummary/{AgreementId}")]
-        public async Task<IActionResult> GetAgreements([FromRoute] int AgreementId)
+        [HttpGet("GetSummary/{AgreementId}/{ById?}")]
+        public async Task<IActionResult> GetAgreements([FromRoute] int AgreementId, [FromRoute] int ById = 0)
         {
-            var summary = await _context.Agreements
+            var query = _context.Agreements
                                     .Include(a => a.Addresses)
                                         .ThenInclude(s => s.Suburbs)
                                             .ThenInclude(t => t.Towns)
@@ -62,10 +62,19 @@ namespace Siscom.Agua.Api.Controllers
                                     .Include(sd => sd.TypeService)
                                     .Include(tc => tc.TypeConsume)
                                     .Include(ad => ad.AgreementDetails)
-                                    .Include(di => di.AgreementDiscounts)                                    
+                                    .Include(di => di.AgreementDiscounts)
                                         .ThenInclude(d => d.Discount)
-                                    .Include(p => p.Prepaids)                                    
-                                    .Where(a => a.Id == AgreementId).FirstOrDefaultAsync();
+                                    .Include(p => p.Prepaids);
+            Siscom.Agua.DAL.Models.Agreement summary = null;
+            if (ById == 1)
+            {
+                 summary = await query.Where(a => a.Id == AgreementId).FirstOrDefaultAsync();
+            }
+            else
+            {
+                 summary = await query.Where(a => a.Account == AgreementId.ToString()).FirstOrDefaultAsync();
+            }
+                                    
 
             summary.Clients = summary.Clients.Where(c => c.IsActive == true).ToList();
             summary.Addresses = summary.Addresses.Where(a => a.TypeAddress == "DIR01" && a.IsActive == true).ToList();
