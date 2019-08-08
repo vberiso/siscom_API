@@ -275,6 +275,10 @@ namespace Siscom.Agua.Api.Controllers
             decimal totalIva = 0;
             decimal total = 0;
 
+            var number = 20;
+
+
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -285,6 +289,8 @@ namespace Siscom.Agua.Api.Controllers
 
             if (param == null)
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Message = string.Format("No se encuenta parametro para cálculo de expiración") });
+
+
 
             decimal _sumTot = orderSale.OrderSaleDetails.Sum(x => (x.Amount + x.Tax));
             decimal _sumIVA = orderSale.OrderSaleDetails.Sum(x => x.Tax);
@@ -368,7 +374,15 @@ namespace Siscom.Agua.Api.Controllers
                     _orderSale.Observation = orderSale.Observation;
                     _orderSale.IdOrigin = orderSale.IdOrigin;
                     _orderSale.TaxUserId = _taxUser.Id;
-                    _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
+                    if (orderSale.DivisionId == 2)
+                    {
+                        _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(number);
+                    }
+                    else
+                    {
+                        _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(Convert.ToInt16(param.NumberColumn));
+
+                    }
                     _orderSale.DivisionId = orderSale.DivisionId == 0 ? (paramSystem.TextColumn == "NO" ? 1 : 15) : orderSale.DivisionId;
                     _orderSale.OrderSaleDetails = orderSale.OrderSaleDetails;
 
@@ -563,6 +577,8 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(orderSale);
         }
+
+
 
         private bool OrderSaleExists(int id)
         {
