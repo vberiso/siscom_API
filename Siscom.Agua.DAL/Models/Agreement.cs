@@ -90,5 +90,6 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<Notification> Notifications { get; set; }
         public ICollection<AgreementDetail> AgreementDetails { get; set; }
         public ICollection<AgreementFile> AgreementFiles { get; set; }
+        public ICollection<AgreementComment> AgreementComments { get; set; }
     }
 }

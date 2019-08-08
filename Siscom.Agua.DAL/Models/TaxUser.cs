@@ -34,6 +34,8 @@ namespace Siscom.Agua.DAL.Models
         public String EMail { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
+        [Column("is_provider")]
+        public bool IsProvider { get; set; }
 
         public ICollection<TaxAddress>  TaxAddresses { get; set; }
         public ICollection<Breach> Breaches { get; set; }

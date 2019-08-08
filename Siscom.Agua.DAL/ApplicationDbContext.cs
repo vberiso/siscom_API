@@ -65,7 +65,8 @@ namespace Siscom.Agua.DAL
         public DbSet<NotificationDetail> NotificationDetails { get; set; }
         public DbSet<AgreementDetail> AgreementDetails { get; set; }
         public DbSet<AgreementFile> AgreementFiles { get; set; }
-
+        public DbSet<AgreementComment> AgreementComments { get; set; }
+        
         /// <summary>
         /// Accounting
         /// </summary>
@@ -290,12 +291,23 @@ namespace Siscom.Agua.DAL
                   .WithOne(s => s.Agreement);
 
             builder.Entity<Agreement>()
+                 .HasMany(a => a.AgreementComments)
+                 .WithOne(s => s.Agreement);
+
+            builder.Entity<Agreement>()
                  .Property(x => x.StratDate)
                  .HasColumnType("date");
 
             builder.Entity<Agreement>()
                 .Property(x => x.Route)
                 .HasDefaultValue("0");
+            #endregion
+
+            #region AgreementComment
+            builder.Entity<AgreementComment>()
+                   .HasOne<Agreement>(a => a.Agreement)
+                   .WithMany(s => s.AgreementComments)
+                   .HasForeignKey(s => s.AgreementId);
             #endregion
 
             #region AgreementDetail
@@ -1120,6 +1132,10 @@ namespace Siscom.Agua.DAL
             builder.Entity<TaxUser>()
                    .Property(x => x.IsActive)
                    .HasDefaultValue(true);
+            
+            builder.Entity<TaxUser>()
+                  .Property(x => x.IsProvider)
+                  .HasDefaultValue(false);
             #endregion
 
             #region  TaxReceipt
