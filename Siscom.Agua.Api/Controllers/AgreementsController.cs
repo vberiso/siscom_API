@@ -244,7 +244,9 @@ namespace Siscom.Agua.Api.Controllers
                                      .Include(x => x.Addresses)
                                        .ThenInclude(s => s.Suburbs)
                                            .ThenInclude(t => t.Towns)
-                                               .ThenInclude(st => st.States);
+                                               .ThenInclude(st => st.States)
+                                     .Include( x => x.AgreementComments);
+                                      
                 List<Siscom.Agua.DAL.Models.Agreement> agreement;
 
                 if (string.IsNullOrEmpty(agreementID))
@@ -264,7 +266,8 @@ namespace Siscom.Agua.Api.Controllers
                 agreement.ForEach(x =>
                 {
                     x.Clients = x.Clients.Where(c => c.TypeUser == "CLI01" && c.IsActive == true).ToList();
-                    x.Addresses = x.Addresses.Where(c => c.TypeAddress == "DIR01" && c.IsActive == true).ToList();
+                    x.Addresses = x.Addresses.ToList();
+                    x.AgreementComments = x.AgreementComments.Where(ac => ac.IsVisible == true).ToList();
 
                 });
 
