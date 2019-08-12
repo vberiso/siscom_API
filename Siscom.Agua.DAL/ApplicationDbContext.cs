@@ -66,7 +66,7 @@ namespace Siscom.Agua.DAL
         public DbSet<AgreementDetail> AgreementDetails { get; set; }
         public DbSet<AgreementFile> AgreementFiles { get; set; }
         public DbSet<AgreementComment> AgreementComments { get; set; }
-        
+        public DbSet<AgreementRulerCalculation> AgreementRulerCalculations { get; set; }
         /// <summary>
         /// Accounting
         /// </summary>
@@ -295,6 +295,10 @@ namespace Siscom.Agua.DAL
                  .WithOne(s => s.Agreement);
 
             builder.Entity<Agreement>()
+                 .HasMany(a => a.AgreementRulerCalculations)
+                 .WithOne(s => s.Agreement);
+            
+            builder.Entity<Agreement>()
                  .Property(x => x.StratDate)
                  .HasColumnType("date");
 
@@ -375,6 +379,13 @@ namespace Siscom.Agua.DAL
                    .HasOne<ApplicationUser>(a => a.User)
                    .WithMany(s => s.AgreementLogs)
                    .HasForeignKey(s => s.UserId);
+            #endregion
+
+            #region AgreementRulerCalculation
+            builder.Entity<AgreementRulerCalculation>()
+               .HasOne<Agreement>(t => t.Agreement)
+               .WithMany(r => r.AgreementRulerCalculations)
+               .HasForeignKey(f => f.AgreementId);
             #endregion
 
             #region AgreementService

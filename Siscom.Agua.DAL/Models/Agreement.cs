@@ -21,6 +21,7 @@ namespace Siscom.Agua.DAL.Models
             Notifications = new HashSet<Notification>();
             AgreementDetails = new HashSet<AgreementDetail>();
             AgreementFiles = new HashSet<AgreementFile>();
+            AgreementRulerCalculations = new HashSet<AgreementRulerCalculation>();
         }
 
         [Column("id_agreement"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -91,5 +92,6 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<AgreementDetail> AgreementDetails { get; set; }
         public ICollection<AgreementFile> AgreementFiles { get; set; }
         public ICollection<AgreementComment> AgreementComments { get; set; }
+        public ICollection<AgreementRulerCalculation> AgreementRulerCalculations { get; set; }
     }
 }

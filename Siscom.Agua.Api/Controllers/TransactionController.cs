@@ -2778,37 +2778,37 @@ namespace Siscom.Agua.Api.Controllers
                     RequestsAPI RequestsFacturama = new RequestsAPI("https://api.facturama.mx/");
                     if (paymentData.HaveTaxReceipt)
                     {
-                        //try
-                        //{
-                        //    string key = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault().IdXmlFacturama;
-                        //    if (!string.IsNullOrEmpty(key))
-                        //    {
-                        //        var resultado = await RequestsFacturama.SendURIAsync(string.Format("api-lite/cfdis/{0}", key), HttpMethod.Delete, "gfdsystems", "gfds1st95");
-                        //        var cfdiCancel = JsonConvert.DeserializeObject<RepuestaCancelacion>(resultado);
-                        //        Byte[] bytes = Convert.FromBase64String(cfdiCancel.AcuseXmlBase64);
-                        //        TaxReceiptCancel cancel = new TaxReceiptCancel
-                        //        {
-                        //            CancelationDate = cfdiCancel.CancelationDate,
-                        //            AcuseXml = bytes,
-                        //            Message = cfdiCancel.Message,
-                        //            Status = cfdiCancel.Status,
-                        //            RequestDateCancel = cfdiCancel.RequestDate
-                        //        };
-                        //        TaxReceipt receipt = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault();
-                        //        if(receipt != null)
-                        //        {
-                        //            receipt.Status = "ET002";
-                        //            cancel.TaxReceipt = receipt;
-                        //            cancel.TaxReceiptId = receipt.Id;
-                        //            receipt.TaxReceiptCancels.Add(cancel);
-                        //            await _context.SaveChangesAsync();
-                        //        }
-                        //    }
-                        //}
-                        //catch (Exception)
-                        //{
-                        //    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Error al intentar cancelar la factura electrónica" });
-                        //}
+                        try
+                        {
+                            var key = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault();
+                            if (!string.IsNullOrEmpty(key.IdXmlFacturama))
+                            {
+                                var resultado = await RequestsFacturama.SendURIAsync(string.Format("api-lite/cfdis/{0}", key.IdXmlFacturama), HttpMethod.Delete, "gfdsystems", "gfds1st95");
+                                var cfdiCancel = JsonConvert.DeserializeObject<RepuestaCancelacion>(resultado);
+                                Byte[] bytes = Convert.FromBase64String(cfdiCancel.AcuseXmlBase64);
+                                TaxReceiptCancel cancel = new TaxReceiptCancel
+                                {
+                                    CancelationDate = cfdiCancel.CancelationDate,
+                                    AcuseXml = bytes,
+                                    Message = cfdiCancel.Message,
+                                    Status = cfdiCancel.Status,
+                                    RequestDateCancel = cfdiCancel.RequestDate
+                                };
+                                TaxReceipt receipt = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault();
+                                if (receipt != null)
+                                {
+                                    receipt.Status = "ET002";
+                                    cancel.TaxReceipt = receipt;
+                                    cancel.TaxReceiptId = receipt.Id;
+                                    receipt.TaxReceiptCancels.Add(cancel);
+                                    await _context.SaveChangesAsync();
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = "Error al intentar cancelar la factura electrónica" });
+                        }
                     }
                     scope.Complete();
                 }
