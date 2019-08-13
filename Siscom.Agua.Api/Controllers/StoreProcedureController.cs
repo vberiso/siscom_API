@@ -44,14 +44,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("runAccrualPeriod/{id_agreement}/{start_month}/{end_month}/{from_year}/{simulate}")]
         public async Task<IActionResult> ExectSpBillingPeriod(/*[FromBody] int user_id, [FromBody] string observaciones,*/ [FromRoute] int id_agreement, [FromRoute] int start_month, [FromRoute] int end_month, [FromRoute] int from_year, [FromRoute] int simulate)
         {
-            var body = "";
-
-            using (var reader = new StreamReader(Request.Body))
-            {
-                body = reader.ReadToEnd();
-
-            }
-            var jObject = JObject.Parse(body);
+            
             int mesesEfectuados = 0;
             object result = null;
             for (int i = start_month; i <= end_month; i++)
@@ -69,9 +62,10 @@ namespace Siscom.Agua.Api.Controllers
 
                 try
                 {
-                    result = await new RunSP(this, _context).runProcedure("accrual_period", parameters);
+                    result = await new RunSP(this, _context).runProcedureNT("accrual_period", parameters);
                     parameters = null;
                     mesesEfectuados++;
+                    i++;
                 }
                 catch (RunSpException e)
                 {
@@ -82,16 +76,32 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Error = $"{e.ToMessageAndCompleteStacktrace()}", Message = $"Se regiostrarón los {mesesEfectuados} primeros meses" });
                 }
             }
-            string user_id = jObject["user_id"].ToString();
-            ApplicationUser user = await _context.Users.FindAsync(user_id);
-            var error = JObject.Parse(JsonConvert.SerializeObject(result));
-
-            bool is_error = !string.IsNullOrEmpty(error["paramsOut"][0]["Value"].ToString().Trim());
-
-
-            if (!is_error && !createCommentForAgremment(id_agreement, jObject["descripcion"].ToString(), user))
+            
+            if (simulate != 1)
             {
-                return StatusCode((int)TypeError.Code.Ok, new { Message = $"Se registrarón todos, pero no se pudo registrar el comentario", data = result });
+                var body = "";
+
+                using (var reader = new StreamReader(Request.Body))
+                {
+                    body = reader.ReadToEnd();
+
+                }
+                if (body != "")
+                {
+                    var jObject = JObject.Parse(body);
+
+                    string user_id = jObject["user_id"].ToString();
+                    ApplicationUser user = await _context.Users.FindAsync(user_id);
+                    var error = JObject.Parse(JsonConvert.SerializeObject(result));
+
+                    bool is_error = !string.IsNullOrEmpty(error["paramsOut"][0]["Value"].ToString().Trim());
+
+
+                    if (!is_error && !createCommentForAgremment(id_agreement, jObject["descripcion"].ToString(), user))
+                    {
+                        return StatusCode((int)TypeError.Code.Ok, new { Message = $"Se registrarón todos, pero no se pudo registrar el comentario", data = result });
+                    }
+                }
             }
 
             return StatusCode((int)TypeError.Code.Ok, new { Message = $"Se registrarón todos los meses correctamente", data = result });

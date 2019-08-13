@@ -114,7 +114,7 @@ namespace Siscom.Agua.Api.runSp
                 SystemLog systemLog = new SystemLog();
                 systemLog.Description = e.ToMessageAndCompleteStacktrace();
                 systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
-                systemLog.Controller = controller.ControllerContext.RouteData.Values["controller"].ToString();
+                //systemLog.Controller = controller.ControllerContext.RouteData.Values["controller"].ToString();
                 systemLog.Action = controller.ControllerContext.RouteData.Values["action"].ToString();
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
