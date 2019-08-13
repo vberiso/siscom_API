@@ -65,7 +65,7 @@ namespace Siscom.Agua.Api.Controllers
                     result = await new RunSP(this, _context).runProcedureNT("accrual_period", parameters);
                     parameters = null;
                     mesesEfectuados++;
-                    i++;
+                    
                 }
                 catch (RunSpException e)
                 {
