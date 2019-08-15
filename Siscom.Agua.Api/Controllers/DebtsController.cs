@@ -187,5 +187,7 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(new { Detail, DebtDiscount });
         }
 
+
+
     }
 }

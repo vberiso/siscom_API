@@ -229,6 +229,133 @@ namespace Siscom.Agua.Api.Controllers
           
             return Ok(orderSale);
         }
+
+
+        [HttpGet("Name/{name}/{val}")]
+        [Authorize]
+        public IActionResult GetOrderSalesName([FromRoute] string name, int val)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
+            if (val == 1)
+            {
+                var orderSale = _context.TaxUsers
+                                     .Include(x => x.TaxAddresses)
+                                     .Include(z => z.OrderSales)
+                                     .Where(x => x.Name == name)
+                                     .ToList();
+
+                if (orderSale == null)
+                {
+                    return NotFound();
+                }
+
+
+                return Ok(orderSale);
+            }
+            else
+            {
+                var orderSale = _context.TaxUsers
+                                   .Include(x => x.TaxAddresses)
+                                   .Include(z => z.OrderSales)
+                                   .Where(x => x.Name == name && x.IsProvider == true)
+                                   .ToList();
+
+                if (orderSale == null)
+                {
+                    return NotFound();
+                }
+
+
+                return Ok(orderSale);
+            }
+
+
+
+        }
+
+        [HttpGet("RFC/{rfc}/{val}")]
+        [Authorize]
+        public IActionResult GetOrderSalesRFC([FromRoute] string rfc, int val)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
+            if (val == 1)
+            {
+                var orderSale = _context.TaxUsers
+                                     .Include(x => x.TaxAddresses)
+                                     .Include(z => z.OrderSales)
+                                     .Where(x => x.RFC == rfc)
+                                     .ToList();
+
+                if (orderSale == null)
+                {
+                    return NotFound();
+                }
+
+
+                return Ok(orderSale);
+            }
+            else
+            {
+                var orderSale = _context.TaxUsers
+                                   .Include(x => x.TaxAddresses)
+                                   .Include(z => z.OrderSales)
+                                   .Where(x => x.RFC == rfc && x.IsProvider == true)
+                                   .ToList();
+
+                if (orderSale == null)
+                {
+                    return NotFound();
+                }
+
+
+                return Ok(orderSale);
+            }
+
+
+
+        }
+
+
+        [HttpGet("OrderTaxUser/{idTaxUser}/")]
+        [Authorize]
+        public IActionResult GetOrderSalesTaxUser ([FromRoute] int idTaxUser)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
+           
+                var orderSale = _context.OrderSales
+                                     .Include(x => x.OrderSaleDetails)
+                                     .Include(z => z.TaxUser)
+                                     .Where(x => x.TaxUserId == idTaxUser)
+                                     .ToList();
+
+                if (orderSale == null)
+                {
+                    return NotFound();
+                }
+
+
+                return Ok(orderSale);
+
+
+        }
+
+
+
         // PUT: api/OrderSales/5
         [HttpPut("{id}")]
         [Authorize]
@@ -374,6 +501,7 @@ namespace Siscom.Agua.Api.Controllers
                     _orderSale.Observation = orderSale.Observation;
                     _orderSale.IdOrigin = orderSale.IdOrigin;
                     _orderSale.TaxUserId = _taxUser.Id;
+
                     if (orderSale.DivisionId == 2)
                     {
                         _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(number);

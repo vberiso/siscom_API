@@ -2315,6 +2315,64 @@ namespace Siscom.Agua.Api.Controllers
 
 
 
+        [HttpPost("addDebtSosapacBody")]
+        public async Task<IActionResult> PostDebtsSosapacBody([FromBody] DebtSosapac sosapac)
+        {
+            string error = string.Empty;
+            try
+            {
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[accrual_period_now]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@id_agreement", sosapac.idAgreement));
+                    command.Parameters.Add(new SqlParameter("@from_month", sosapac.month));
+                    command.Parameters.Add(new SqlParameter("@from_year", sosapac.year));
+                    command.Parameters.Add(new SqlParameter("@status", sosapac.status));
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@error",
+                        DbType = DbType.String,
+                        Size = 200,
+                        Direction = ParameterDirection.Output
+                    });
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        if (result.HasRows)
+                        {
+                            error = command.Parameters["@error"].Value.ToString();
+                        }
+                        error = command.Parameters["@error"].Value.ToString();
+                    }
+                    if (string.IsNullOrEmpty(error))
+                    {
+                        return Ok("Se genero adeudo");
+
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo agregar la deuda:{error}") });
+
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = sosapac.idAgreement.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar adeudo" });
+            }
+
+        }
+
         [HttpPost("addDiscountDebt/{idAgreement}")]
         public async Task<IActionResult> PostDiscountDebt([FromRoute] int idAgreement)
         {
