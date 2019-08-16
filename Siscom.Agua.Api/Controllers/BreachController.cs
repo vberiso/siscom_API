@@ -267,7 +267,7 @@ namespace Siscom.Agua.Api.Controllers
                     order.Period = 0;
                     order.Type = "OM001";
                     order.Status = "EOS01";
-                    order.Observation = "FOLIO"+ breach.Series+ticket.Folio+","+"AGENTE"+ ticket.TransitPolice.Plate;
+                    order.Observation = "FOLIO " +":"+" "+ breach.Series+ticket.Folio+","+"AGENTE "+ ":"+" "+ ticket.TransitPolice.Plate;
                     order.ExpirationDate = DateTime.UtcNow.ToLocalTime();
                     var valExpirationDate = Convert.ToInt32(param.NumberColumn);
                     var endDate = order.ExpirationDate.AddDays(valExpirationDate);
