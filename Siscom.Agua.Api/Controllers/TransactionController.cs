@@ -2617,6 +2617,326 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(transaction.Id);
         }
 
+        [HttpPost("SuperService/Cancel/{TransactionId}")]
+        public async Task<IActionResult> TransactionServiceCancel([FromRoute] int TransactionId)
+        {
+            DAL.Models.Transaction transaction = new DAL.Models.Transaction();
+            bool _validation = false;
+            Prepaid prepaid;
+            decimal _sumTransactionDetail = 0;
+            decimal sumPayDetail = 0;
+            decimal _saldo = 0;
+
+            #region Validación
+            //Parametros
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var transactionData = await _context.Transactions
+                                        .Include(x => x.TransactionFolios)
+                                        .Include(t => t.TransactionDetails)
+                                        .Where(x => x.Id == TransactionId).SingleOrDefaultAsync();
+
+            var paymentData = await _context.Payments
+                                            .Include(x => x.PaymentDetails)
+                                            .Include(t => t.TaxReceipts)//then include cancelaciones
+                                            .Where(x => x.TransactionFolio == transactionData.Folio)
+                                            .SingleOrDefaultAsync();
+
+            if (transactionData.Amount <= 0)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cancelar incorrecto") });
+
+            if (String.IsNullOrEmpty(transactionData.Folio))
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Debe ingresar folio de cancelación") });
+
+            foreach (var item in transactionData.TransactionDetails)
+            {
+                _sumTransactionDetail += item.Amount;
+            }
+
+            if ((transactionData.Amount + transactionData.Tax + transactionData.Rounding) != transactionData.Total)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El monto total de la transacción no es correcto" });
+
+            if (transactionData.Amount != _sumTransactionDetail)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El detalle de transacción: {0}, no coincide con el total de la transacción: {1}", _sumTransactionDetail, transactionData.Amount) });
+
+            foreach (var item in paymentData.PaymentDetails)
+            {
+                sumPayDetail += item.Amount;
+            }
+            if (transactionData.Amount != sumPayDetail)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Los montos de detalle de pago no coinciden") });
+
+            //Terminal
+            TerminalUser terminalUser = new TerminalUser();
+            terminalUser = await _context.TerminalUsers
+                                             .Include(x => x.Terminal)
+                                             .Include(x => x.User)
+                                             .Where(x => x.Id == transactionData.TerminalUserId).FirstOrDefaultAsync();
+
+            if (terminalUser == null)
+                return NotFound();
+
+            var movimientosCaja = await _context.Transactions
+                                                .Include(x => x.TypeTransaction)
+                                                .Where(x => x.TerminalUser.Id == terminalUser.Id &&
+                                                           x.PayMethodId == transactionData.PayMethodId &&
+                                                          (x.TypeTransactionId == 3 || x.TypeTransactionId == 4 || x.TypeTransactionId == 6))
+                                                .OrderBy(x => x.Id).ToListAsync();
+
+            if (movimientosCaja == null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = "Método de pago improcedente" });
+
+            movimientosCaja.ForEach(x =>
+            {
+                _saldo += x.Sign ? x.Total : x.Total * -1;
+            });
+
+            //Cancelación
+            //var cancelacion = await _context.Transactions.Where(x => x.Folio == transactionData.Folio).FirstAsync();
+            if (string.IsNullOrEmpty(transactionData.Folio))
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No existe el folio a cancelación") });
+
+            var cancelacionPrevia = await _context.Transactions
+                                                 .Include(x => x.TransactionFolios)
+                                                 .Where(x => x.CancellationFolio == transactionData.Folio).FirstOrDefaultAsync();
+            if (cancelacionPrevia != null)
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El pago ha sido cancelado previamente. Folio->{0}", cancelacionPrevia.TransactionFolios.FirstOrDefault().Folio) });
+
+            #endregion
+
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    //Transacción en caja
+                    transaction.Folio = Guid.NewGuid().ToString("D");
+                    // fecha de transacción anterior
+                    transaction.DateTransaction = transactionData.DateTransaction.AddMinutes(5);
+                    transaction.Sign = false;
+                    transaction.Amount = transactionData.Amount;
+                    transaction.Tax = transactionData.Tax;
+                    transaction.Rounding = transactionData.Rounding;
+                    transaction.Total = transactionData.Total;
+                    transaction.Aplication = transactionData.Aplication;
+                    transaction.TypeTransactionId = 4;
+                    transaction.PayMethodId = transactionData.PayMethodId;
+                    transaction.TerminalUser = terminalUser;
+                    transaction.CancellationFolio = transactionData.Folio;
+                    transaction.AuthorizationOriginPayment = transactionData.AuthorizationOriginPayment;
+                    transaction.OriginPayment = await _context.OriginPayments.FindAsync(transactionData.OriginPaymentId).ConfigureAwait(false);
+                    transaction.ExternalOriginPayment = await _context.ExternalOriginPayments.FindAsync(transactionData.ExternalOriginPaymentId).ConfigureAwait(false);
+                    transaction.Account = null;
+                    transaction.AccountNumber = null;
+                    transaction.NumberBank = null;
+                    _context.Transactions.Add(transaction);
+                    await _context.SaveChangesAsync();
+
+                    //se modifica estado de pago
+                    //payment = await _context.Payments.FindAsync(pCancelPayment.Payment.Id);
+                    paymentData.Status = "EP002";
+                    _context.Entry(paymentData).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+
+
+
+                    #region Codigo que agrege para Cancelar un pago de servicio
+
+                    //Se modifican los debt
+                    var debtList = paymentData.PaymentDetails.Select(x => x.DebtId).Distinct();
+
+                    if (debtList != null)
+                    {
+                        foreach (var item in debtList)
+                        {
+                            Debt debt = new Debt();
+                            debt = await _context.Debts.FindAsync(item);
+                            decimal sumPaymentDetails = 0;
+
+                            //Status anterior
+                            var statusDebt = await _context.DebtStatuses.Where(x => x.DebtId == debt.Id).OrderByDescending(x => x.Id).ToListAsync();
+                            string statusAnterior = String.Empty;
+
+                            if (statusDebt != null)
+                            {
+                                if (statusDebt.Count >= 1)
+                                {
+                                    for (int i = 0; i < statusDebt.Count; i++)
+                                    {
+                                        if (i == 0)
+                                        {
+                                            if (statusDebt[i].id_status != "ED005" && statusDebt[i].id_status != "ED004")
+                                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("La cancelación no procede. La deuda ha cambiado") });
+                                        }
+                                        if (i == 1)
+                                        {
+                                            if (String.IsNullOrEmpty(statusDebt[i].id_status))
+                                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se puede identificar estado de deuda. Comunicar con el administrador.") });
+                                            statusAnterior = statusDebt[i].id_status;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                    return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se puede identificar estado de deuda. Comunicar con el administrador.") });
+                            }
+                            else
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se puede identificar estado de deuda. Comunicar con el administrador.") });
+
+
+                            paymentData.PaymentDetails.ToList().ForEach(x =>
+                            {
+                                if (x.DebtId == item)
+                                    sumPaymentDetails += x.Amount;
+                            });
+
+                            debt.Status = statusAnterior;
+                            debt.OnAccount = debt.OnAccount - sumPaymentDetails;
+
+                            _context.Entry(debt).State = EntityState.Modified;        //<-----------------------------------------------------------
+                            await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
+
+                            bool removeItem = false;
+                            if (!removeItem)
+                            {
+                                _context.Entry(await _context.DebtStatuses.FindAsync(statusDebt.First().Id)).State = EntityState.Deleted;
+                                await _context.SaveChangesAsync();
+                                removeItem = true;
+                            }
+                            removeItem = false;
+                        }
+                    }
+                    else
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No es posible revertir deuda sin detalle de pago") });
+
+                    //Se agregan los detalles para la transation de cancelacion.
+                    foreach (var pay in paymentData.PaymentDetails)
+                    {
+                        TransactionDetail transactionDetail = new TransactionDetail();
+                        transactionDetail.CodeConcept = pay.CodeConcept;
+                        transactionDetail.Amount = pay.Amount;
+                        transactionDetail.Description = pay.Description;
+                        transactionDetail.Transaction = transaction;
+                        _context.TransactionDetails.Add(transactionDetail);       //<-----------------------------------------------------------
+                        await _context.SaveChangesAsync();                        //<----------------------------------------------------------- 
+
+                        DebtDetail debtDetail = new DebtDetail();
+                        debtDetail = await _context.DebtDetails.Where(x => x.DebtId == pay.DebtId &&
+                                                                           x.CodeConcept == pay.CodeConcept).FirstAsync();
+
+                        //Se resta en el debt_detail el monto de pago cancelado.
+                        if (debtDetail.OnAccount - pay.Amount < 0)
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: pay.Description) });
+
+                        debtDetail.OnAccount -= pay.Amount;
+                        await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
+                    }
+                    #endregion
+
+
+                    #region Codigo previo de Julio
+                    ////await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+
+                    ////var orderList = paymentData.PaymentDetails.Select(x => x.OrderSaleId).Distinct();
+
+                    ////foreach (var item in orderList)
+                    ////{
+                    ////    OrderSale order = await _context.OrderSales.FindAsync(item);
+                    ////    order.OnAccount = (order.Amount - order.OnAccount);
+                    ////    order.Status = "EOS01";
+                    ////    _context.Entry(order).State = EntityState.Modified;
+                    ////    _context.SaveChanges();
+                    ////}
+
+                    ////int position = 0;
+                    ////List<OrderSaleDetail> saleDetails = await _context.OrderSaleDetails.Where(x => x.OrderSaleId == paymentData.PaymentDetails.First().OrderSaleId).ToListAsync();
+                    ////foreach (var pay in paymentData.PaymentDetails)
+                    ////{
+                    ////    TransactionDetail transactionDetail = new TransactionDetail();
+                    ////    transactionDetail.CodeConcept = pay.CodeConcept;
+                    ////    transactionDetail.Amount = transaction.Amount;
+                    ////    transactionDetail.Description = pay.Description;
+                    ////    transactionDetail.Transaction = transaction;
+                    ////    _context.TransactionDetails.Add(transactionDetail);
+                    ////    await _context.SaveChangesAsync();
+
+                    ////    if (saleDetails[position].OnAccount - pay.Amount < 0)
+                    ////        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: pay.Description) });
+
+                    ////    saleDetails[position].OnAccount -= pay.Amount;
+                    ////    saleDetails[position].Tax = 0;
+                    ////    await _context.SaveChangesAsync();
+                    ////    position++;
+                    ////}
+                    #endregion
+
+                    //Se resta el monto la cancelacion al cierre del dia correspondiente.
+                    DAL.Models.Transaction trans = movimientosCaja.Where(x => x.TypeTransactionId == 6 && x.PayMethodId == transactionData.PayMethodId).FirstOrDefault();
+                    trans.TransactionDetails = _context.TransactionDetails.Where(x => x.TransactionId == trans.Id).ToList();
+                    trans.Amount = trans.Amount - transactionData.Amount;
+                    trans.Tax = trans.Tax - transactionData.Tax;
+                    trans.Total = trans.Total - transactionData.Total;
+                    trans.TransactionDetails.Where(x => x.Description.Contains("Retiro") && x.CodeConcept == "6").FirstOrDefault().Amount = trans.Total;
+
+                    _context.Entry(trans).State = EntityState.Modified;
+                    _context.SaveChanges();
+
+                    //Se Cancela la factura ligada al pago.
+                    RequestsAPI RequestsFacturama = new RequestsAPI("https://api.facturama.mx/");
+                    if (paymentData.HaveTaxReceipt)
+                    {
+                        try
+                        {
+                            var key = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault();
+                            if (!string.IsNullOrEmpty(key.IdXmlFacturama))
+                            {
+                                var resultado = await RequestsFacturama.SendURIAsync(string.Format("api-lite/cfdis/{0}", key.IdXmlFacturama), HttpMethod.Delete, "gfdsystems", "gfds1st95");
+                                var cfdiCancel = JsonConvert.DeserializeObject<RepuestaCancelacion>(resultado);
+                                Byte[] bytes = Convert.FromBase64String(cfdiCancel.AcuseXmlBase64);
+                                TaxReceiptCancel cancel = new TaxReceiptCancel
+                                {
+                                    CancelationDate = cfdiCancel.CancelationDate,
+                                    AcuseXml = bytes,
+                                    Message = cfdiCancel.Message,
+                                    Status = cfdiCancel.Status,
+                                    RequestDateCancel = cfdiCancel.RequestDate
+                                };
+                                TaxReceipt receipt = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault();
+                                if (receipt != null)
+                                {
+                                    receipt.Status = "ET002";
+                                    cancel.TaxReceipt = receipt;
+                                    cancel.TaxReceiptId = receipt.Id;
+                                    receipt.TaxReceiptCancels.Add(cancel);
+                                    await _context.SaveChangesAsync();
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = "Error al intentar cancelar la factura electrónica" });
+                        }
+                    }
+                    scope.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = TransactionId.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
+            }
+
+            return Ok();
+        }
+
         [HttpPost("SuperOrders/Cancel/{TransactionId}")]
         public async Task<IActionResult> TransactionOrderCancel([FromRoute] int TransactionId)
         {
@@ -2771,7 +3091,8 @@ namespace Siscom.Agua.Api.Controllers
                         await _context.SaveChangesAsync();
                         position++;
                     }
-
+                    
+                    //Se resta el monto la cancelacion al cierre del dia correspondiente.
                     DAL.Models.Transaction trans = movimientosCaja.Where(x => x.TypeTransactionId == 6 && x.PayMethodId == transactionData.PayMethodId).FirstOrDefault();
                     trans.TransactionDetails = _context.TransactionDetails.Where(x => x.TransactionId == trans.Id).ToList();
                     trans.Amount = trans.Amount - transactionData.Amount;
@@ -2782,6 +3103,7 @@ namespace Siscom.Agua.Api.Controllers
                     _context.Entry(trans).State = EntityState.Modified;
                     _context.SaveChanges();
 
+                    //Se Cancela la factura ligada al pago.
                     RequestsAPI RequestsFacturama = new RequestsAPI("https://api.facturama.mx/");
                     if (paymentData.HaveTaxReceipt)
                     {

@@ -12,6 +12,8 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 using Siscom.Agua.Api.Enums;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -32,7 +34,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> GetOrderSales([FromRoute] string ini, [FromRoute] string fin)
         {
             DateTime FechaIni = new DateTime(int.Parse(ini.Split("-")[0]), int.Parse(ini.Split("-")[1]), int.Parse(ini.Split("-")[2]));
-            DateTime FechaFin = new DateTime(int.Parse(ini.Split("-")[0]), int.Parse(ini.Split("-")[1]), int.Parse(ini.Split("-")[2]), 23, 59, 59);
+            DateTime FechaFin = new DateTime(int.Parse(fin.Split("-")[0]), int.Parse(fin.Split("-")[1]), int.Parse(fin.Split("-")[2]), 23, 59, 59);
             var tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == "ET001").ToList();
 
             RequestsAPI RequestsFacturama = new RequestsAPI("https://api.facturama.mx/");
@@ -63,6 +65,29 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Format("Problemas al consultar los registros {0}", ex.Message) });
             }
             return Ok(string.Format("Registros revisados: {0} de {1}, se actualizaron: {2}", count, tmp.Count, refresh ));
+        }
+
+
+        [HttpGet("Cancelaciones/{ini}/{fin}")]
+        public async Task<IActionResult> GetCancelaciones([FromRoute] string ini, [FromRoute] string fin)
+        {
+            try
+            {
+                DateTime FechaIni = new DateTime(int.Parse(ini.Split("-")[0]), int.Parse(ini.Split("-")[1]), int.Parse(ini.Split("-")[2]));
+                DateTime FechaFin = new DateTime(int.Parse(fin.Split("-")[0]), int.Parse(fin.Split("-")[1]), int.Parse(fin.Split("-")[2]), 23, 59, 59);
+                var tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == "ET002" && x.PDFInvoce != null).ToList();
+
+                if(tmp.Count == 0)
+                {
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Format("No se encotraron facturas canceladas.") });
+                }
+
+                return Ok(tmp);                
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Format("Error al tratar solicitar facturas canceladas.") });
+            }
         }
 
     }
