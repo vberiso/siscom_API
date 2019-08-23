@@ -2946,7 +2946,7 @@ namespace Siscom.Agua.Api.Controllers
             decimal _sumTransactionDetail = 0;
             decimal sumPayDetail = 0;
             decimal _saldo = 0;
-
+            string message = string.Empty;
             #region Validación
             //Parametros
             if (!ModelState.IsValid)
@@ -3110,28 +3110,39 @@ namespace Siscom.Agua.Api.Controllers
                         try
                         {
                             var key = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault();
-                            if (!string.IsNullOrEmpty(key.IdXmlFacturama))
+                            if (key != null)
                             {
-                                var resultado = await RequestsFacturama.SendURIAsync(string.Format("api-lite/cfdis/{0}", key.IdXmlFacturama), HttpMethod.Delete, "gfdsystems", "gfds1st95");
-                                var cfdiCancel = JsonConvert.DeserializeObject<RepuestaCancelacion>(resultado);
-                                Byte[] bytes = Convert.FromBase64String(cfdiCancel.AcuseXmlBase64);
-                                TaxReceiptCancel cancel = new TaxReceiptCancel
+                                if (!string.IsNullOrEmpty(key.IdXmlFacturama))
                                 {
-                                    CancelationDate = cfdiCancel.CancelationDate,
-                                    AcuseXml = bytes,
-                                    Message = cfdiCancel.Message,
-                                    Status = cfdiCancel.Status,
-                                    RequestDateCancel = cfdiCancel.RequestDate
-                                };
-                                TaxReceipt receipt = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault();
-                                if (receipt != null)
-                                {
-                                    receipt.Status = "ET002";
-                                    cancel.TaxReceipt = receipt;
-                                    cancel.TaxReceiptId = receipt.Id;
-                                    receipt.TaxReceiptCancels.Add(cancel);
-                                    await _context.SaveChangesAsync();
+                                    var resultado = await RequestsFacturama.SendURIAsync(string.Format("api-lite/cfdis/{0}", key.IdXmlFacturama), HttpMethod.Delete, "gfdsystems", "gfds1st95");
+                                    var cfdiCancel = JsonConvert.DeserializeObject<RepuestaCancelacion>(resultado);
+                                    Byte[] bytes = Convert.FromBase64String(cfdiCancel.AcuseXmlBase64);
+                                    TaxReceiptCancel cancel = new TaxReceiptCancel
+                                    {
+                                        CancelationDate = cfdiCancel.CancelationDate,
+                                        AcuseXml = bytes,
+                                        Message = cfdiCancel.Message,
+                                        Status = cfdiCancel.Status,
+                                        RequestDateCancel = cfdiCancel.RequestDate
+                                    };
+                                    TaxReceipt receipt = paymentData.TaxReceipts.Where(x => x.Status == "ET001").FirstOrDefault();
+                                    if (receipt != null)
+                                    {
+                                        receipt.Status = "ET002";
+                                        cancel.TaxReceipt = receipt;
+                                        cancel.TaxReceiptId = receipt.Id;
+                                        receipt.TaxReceiptCancels.Add(cancel);
+                                        await _context.SaveChangesAsync();
+                                    }
                                 }
+                                else
+                                {
+                                    message = "El pago no cuenta con un timbre en FACTURAMA, Favor de verificar";
+                                }
+                            }
+                            if(key == null)
+                            {
+                                message = "El pago de cancelo pero la factura ya se encuentra en estatus cancelado";
                             }
                         }
                         catch (Exception)
@@ -3155,7 +3166,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
 
-            return Ok();
+            return Ok(message);
         }
 
         private bool Validate(TransactionVM ptransaction)

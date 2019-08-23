@@ -39,5 +39,7 @@ namespace Siscom.Agua.DAL.Models
         public int IdSolPago { get; set; }
         [Column("status"), StringLength(5)]
         public string Status { get; set; }
+        [Column("status_payment"), StringLength(5)]
+        public string StatusPayment { get; set; }
     }
 }
