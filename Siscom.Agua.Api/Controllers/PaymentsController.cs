@@ -289,7 +289,7 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     using (var command = _context.Database.GetDbConnection().CreateCommand())
                     {
-                        command.CommandText = "[dbo].[CancelacionSAC]";
+                        command.CommandText = "[dbo].[CancelacionSACOneToOne]";
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.Add(new SqlParameter("@idAccountingPayment", item.Id));
                         command.Parameters.Add(new SqlParameter

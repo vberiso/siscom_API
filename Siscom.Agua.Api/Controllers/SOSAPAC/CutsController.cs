@@ -67,7 +67,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
 
         // GET: api/Suburbs/2/5000
         [HttpGet]
-        public async Task<IEnumerable<Suburb>> GetSuburbs([FromRoute] int NumOfPeriods, [FromRoute] decimal Debit)
+        public async Task<IActionResult> GetSuburbs([FromRoute] int NumOfPeriods, [FromRoute] decimal Debit)
         {
 
             var debt = await _context.Debts.Include(dd => dd.DebtDetails)
@@ -78,7 +78,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 //GetMonthDifference()
             });
 
-            return _context.Suburbs;
+            return Ok();
         }
 
         // GET: api/Suburbs/5
