@@ -38,7 +38,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             var Agreement = await _context.Agreements
                                             .Include(x => x.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
-                                                    .ThenInclude(c => c.Clasifications)
+                                            .Where(x => x.TypeStateServiceId == 1 && x.Addresses.Any(z=> z.TypeAddress == "DIR01"))
                                             .ToListAsync();
 
             List<CutSuburbVM> suburbs = new List<CutSuburbVM>();
@@ -50,8 +50,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                     {
                         Id = z.Suburbs.Id,
                         Name = z.Suburbs.Name,
-                        Classification = z.Suburbs.Clasifications.Name,
-                        ClassificationId = z.Suburbs.ClasificationsId
+                        Route = x.Route
                     });
                 });
             });
@@ -69,7 +68,12 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         [HttpGet]
         public async Task<IActionResult> GetSuburbs([FromRoute] int NumOfPeriods, [FromRoute] decimal Debit)
         {
+            int[] suburbs = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            foreach (var item in suburbs)
+            {
 
+            }
+            //string.Join(string.Format("Id={0},",))
             var debt = await _context.Debts.Include(dd => dd.DebtDetails)
                         .Where(gs => _context.Statuses
                                 .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status)).OrderBy(x => x.FromDate).ToListAsync();
