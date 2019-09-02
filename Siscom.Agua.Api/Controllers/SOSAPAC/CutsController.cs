@@ -1,14 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Siscom.Agua.Api.Model.SOSAPAC;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Threading.Tasks;
 
 namespace Siscom.Agua.Api.Controllers.SOSAPAC
 {
@@ -20,7 +22,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
 
         public CutsController(ApplicationDbContext context)
         {
-            
+
             _context = context;
         }
         // GET: api/Suburbs
@@ -38,7 +40,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             var Agreement = await _context.Agreements
                                             .Include(x => x.Addresses)
                                                 .ThenInclude(s => s.Suburbs)
-                                            .Where(x => x.TypeStateServiceId == 1 && x.Addresses.Any(z=> z.TypeAddress == "DIR01"))
+                                            .Where(x => x.TypeStateServiceId == 1 && x.Addresses.Any(z => z.TypeAddress == "DIR01"))
                                             .ToListAsync();
 
             List<CutSuburbVM> suburbs = new List<CutSuburbVM>();
@@ -55,7 +57,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 });
             });
 
-            
+
             //List<Suburb> 
             return Ok(suburbs.GroupBy(x => x.Name)
                              .Select(g => g.First())
@@ -64,25 +66,49 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
 
         }
 
-        // GET: api/Suburbs/2/5000
-        [HttpGet]
-        public async Task<IActionResult> GetSuburbs([FromRoute] int NumOfPeriods, [FromRoute] decimal Debit)
+        // GET: api/Suburbs/2/5000/
+        [HttpGet("{NumOfPeriods}/{Debit}/{Suburbs}")]
+        public async Task<IActionResult> GetSuburbs([FromRoute] int NumOfPeriods, [FromRoute] decimal Debit, [FromRoute] string Suburbs)
         {
-            int[] suburbs = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            foreach (var item in suburbs)
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            try
             {
-
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[GetAgreementBySuburbs]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@Suburbs",
+                        DbType = DbType.String,
+                        Value = Suburbs
+                    });
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@NumPeriods",
+                        DbType = DbType.Int32,
+                        Value = NumOfPeriods
+                    });
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@Amount",
+                        DbType = DbType.Decimal,
+                        Value = Debit
+                    });
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        dataTable.Load(result);
+                    }
+                }
+                return Ok(dataTable);
             }
-            //string.Join(string.Format("Id={0},",))
-            var debt = await _context.Debts.Include(dd => dd.DebtDetails)
-                        .Where(gs => _context.Statuses
-                                .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status)).OrderBy(x => x.FromDate).ToListAsync();
-            debt.ForEach(x => {
-                //int monts = 0;
-                //GetMonthDifference()
-            });
-
-            return Ok();
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+            
         }
 
         // GET: api/Suburbs/5
