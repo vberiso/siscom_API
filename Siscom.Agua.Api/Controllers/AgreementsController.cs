@@ -45,7 +45,7 @@ namespace Siscom.Agua.Api.Controllers
             this.appSettings = appSettings.Value;
         }
 
-     
+
 
         // GET: api/Agreements
         [HttpGet("GetSummary/{AgreementId}/{ById?}")]
@@ -68,13 +68,13 @@ namespace Siscom.Agua.Api.Controllers
             Siscom.Agua.DAL.Models.Agreement summary = null;
             if (ById == 1)
             {
-                 summary = await query.Where(a => a.Id == AgreementId).FirstOrDefaultAsync();
+                summary = await query.Where(a => a.Id == AgreementId).FirstOrDefaultAsync();
             }
             else
             {
-                 summary = await query.Where(a => a.Account == AgreementId.ToString()).FirstOrDefaultAsync();
+                summary = await query.Where(a => a.Account == AgreementId.ToString()).FirstOrDefaultAsync();
             }
-                                    
+
 
             summary.Clients = summary.Clients.Where(c => c.IsActive == true).ToList();
             summary.Addresses = summary.Addresses.Where(a => a.TypeAddress == "DIR01" && a.IsActive == true).ToList();
@@ -142,21 +142,21 @@ namespace Siscom.Agua.Api.Controllers
             }
 
 
-            var agreement =  _context.Agreements
+            var agreement = _context.Agreements
                                         .Include(c => c.TypeIntake)
                                         .Where(x => x.Account == account).FirstOrDefault();
 
 
             if (agreement == null)
             {
-                return Ok("Numero de cuenta valido: "+ account);
+                return Ok("Numero de cuenta valido: " + account);
             }
             else
             {
                 if (agreement.TypeIntake.Id == idIntake)
                 {
 
-                    return NotFound("Ya existe esta numero de cuenta con tipo "+ agreement.TypeIntake.Name);
+                    return NotFound("Ya existe esta numero de cuenta con tipo " + agreement.TypeIntake.Name);
                 }
                 else
                 {
@@ -236,7 +236,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             try
             {
-                var query =  _context.Agreements
+                var query = _context.Agreements
                                      .Include(x => x.Clients)
                                      .Include(x => x.TypeStateService)
                                      .Include(x => x.AgreementDetails)
@@ -245,20 +245,20 @@ namespace Siscom.Agua.Api.Controllers
                                        .ThenInclude(s => s.Suburbs)
                                            .ThenInclude(t => t.Towns)
                                                .ThenInclude(st => st.States)
-                                     .Include( x => x.AgreementComments);
-                                      
+                                     .Include(x => x.AgreementComments);
+
                 List<Siscom.Agua.DAL.Models.Agreement> agreement;
 
                 if (string.IsNullOrEmpty(agreementID))
                 {
-                    agreement= await query.Where(a => a.Account == AcountNumber).ToListAsync();
+                    agreement = await query.Where(a => a.Account == AcountNumber).ToListAsync();
                 }
                 else
                 {
                     agreement = await query.Where(a => a.Id == Convert.ToInt32(agreementID)).ToListAsync();
                 }
-                
-                
+
+
                 if (agreement == null)
                 {
                     return StatusCode((int)TypeError.Code.NotFound, new { Error = "No hay datos para este número de cuenta" });
@@ -271,8 +271,8 @@ namespace Siscom.Agua.Api.Controllers
 
                 });
 
-                    ;
-                
+                ;
+
                 return Ok(agreement);
 
             }
@@ -300,7 +300,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(di => di.Diameter)
                                       .Include(c => c.Clients)
                                       .Include(a => a.Addresses)
-                                        .ThenInclude(s =>s.Suburbs)
+                                        .ThenInclude(s => s.Suburbs)
                                          .ThenInclude(t => t.Towns)
                                             .ThenInclude(st => st.States)
                                       .Include(tc => tc.TypeClassification)
@@ -346,7 +346,7 @@ namespace Siscom.Agua.Api.Controllers
                                       .Include(ad => ad.AgreementDetails)
                                       .Include(af => af.AgreementFiles)
                                       .FirstOrDefaultAsync(a => a.Account == account);
-          
+
 
             if (agreement == null)
             {
@@ -381,7 +381,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
             var agreement = await _context.Debts.Include(d => d.DebtDetails)
-                                                .Where(a =>a.AgreementId == idAgreement && a.Status != "ED005" && a.ExpirationDate.Year == year ).OrderByDescending(e =>e.DebitDate).ToListAsync();
+                                                .Where(a => a.AgreementId == idAgreement && a.Status != "ED005" && a.ExpirationDate.Year == year).OrderByDescending(e => e.DebitDate).ToListAsync();
 
             if (agreement == null || agreement.Count == 0)
             {
@@ -394,12 +394,12 @@ namespace Siscom.Agua.Api.Controllers
 
                 //var deta = await _context.PaymentDetails.Where(xa => xa.PaymentId == pay.Id ).ToListAsync();
 
-               
 
-                foreach(var payment in pay)
+
+                foreach (var payment in pay)
                 {
 
-                    foreach(var detail  in payment.PaymentDetails)
+                    foreach (var detail in payment.PaymentDetails)
                     {
                         if (detail.Description == "Constancia de No Adeudo")
                         {
@@ -408,15 +408,15 @@ namespace Siscom.Agua.Api.Controllers
                             {
                                 Id = detail.Id,
                                 Description = detail.Description
-                             });
+                            });
 
                         }
                     }
-                   
-                   
+
+
                 }
 
-               if(pi == null || pi.Count == 0)
+                if (pi == null || pi.Count == 0)
                 {
                     return NotFound("No tiene la constancia de no adeudo");
                 }
@@ -435,7 +435,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
 
-          
+
 
 
         }
@@ -1383,7 +1383,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
-       
+
 
 
 
@@ -1578,7 +1578,7 @@ namespace Siscom.Agua.Api.Controllers
                                               .Where(x => x.IdAgreement == AgreementId &&
                                                           x.IsActive == true).ToListAsync();
 
-                return Ok(new { discounts , file });
+                return Ok(new { discounts, file });
             }
             else
             {
@@ -1902,7 +1902,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 var email = _context.Clients.Where(c => c.AgreementId == idAgreement).FirstOrDefault();
 
-                if(email.EMail == null || email.EMail == " " || string.IsNullOrEmpty(email.EMail) )
+                if (email.EMail == null || email.EMail == " " || string.IsNullOrEmpty(email.EMail))
                 {
                     return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No cuenta con email, favor de ingresar uno en la parte de contacto" });
 
@@ -1921,7 +1921,7 @@ namespace Siscom.Agua.Api.Controllers
                     mail.Subject = "Envió de comprobante fiscal CFDI";
                     mail.AlternateViews.Add(getEmbeddedImage());
                     //mail.Body = string.Format(@"<!DOCTYPE html><html lang=""es""><head><meta charset=""UTF-8""><title>Facturación - Cuautlancingo</title><meta name=""viewport"" content=""width=device-width, initial-scale=1.0""/><link href=""https://fonts.googleapis.com/css?family=Montserrat|Roboto&display=swap"" rel=""stylesheet""></head><body style=""margin: 0; padding: 0;""><table style=""width: 100%; font-family: 'Roboto', sans-serif; letter-spacing: 0.50px;""><th style=""width: 7%;""><img src=""https://i.ibb.co/BGRJZGD/ayuntamiento-sistema.png"" alt=""Logo""></th><th style=""width: 93%;""><div style =""position: absolute !important; top: 26px; left:145px; color: #691A1B text-align: left;""><div><h2> Sistema de Facturación</h2></div><div style=""margin-bottom:25px;""><h5> Comprobante Fiscal CFDI</h5></div></div><div style=""background-color: #691A1B; width: 100%; height: 5px; position: relative; top: 35px;""></div></th><tr style=""font-family: 'Montserrat', sans-serif; ""><th colspan=""2"" style=""text-align: left; font-size: 15px; padding-left: 30px;""><br><br><p>Estimado Contribuyente:&nbsp;&nbsp; <strong></strong></p><p>Cuenta:&nbsp;&nbsp; <strong>{info.Account}</strong></p></p><br></th></tr><tr style=""font-family: 'Montserrat', sans-serif;""><th colspan=""2"" style=""text-align: justify; padding: 0px 80px 0px 80px;""><p> Usted está recibiendo un comprobante fiscal digital (FACTURA ELECTRÓNICA) del municipio de Cuautlancingo, Puebla 2018 - 2021. De acuerdo a la reglamentación del servicio de administración tributaria (SAT), publicada en el diario oficial de la federación (RMISC 2004)el 31 de Mayo del 2004, la factura electrónica es 100% valida y legal a partir de ahora, la entrega del documento fiscal (FACTURA ELECTRÓNICA)sera emitida y entregada por correo electrónico, cabe destacar que la factura electrónica se entregara en formato<small style=""color:#691A1B"">PDF</small> y archivo <small style=""color:#691A1B"">XML</small>, el cual podra imprimir libremente e incluirlaen su contabilidad (ARTICULO 29, FRACCION IV DE CFF), resguardar la impresión y archivo <small style=""color:#691A1B"">XML</small> por un periodode 5 años.<br><br><small style = ""font-size: 11px;""> Importante: contenido de la factura electrónica en el anexo 20 del diario oficial de la federación, publicadoel 1 de Septiembre de 2004, en el parrafo 2.22.8, se estipula que la impresión de la factura electrónica, que ademasde los datos fiscales y comerciales, deberá contener la cadena original, el certificado de sello digital, el sello digital y la leyenda: 'Este documento es una representación impresa de un CFD/CFDI'.</ small ></p></th></tr><tr style=""text-align: left; font-size: 15px; padding-left: 30px;""><th colspan=""2""><p>Observaciones</p><p></p></th></tr><tr><th colspan=""2""><br><br> <p style=""text-align: right; padding-right: 80px; font-size: 13px;""> **ESTE CORREO ES UNICAMENTE PARA ENVIOS, FAVOR DE NO RESPONDER</p> </th></tr><tr style=""background: url('https://i.ibb.co/2Kd9dfG/breadcrumb-bg1.jpg')""><th colspan=""2"" style=""width: 100%; height: 300px;""></th></tr></table></body></html>");
-                                       
+
                     MemoryStream memoryStream = new MemoryStream();
                     System.Xml.XmlDocument xDocument = new System.Xml.XmlDocument();
                     xDocument.LoadXml(value.XML);
@@ -1931,7 +1931,7 @@ namespace Siscom.Agua.Api.Controllers
                     Stream stream = memoryStream;
                     Attachment attachment = new Attachment(stream, string.Format("Comprobante_" + info.Account + ".xml"), "application/xml");
                     mail.Attachments.Add(attachment);
-                    
+
                     SmtpServer.Port = 25;
                     SmtpServer.Credentials = new System.Net.NetworkCredential("facturacion@cuautlancingo.gob.mx", "e0P?k0k8");
                     SmtpServer.Send(mail);
@@ -1946,7 +1946,7 @@ namespace Siscom.Agua.Api.Controllers
                     mail.Subject = "Envió de comprobante fiscal CFDI";
                     mail.AlternateViews.Add(getEmbeddedImage());
                     //mail.Body = string.Format(@"<!DOCTYPE html><html lang=""es""><head><meta charset=""UTF-8""><title>Facturación - Cuautlancingo</title><meta name=""viewport"" content=""width=device-width, initial-scale=1.0""/><link href=""https://fonts.googleapis.com/css?family=Montserrat|Roboto&display=swap"" rel=""stylesheet""></head><body style=""margin: 0; padding: 0;""><table style=""width: 100%; font-family: 'Roboto', sans-serif; letter-spacing: 0.50px;""><th style=""width: 7%;""><img src=""https://i.ibb.co/BGRJZGD/ayuntamiento-sistema.png"" alt=""Logo""></th><th style=""width: 93%;""><div style =""position: absolute !important; top: 26px; left:145px; color: #691A1B text-align: left;""><div><h2> Sistema de Facturación</h2></div><div style=""margin-bottom:25px;""><h5> Comprobante Fiscal CFDI</h5></div></div><div style=""background-color: #691A1B; width: 100%; height: 5px; position: relative; top: 35px;""></div></th><tr style=""font-family: 'Montserrat', sans-serif; ""><th colspan=""2"" style=""text-align: left; font-size: 15px; padding-left: 30px;""><br><br><p>Estimado Contribuyente:&nbsp;&nbsp; <strong></strong></p><p>Cuenta:&nbsp;&nbsp; <strong>{info.Account}</strong></p></p><br></th></tr><tr style=""font-family: 'Montserrat', sans-serif;""><th colspan=""2"" style=""text-align: justify; padding: 0px 80px 0px 80px;""><p> Usted está recibiendo un comprobante fiscal digital (FACTURA ELECTRÓNICA) del municipio de Cuautlancingo, Puebla 2018 - 2021. De acuerdo a la reglamentación del servicio de administración tributaria (SAT), publicada en el diario oficial de la federación (RMISC 2004)el 31 de Mayo del 2004, la factura electrónica es 100% valida y legal a partir de ahora, la entrega del documento fiscal (FACTURA ELECTRÓNICA)sera emitida y entregada por correo electrónico, cabe destacar que la factura electrónica se entregara en formato<small style=""color:#691A1B"">PDF</small> y archivo <small style=""color:#691A1B"">XML</small>, el cual podra imprimir libremente e incluirlaen su contabilidad (ARTICULO 29, FRACCION IV DE CFF), resguardar la impresión y archivo <small style=""color:#691A1B"">XML</small> por un periodode 5 años.<br><br><small style = ""font-size: 11px;""> Importante: contenido de la factura electrónica en el anexo 20 del diario oficial de la federación, publicadoel 1 de Septiembre de 2004, en el parrafo 2.22.8, se estipula que la impresión de la factura electrónica, que ademasde los datos fiscales y comerciales, deberá contener la cadena original, el certificado de sello digital, el sello digital y la leyenda: 'Este documento es una representación impresa de un CFD/CFDI'.</ small ></p></th></tr><tr style=""text-align: left; font-size: 15px; padding-left: 30px;""><th colspan=""2""><p>Observaciones</p><p></p></th></tr><tr><th colspan=""2""><br><br> <p style=""text-align: right; padding-right: 80px; font-size: 13px;""> **ESTE CORREO ES UNICAMENTE PARA ENVIOS, FAVOR DE NO RESPONDER</p> </th></tr><tr style=""background: url('https://i.ibb.co/2Kd9dfG/breadcrumb-bg1.jpg')""><th colspan=""2"" style=""width: 100%; height: 300px;""></th></tr></table></body></html>");
-                                       
+
                     MemoryStream memoryStream = new MemoryStream();
                     System.Xml.XmlDocument xDocument = new System.Xml.XmlDocument();
                     xDocument.LoadXml(value.XML);
@@ -1956,7 +1956,7 @@ namespace Siscom.Agua.Api.Controllers
                     Stream stream = memoryStream;
                     Attachment attachment = new Attachment(stream, string.Format("Comprobante_" + info.Account + ".xml"), "application/xml");
                     mail.Attachments.Add(attachment);
-                    
+
                     SmtpServer.Port = 25;
                     SmtpServer.Credentials = new System.Net.NetworkCredential("facturacion@sosapac.gob.mx", "e0P?k0k8");
                     SmtpServer.Send(mail);
@@ -2102,7 +2102,7 @@ namespace Siscom.Agua.Api.Controllers
                     command.CommandText = "[dbo].[billing_period]";
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add(new SqlParameter("@id_agreement", idAgreement));
-                   
+
                     command.Parameters.Add(new SqlParameter
                     {
                         ParameterName = "@error",
@@ -2168,23 +2168,23 @@ namespace Siscom.Agua.Api.Controllers
             string error = string.Empty;
             try
             {
-                var debt = await _context.Debts.Where(x => x.AgreementId == idAgreement && x.ExpirationDate.Year == year && x.Status == "ED001" && x.Type != "TIP02" && x.Type != "TIP03" && x.Type != "TIP05" ).ToListAsync();
+                var debt = await _context.Debts.Where(x => x.AgreementId == idAgreement && x.ExpirationDate.Year == year && x.Status == "ED001" && x.Type != "TIP02" && x.Type != "TIP03" && x.Type != "TIP05").ToListAsync();
 
-                if( debt.Count == 0)
+                if (debt.Count == 0)
                 {
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se encontro deuda por pagar en este año") });
 
                 }
-                var discount =  _context.AgreementDiscounts.Where(sd => sd.IdAgreement == idAgreement).FirstOrDefault();
+                var discount = _context.AgreementDiscounts.Where(sd => sd.IdAgreement == idAgreement).FirstOrDefault();
 
-                if(discount == null)
+                if (discount == null)
                 {
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El contrato no tiene agregado algun descuento") });
                 }
 
                 var valueD = _context.Discounts.Where(d => d.Id == discount.IdDiscount).FirstOrDefault();
 
-                if(valueD == null)
+                if (valueD == null)
                 {
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("No se encontraron descuentos") });
 
@@ -2256,7 +2256,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpPost("addDebtSosapac/{idAgreement}/{Month}/{Year}/{status}")]
-        public async Task<IActionResult> PostDebtsSosapac([FromRoute] int idAgreement, int Month,int Year, string status)
+        public async Task<IActionResult> PostDebtsSosapac([FromRoute] int idAgreement, int Month, int Year, string status)
         {
             string error = string.Empty;
             try
@@ -2428,7 +2428,20 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
-
+        [HttpGet("countAgrements/{year}/{mes}")]
+        public async Task<IActionResult> CuntAgreements([FromRoute] string year, string mes)
+        {
+            var a=_context.Agreements.ToList();
+            List<object> oc = new List<object>();
+            a.ForEach(x =>{
+                var paymenhts = _context.Payments.Include(p => p.PaymentDetails)
+                .ThenInclude(pd => pd.Debt)
+                .ToList();
+                oc.Add(new { Agrement = x, Payments = paymenhts });
+            });
+            
+            return null;
+        }
     }
 
 
@@ -2441,4 +2454,8 @@ namespace Siscom.Agua.Api.Controllers
         public string Type { get; set; }
         public string Description { get; set; }
     }
+
+
+   
+
 }

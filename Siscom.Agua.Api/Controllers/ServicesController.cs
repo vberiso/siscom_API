@@ -132,7 +132,7 @@ namespace Siscom.Agua.Api.Controllers
                     _context.Services.Add(service);
                     await _context.SaveChangesAsync();
                     scope.Complete();
-                }    
+                }
             }
             catch (Exception e)
             {
@@ -174,6 +174,23 @@ namespace Siscom.Agua.Api.Controllers
         private bool ServiceExists(int id)
         {
             return _context.Services.Any(e => e.Id == id);
+        }
+
+        // obtines Los grupos de los servicios que estan en la tatbla catalogue
+        [HttpPost("GetCataloges")]
+        public async Task<IActionResult> GetGroups()
+        {
+            List<GroupCatalogue> Groups = null;
+            try
+            {
+                Groups = _context.GroupCatalogues.Include(x => x.Catalogues).ToList();
+
+                
+            }catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Format($"{ex.ToMessageAndCompleteStacktrace()}") });
+            }
+            return Ok(Groups);
         }
     }
 }
