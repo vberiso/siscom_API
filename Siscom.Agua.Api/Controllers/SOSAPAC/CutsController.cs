@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Newtonsoft.Json;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model.SOSAPAC;
+using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 using System;
@@ -111,99 +115,73 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             
         }
 
-        // GET: api/Suburbs/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetSuburb([FromRoute] int id)
+        [HttpPost("{Agreements}")]
+        public async Task<IActionResult> PostNotifications([FromRoute] string Agreements)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var suburb = await _context.Suburbs.FindAsync(id);
-
-            if (suburb == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(suburb);
-        }
-
-        // PUT: api/Suburbs/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSuburb([FromRoute] int id, [FromBody] Suburb suburb)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != suburb.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(suburb).State = EntityState.Modified;
-
+            List<string> agreements = new List<string>(Agreements.Split(","));
+            List<string> error = new List<string>();
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SuburbExists(id))
+                foreach (var item in Agreements.Split(","))
                 {
-                    return NotFound();
+                    using (var command = _context.Database.GetDbConnection().CreateCommand())
+                    {
+                        command.CommandText = "[dbo].[generate_notification]";
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@id_agreement",
+                            DbType = DbType.Int32,
+                            Value = Convert.ToInt32(item)
+                        });
+
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@error",
+                            DbType = DbType.String,
+                            Size = 200,
+                            Direction = ParameterDirection.Output
+                        });
+
+                        this._context.Database.OpenConnection();
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            if (!string.IsNullOrEmpty(command.Parameters["@error"].Value.ToString()))
+                                error.Add("El contrado (ID: " + item + ") -> " + command.Parameters["@error"].Value.ToString());
+                        }
+                    }
+                }
+
+                if(error.Count > 0)
+                {
+                    if(agreements.Count != error.Count)
+                    {
+                        return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format($"Se completaron {agreements.Count - error.Count} de {agreements.Count} de el proceso de notificación pero no se genero notificacion para las siguientes cuentas ID: [{string.Join(Environment.NewLine, error)}]") });
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format($"No se pudo realizar el proceso de descuentos por las siguientes razones: [{string.Join(Environment.NewLine, error)}]") });
+                    }
+
                 }
                 else
                 {
-                    throw;
+                    return Ok();
                 }
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Suburbs
-        [HttpPost]
-        public async Task<IActionResult> PostSuburb([FromBody] Suburb suburb)
-        {
-            if (!ModelState.IsValid)
+            catch (Exception e)
             {
-                return BadRequest(ModelState);
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = $"Agreement List: {Agreements}";
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción de notificaciones" });
             }
-
-            _context.Suburbs.Add(suburb);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSuburb", new { id = suburb.Id }, suburb);
-        }
-
-        // DELETE: api/Suburbs/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSuburb([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var suburb = await _context.Suburbs.FindAsync(id);
-            if (suburb == null)
-            {
-                return NotFound();
-            }
-
-            _context.Suburbs.Remove(suburb);
-            await _context.SaveChangesAsync();
-
-            return Ok(suburb);
-        }
-
-        private bool SuburbExists(int id)
-        {
-            return _context.Suburbs.Any(e => e.Id == id);
+           
         }
 
         private static int GetMonthDifference(DateTime startDate, DateTime endDate)
