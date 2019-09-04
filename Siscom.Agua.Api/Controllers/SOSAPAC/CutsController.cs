@@ -160,7 +160,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                     }
                     else
                     {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Message = string.Format($"No se pudo realizar el proceso de descuentos por las siguientes razones: [{string.Join(Environment.NewLine, error)}]") });
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo realizar el proceso de descuentos por las siguientes razones: [{string.Join(Environment.NewLine, error)}]") });
                     }
 
                 }
