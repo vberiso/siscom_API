@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model.SOSAPAC;
@@ -14,6 +12,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Siscom.Agua.Api.Controllers.SOSAPAC
@@ -33,40 +32,22 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         [HttpGet("Suburbs")]
         public async Task<IActionResult> GetSuburbs()
         {
-            //var Agreement = await _context.Agreements
-            //                        .Include(s => s.Addresses)
-            //                            .ThenInclude(su => su.Suburbs)
-            //                        .Include(d => d.Debts)
-            //                        .Where(x => x.Debts.Any(gs => _context.Statuses
-            //                                                              .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && 
-            //                                                              (gs.Amount - gs.OnAccount) > 1000))
-            //                        .ToListAsync();
-            var Agreement = await _context.Agreements
-                                            .Include(x => x.Addresses)
-                                                .ThenInclude(s => s.Suburbs)
-                                            .Where(x => x.TypeStateServiceId == 1 && x.Addresses.Any(z => z.TypeAddress == "DIR01"))
-                                            .ToListAsync();
+            var dataTable = new System.Data.DataTable();
 
-            List<CutSuburbVM> suburbs = new List<CutSuburbVM>();
-            Agreement.ForEach(x =>
+            using (var connection = _context.Database.GetDbConnection())
             {
-                x.Addresses.ToList().ForEach(z =>
+                await connection.OpenAsync();
+                using (var command = connection.CreateCommand())
                 {
-                    suburbs.Add(new CutSuburbVM
+                    command.CommandText = "SELECT * FROM [dbo].[GetSuburbs]";
+                    using (var result = await command.ExecuteReaderAsync())
                     {
-                        Id = z.Suburbs.Id,
-                        Name = z.Suburbs.Name,
-                        Route = x.Route
-                    });
-                });
-            });
-
-
-            //List<Suburb> 
-            return Ok(suburbs.GroupBy(x => x.Name)
-                             .Select(g => g.First())
-                             .OrderBy(x => x.Name)
-                             .ToList());
+                        dataTable.Load(result);
+                    }
+                }
+            }
+            var data = ConvertDataTable<CutSuburbVM>(dataTable);
+            return Ok(data);
 
         }
 
@@ -119,6 +100,8 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         public async Task<IActionResult> PostNotifications([FromRoute] string Agreements)
         {
             List<string> agreements = new List<string>(Agreements.Split(","));
+            List<NotificationVM> Notification = new List<NotificationVM>();
+            int idNotification = 0;
             List<string> error = new List<string>();
             try
             {
@@ -142,16 +125,44 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                             Size = 200,
                             Direction = ParameterDirection.Output
                         });
+                        //@IdNotification
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@IdNotification",
+                            DbType = DbType.Int32,
+                            Direction = ParameterDirection.Output
+                        });
 
                         this._context.Database.OpenConnection();
                         using (var result = await command.ExecuteReaderAsync())
                         {
                             if (!string.IsNullOrEmpty(command.Parameters["@error"].Value.ToString()))
                                 error.Add("El contrado (ID: " + item + ") -> " + command.Parameters["@error"].Value.ToString());
+                            else
+                                idNotification = Convert.ToInt32(command.Parameters["@IdNotification"].Value.ToString());
                         }
                     }
+                    if(idNotification != 0)
+                    {
+                        Notification.Add(await _context.Notifications.Select(x => new NotificationVM
+                        {
+                            Id = x.Id,
+                            AgreementId = x.AgreementId,
+                            Folio = x.Folio,
+                            FromDate = x.FromDate,
+                            NotificationDate = x.NotificationDate,
+                            Rounding = x.Rounding,
+                            Status = x.Status,
+                            Subtotal = x.Subtotal,
+                            Tax = x.Tax,
+                            Total = x.Total,
+                            UntilDate = x.UntilDate
+                        }).Where(x => x.Id == idNotification).FirstOrDefaultAsync());
+                    }
+                    
+                    idNotification = 0;
                 }
-
+                
                 if(error.Count > 0)
                 {
                     if(agreements.Count != error.Count)
@@ -166,7 +177,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 }
                 else
                 {
-                    return Ok();
+                    return Ok(Notification);
                 }
             }
             catch (Exception e)
@@ -184,6 +195,79 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
            
         }
 
+        private List<T> ConvertDataTable<T>(DataTable dt)
+        {
+            List<T> data = new List<T>();
+            foreach (DataRow row in dt.Rows)
+            {
+                T item = GetItem<T>(row);
+                data.Add(item);
+            }
+            return data;
+        }
+
+        private T GetItem<T>(DataRow dr)
+        {
+            System.Type temp = typeof(T);
+            T obj = Activator.CreateInstance<T>();
+            foreach (DataColumn column in dr.Table.Columns)
+            {
+                foreach (PropertyInfo pro in temp.GetProperties())
+                {
+                    if (pro.Name == column.ColumnName)
+                    {
+                        try
+                        {
+                            var convertedValue = GetValueByDataType(pro.PropertyType, dr[column.ColumnName]);
+                            pro.SetValue(obj, convertedValue, null);
+                        }
+                        catch (Exception e)
+                        {
+                            //ex handle code                   
+                            throw;
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+            return obj;
+        }
+
+        private object GetValueByDataType(System.Type propertyType, object o)
+        {
+            if (o.ToString() == "null")
+            {
+                return null;
+            }
+            if (propertyType == (typeof(Guid)) || propertyType == typeof(Guid?))
+            {
+                return Guid.Parse(o.ToString());
+            }
+            else if (propertyType == typeof(int) || propertyType.IsEnum)
+            {
+                return Convert.ToInt32(o);
+            }
+            else if (propertyType == typeof(decimal))
+            {
+                return Convert.ToDecimal(o);
+            }
+            else if (propertyType == typeof(long))
+            {
+                return Convert.ToInt64(o);
+            }
+            else if (propertyType == typeof(bool) || propertyType == typeof(bool?))
+            {
+                return Convert.ToBoolean(o);
+            }
+            else if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
+            {
+                return Convert.ToDateTime(o);
+            }
+            return o.ToString();
+        }
         private static int GetMonthDifference(DateTime startDate, DateTime endDate)
         {
             int monthsApart = 12 * (startDate.Year - endDate.Year) + startDate.Month - endDate.Month;

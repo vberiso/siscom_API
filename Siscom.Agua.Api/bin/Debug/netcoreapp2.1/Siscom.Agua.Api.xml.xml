@@ -285,6 +285,11 @@
             <param name="id">Mandatory</param>
             <returns></returns>
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.StoreProcedureController.ExectSpFormatos(System.String)">
+            <summary>
+            End Points Para formatos de agua
+            </summary>
+        </member>
         <member name="M:Siscom.Agua.Api.Controllers.SuburbsController.PostSuburb(System.Int32,Siscom.Agua.Api.Model.SuburbVM)">
              <summary>
              Creates a Suburb.
