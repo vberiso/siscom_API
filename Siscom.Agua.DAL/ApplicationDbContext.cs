@@ -138,6 +138,11 @@ namespace Siscom.Agua.DAL
         public DbSet<DetailOfPaymentMethods> DetailOfPaymentMethods { get; set; }
 
         /// <summary>
+        /// Route
+        /// </summary>
+        public DbSet<Route> Routes { get; set; }
+
+        /// <summary>
         /// System
         /// </summary>
         public DbSet<SystemLog> SystemLogs { get; set; }
@@ -1004,6 +1009,12 @@ namespace Siscom.Agua.DAL
             builder.Entity<Region>()
                  .Property(p => p.Price)
                  .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region Route
+            builder.Entity<Route>()
+                   .Property(x => x.IsActive)
+                   .HasDefaultValue(true);
             #endregion
 
             #region State

@@ -32,21 +32,22 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         [HttpGet("Suburbs")]
         public async Task<IActionResult> GetSuburbs()
         {
-            var dataTable = new System.Data.DataTable();
+            //var dataTable = new System.Data.DataTable();
 
-            using (var connection = _context.Database.GetDbConnection())
-            {
-                await connection.OpenAsync();
-                using (var command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT * FROM [dbo].[GetSuburbs]";
-                    using (var result = await command.ExecuteReaderAsync())
-                    {
-                        dataTable.Load(result);
-                    }
-                }
-            }
-            var data = ConvertDataTable<CutSuburbVM>(dataTable);
+            //using (var connection = _context.Database.GetDbConnection())
+            //{
+            //    await connection.OpenAsync();
+            //    using (var command = connection.CreateCommand())
+            //    {
+            //        command.CommandText = "SELECT * FROM [dbo].[GetSuburbs]";
+            //        using (var result = await command.ExecuteReaderAsync())
+            //        {
+            //            dataTable.Load(result);
+            //        }
+            //    }
+            //}
+            //var data = ConvertDataTable<CutSuburbVM>(dataTable);
+            var data = await _context.Routes.ToListAsync();
             return Ok(data);
 
         }
