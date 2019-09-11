@@ -214,8 +214,16 @@ namespace Siscom.Agua.Api.Controllers
                     body = reader.ReadToEnd();
 
                 }
-
-                List<SPParameters> parameters = JsonConvert.DeserializeObject<List<SPParameters>>(body);
+                List<SPParameters> parameters;
+               // var saa = JObject.Parse(body);
+                if (string.IsNullOrEmpty(body))
+                {
+                   parameters = new List<SPParameters>();
+                }
+                else
+                {
+                    parameters = JsonConvert.DeserializeObject<List<SPParameters>>(body);
+                }
                 parameters.Add(new SPParameters { Key = "error", Size = 200, Direccion = ParameterDirection.InputOutput, DbType = DbType.String, Value = "" });
 
 
