@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model.SOSAPAC;
@@ -10,10 +12,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Siscom.Agua.Api.Controllers.SOSAPAC
 {
@@ -196,6 +200,57 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
            
         }
 
+        [HttpPost("AddFileResult")]
+        public async Task<IActionResult> addPDF(IFormFile AttachedFile)
+        {
+            FileNotifications NotificationsData = null;
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    NotificationsData = JsonConvert.DeserializeObject<FileNotifications>(Request.Form["Data"].ToString());
+                    NotificationFiles file = new NotificationFiles();
+                    file.UserId = NotificationsData.UserId;
+                    file.UserName = NotificationsData.UserName;
+                    file.GenerationDate = NotificationsData.GenerationDate;
+                    file.FileName = NotificationsData.FileName;
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await AttachedFile.CopyToAsync(memoryStream);
+                        file.PDFNotifications = memoryStream.ToArray();
+                    }
+
+                    await _context.NotificationFiles.AddAsync(file);
+                    await _context.SaveChangesAsync();
+
+                    NotificationsData.notifications.ToList().ForEach(x =>
+                    {
+                        var notif = _context.Notifications.Find(x.Id);
+                        notif.NotificationFiles = file.Id;
+                        _context.Entry(notif).State = EntityState.Modified;
+                        _context.SaveChanges();
+
+                    });
+                    scope.Complete();
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(JsonConvert.SerializeObject(NotificationsData));
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo de las notificaciones" });
+            }
+        }
+
+        #region Private Methods
         private List<T> ConvertDataTable<T>(DataTable dt)
         {
             List<T> data = new List<T>();
@@ -274,5 +329,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             int monthsApart = 12 * (startDate.Year - endDate.Year) + startDate.Month - endDate.Month;
             return Math.Abs(monthsApart);
         }
+
+        #endregion
     }
 }

@@ -17,6 +17,8 @@ namespace Siscom.Agua.DAL.Models
         public string UserName { get; set; }
         [Column("generation_date")]
         public DateTime GenerationDate { get; set; }
+        [Column("file_name"), StringLength(200)]
+        public string FileName { get; set; }
         [Column("pdf_notifications")]
         public byte[] PDFNotifications { get; set; }
     }
