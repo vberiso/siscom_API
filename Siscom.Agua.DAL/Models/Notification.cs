@@ -35,7 +35,8 @@ namespace Siscom.Agua.DAL.Models
         public decimal Total { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
-
+        [Column("notificationFileId")]
+        public int NotificationFiles { get; set; }
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
 

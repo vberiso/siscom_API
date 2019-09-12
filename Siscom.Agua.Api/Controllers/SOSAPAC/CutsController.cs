@@ -97,8 +97,8 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             
         }
 
-        [HttpPost("{Agreements}")]
-        public async Task<IActionResult> PostNotifications([FromRoute] string Agreements)
+        [HttpPost()]
+        public async Task<IActionResult> PostNotifications([FromBody] string Agreements)
         {
             List<string> agreements = new List<string>(Agreements.Split(","));
             List<NotificationVM> Notification = new List<NotificationVM>();

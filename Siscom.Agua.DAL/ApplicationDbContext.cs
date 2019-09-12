@@ -155,6 +155,11 @@ namespace Siscom.Agua.DAL
         public DbSet<PushNotifications> PushNotifications { get; set; }
 
         /// <summary>
+        /// NotificationFiles
+        /// </summary>
+        public DbSet<NotificationFiles> NotificationFiles { get; set; }
+
+        /// <summary>
         /// Authorization
         /// </summary>
         public DbSet<Authorization> Authorizations { get; set; }
@@ -822,6 +827,10 @@ namespace Siscom.Agua.DAL
                    .HasOne<Notification>(a => a.Notification)
                    .WithMany(s => s.NotificationDetails)
                    .HasForeignKey(s => s.NotificationId);
+            #endregion
+
+            #region NotificationFiles
+
             #endregion
 
             #region OrderSale
