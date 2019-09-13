@@ -165,7 +165,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Authorization> Authorizations { get; set; }
 
         /// <summary>
-        /// Orders
+        /// Orders 
         /// </summary>
         public DbSet<TaxUser>  TaxUsers { get; set; }
         public DbSet<TaxAddress> TaxAddresses { get; set; }
@@ -198,6 +198,16 @@ namespace Siscom.Agua.DAL
         /// VersionApp
         /// </summary>
         public DbSet<VersionApp> VersionApps { get; set; }
+
+        /// <summary>
+        /// OrderWork
+        /// </summary>
+        public DbSet<TechnicalRole> TechnicalRoles { get; set; }
+        public DbSet<TechnicalTeam> TechnicalTeams { get; set; }
+        public DbSet<TechnicalStaff> TechnicalStaffs { get; set; }
+        public DbSet<OrderWork> OrderWorks { get; set; }
+        public DbSet<OrderWorkStatus> OrderWorkStatus { get; set; }
+        public DbSet<OrderParameters> OrderParameters { get; set; }
 
         public ApplicationDbContext()
         {
