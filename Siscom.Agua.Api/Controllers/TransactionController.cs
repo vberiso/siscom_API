@@ -147,7 +147,7 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(transactionPayment);
         }
-
+              
         /// <summary>
         /// Get all transactions of terminalUser from day
         /// </summary>
@@ -281,7 +281,7 @@ namespace Siscom.Agua.Api.Controllers
                 transaction.AddRange(await _context.Transactions
                                          .Include(x => x.TypeTransaction)
                                          .Include(x => x.TransactionFolios)
-                                         .Where(x => x.TerminalUser.Id == item && x.TypeTransactionId == 3)
+                                         .Where(x => x.TerminalUser.Id == item && (x.TypeTransactionId == 3 || x.TypeTransactionId == 4))
                                          .OrderBy(x => x.Id).ToListAsync());
             }
 
@@ -291,18 +291,23 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             //Obtengo los pagos correspondientes a las transacciones, que esten activos.
-            var lstFolios = transaction.Select(t => t.Folio).ToList();
+            var lstFolios = transaction.Where(x => x.TypeTransactionId == 3).Select(t => t.Folio).ToList();
             var pays = await _context.Payments.Where(p => lstFolios.Contains(p.TransactionFolio) && p.Status != "EP002").Select(pp => pp.TransactionFolio).ToListAsync();
             var TransactionsFiltrados = transaction.Where(t => pays.Contains(t.Folio)).ToList();
+
+            //Obtengo los pagos cancelados correspondientes a las transacciones, que esten activos.
+            var lstFoliosC = transaction.Where(x => x.TypeTransactionId == 4).Select(t => t.CancellationFolio).ToList();
+            var paysC = await _context.Payments.Where(p => lstFoliosC.Contains(p.TransactionFolio) && p.Status == "EP002").Select(pp => pp.TransactionFolio).ToListAsync();
+            TransactionsFiltrados.AddRange(transaction.Where(t => paysC.Contains(t.CancellationFolio)).ToList());
 
             List<TransactionMovimientosCaja> lstMovs = TransactionsFiltrados
                 .Select(t => new TransactionMovimientosCaja()
                 {
                     IdTransaction = t.Id,
-                    FolioTransaccion = t.Folio,
-                    Cuenta = t.Account,
+                    FolioTransaccion = t.TypeTransactionId == 3 ? t.Folio : t.CancellationFolio,
+                    Cuenta = t.TypeTransactionId == 3 ? t.Account : transaction.Where(x => x.Folio == t.CancellationFolio).FirstOrDefault().Account ,
                     Operacion = t.TypeTransaction.Name,
-                    FolioImpresion = t.TransactionFolios.Count > 0 ? t.TransactionFolios.FirstOrDefault().Folio : "",
+                    FolioImpresion = t.TypeTransactionId == 3 ? (t.TransactionFolios.Count > 0 ? t.TransactionFolios.FirstOrDefault().Folio : "") : "---",
                     Hora = t.DateTransaction.ToString("hh:mm tt"),
                     Total = t.Total,
                     Signo = t.Sign

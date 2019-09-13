@@ -152,6 +152,13 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(res);
         }
 
+        [HttpGet("SerialFromUser/{pId}")]
+        public async Task<IActionResult> GetSerialFromUser([FromRoute] string pId)
+        {
+            var res = _context.Users.Where(u => u.Id == pId && u.IsActive == true && u.Serial != null).FirstOrDefault().Serial;
+            return Ok(res);
+        }
+
         [HttpGet("teller")]
         public async Task<IActionResult> GetTeller()
         {

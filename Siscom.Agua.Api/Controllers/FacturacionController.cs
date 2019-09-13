@@ -75,7 +75,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 DateTime FechaIni = new DateTime(int.Parse(ini.Split("-")[0]), int.Parse(ini.Split("-")[1]), int.Parse(ini.Split("-")[2]));
                 DateTime FechaFin = new DateTime(int.Parse(fin.Split("-")[0]), int.Parse(fin.Split("-")[1]), int.Parse(fin.Split("-")[2]), 23, 59, 59);
-                var tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == "ET002" && x.PDFInvoce != null).ToList();
+                var tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == "ET001" && x.PDFInvoce != null).ToList();
 
                 if(tmp.Count == 0)
                 {
@@ -83,6 +83,32 @@ namespace Siscom.Agua.Api.Controllers
                 }
 
                 return Ok(tmp);                
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Format("Error al tratar solicitar facturas canceladas.") });
+            }
+        }
+
+        [HttpGet("Facturas/{ini}/{fin}/{id}/{status}")]
+        public async Task<IActionResult> GetFacturasRango([FromRoute] string ini, [FromRoute] string fin, [FromRoute] string id, [FromRoute] string status)
+        {
+            try
+            {
+                DateTime FechaIni = new DateTime(int.Parse(ini.Split("-")[0]), int.Parse(ini.Split("-")[1]), int.Parse(ini.Split("-")[2]));
+                DateTime FechaFin = new DateTime(int.Parse(fin.Split("-")[0]), int.Parse(fin.Split("-")[1]), int.Parse(fin.Split("-")[2]), 23, 59, 59);
+                List<DAL.Models.TaxReceipt> tmp;
+                if(status != "ET111")
+                    tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == status && x.UserId == id && x.PDFInvoce != null).ToList();
+                else
+                    tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.UserId == id && x.PDFInvoce != null).ToList();
+
+                if (tmp.Count == 0)
+                {
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Format("No se encotraron facturas canceladas.") });
+                }
+                                
+                return Ok(tmp);
             }
             catch (Exception ex)
             {

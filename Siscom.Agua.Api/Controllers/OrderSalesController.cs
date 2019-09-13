@@ -198,6 +198,44 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(orderSale);
         }
+
+        //Obtiene informacion de infraccion        
+        [HttpGet("FolioInfraccion/{folio}")]
+        [Authorize]
+        public async Task<IActionResult> GetOrderSaleFolioInfraccion([FromRoute] string folio)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (string.IsNullOrWhiteSpace(folio))
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Folio incorrecto" });
+
+            var orderSale = _context.OrderSales
+                                          .Include(x => x.TaxUser)
+                                            .ThenInclude(y => y.TaxAddresses)
+                                          .Include(x => x.OrderSaleDetails)
+                                          .Include(dis => dis.OrderSaleDiscounts)
+                                          .Where(os => os.Status == "EOS01")
+                                          .FirstOrDefault();
+            if (orderSale == null)            
+                return NotFound();
+            
+
+            orderSale.DescriptionStatus = await _context.Statuses
+                                                        .Where(x => x.CodeName == orderSale.Status)
+                                                        .Select(x => x.Description)
+                                                        .FirstOrDefaultAsync();
+
+            orderSale.DescriptionType = await _context.Types
+                                                        .Where(x => x.CodeName == orderSale.Type)
+                                                        .Select(x => x.Description)
+                                                        .FirstOrDefaultAsync();
+
+            return Ok(orderSale);
+        }
+
         [HttpGet("All/Folio/{folio}")]
         [Authorize]
         public async Task<IActionResult> GetOrderSaleByFolio([FromRoute] string folio)
