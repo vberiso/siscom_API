@@ -14,23 +14,23 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_order_work")]
         public int Id { get; set; }
 
-        [Column("folio"), Required]
+        [Column("folio"), Required, StringLength(30)]
         public string Folio { get; set; }
 
         [Column("date_order"), Required]
         public DateTime DateOrder { get; set; }
 
-        [Column("applicant"), Required]
+        [Column("applicant"), Required, StringLength(150)]
         public string Applicant { get; set; }
 
 
-        [Column("type"), Required]
+        [Column("type"), Required, StringLength(6)]
         public string Type { get; set; }
 
-        [Column("status"), Required]
+        [Column("status"), Required, StringLength(6)]
         public string Status { get; set; }
 
-        [Column("observation")]
+        [Column("observation"), StringLength(800)]
         public string Observation { get; set; }
 
         [Column("date_stimated")]
@@ -39,7 +39,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("date_realization"), Required]
         public DateTime DateRealization { get; set; }
 
-        [Column("activities"), Required]
+        [Column("activities"), Required, StringLength(250)]
         public string Activities { get; set; }
 
         [Column("AgreementId"), Required]
@@ -51,8 +51,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("TechnicalStaffId"), Required]
         public int TechnicalStaffId { get; set; }
 
-
-        public ICollection<OrderWork> OrderWorkStatus { get; set; }
+        public ICollection<OrderWorkStatus> OrderWorkStatus { get; set; }
 
 
 

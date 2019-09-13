@@ -911,6 +911,14 @@ namespace Siscom.Agua.DAL
 
             #endregion
 
+            #region OrderWorkStatus
+            builder.Entity<OrderWorkStatus>()
+               .HasOne<OrderWork>(a => a.OrderWork)
+               .WithMany(s => s.OrderWorkStatus)
+               .HasForeignKey(s => s.OrderWorkId);
+
+            #endregion
+
             #region OriginPayment
             builder.Entity<OriginPayment>()
                    .Property(x => x.IsActive)
@@ -1196,6 +1204,34 @@ namespace Siscom.Agua.DAL
                 .HasOne<TaxReceipt>(t => t.TaxReceipt)
                 .WithMany(r => r.TaxReceiptCancels)
                 .HasForeignKey(f => f.TaxReceiptId);
+            #endregion
+
+            #region TechnicalRole
+            builder.Entity<TechnicalRole>()
+                  .Property(p => p.IsActive)
+                  .HasDefaultValue(true);
+            #endregion
+
+            #region TechnicalStaff
+            builder.Entity<TechnicalStaff>()
+                .HasOne<TechnicalRole>(a => a.TechnicalRole)
+                .WithMany(s => s.TechnicalStaffs)
+                .HasForeignKey(s => s.TechnicalRoleId);
+
+            builder.Entity<TechnicalStaff>()
+               .HasOne<TechnicalTeam>(a => a.TechnicalTeam)
+               .WithMany(s => s.TechnicalStaffs)
+               .HasForeignKey(s => s.TechnicalTeamId);
+
+            builder.Entity<TechnicalStaff>()
+                  .Property(p => p.IsActive)
+                  .HasDefaultValue(true);
+            #endregion
+
+            #region TechnicalTeam
+            builder.Entity<TechnicalTeam>()
+                 .Property(p => p.IsActive)
+                 .HasDefaultValue(true);
             #endregion
 
             #region Terminal

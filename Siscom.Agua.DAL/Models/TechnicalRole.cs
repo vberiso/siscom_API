@@ -14,16 +14,10 @@ namespace Siscom.Agua.DAL.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_technical_role")]
         public int Id { get; set; }
-
-        [Column("name"), Required]
+        [Column("name"), Required, StringLength(50)]
         public string Name { get; set; }
-
-
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
-
-
-       
         public ICollection<TechnicalStaff> TechnicalStaffs { get; set; }
     }
 }

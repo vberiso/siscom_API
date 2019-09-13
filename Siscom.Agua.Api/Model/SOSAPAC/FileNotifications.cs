@@ -7,10 +7,12 @@ namespace Siscom.Agua.Api.Model.SOSAPAC
 {
     public class FileNotifications
     {
+        public int Id { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }
         public DateTime GenerationDate { get; set; }
         public string FileName { get; set; }
+        public byte[] PDFNotifications { get; set; }
         public IEnumerable<NotificationVM> notifications { get; set; }
     }
 }

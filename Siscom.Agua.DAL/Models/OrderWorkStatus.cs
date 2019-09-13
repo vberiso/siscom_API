@@ -14,13 +14,13 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_order_work_status")]
         public int Id { get; set; }
 
-        [Column("id_status"), Required]
+        [Column("id_status"), Required, StringLength(10)]
         public string IdStatus { get; set; }
 
         [Column("order_work_status_date"), Required]
         public DateTime OrderWorkStatusDate { get; set; }
 
-        [Column("user"), Required]
+        [Column("user"), Required, StringLength(80)]
         public string User { get; set; }
 
         [Column("OrderWorkId")]

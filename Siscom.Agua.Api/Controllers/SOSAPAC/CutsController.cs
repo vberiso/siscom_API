@@ -101,6 +101,34 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             
         }
 
+        [HttpGet("GetFiles")]
+        public async Task<IActionResult> GetFiles()
+        {
+            return Ok(await _context.NotificationFiles.Select(x => new FileNotifications
+            {
+                Id = x.Id,
+                FileName = x.FileName,
+                GenerationDate = x.GenerationDate,
+                UserName = x.UserName,
+                UserId = x.UserId,
+            }).OrderByDescending(x => x.GenerationDate).ToListAsync());
+        }
+
+
+        [HttpGet("GetFilesById/{Id}")]
+        public async Task<IActionResult> GetFiles([FromRoute] int Id)
+        {
+            return Ok(await _context.NotificationFiles.Where(x => x.Id == Id).Select(x => new FileNotifications
+            {
+                Id = x.Id,
+                FileName = x.FileName,
+                GenerationDate = x.GenerationDate,
+                UserName = x.UserName,
+                UserId = x.UserId,
+                PDFNotifications = x.PDFNotifications
+            }).FirstOrDefaultAsync());
+        }
+
         [HttpPost()]
         public async Task<IActionResult> PostNotifications([FromBody] string Agreements)
         {
