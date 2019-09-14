@@ -278,6 +278,11 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> GetAgreementsWithNotifications()
+        {
+            return Ok();
+        }
         #region Private Methods
         private List<T> ConvertDataTable<T>(DataTable dt)
         {
