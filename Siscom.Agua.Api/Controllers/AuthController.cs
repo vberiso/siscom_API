@@ -43,7 +43,7 @@ namespace Siscom.Agua.Api.Controllers
         {
             var env = appSettings.ValidAudience;
             //string rolname = string.Empty;
-            var listRoles = new List<string>();
+             var listRoles = new List<string>();
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
