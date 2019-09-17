@@ -278,11 +278,56 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> GetAgreementsWithNotifications()
+        [HttpPost("WithNotifications")]
+        public async Task<IActionResult> GetAgreementsWithNotifications([FromBody] SendCutsVM send)
         {
-            return Ok();
+            string error = string.Empty;
+            var dataTable = new DataTable();
+            try
+            {
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[GetAgreementByNotifications]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@Suburbs",
+                        DbType = DbType.String,
+                        Value = send.Routes
+                    });
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@NumPeriods",
+                        DbType = DbType.Int32,
+                        Value = send.Periods
+                    });
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@Amount",
+                        DbType = DbType.Decimal,
+                        Value = send.Amount
+                    });
+
+                    command.Parameters.Add(new SqlParameter
+                    {
+                        ParameterName = "@NumNotifications",
+                        DbType = DbType.Int32,
+                        Value = send.NumNotification
+                    });
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        dataTable.Load(result);
+                    }
+                }
+                return Ok(dataTable);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
+
         #region Private Methods
         private List<T> ConvertDataTable<T>(DataTable dt)
         {
