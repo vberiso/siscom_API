@@ -249,6 +249,7 @@ namespace Siscom.Agua.Api.Controllers
                                 string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
                                 OS.Observation = OS.Observation.Replace(textoAQuitar, "");
                             }
+                            OS.Observation = OS.Observation.TrimEnd();
                             OS.Observation += ", Descuento a infracción del " + item.Percentage + "% ";
                         }
                         else       //Si se esta editando los descuento.
@@ -267,6 +268,7 @@ namespace Siscom.Agua.Api.Controllers
                                 string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
                                 OS.Observation = OS.Observation.Replace(textoAQuitar, "");
                             }
+                            OS.Observation = OS.Observation.TrimEnd();
                             OS.Observation += ", Descuento a infracción del " + item.Percentage + "% ";
                         }
 
@@ -299,6 +301,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
                             OS.Observation = OS.Observation.Replace(textoAQuitar, "");
+                            OS.Observation = OS.Observation.TrimEnd();
                         }                        
                     }
                     _context.Entry(OS).State = EntityState.Modified;
