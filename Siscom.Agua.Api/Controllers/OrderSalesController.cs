@@ -170,9 +170,9 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Folio incorrecto" });
 
             //Valida si es una infracción
-            if (char.IsLetter(Convert.ToChar(folio.Substring(0, 1))) && folio.Contains("-") && folio.Substring(0, 1).Equals("I") )            
+            if (char.IsLetter(Convert.ToChar(folio.Substring(0, 1))) && folio.Contains("-") && folio.Substring(0, 1).Equals("I"))
                 ValidaDescuentoDeInfraccion(folio);
-            
+
 
             var query = _context.OrderSales
                                         .Include(x => x.TaxUser)
@@ -205,7 +205,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         //Valida el descuento correspondiente para la infraccion, segun su fecha de emision.
-        private async void ValidaDescuentoDeInfraccion(string folio)
+        private void ValidaDescuentoDeInfraccion(string folio)
         {
             try
             {
@@ -216,16 +216,19 @@ namespace Siscom.Agua.Api.Controllers
                                         .FirstOrDefault();
 
                 var lstCamp = _context.DiscountCampaigns.Where(c => c.Name.Contains("INFDES") && c.IsActive == true).OrderBy(x => x.Id).ToList();
+                // Obtengo la fecha que se genera la infraccion.
+                var B = _context.Breaches
+                            .Where(b => b.Id == OS.IdOrigin).FirstOrDefault();
 
-                var dias = (DateTime.Today - OS.DateOrder).TotalDays;
-                foreach(var item in lstCamp)
+                var dias = (DateTime.Today - B.DateBreach).TotalDays;
+                foreach (var item in lstCamp)
                 {
                     int DiasVigencia = int.Parse(item.Name.Split("_")[1]);
-                    if(dias <= DiasVigencia)
+                    if (dias <= DiasVigencia)
                     {
-                        if(OS.OrderSaleDiscounts == null || OS.OrderSaleDiscounts.Count == 0)     //Si aun no existe ningun descuento
+                        if (OS.OrderSaleDiscounts == null || OS.OrderSaleDiscounts.Count == 0)     //Si aun no existe ningun descuento
                         {
-                            List<OrderSaleDiscount> lstOSDis = new List<OrderSaleDiscount>();                            
+                            List<OrderSaleDiscount> lstOSDis = new List<OrderSaleDiscount>();
                             foreach (var OSD in OS.OrderSaleDetails.ToList())
                             {
                                 OrderSaleDiscount OSDis = new OrderSaleDiscount();
@@ -253,7 +256,7 @@ namespace Siscom.Agua.Api.Controllers
                             OS.Observation += ", Descuento a infracción del " + item.Percentage + "% ";
                         }
                         else       //Si se esta editando los descuento.
-                        {                            
+                        {
                             foreach (var OSDis in OS.OrderSaleDiscounts.ToList())
                             {
                                 OSDis.DiscountAmount = decimal.Round(OSDis.OriginalAmount * ((decimal)item.Percentage / 100), 2);
@@ -282,7 +285,7 @@ namespace Siscom.Agua.Api.Controllers
                     }
                 }
                 //Si llega a esta etapa significa que agoto los dias de tolerancia para descuentos.
-                if(dias > 0)
+                if (dias > 0)
                 {
                     if (OS.OrderSaleDiscounts == null || OS.OrderSaleDiscounts.Count == 0)     //Si aun no existe ningun descuento
                     {
@@ -297,12 +300,12 @@ namespace Siscom.Agua.Api.Controllers
                             OS.OrderSaleDetails.Where(x => x.Id == OSDis.OrderSaleDetailId).FirstOrDefault().Amount = OSDis.OriginalAmount;
                         }
                         OS.Amount = OS.OrderSaleDetails.Sum(osd => osd.Amount);
-                        if(OS.Observation.Contains(", Descuento a infracción del"))
+                        if (OS.Observation.Contains(", Descuento a infracción del"))
                         {
                             string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
                             OS.Observation = OS.Observation.Replace(textoAQuitar, "");
                             OS.Observation = OS.Observation.TrimEnd();
-                        }                        
+                        }
                     }
                     _context.Entry(OS).State = EntityState.Modified;
                     _context.SaveChanges();
