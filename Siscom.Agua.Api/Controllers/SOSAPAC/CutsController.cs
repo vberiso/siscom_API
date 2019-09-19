@@ -102,7 +102,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         }
 
         [HttpGet("GetNotificationByAccount/{account}")]
-        public async Task<IActionResult> GetNotificationByAccount([FromRoute] int account)
+        public async Task<IActionResult> GetNotificationByAccount([FromRoute] string account)
         {
             var datatable = new DataTable();
             try
@@ -111,7 +111,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 {
                     command.CommandText = "[dbo].[GetAgreementByAccount]";
                     command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.Add(new SqlParameter { ParameterName = "@Account", DbType = DbType.Int32, Value = account });
+                    command.Parameters.Add(new SqlParameter { ParameterName = "@Account", DbType = DbType.String, Value = account });
                     this._context.Database.OpenConnection();
                     using (var result = await command.ExecuteReaderAsync()){ datatable.Load(result); }
                 }
@@ -119,6 +119,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             }
             catch (Exception e)
             {
+
                 return BadRequest(e);
             }
         }
