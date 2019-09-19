@@ -919,6 +919,14 @@ namespace Siscom.Agua.DAL
 
             #endregion
 
+            #region
+            builder.Entity<OrderWork>()
+               .HasOne<TechnicalStaff>(a => a.TechnicalStaff)
+               .WithMany(s => s.OrderWorks)
+               .HasForeignKey(s => s.TechnicalStaffId);
+
+            #endregion
+
             #region OriginPayment
             builder.Entity<OriginPayment>()
                    .Property(x => x.IsActive)

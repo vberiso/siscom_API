@@ -26,5 +26,6 @@ namespace Siscom.Agua.DAL.Models
         [Column("TechnicalTeamId"), Required]
         public int TechnicalTeamId { get; set; }
         public TechnicalTeam TechnicalTeam { get; set; }
+        public ICollection<OrderWork> OrderWorks { get; set; }
     }
 }

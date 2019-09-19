@@ -51,6 +51,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("TechnicalStaffId"), Required]
         public int TechnicalStaffId { get; set; }
 
+        public TechnicalStaff TechnicalStaff { get; set; }
+
         public ICollection<OrderWorkStatus> OrderWorkStatus { get; set; }
 
 
