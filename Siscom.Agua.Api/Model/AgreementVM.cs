@@ -56,5 +56,7 @@ namespace Siscom.Agua.Api.Model
         public List<AdressVM> Adresses { get; set; }
         public List<ClientVM> Clients { get; set; }
         public List<AgreementDetailVM> AgreementDetails { get; set; }
+
+        public OrderWork OrderWork { get; set; }
     }
 }

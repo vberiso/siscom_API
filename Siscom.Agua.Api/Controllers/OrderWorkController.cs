@@ -48,10 +48,35 @@ namespace Siscom.Agua.Api.Controllers
 
                 return Ok(OrderWorks);
             }
-            var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
-                
-                .First();
-            return Ok(OrderWork);
+            try
+            {
+                var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id).First();
+                var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
+                    .Include(x => x.OrderWork)
+                    .Include(x => x.Clients)
+                    .Include(x => x.Addresses)
+                        .ThenInclude(x => x.Suburbs)
+                            .ThenInclude(x => x.Towns)
+                                .ThenInclude(x => x.States)
+                                    .ThenInclude(x => x.Countries)
+                                        .First();
+
+                //var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
+                //    .Include(x => x.Agreement) 
+                //    .ThenInclude(x => x.Clients)
+                //    .Tnclude(x => x.Address)
+                //        .ThenInclude(x => x.Suburbs)
+                //            .ThenInclude(x => x.Town)
+                //                .ThenInclude(x => x.State)
+                //                    .ThenInclude(x => x.Country)
+                //                        .First();
+                return Ok(agreement);
+            }
+            catch (Exception ex)
+            {
+                return Ok("");
+            }
+            
         }
 
         [HttpPost("OrderWorks")]

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190920210043_OrderWork_FereingkeyAgreement")]
+    partial class OrderWork_FereingkeyAgreement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2076,7 +2078,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 9, 17, 15, 55, 0, 216, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 9, 20, 16, 0, 42, 877, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2127,39 +2129,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FolioOrderSale");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.FolioOrderWork", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_folio_order_work")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("is_active")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Prefix")
-                        .HasColumnName("prefix")
-                        .HasMaxLength(3);
-
-                    b.Property<int>("Secuential")
-                        .HasColumnName("secuential");
-
-                    b.Property<string>("Suffixes")
-                        .HasColumnName("suffixes")
-                        .HasMaxLength(3);
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnName("type")
-                        .HasMaxLength(5);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Folio_order_work");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.GroupCatalogue", b =>

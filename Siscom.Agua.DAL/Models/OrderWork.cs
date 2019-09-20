@@ -48,10 +48,12 @@ namespace Siscom.Agua.DAL.Models
         [Column("TaxUserId"), Required]
         public int TaxUserId { get; set; }
 
-        [Column("TechnicalStaffId"), Required]
-        public int TechnicalStaffId { get; set; }
+        [Column("TechnicalStaffId")]
+        public int? TechnicalStaffId { get; set; }
 
         public TechnicalStaff TechnicalStaff { get; set; }
+
+        public Agreement Agreement { get; set; }
 
         public ICollection<OrderWorkStatus> OrderWorkStatus { get; set; }
 

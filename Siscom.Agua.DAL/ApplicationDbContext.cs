@@ -927,11 +927,17 @@ namespace Siscom.Agua.DAL
 
             #endregion
 
-            #region
-            builder.Entity<OrderWork>()
-               .HasOne<TechnicalStaff>(a => a.TechnicalStaff)
-               .WithMany(s => s.OrderWorks)
+            #region TechnicalStaff
+            builder.Entity<TechnicalStaff>()
+               .HasMany<OrderWork>(a => a.OrderWorks)
+               .WithOne(s => s.TechnicalStaff)
                .HasForeignKey(s => s.TechnicalStaffId);
+
+            builder.Entity<Agreement>()
+              .HasOne<OrderWork>(a => a.OrderWork)
+              .WithOne(s => s.Agreement)
+              .HasForeignKey<OrderWork>(b => b.AgrementId);
+            //  .HasForeignKey(s => s.AgrementId);
 
             #endregion
 
