@@ -9,7 +9,9 @@
     <Compile Remove="Migrations\20190614185828_AddcancelProductAndOrderSaleStatus.cs" />
     <Compile Remove="Migrations\20190614185828_AddcancelProductAndOrderSaleStatus.Designer.cs" />
     <Compile Remove="Migrations\20190716154538_addFieldBranchOfficeLoginLog.cs" />
-    <Compile Remove="Migrations\20190716154538_addFieldBranchOfficeLoginLog.Designer.cs" /> 
+    <Compile Remove="Migrations\20190716154538_addFieldBranchOfficeLoginLog.Designer.cs" />
+    <Compile Remove="Migrations\20190917205154_AddTableFoliosOrderWork.cs" />
+    <Compile Remove="Migrations\20190917205154_AddTableFoliosOrderWork.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>
