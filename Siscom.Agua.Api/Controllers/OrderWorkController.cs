@@ -100,14 +100,29 @@ namespace Siscom.Agua.Api.Controllers
                         Applicant = data["applicant"].ToString(),
                         Type = data["typeOrder"].ToString(),
                         Status = "EOT01",
-                        Observation = "Orden de trabajo",
+                        Observation = data["Observation"].ToString(),
                         Folio = "f",
-                        Activities = "Orden de trabajo"
+                        Activities = data["Activities"].ToString()
 
 
                     };
                     _context.OrderWorks.Add(OrderWork);
+
+                   
                     _context.SaveChanges();
+                    var Status = new OrderWorkStatus()
+                    {
+                        IdStatus = "EOT01",
+                        OrderWorkId = OrderWork.Id,
+                        User = data["applicant"].ToString(),
+                        OrderWorkStatusDate = DateTime.Now
+
+                    };
+                    _context.OrderWorkStatus.Add(Status);
+
+
+                    _context.SaveChanges();
+
                     ApplyIds++;
 
 
