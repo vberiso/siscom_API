@@ -138,7 +138,7 @@ namespace Siscom.Agua.Api.Controllers
                                                 .FirstOrDefaultAsync(a => a.Folio == Folio);
             if(fol == null)
             {
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontre la infracción" });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se encontro la infracción" });
 
             }
 

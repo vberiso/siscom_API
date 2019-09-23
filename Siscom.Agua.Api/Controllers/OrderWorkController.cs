@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -71,13 +72,32 @@ namespace Siscom.Agua.Api.Controllers
                 //                .ThenInclude(x => x.State)
                 //                    .ThenInclude(x => x.Country)
                 //                        .First();
+
+              
                 return Ok(agreement);
+                
+                
             }
             catch (Exception ex)
             {
                 return Ok("");
             }
             
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrderWorksById([FromRoute] int id)
+        {
+            var order = await _context.OrderWorks.FindAsync(id);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return Ok(order);
         }
 
         [HttpPost("OrderWorks")]
@@ -136,7 +156,6 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message, msg = "Solo se pudieron generar las primeras " + ApplyIds + " ordenes" });
             }
         }
-
 
         [HttpPost("OrderWorks/update/{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] OrderWork OrderWork)
