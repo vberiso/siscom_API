@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http.Cors;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,9 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
+    
+    [Authorize]
     public class TechnicalStaffController : ControllerBase
     {
 
@@ -25,6 +30,33 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             _context = context;
         }
 
+        [HttpGet("getAgremmentsOfStaff/{staffId}")]
+        public async Task<IActionResult> getAgremmentsOfStaff([FromRoute] string staffId)
+        {
+
+            var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).Include(x => x.OrderWorks).First();
+            List<Agreement> Agreements = new List<Agreement>();
+            foreach (var orderWork in Staff.OrderWorks)
+            {
+                orderWork.Agreement = 
+                    _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
+                    .Include(x => x.OrderWork)
+                    
+                    .Include(x => x.Clients)
+                    .Include(x => x.Addresses)
+                        .ThenInclude(x => x.Suburbs)
+                            .ThenInclude(x => x.Towns)
+                                .ThenInclude(x => x.States)
+                                    .ThenInclude(x => x.Countries)
+                                        .First()
+                    ;
+            }
+
+
+
+            return Ok(Staff.OrderWorks);
+        }
+
         [HttpGet("Staffs/{id?}")]
         public async Task<IActionResult> GetStaffs([FromRoute] string id = null)
         {
@@ -32,14 +64,10 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             {
                 var Staffs = _context.TechnicalStaffs
                     .Include(x => x.TechnicalRole)
-                   
-                    .Include(x => x.OrderWorks)
-                       
+                
                                        
                     .Include(x => x.TechnicalTeam).ToList();
                
-
-
                 return Ok(Staffs);
             }
             var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == id)

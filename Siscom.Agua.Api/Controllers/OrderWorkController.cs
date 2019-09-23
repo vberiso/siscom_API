@@ -1,20 +1,31 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using System.Web.Http.Cors;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
+
+using Microsoft.AspNetCore.Http;
+
+
+using System;
+
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 
 namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
+    [Produces("application/json")]
     [ApiController]
+    [Authorize]
     public class OrderWorkController : ControllerBase
     {
 
@@ -63,15 +74,7 @@ namespace Siscom.Agua.Api.Controllers
                                     .ThenInclude(x => x.Countries)
                                         .First();
 
-                //var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
-                //    .Include(x => x.Agreement) 
-                //    .ThenInclude(x => x.Clients)
-                //    .Tnclude(x => x.Address)
-                //        .ThenInclude(x => x.Suburbs)
-                //            .ThenInclude(x => x.Town)
-                //                .ThenInclude(x => x.State)
-                //                    .ThenInclude(x => x.Country)
-                //                        .First();
+              
 
               
                 return Ok(agreement);
@@ -85,20 +88,8 @@ namespace Siscom.Agua.Api.Controllers
             
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetOrderWorksById([FromRoute] int id)
-        {
-            var order = await _context.OrderWorks.FindAsync(id);
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            if (order == null)
-            {
-                return NotFound();
-            }
-            return Ok(order);
-        }
+      
+
 
         [HttpPost("OrderWorks")]
         public async Task<IActionResult> Create([FromBody] object collection)
