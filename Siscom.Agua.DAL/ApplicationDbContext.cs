@@ -933,10 +933,10 @@ namespace Siscom.Agua.DAL
                .WithOne(s => s.TechnicalStaff)
                .HasForeignKey(s => s.TechnicalStaffId);
 
-            builder.Entity<Agreement>()
-              .HasOne<OrderWork>(a => a.OrderWork)
-              .WithOne(s => s.Agreement)
-              .HasForeignKey<OrderWork>(b => b.AgrementId);
+            builder.Entity<OrderWork>()
+              .HasOne<Agreement>(a => a.Agreement)
+              .WithMany(s => s.OrderWork)
+              .HasForeignKey(b => b.AgrementId);
             //  .HasForeignKey(s => s.AgrementId);
 
             #endregion

@@ -94,6 +94,6 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<AgreementComment> AgreementComments { get; set; }
         public ICollection<AgreementRulerCalculation> AgreementRulerCalculations { get; set; }
 
-        public OrderWork OrderWork { get; set; }
+        public ICollection<OrderWork> OrderWork { get; set; }
     }
 }
