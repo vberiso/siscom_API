@@ -32,10 +32,14 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             {
                 var Staffs = _context.TechnicalStaffs
                     .Include(x => x.TechnicalRole)
+                   
                     .Include(x => x.OrderWorks)
+                       
+                                       
                     .Include(x => x.TechnicalTeam).ToList();
-                var orders = Staffs.First().OrderWorks;
-                
+               
+
+
                 return Ok(Staffs);
             }
             var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == id)

@@ -25,7 +25,7 @@ namespace Siscom.Agua.Api.Controllers
             _context = context;
         }
 
-        [HttpGet("OrderWorks")]
+        [HttpGet("OrderWorks/{id?}")]
         public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null)
         {
             if (id == null)
@@ -53,6 +53,7 @@ namespace Siscom.Agua.Api.Controllers
                 var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id).First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
                     .Include(x => x.OrderWork)
+                        .ThenInclude(x => x.TechnicalStaff)
                     .Include(x => x.Clients)
                     .Include(x => x.Addresses)
                         .ThenInclude(x => x.Suburbs)
