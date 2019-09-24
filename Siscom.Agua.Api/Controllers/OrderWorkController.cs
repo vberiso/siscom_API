@@ -64,6 +64,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id).First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
+                    .Include(x => x.TypeIntake)
+                    .Include(x => x.TypeService)
                     .Include(x => x.OrderWork)
                         .ThenInclude(x => x.TechnicalStaff)
                     .Include(x => x.Clients)
@@ -72,14 +74,9 @@ namespace Siscom.Agua.Api.Controllers
                             .ThenInclude(x => x.Towns)
                                 .ThenInclude(x => x.States)
                                     .ThenInclude(x => x.Countries)
-                                        .First();
+                    .First();
 
-              
-
-              
-                return Ok(agreement);
-                
-                
+                return Ok(agreement);  
             }
             catch (Exception ex)
             {
