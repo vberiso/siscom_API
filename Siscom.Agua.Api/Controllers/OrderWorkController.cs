@@ -18,7 +18,7 @@ using System;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+using Siscom.Agua.Api.Model;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -176,6 +176,87 @@ namespace Siscom.Agua.Api.Controllers
             }
             catch (Exception ex)
             {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("TypeOfReconnection/{TypeIntakeId}")]
+        public async Task<IActionResult> GetParamsReconnection([FromRoute] int TypeIntakeId)
+        {
+            string[] array = null;
+            List<ProductVM> products = new List<ProductVM>();
+            try
+            {
+                switch (TypeIntakeId)
+                {
+                    case 1:
+                        array = _context.SystemParameters.Where(x => x.Name == "RECO1").Select(x => x.TextColumn).FirstOrDefault().Split(",");
+                        array.ToList().ForEach(x =>
+                        {
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            {
+                                Id = y.ProductId,
+                                Name = y.Product.Name,
+                                Amount = y.Amount
+                            }).FirstOrDefault());
+                        });
+                        break;
+                    case 2:
+                        array = _context.SystemParameters.Where(x => x.Name == "RECO2").Select(x => x.TextColumn).FirstOrDefault().Split(",");
+                        array.ToList().ForEach(x =>
+                        {
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            {
+                                Id = y.ProductId,
+                                Name = y.Product.Name,
+                                Amount = y.Amount
+                            }).FirstOrDefault());
+                        });
+                        break;
+                    case 3:
+                        array = _context.SystemParameters.Where(x => x.Name == "RECO3").Select(x => x.TextColumn).FirstOrDefault().Split(",");
+                        array.ToList().ForEach(x =>
+                        {
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            {
+                                Id = y.ProductId,
+                                Name = y.Product.Name,
+                                Amount = y.Amount
+                            }).FirstOrDefault());
+                        });
+                        break;
+                    case 4:
+                        array = _context.SystemParameters.Where(x => x.Name == "RECO1").Select(x => x.TextColumn).FirstOrDefault().Split(",");
+                        array.ToList().ForEach(x =>
+                        {
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            {
+                                Id = y.ProductId,
+                                Name = y.Product.Name,
+                                Amount = y.Amount
+                            }).FirstOrDefault());
+                        });
+                        break;
+                    case 5:
+                        array = _context.SystemParameters.Where(x => x.Name == "RECO1").Select(x => x.TextColumn).FirstOrDefault().Split(",");
+                        array.ToList().ForEach(x =>
+                        {
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            {
+                                Id = y.ProductId,
+                                Name = y.Product.Name,
+                                Amount = y.Amount
+                            }).FirstOrDefault());
+                        });
+                        break;
+                    default:
+                        return StatusCode(StatusCodes.Status400BadRequest, new { error = "Tipo de Toma no clasificada, favor de verificar" });
+                }
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+
                 return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message });
             }
         }
