@@ -42,20 +42,25 @@ namespace Siscom.Agua.Api.Controllers
         {
             if (id == null)
             {
-
                 System.Linq.IQueryable<OrderWork> query = _context.OrderWorks;
-                if (status != null)
-                {
-                    query = query.Where(x => x.Status == status);
+                if (folio == null) {
+                    
+                    if (status != null)
+                    {
+                        query = query.Where(x => x.Status == status);
+                    }
+
+                    if (type != null)
+                    {
+                        query = query.Where(x => x.Type == type);
+                    }
                 }
-                if (folio != null)
+                else
                 {
                     query = query.Where(x => x.Folio == folio);
                 }
-                if (type != null)
-                {
-                    query = query.Where(x => x.Type == type);
-                }
+                query = query.OrderBy(x => x.Folio);
+
                 var OrderWorks = query.ToList();
 
                 return Ok(OrderWorks);
@@ -145,12 +150,27 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
-        [HttpPost("OrderWorks/update/{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] OrderWork OrderWork)
+        [HttpPost("OrderWorks/update/{id}/{user?}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromRoute] string user, [FromBody] OrderWork OrderWork)
         {
             try
             {
+                var status = _context.OrderWorks.Where(x => x.Id == id) .Select(x => x.Status).First();
+                if (status != OrderWork.Status)
+                {
+                    var Status = new OrderWorkStatus()
+                    {
+                        IdStatus = OrderWork.Status,
+                        OrderWorkId = OrderWork.Id,
+                        User = user,
+                        OrderWorkStatusDate = DateTime.Now
+
+                    };
+                    _context.OrderWorkStatus.Add(Status);
+                }
+
                 _context.OrderWorks.Update(OrderWork);
+                //_context.Entry(OrderWork).State = EntityState.Modified;
                 _context.SaveChanges();
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Orden actualizada correctamente", id = OrderWork.Id });
             }
