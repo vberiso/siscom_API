@@ -113,9 +113,19 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add(new SqlParameter { ParameterName = "@Account", DbType = DbType.String, Value = account });
                     this._context.Database.OpenConnection();
-                    using (var result = await command.ExecuteReaderAsync()){ datatable.Load(result); }
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        datatable.Load(result);
+                    }
                 }
-                return Ok(datatable);
+                if (datatable.Rows.Count <= 0)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "El contribuyente de esta cuenta va al corriente de sus pagos, lo cual no puede mandar una orden de corte" });
+                }
+                else
+                {
+                    return Ok(datatable);
+                }
             }
             catch (Exception e)
             {
