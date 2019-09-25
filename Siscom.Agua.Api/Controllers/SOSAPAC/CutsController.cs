@@ -120,7 +120,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 }
                 if (datatable.Rows.Count <= 0)
                 {
-                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "El contribuyente de esta cuenta va al corriente de sus pagos, lo cual no puede mandar una orden de corte" });
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "El contribuyente de esta cuenta va al corriente de sus pagos o está en estado cortado, por lo cual no puede mandar una orden de corte" });
                 }
                 else
                 {
