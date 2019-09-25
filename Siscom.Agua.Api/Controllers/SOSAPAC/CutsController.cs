@@ -92,7 +92,14 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                         dataTable.Load(result);
                     }
                 }
-                return Ok(dataTable);
+                if (dataTable.Rows.Count <= 0)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se encontraron datos con los parametros especificados" });
+                }
+                else
+                {
+                    return Ok(dataTable);
+                }
             }
             catch (Exception e)
             {
@@ -353,7 +360,14 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                         dataTable.Load(result);
                     }
                 }
-                return Ok(dataTable);
+                if (dataTable.Rows.Count <= 0)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se encontraron datos con los parametros especificados." });
+                }
+                else
+                {
+                    return Ok(dataTable);
+                }
             }
             catch (Exception e)
             {
