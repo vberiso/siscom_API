@@ -171,7 +171,7 @@ namespace Siscom.Agua.Api.Controllers
 
             //Valida si es una infracción
             if (char.IsLetter(Convert.ToChar(folio.Substring(0, 1))) && folio.Contains("-") && folio.Substring(0, 1).Equals("I"))
-                ValidaDescuentoDeInfraccion(folio);
+                await ValidaDescuentoDeInfraccion(folio);
 
 
             var query = _context.OrderSales
@@ -205,116 +205,144 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         //Valida el descuento correspondiente para la infraccion, segun su fecha de emision.
-        private void ValidaDescuentoDeInfraccion(string folio)
+        private async Task<int> ValidaDescuentoDeInfraccion(string folio)
         {
             try
             {
-                var OS = _context.OrderSales                                        
+                //Se obtienes las campañas para infaccion activas.
+                var lstCamp = await _context.DiscountCampaigns.Where(c => c.Name.Contains("INFDES") && c.IsActive == true).OrderBy(x => x.Id).ToListAsync();
+                if (lstCamp.Count > 0)
+                {
+                    OrderSale OS = await _context.OrderSales
                                         .Include(x => x.OrderSaleDetails)
                                         .Include(x => x.OrderSaleDiscounts)
                                         .Where(x => x.Folio == folio && x.Status == "EOS01")
-                                        .FirstOrDefault();
+                                        .FirstOrDefaultAsync();
 
-                var lstCamp = _context.DiscountCampaigns.Where(c => c.Name.Contains("INFDES") && c.IsActive == true).OrderBy(x => x.Id).ToList();
-                // Obtengo la fecha que se genera la infraccion.
-                var B = _context.Breaches
-                            .Where(b => b.Id == OS.IdOrigin).FirstOrDefault();
 
-                var dias = (DateTime.Today - B.DateBreach).TotalDays;
-                foreach (var item in lstCamp)
-                {
-                    int DiasVigencia = int.Parse(item.Name.Split("_")[1]);
-                    if (dias <= DiasVigencia)
+                    // Obtengo la fecha que se genera la infraccion.
+                    var B = await _context.Breaches
+                                .Where(b => b.Id == OS.IdOrigin).FirstOrDefaultAsync();
+
+                    //Para estoy articulos no se debe aplicar descuento.
+                    Boolean EsExcepcionDesc = false;
+                    List<string> lstExcepcionesDeDescuento = new List<string>();
+                    lstExcepcionesDeDescuento.Add("74");
+                    lstExcepcionesDeDescuento.Add("76");
+                    lstExcepcionesDeDescuento.Add("77,IV");
+                    lstExcepcionesDeDescuento.Add("93,VI");
+
+                    foreach (var osd in OS.OrderSaleDetails.ToList())
                     {
-                        if (OS.OrderSaleDiscounts == null || OS.OrderSaleDiscounts.Count == 0)     //Si aun no existe ningun descuento
+                        foreach (var ed in lstExcepcionesDeDescuento)
                         {
-                            List<OrderSaleDiscount> lstOSDis = new List<OrderSaleDiscount>();
-                            foreach (var OSD in OS.OrderSaleDetails.ToList())
+                            if (ed.Split(",").ToList().All(osd.Description.Contains))
                             {
-                                OrderSaleDiscount OSDis = new OrderSaleDiscount();
-                                OSDis.CodeConcept = OSD.CodeConcept;
-                                OSDis.NameConcept = OSD.NameConcept;
-                                OSDis.OriginalAmount = OSD.Amount;
-                                OSDis.DiscountAmount = decimal.Round(OSD.Amount * ((decimal)item.Percentage / 100), 2);
-                                OSDis.DiscountPercentage = item.Percentage;
-                                OSDis.OrderSaleId = OS.Id;
-                                OSDis.OrderSaleDetailId = OSD.Id;
-                                lstOSDis.Add(OSDis);
-
-                                OSD.Amount = OSD.Amount - OSDis.DiscountAmount;
+                                EsExcepcionDesc = true;
                             }
-
-                            OS.OrderSaleDiscounts = lstOSDis;
-                            OS.Amount = OS.OrderSaleDetails.Sum(osd => osd.Amount);
-
-                            if (OS.Observation.Contains(", Descuento a infracción del"))
-                            {
-                                string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
-                                OS.Observation = OS.Observation.Replace(textoAQuitar, "");
-                            }
-                            OS.Observation = OS.Observation.TrimEnd();
-                            OS.Observation += ", Descuento a infracción del " + item.Percentage + "% ";
-                        }
-                        else       //Si se esta editando los descuento.
-                        {
-                            foreach (var OSDis in OS.OrderSaleDiscounts.ToList())
-                            {
-                                OSDis.DiscountAmount = decimal.Round(OSDis.OriginalAmount * ((decimal)item.Percentage / 100), 2);
-                                OSDis.DiscountPercentage = item.Percentage;
-
-                                OS.OrderSaleDetails.Where(x => x.Id == OSDis.OrderSaleDetailId).FirstOrDefault().Amount = OSDis.OriginalAmount - OSDis.DiscountAmount;
-                            }
-                            OS.Amount = OS.OrderSaleDetails.Sum(osd => osd.Amount);
-
-                            if (OS.Observation.Contains(", Descuento a infracción del"))
-                            {
-                                string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
-                                OS.Observation = OS.Observation.Replace(textoAQuitar, "");
-                            }
-                            OS.Observation = OS.Observation.TrimEnd();
-                            OS.Observation += ", Descuento a infracción del " + item.Percentage + "% ";
-                        }
-
-                        _context.Entry(OS).State = EntityState.Modified;
-                        _context.SaveChanges();
-                        return;
-                    }
-                    else
-                    {
-                        dias = dias - DiasVigencia;
-                    }
-                }
-                //Si llega a esta etapa significa que agoto los dias de tolerancia para descuentos.
-                if (dias > 0)
-                {
-                    if (OS.OrderSaleDiscounts == null || OS.OrderSaleDiscounts.Count == 0)     //Si aun no existe ningun descuento
-                    {
-                        //No sucede nada, la deuda debe permanecer igual.
-                    }
-                    else       //Si se esta editando los descuento.
-                    {
-                        foreach (var OSDis in OS.OrderSaleDiscounts.ToList())
-                        {
-                            OSDis.DiscountAmount = 0;
-                            OSDis.DiscountPercentage = 0;
-                            OS.OrderSaleDetails.Where(x => x.Id == OSDis.OrderSaleDetailId).FirstOrDefault().Amount = OSDis.OriginalAmount;
-                        }
-                        OS.Amount = OS.OrderSaleDetails.Sum(osd => osd.Amount);
-                        if (OS.Observation.Contains(", Descuento a infracción del"))
-                        {
-                            string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
-                            OS.Observation = OS.Observation.Replace(textoAQuitar, "");
-                            OS.Observation = OS.Observation.TrimEnd();
                         }
                     }
-                    _context.Entry(OS).State = EntityState.Modified;
-                    _context.SaveChanges();
-                    return;
-                }
+
+                    if (!EsExcepcionDesc)
+                    {
+                        var dias = (DateTime.Today - B.DateBreach).TotalDays;
+                        foreach (var item in lstCamp)
+                        {
+                            int DiasVigencia = int.Parse(item.Name.Split("_")[1]);
+                            if (dias <= DiasVigencia)
+                            {
+                                if (OS.OrderSaleDiscounts == null || OS.OrderSaleDiscounts.Count == 0)     //Si aun no existe ningun descuento
+                                {
+                                    List<OrderSaleDiscount> lstOSDis = new List<OrderSaleDiscount>();
+                                    foreach (var OSD in OS.OrderSaleDetails.ToList())
+                                    {
+                                        OrderSaleDiscount OSDis = new OrderSaleDiscount();
+                                        OSDis.CodeConcept = OSD.CodeConcept;
+                                        OSDis.NameConcept = OSD.NameConcept;
+                                        OSDis.OriginalAmount = OSD.Amount;
+                                        OSDis.DiscountAmount = decimal.Round(OSD.Amount * ((decimal)item.Percentage / 100), 2);
+                                        OSDis.DiscountPercentage = item.Percentage;
+                                        OSDis.OrderSaleId = OS.Id;
+                                        OSDis.OrderSaleDetailId = OSD.Id;
+                                        lstOSDis.Add(OSDis);
+
+                                        OSD.Amount = OSD.Amount - OSDis.DiscountAmount;
+                                    }
+
+                                    OS.OrderSaleDiscounts = lstOSDis;
+                                    OS.Amount = OS.OrderSaleDetails.Sum(osd => osd.Amount);
+
+                                    if (OS.Observation.Contains(", Descuento a infracción del"))
+                                    {
+                                        string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
+                                        OS.Observation = OS.Observation.Replace(textoAQuitar, "");
+                                    }
+                                    OS.Observation = OS.Observation.TrimEnd();
+                                    OS.Observation += ", Descuento a infracción del " + item.Percentage + "% ";
+                                }
+                                else       //Si se esta editando los descuento.
+                                {
+                                    foreach (var OSDis in OS.OrderSaleDiscounts.ToList())
+                                    {
+                                        OSDis.DiscountAmount = decimal.Round(OSDis.OriginalAmount * ((decimal)item.Percentage / 100), 2);
+                                        OSDis.DiscountPercentage = item.Percentage;
+
+                                        OS.OrderSaleDetails.Where(x => x.Id == OSDis.OrderSaleDetailId).FirstOrDefault().Amount = OSDis.OriginalAmount - OSDis.DiscountAmount;
+                                    }
+                                    OS.Amount = OS.OrderSaleDetails.Sum(osd => osd.Amount);
+
+                                    if (OS.Observation.Contains(", Descuento a infracción del"))
+                                    {
+                                        string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
+                                        OS.Observation = OS.Observation.Replace(textoAQuitar, "");
+                                    }
+                                    OS.Observation = OS.Observation.TrimEnd();
+                                    OS.Observation += ", Descuento a infracción del " + item.Percentage + "% ";
+                                }
+
+                                _context.Entry(OS).State = EntityState.Modified;
+                                _context.SaveChanges();
+                                return 1;
+                            }
+                            else
+                            {
+                                dias = dias - DiasVigencia;
+                            }
+                        }
+                        //Si llega a esta etapa significa que agoto los dias de tolerancia para descuentos.
+                        if (dias > 0 && lstCamp.Count > 0)
+                        {
+                            if (OS.OrderSaleDiscounts == null || OS.OrderSaleDiscounts.Count == 0)     //Si aun no existe ningun descuento
+                            {
+                                //No sucede nada, la deuda debe permanecer igual.
+                            }
+                            else       //Si se esta editando los descuento.
+                            {
+                                foreach (var OSDis in OS.OrderSaleDiscounts.ToList())
+                                {
+                                    OSDis.DiscountAmount = 0;
+                                    OSDis.DiscountPercentage = 0;
+                                    OS.OrderSaleDetails.Where(x => x.Id == OSDis.OrderSaleDetailId).FirstOrDefault().Amount = OSDis.OriginalAmount;
+                                }
+                                OS.Amount = OS.OrderSaleDetails.Sum(osd => osd.Amount);
+                                if (OS.Observation.Contains(", Descuento a infracción del"))
+                                {
+                                    string textoAQuitar = OS.Observation.Substring(OS.Observation.IndexOf(", Descuento a infracción del"), 32);
+                                    OS.Observation = OS.Observation.Replace(textoAQuitar, "");
+                                    OS.Observation = OS.Observation.TrimEnd();
+                                }
+                            }
+                            _context.Entry(OS).State = EntityState.Modified;
+                            _context.SaveChanges();
+                            return 1;
+                        }
+                    }                    
+                }                                
+                return 1;
             }
             catch(Exception ex)
             {
-
+                return 0;
             }
         }
 
