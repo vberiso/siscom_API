@@ -38,13 +38,17 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet("OrderWorks/{id?}")]
-        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null)
+        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha= null)
         {
             if (id == null)
             {
                 System.Linq.IQueryable<OrderWork> query = _context.OrderWorks;
                 if (folio == null) {
-                    
+                    if (fecha != null)
+                    {
+                        fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
+                        query = query.Where(x => x.DateOrder.ToString("dd-MM-yyyy") == fecha);
+                    }
                     if (status != null)
                     {
                         query = query.Where(x => x.Status == status);
@@ -70,7 +74,7 @@ namespace Siscom.Agua.Api.Controllers
                 var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id).First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
                     .Include(x => x.TypeIntake)
-                    .Include(x => x.TypeStateService)
+                    .Include(x => x.TypeConsume)
                     .Include(x => x.OrderWork)
                         .ThenInclude(x => x.TechnicalStaff)
                     .Include(x => x.Clients)
