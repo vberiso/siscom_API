@@ -349,5 +349,13 @@ namespace Siscom.Agua.Api.Controllers
             
             return Ok(new { msg = "Operación exitosa" });
         }
+
+        [HttpGet("test")]
+        public async Task<IActionResult> test()
+        {
+            var data = _context.OrderWorks.GroupBy(x => new {x.Status,  x.Type })
+                .Select(g => new  { Type = g.Key, count = g.Count() }); 
+           return Ok(data);
+        }
     }
 }
