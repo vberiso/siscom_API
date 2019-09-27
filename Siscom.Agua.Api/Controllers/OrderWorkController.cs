@@ -38,12 +38,13 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet("OrderWorks/{id?}")]
-        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha= null)
+        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo= null)
         {
             if (id == null)
             {
                 System.Linq.IQueryable<OrderWork> query = _context.OrderWorks;
-                if (folio == null) {
+                if (folio == null)
+                {
                     if (fecha != null)
                     {
                         fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
@@ -58,12 +59,18 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         query = query.Where(x => x.Type == type);
                     }
+                    if(IsMasivo != null)
+                    {
+                        query = query.Where(x => x.Status == "EOT01");
+                    }
                 }
                 else
                 {
                     query = query.Where(x => x.Folio == folio);
                 }
-                query = query.OrderBy(x => x.Folio);
+                query = query.Include(x => x.Agreement)
+
+                        .OrderBy(x => x.Folio);
 
                 var OrderWorks = query.ToList();
 
@@ -71,6 +78,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             try
             {
+
                 var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id).First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
                     .Include(x => x.TypeIntake)
@@ -85,15 +93,16 @@ namespace Siscom.Agua.Api.Controllers
                                     .ThenInclude(x => x.Countries)
                     .First();
 
-                return Ok(agreement);  
+                return Ok(agreement);
             }
             catch (Exception ex)
             {
                 return Ok("");
             }
-            
+
         }
-        [HttpPost("OrderWorks")]
+
+        [HttpPost("OrderWorks/GetByIds")]
         public async Task<IActionResult> GetListOrderWorks([FromBody] List<int> list)
         {
             List<Agreement> agreements = new List<Agreement>();
@@ -127,6 +136,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
+
         [HttpPost("OrderWorks")]
         public async Task<IActionResult> Create([FromBody] object collection)
         {
@@ -156,7 +166,7 @@ namespace Siscom.Agua.Api.Controllers
                     };
                     _context.OrderWorks.Add(OrderWork);
 
-                   
+
                     _context.SaveChanges();
                     var Status = new OrderWorkStatus()
                     {
@@ -189,7 +199,7 @@ namespace Siscom.Agua.Api.Controllers
         {
             try
             {
-                var status = _context.OrderWorks.Where(x => x.Id == id) .Select(x => x.Status).First();
+                var status = _context.OrderWorks.Where(x => x.Id == id).Select(x => x.Status).First();
                 if (status != OrderWork.Status)
                 {
                     var Status = new OrderWorkStatus()
@@ -310,6 +320,34 @@ namespace Siscom.Agua.Api.Controllers
 
                 return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message });
             }
+        }
+
+        [HttpPost("AsignarStaffMasivo/{stafId}/{dateStimate}")]
+        public async Task<IActionResult> AsignarStaffMasivo([FromRoute] int stafId, [FromRoute] string dateStimate, [FromBody] List<int> orderWorkIds)
+        {
+            try
+            {
+                OrderWork orderWOrk = null;
+                orderWorkIds.ForEach(x =>
+                {
+                    orderWOrk = _context.OrderWorks.Where(order => order.Id == x && order.Status == "EOT01").FirstOrDefault();
+                    if (orderWOrk != null)
+                    {
+                        orderWOrk.TechnicalStaffId = stafId;
+                        orderWOrk.DateStimated = DateTime.Parse(dateStimate);
+                        
+                        orderWOrk.Status = "EOT02";
+                        _context.OrderWorks.Update(orderWOrk);
+                        _context.SaveChanges();
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status409Conflict, new { error = ex.Message });
+            }
+            
+            return Ok(new { msg = "Operación exitosa" });
         }
     }
 }
