@@ -93,8 +93,38 @@ namespace Siscom.Agua.Api.Controllers
             }
             
         }
+        [HttpPost("OrderWorks")]
+        public async Task<IActionResult> GetListOrderWorks([FromBody] List<int> list)
+        {
+            List<Agreement> agreements = new List<Agreement>();
+            try
+            {
+                foreach (var item in list)
+                {
+                    var OrderWork = _context.OrderWorks.Where(x => x.Id == item).First();
+                    var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
+                        .Include(x => x.TypeIntake)
+                        .Include(x => x.TypeConsume)
+                        .Include(x => x.OrderWork)
+                            .ThenInclude(x => x.TechnicalStaff)
+                        .Include(x => x.Clients)
+                        .Include(x => x.Addresses)
+                            .ThenInclude(x => x.Suburbs)
+                                .ThenInclude(x => x.Towns)
+                                    .ThenInclude(x => x.States)
+                                        .ThenInclude(x => x.Countries)
+                        .First();
+                    agreements.Add(agreement);
+                }
+              
 
-      
+                return Ok(agreements);
+            }
+            catch (Exception ex)
+            {
+                return Ok("");
+            }
+        }
 
 
         [HttpPost("OrderWorks")]
