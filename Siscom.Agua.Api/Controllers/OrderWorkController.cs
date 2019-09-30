@@ -19,6 +19,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.Enums;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -134,7 +135,6 @@ namespace Siscom.Agua.Api.Controllers
                 return Ok("");
             }
         }
-
 
 
         [HttpPost("OrderWorks")]
@@ -356,6 +356,47 @@ namespace Siscom.Agua.Api.Controllers
             var data = _context.OrderWorks.GroupBy(x => new {x.Status,  x.Type })
                 .Select(g => new  { Type = g.Key, count = g.Count() }); 
            return Ok(data);
+        }
+
+        [HttpGet("PanelData/{dateStart}/{dateEnd}")]
+        public async Task<IActionResult> GetPanelData([FromRoute] string dateStart, [FromRoute] string dateEnd)
+        {
+            DateTime Dstart = new DateTime();
+            DateTime DEnd = new DateTime();
+            DateTime.TryParse(dateStart, out Dstart);
+            DateTime.TryParse(dateEnd, out DEnd);
+            try
+            {
+                //var generadas = _context.OrderWorks.Where(g => g.Status == "EOT01").ToListAsync();
+                var generadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT01").ToListAsync();
+                var asignadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT02").ToListAsync();
+                var ejecutadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT03").ToListAsync();
+                var noEjecutada = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT04").ToListAsync();
+
+                var list = await Task.WhenAll(generadas, asignadas, ejecutadas, noEjecutada);
+                //var list = new { generadas, asignadas, ejecutadas, noEjecutada };
+
+                return Ok(list);
+            }
+            catch (Exception error)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = "Ocurrió un problema con la petición... " + error });
+            }
+        }
+
+        [HttpGet("PanelDataStaff")]
+        public async Task<IActionResult> GetPanelDataStaff()
+        {
+            try
+            {
+                var orderwork = _context.TechnicalStaffs.Include(x => x.OrderWorks).ToList();
+                //var orderwork = _context.OrderWorks.Include(x => x.TechnicalStaff).Where(x => x.DateOrder.Date >= Dstart && x.DateOrder.Date <= Dend).ToList();
+                return Ok(orderwork);
+            }
+            catch (Exception error)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = "Ocurrió un problema con la petición... " + error });
+            }
         }
     }
 }
