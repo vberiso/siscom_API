@@ -224,21 +224,18 @@ namespace Siscom.Agua.Api.Controllers
                     var B = await _context.Breaches
                                 .Where(b => b.Id == OS.IdOrigin).FirstOrDefaultAsync();
 
-                    //Para estoy articulos no se debe aplicar descuento.
+                    //Para estos articulos no se debe aplicar descuento.                   
+                    var lstExcepcionesDeDescuento = _context.SkipArticles.Where(s => s.IsActive == true).ToList();
                     Boolean EsExcepcionDesc = false;
-                    List<string> lstExcepcionesDeDescuento = new List<string>();
-                    lstExcepcionesDeDescuento.Add("74");
-                    lstExcepcionesDeDescuento.Add("76");
-                    lstExcepcionesDeDescuento.Add("77,IV");
-                    lstExcepcionesDeDescuento.Add("93,VI");
 
                     foreach (var osd in OS.OrderSaleDetails.ToList())
                     {
                         foreach (var ed in lstExcepcionesDeDescuento)
                         {
-                            if (ed.Split(",").ToList().All(osd.Description.Contains))
+                            if (ed.Article.Split(",").ToList().All(osd.Description.Contains))
                             {
                                 EsExcepcionDesc = true;
+                                break;
                             }
                         }
                     }

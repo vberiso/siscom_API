@@ -185,6 +185,7 @@ namespace Siscom.Agua.DAL
         public DbSet<DiscountAuthorizationDetail> DiscountAuthorizationDetails { get; set; }
         public DbSet<TransitPolice> TransitPolices { get; set; }
         public DbSet<OrderSaleStatus> OrderSaleStatuses { get; set; }
+        public DbSet<SkipArticles> SkipArticles { get; set; }
 
         /// <summary>
         /// Cancelations

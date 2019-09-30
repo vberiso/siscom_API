@@ -145,7 +145,8 @@ namespace Siscom.Agua.Api.Controllers
         {
             var campaign = await _context.DiscountCampaigns.Where(x => x.IsActive &&
                                                             x.StartDate <= DateTime.Now.Date &&
-                                                            x.EndDate >= DateTime.Now.Date)
+                                                            x.EndDate >= DateTime.Now.Date &&
+                                                            !x.Name.Contains("INFDES"))
                                                             .ToListAsync();
             return Ok(campaign);
         } 
