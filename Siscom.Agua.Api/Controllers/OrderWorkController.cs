@@ -410,6 +410,32 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+        [HttpGet("PanelData/{dateStart}/{dateEnd}")]
+        public async Task<IActionResult> GetPanelData([FromRoute] string dateStart, [FromRoute] string dateEnd)
+        {
+            DateTime Dstart = new DateTime();
+            DateTime DEnd = new DateTime();
+            DateTime.TryParse(dateStart, out Dstart);
+            DateTime.TryParse(dateEnd, out DEnd);
+            try
+            {
+                //var generadas = _context.OrderWorks.Where(g => g.Status == "EOT01").ToListAsync();
+                var generadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT01").ToListAsync();
+                var asignadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT02").ToListAsync();
+                var ejecutadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT03").ToListAsync();
+                var noEjecutada = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT04").ToListAsync();
+
+                var list = await Task.WhenAll(generadas, asignadas, ejecutadas, noEjecutada);
+                //var list = new { generadas, asignadas, ejecutadas, noEjecutada };
+
+                return Ok(list);
+            }
+            catch (Exception error)
+            {
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = "Ocurrió un problema con la petición... " + error });
+            }
+        }
+
         [HttpGet("PanelDataStaff")]
         public async Task<IActionResult> GetPanelDataStaff()
         {
