@@ -25,8 +25,8 @@ namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
     [Produces("application/json")]
-    [ApiController]
-    [Authorize]
+    //[ApiController]
+    //[Authorize]
     public class OrderWorkController : ControllerBase
     {
 
@@ -39,7 +39,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet("OrderWorks/{id?}")]
-        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo= null)
+        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo= null, [FromQuery] bool withOrder =false)
         {
             if (id == null)
             {
@@ -74,18 +74,23 @@ namespace Siscom.Agua.Api.Controllers
                         .OrderBy(x => x.Folio);
 
                 var OrderWorks = query.ToList();
-
+               
                 return Ok(OrderWorks);
             }
             try
             {
 
-                var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id).First();
+                var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
+                    .Include(x=>x.OrderWorkReasonCatalogs)
+                    .ThenInclude(x => x.ReasonCatalog)
+                    .First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
+
                     .Include(x => x.TypeIntake)
                     .Include(x => x.TypeConsume)
                     .Include(x => x.OrderWork)
                         .ThenInclude(x => x.TechnicalStaff)
+                        
                     .Include(x => x.Clients)
                     .Include(x => x.Addresses)
                         .ThenInclude(x => x.Suburbs)
@@ -93,7 +98,10 @@ namespace Siscom.Agua.Api.Controllers
                                 .ThenInclude(x => x.States)
                                     .ThenInclude(x => x.Countries)
                     .First();
-
+                if (withOrder)
+                {
+                    return Ok(new List<object>() { agreement, OrderWork });
+                }
                 return Ok(agreement);
             }
             catch (Exception ex)
@@ -135,6 +143,7 @@ namespace Siscom.Agua.Api.Controllers
                 return Ok("");
             }
         }
+
 
 
         [HttpPost("OrderWorks")]
@@ -358,30 +367,47 @@ namespace Siscom.Agua.Api.Controllers
            return Ok(data);
         }
 
-        [HttpGet("PanelData/{dateStart}/{dateEnd}")]
-        public async Task<IActionResult> GetPanelData([FromRoute] string dateStart, [FromRoute] string dateEnd)
+
+        [HttpGet("GetReasonCatalog/{type}")]
+        public async Task<IActionResult> GetReasonCatalog([FromRoute] string type)
         {
-            DateTime Dstart = new DateTime();
-            DateTime DEnd = new DateTime();
-            DateTime.TryParse(dateStart, out Dstart);
-            DateTime.TryParse(dateEnd, out DEnd);
             try
             {
-                //var generadas = _context.OrderWorks.Where(g => g.Status == "EOT01").ToListAsync();
-                var generadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT01").ToListAsync();
-                var asignadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT02").ToListAsync();
-                var ejecutadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT03").ToListAsync();
-                var noEjecutada = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT04").ToListAsync();
-
-                var list = await Task.WhenAll(generadas, asignadas, ejecutadas, noEjecutada);
-                //var list = new { generadas, asignadas, ejecutadas, noEjecutada };
-
-                return Ok(list);
+                var ReasonCatalog = _context.ReasonCatalog.Where(x => x.Type == type).ToList();
+                return Ok(ReasonCatalog);
             }
-            catch (Exception error)
+            catch ( Exception e) {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = e.Message});
+            }
+        }
+
+
+        [HttpPost("SetReasonCatalogs/{orderWorkId}")]
+        public async Task<IActionResult> SetReasonCatalogs([FromRoute] int orderWorkId, [FromBody] List<int> idsReason)
+        {
+            try
             {
-                return StatusCode((int)TypeError.Code.NotFound, new { Error = "Ocurrió un problema con la petición... " + error });
+                OrderWorkReasonCatalog OrderWorkReasonCatalog = null;
+                idsReason.ForEach(x =>
+                {
+                    OrderWorkReasonCatalog = new OrderWorkReasonCatalog()
+                    {
+                        OrderWorkId = orderWorkId,
+                        ReasonCatalogId = x
+                    
+                    };
+                    _context.OrderWorkReasonCatalog.Add(OrderWorkReasonCatalog);
+                    _context.SaveChanges();
+
+                });
+
+                return Ok("success");
             }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = e.Message });
+            }
+
         }
 
         [HttpGet("PanelDataStaff")]
@@ -398,5 +424,6 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotFound, new { Error = "Ocurrió un problema con la petición... " + error });
             }
         }
+
     }
 }

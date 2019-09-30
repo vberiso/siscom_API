@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190930174447_ReasonCatalog_AccountAccumulated")]
+    partial class ReasonCatalog_AccountAccumulated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2097,7 +2099,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 9, 27, 14, 45, 10, 233, DateTimeKind.Local).AddTicks(1064));
+                        .HasDefaultValue(new DateTime(2019, 9, 30, 12, 44, 46, 446, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2607,7 +2609,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<string>("NameConcept")
                         .IsRequired()
                         .HasColumnName("name_concept")
-                        .HasMaxLength(800);
+                        .HasMaxLength(500);
 
                     b.Property<decimal>("OnAccount")
                         .HasColumnName("on_account")
@@ -3351,26 +3353,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("ServiceId");
 
                     b.ToTable("Service_Param");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.SkipArticles", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_skip_articles")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Article")
-                        .IsRequired()
-                        .HasColumnName("article")
-                        .HasMaxLength(500);
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnName("is_active");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Skip_Articles");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.State", b =>

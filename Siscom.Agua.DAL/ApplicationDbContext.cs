@@ -45,7 +45,7 @@ namespace Siscom.Agua.DAL
         public DbSet<TypeIntake> TypeIntakes { get; set; }
         public DbSet<TypeUse> TypeUses { get; set; }
         public DbSet<TypeConsume> TypeConsumes { get; set; }
-        public DbSet<TypeRegime> TypeRegimes { get; set; }            
+        public DbSet<TypeRegime> TypeRegimes { get; set; }
         public DbSet<TypeCommercialBusiness> TypeCommertialBusinesses { get; set; }
         public DbSet<TypeStateService> TypeStateServices { get; set; }
         public DbSet<Agreement> Agreements { get; set; }
@@ -125,7 +125,7 @@ namespace Siscom.Agua.DAL
         public DbSet<DebtCalculation> DebtCalculations { get; set; }
         public DbSet<ProductParam> ProductParams { get; set; }
         public DbSet<ServiceParam> ServiceParams { get; set; }
-        
+
 
         /// <summary> 
         /// Payment
@@ -168,7 +168,7 @@ namespace Siscom.Agua.DAL
         /// <summary>
         /// Orders 
         /// </summary>
-        public DbSet<TaxUser>  TaxUsers { get; set; }
+        public DbSet<TaxUser> TaxUsers { get; set; }
         public DbSet<TaxAddress> TaxAddresses { get; set; }
         public DbSet<OrderSale> OrderSales { get; set; }
         public DbSet<OrderSaleDetail> OrderSaleDetails { get; set; }
@@ -210,6 +210,16 @@ namespace Siscom.Agua.DAL
         public DbSet<OrderWork> OrderWorks { get; set; }
         public DbSet<OrderWorkStatus> OrderWorkStatus { get; set; }
         public DbSet<OrderParameters> OrderParameters { get; set; }
+
+        public DbSet<ReasonCatalog> ReasonCatalog { get; set; }
+        public DbSet<OrderWorkReasonCatalog> OrderWorkReasonCatalog { get; set; }
+
+        /// <summary>
+        /// Otros
+        /// </summary>
+        /// 
+        public DbSet<AccountsAccumulated> AccountsAccumulated { get; set; }
+
 
         public ApplicationDbContext()
         {
@@ -942,6 +952,20 @@ namespace Siscom.Agua.DAL
 
             #endregion
 
+            #region OrderWorkReasonCatalog
+            builder.Entity<OrderWorkReasonCatalog>().HasKey(ORC => new { ORC.OrderWorkId, ORC.ReasonCatalogId });
+
+
+            builder.Entity<OrderWorkReasonCatalog>()
+                .HasOne(bc => bc.ReasonCatalog)
+                .WithMany(b => b.OrderWorkReasonCatalogs)
+                .HasForeignKey(bc => bc.ReasonCatalogId);
+            builder.Entity<OrderWorkReasonCatalog>()
+                .HasOne(bc => bc.OrderWork)
+                .WithMany(c => c.OrderWorkReasonCatalogs)
+                .HasForeignKey(bc => bc.OrderWorkId);
+            #endregion
+
             #region OriginPayment
             builder.Entity<OriginPayment>()
                    .Property(x => x.IsActive)
@@ -1460,6 +1484,12 @@ namespace Siscom.Agua.DAL
                    .HasOne<ApplicationRol>(sc => sc.ApplicationRol)
                    .WithMany(s => s.ViewProfiles)
                    .HasForeignKey(sc => sc.RoleId);
+            #endregion
+
+            #region otros
+            builder.Entity<ReasonCatalog>()
+              .Property(x => x.IsActive)
+              .HasDefaultValue(true);
             #endregion
 
             base.OnModelCreating(builder);

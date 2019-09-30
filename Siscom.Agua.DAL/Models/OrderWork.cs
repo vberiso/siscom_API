@@ -9,6 +9,12 @@ namespace Siscom.Agua.DAL.Models
     [Table("Order_work")]
     public class OrderWork
     {
+        public OrderWork()
+        {
+            OrderWorkReasonCatalogs = new HashSet<OrderWorkReasonCatalog>();
+           
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_order_work")]
@@ -56,6 +62,8 @@ namespace Siscom.Agua.DAL.Models
         public Agreement Agreement { get; set; }
 
         public ICollection<OrderWorkStatus> OrderWorkStatus { get; set; }
+
+        public ICollection<OrderWorkReasonCatalog> OrderWorkReasonCatalogs { get; set; }
 
 
 
