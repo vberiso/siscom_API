@@ -22,6 +22,13 @@ namespace Siscom.Agua.DAL.Models
         [Column("mes"), Required]
         public int Mes { get; set; }
 
-       
+
+        [Column("isMedido"), Required]
+        public bool IsMedido { get; set; }
+
+        [Column("type"), Required]
+        public string type { get; set; }
+
+
     }
 }

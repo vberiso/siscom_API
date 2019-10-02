@@ -39,7 +39,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet("OrderWorks/{id?}")]
-        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo= null, [FromQuery] bool withOrder =false)
+        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo = null, [FromQuery] bool withOrder = false)
         {
             if (id == null)
             {
@@ -60,7 +60,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         query = query.Where(x => x.Type == type);
                     }
-                    if(IsMasivo != null)
+                    if (IsMasivo != null)
                     {
                         query = query.Where(x => x.Status == "EOT01");
                     }
@@ -74,14 +74,14 @@ namespace Siscom.Agua.Api.Controllers
                         .OrderBy(x => x.Folio);
 
                 var OrderWorks = query.ToList();
-               
+
                 return Ok(OrderWorks);
             }
             try
             {
 
                 var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
-                    .Include(x=>x.OrderWorkReasonCatalogs)
+                    .Include(x => x.OrderWorkReasonCatalogs)
                     .ThenInclude(x => x.ReasonCatalog)
                     .First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
@@ -90,7 +90,7 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.TypeConsume)
                     .Include(x => x.OrderWork)
                         .ThenInclude(x => x.TechnicalStaff)
-                        
+
                     .Include(x => x.Clients)
                     .Include(x => x.Addresses)
                         .ThenInclude(x => x.Suburbs)
@@ -134,7 +134,7 @@ namespace Siscom.Agua.Api.Controllers
                         .First();
                     agreements.Add(agreement);
                 }
-              
+
 
                 return Ok(agreements);
             }
@@ -155,12 +155,54 @@ namespace Siscom.Agua.Api.Controllers
             {
                 string[] ids = JsonConvert.DeserializeObject<string[]>(data["ids"].ToString());
 
-
+                List<string> msgs = new List<string>();
                 OrderWork OrderWork = null;
+                Agreement Aggrement;
+                bool canCreate;
                 foreach (string id in ids)
                 {
+                    //Aggrement = _context.Agreements.Where(x => x.Id == int.Parse(id))
+                    //    .Include(x => x.Clients)
+                    //    .Include(x => x.OrderWork)
+                    //    .First();
+                    //canCreate = true;
+
+                    //OrderWork = Aggrement.OrderWork.Where(x => x.Type == data["typeOrder"].ToString() && (x.Status == "EOT02" || x.Status == "EOT01")).FirstOrDefault();
+                    //if (OrderWork != null)
+                    //{
+                    //    canCreate = false;
+                    //}
+                    //else if (Aggrement.TypeStateServiceId == 4)
+                    //{
+                    //    canCreate = false;
+                    //}
+                    //if (canCreate)
+                    //{
+                    //    var client = Aggrement.Clients.Where(x => x.TypeUser == "CLI01").First();
+                    //    string tipeOrder = "";
+                    //    switch (data["typeOrder"].ToString())
+                    //    {
+                    //        case "OT001":
+                    //            tipeOrder = "Inspeccion / Verificacion";
+                    //            break;
+                    //        case "OT002":
+                    //            tipeOrder = "Corte";
+                    //            break;
+                    //        case "OT003":
+                    //            tipeOrder = "Reconexion";
+                    //            break;
+                    //        case "OT004":
+                    //            tipeOrder = "Mantenimiento / Sustitucion";
+                    //            break;
+                    //    }
+                    //    msgs.Add($"La cuenta {Aggrement.Account} con nombre de cliente {client.Name} {client.LastName} no se pudo generar una orden de tipo {tipeOrder}");
+                    //    continue;
+                    //}
                     OrderWork = new OrderWork()
                     {
+
+
+
                         AgrementId = data["isAgreement"].ToString() == "1" ? int.Parse(id) : 0,
                         TaxUserId = data["isAgreement"].ToString() == "0" ? int.Parse(id) : 0,
                         DateOrder = DateTime.Now,
@@ -193,6 +235,10 @@ namespace Siscom.Agua.Api.Controllers
                     ApplyIds++;
 
 
+                }
+                if(msgs.Count > 0)
+                {
+                    return StatusCode(StatusCodes.Status200OK, new {reazon = msgs, msg = "Algunas ordenes no se pudieron generar", id = OrderWork.Id });
                 }
 
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Orden generada correctamente", id = OrderWork.Id });
@@ -344,7 +390,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         orderWOrk.TechnicalStaffId = stafId;
                         orderWOrk.DateStimated = DateTime.Parse(dateStimate);
-                        
+
                         orderWOrk.Status = "EOT02";
                         _context.OrderWorks.Update(orderWOrk);
                         _context.SaveChanges();
@@ -355,16 +401,16 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return StatusCode(StatusCodes.Status409Conflict, new { error = ex.Message });
             }
-            
+
             return Ok(new { msg = "Operación exitosa" });
         }
 
         [HttpGet("test")]
         public async Task<IActionResult> test()
         {
-            var data = _context.OrderWorks.GroupBy(x => new {x.Status,  x.Type })
-                .Select(g => new  { Type = g.Key, count = g.Count() }); 
-           return Ok(data);
+            var data = _context.OrderWorks.GroupBy(x => new { x.Status, x.Type })
+                .Select(g => new { Type = g.Key, count = g.Count() });
+            return Ok(data);
         }
 
 
@@ -376,8 +422,9 @@ namespace Siscom.Agua.Api.Controllers
                 var ReasonCatalog = _context.ReasonCatalog.Where(x => x.Type == type).ToList();
                 return Ok(ReasonCatalog);
             }
-            catch ( Exception e) {
-                return StatusCode(StatusCodes.Status400BadRequest, new { error = e.Message});
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = e.Message });
             }
         }
 
@@ -386,6 +433,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> SetReasonCatalogs([FromRoute] int orderWorkId, [FromBody] List<int> idsReason)
         {
             try
+
             {
                 OrderWorkReasonCatalog OrderWorkReasonCatalog = null;
                 idsReason.ForEach(x =>
@@ -394,7 +442,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         OrderWorkId = orderWorkId,
                         ReasonCatalogId = x
-                    
+
                     };
                     _context.OrderWorkReasonCatalog.Add(OrderWorkReasonCatalog);
                     _context.SaveChanges();

@@ -31,7 +31,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                     System.Linq.IQueryable<ReasonCatalog> query = _context.ReasonCatalog;
                     if (type != null)
                     {
-                        query = query.Where(x => x.Type == type);
+                        query = query.Where(x => x.Type == type && x.IsActive == true);
                     }
                     var ReasonCatalogs = query.ToList();
                     return Ok(ReasonCatalogs);
