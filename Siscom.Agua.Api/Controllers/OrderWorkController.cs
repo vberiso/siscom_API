@@ -173,7 +173,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         OrderWork = Aggrement.OrderWork.Where(x => x.Type == "OT003" && (x.Status == "EOT02" || x.Status == "EOT01")).FirstOrDefault();
                         var deb = Aggrement.Debts.Where(x => x.Status == "ED001" || x.Status == "ED011" || x.Status == "ED007" || x.Status == "ED004").ToList();
-                        if (OrderWork != null && deb.Count() > 0)
+                        if (OrderWork != null || deb.Count() > 0 || Aggrement.TypeStateServiceId == 3)
                         {
                             canCreate = false;
                         }

@@ -298,7 +298,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         newMes = (int.Parse(mes) + 1).ToString();
 
-                        
+
                         if (nextAccumulated == null)
                         {
                             bool create = false;
@@ -412,7 +412,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpPost("RunFormato23Desgloce/{isFormato2?}")]
-        public async Task<IActionResult> ExectSpFzaFormato23Desgloce([FromRoute] bool isFormato2= false)
+        public async Task<IActionResult> ExectSpFzaFormato23Desgloce([FromRoute] bool isFormato2 = false)
         {
             var body = "";
 
@@ -457,8 +457,8 @@ namespace Siscom.Agua.Api.Controllers
                 var AccumulatedD = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "actuales" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault()?.Accumulated;
                 var AccumulatedND = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "anteriores" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault()?.Accumulated;
                 var AccumulatedO = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "mixto" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault()?.Accumulated;
-              
-                        bool create = false;
+
+                bool create = false;
                 if (nextAccumulated == null)
                 {
 
@@ -471,7 +471,8 @@ namespace Siscom.Agua.Api.Controllers
                         create = true;
                     }
 
-                    if (create) {
+                    if (create)
+                    {
                         SetAccumulatedDesgloce(year, mes, JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(result)));
                     }
 
@@ -479,7 +480,8 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 else
                 {
-                    if (!isFormato2) {
+                    if (!isFormato2)
+                    {
                         data = new List<object>() { new List<object>() };
                     }
                 }
@@ -522,59 +524,96 @@ namespace Siscom.Agua.Api.Controllers
 
             //if (create)
             //{
-                string newMes = (int.Parse(mes) - 1).ToString();
-                string newYear = year;
+            string newMes = (int.Parse(mes) - 1).ToString();
+            string newYear = year;
 
-                if (mes == "1")
+            if (mes == "1")
+            {
+                newMes = "12";
+                newYear = (int.Parse(year) - 1).ToString();
+            }
+
+
+            var AccumulatedD = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "actuales" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
+
+            var AccumulatedND = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "anteriores" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
+
+            var AccumulatedO = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "mixto" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
+
+            newMes = (int.Parse(mes) + 1).ToString();
+            newYear = year;
+
+
+            var Jobject = currentNewAccounts.Where(x => JObject.Parse(JsonConvert.SerializeObject(x))["tipo"].ToString() == "actuales").First();
+            int totalUsuarios = int.Parse(JObject.Parse(JsonConvert.SerializeObject(Jobject))["usuarios"].ToString());
+            if (AccumulatedD != null)
+            {
+                totalUsuarios = totalUsuarios + AccumulatedD.Accumulated;
+
+            }
+            _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = totalUsuarios, IsMedido = true, Mes = int.Parse(mes), Year = int.Parse(year), type = "actuales" });
+            Jobject = currentNewAccounts.Where(x => JObject.Parse(JsonConvert.SerializeObject(x))["tipo"].ToString() == "anteriores").First();
+            totalUsuarios = int.Parse(JObject.Parse(JsonConvert.SerializeObject(Jobject))["usuarios"].ToString());
+            if (AccumulatedND != null)
+            {
+                totalUsuarios = totalUsuarios + AccumulatedND.Accumulated;
+
+            }
+            _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = totalUsuarios, IsMedido = true, Mes = int.Parse(mes), Year = int.Parse(year), type = "anteriores" });
+            Jobject = currentNewAccounts.Where(x => JObject.Parse(JsonConvert.SerializeObject(x))["tipo"].ToString() == "mixto").First();
+            totalUsuarios = int.Parse(JObject.Parse(JsonConvert.SerializeObject(Jobject))["usuarios"].ToString());
+            if (AccumulatedO != null)
+            {
+                totalUsuarios = totalUsuarios + AccumulatedO.Accumulated;
+            }
+            _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = totalUsuarios, IsMedido = true, Mes = int.Parse(mes), Year = int.Parse(year), type = "mixto" });
+            _context.SaveChanges();
+
+
+        }
+
+        [HttpPost("runSpAsignarDeb")]
+        public async Task<IActionResult> ExectSpFormatoss()
+        {
+
+            var body = "";
+            List<object> Lresult = null;
+            object result = null;
+
+
+            try
+            {
+                using (var reader = new StreamReader(Request.Body))
                 {
-                    newMes = "12";
-                    newYear = (int.Parse(year) - 1).ToString();
+                    body = reader.ReadToEnd();
+
                 }
-
-
-                var AccumulatedD = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "actuales" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
-
-                var AccumulatedND = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "anteriores" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
-
-                var AccumulatedO = _context.AccountsAccumulated.Where(x => x.IsMedido == true && x.type == "mixto" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
-
-                newMes = (int.Parse(mes) + 1).ToString();
-                newYear = year;
-
-
-                var Jobject = currentNewAccounts.Where(x => JObject.Parse(JsonConvert.SerializeObject(x))["tipo"].ToString() == "actuales").First();
-                int totalUsuarios = int.Parse(JObject.Parse(JsonConvert.SerializeObject(Jobject))["usuarios"].ToString());
-                if (AccumulatedD != null)
+                List<SPParameters> parameters;
+                // var saa = JObject.Parse(body);
+                if (string.IsNullOrEmpty(body))
                 {
-                    totalUsuarios = totalUsuarios + AccumulatedD.Accumulated;
-
+                    parameters = new List<SPParameters>();
                 }
-                _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = totalUsuarios, IsMedido = true, Mes = int.Parse(mes), Year = int.Parse(year), type = "actuales" });
-                Jobject= currentNewAccounts.Where(x => JObject.Parse(JsonConvert.SerializeObject(x))["tipo"].ToString() == "anteriores").First();
-                totalUsuarios = int.Parse(JObject.Parse(JsonConvert.SerializeObject(Jobject))["usuarios"].ToString());
-                if (AccumulatedND != null)
+                else
                 {
-                    totalUsuarios = totalUsuarios + AccumulatedND.Accumulated;
-
+                    parameters = JsonConvert.DeserializeObject<List<SPParameters>>(body);
                 }
-                _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = totalUsuarios, IsMedido = true, Mes = int.Parse(mes), Year = int.Parse(year), type = "anteriores" });
-                Jobject = currentNewAccounts.Where(x => JObject.Parse(JsonConvert.SerializeObject(x))["tipo"].ToString() == "mixto").First();
-                totalUsuarios = int.Parse(JObject.Parse(JsonConvert.SerializeObject(Jobject))["usuarios"].ToString());
-                if (AccumulatedO != null)
-                {
-                    totalUsuarios = totalUsuarios + AccumulatedO.Accumulated;
-                }
-                _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = totalUsuarios, IsMedido = true, Mes = int.Parse(mes), Year = int.Parse(year), type = "mixto" });
-                _context.SaveChanges();
+                parameters.Add(new SPParameters { Key = "error", Size = 200, Direccion = ParameterDirection.InputOutput, DbType = DbType.String, Value = "" });
+                result = await new RunSP(this, _context).runProcedure("OrderWork_Update", parameters);
+                return Ok(result);
 
-            
+
+            }
+            catch (Exception e)
+            {
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"{e.ToMessageAndCompleteStacktrace()}") });
+            }
+
+
         }
 
 
     }
-
-
-
 
 
 }
