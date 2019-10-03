@@ -421,7 +421,6 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(data);
         }
 
-
         [HttpGet("GetReasonCatalog/{type}")]
         public async Task<IActionResult> GetReasonCatalog([FromRoute] string type)
         {
@@ -435,7 +434,6 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, new { error = e.Message });
             }
         }
-
 
         [HttpPost("SetReasonCatalogs/{orderWorkId}")]
         public async Task<IActionResult> SetReasonCatalogs([FromRoute] int orderWorkId, [FromBody] List<int> idsReason)
@@ -475,16 +473,20 @@ namespace Siscom.Agua.Api.Controllers
             DateTime.TryParse(dateEnd, out DEnd);
             try
             {
-                //var generadas = _context.OrderWorks.Where(g => g.Status == "EOT01").ToListAsync();
                 var generadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT01").ToListAsync();
                 var asignadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT02").ToListAsync();
                 var ejecutadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT03").ToListAsync();
                 var noEjecutada = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT04").ToListAsync();
 
                 var list = await Task.WhenAll(generadas, asignadas, ejecutadas, noEjecutada);
-                //var list = new { generadas, asignadas, ejecutadas, noEjecutada };
-
-                return Ok(list);
+                if (list[0].Count == 0 && list[1].Count == 0 && list[2].Count == 0 && list[3].Count == 0)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se encontraron datos en el rango de fecha especificado, posiblemente es una fecha que aun no ha llegado o no hay registros actualmente" });
+                } else
+                {
+                    return Ok(list);
+                }
+                
             }
             catch (Exception error)
             {
@@ -498,7 +500,6 @@ namespace Siscom.Agua.Api.Controllers
             try
             {
                 var orderwork = _context.TechnicalStaffs.Include(x => x.OrderWorks).ToList();
-                //var orderwork = _context.OrderWorks.Include(x => x.TechnicalStaff).Where(x => x.DateOrder.Date >= Dstart && x.DateOrder.Date <= Dend).ToList();
                 return Ok(orderwork);
             }
             catch (Exception error)
