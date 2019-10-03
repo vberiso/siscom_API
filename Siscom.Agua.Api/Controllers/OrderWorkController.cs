@@ -161,43 +161,51 @@ namespace Siscom.Agua.Api.Controllers
                 bool canCreate;
                 foreach (string id in ids)
                 {
-                    //Aggrement = _context.Agreements.Where(x => x.Id == int.Parse(id))
-                    //    .Include(x => x.Clients)
-                    //    .Include(x => x.OrderWork)
-                    //    .First();
-                    //canCreate = true;
+                    canCreate = true;
+                    if (data["typeOrder"].ToString() == "OT003")
+                    {
+                        Aggrement = _context.Agreements.Where(x => x.Id == int.Parse(id))
+                            .Include(x => x.Clients)
+                            .Include(x => x.OrderWork)
+                            .Include(x => x.Debts)
+                            .First();
 
-                    //OrderWork = Aggrement.OrderWork.Where(x => x.Type == data["typeOrder"].ToString() && (x.Status == "EOT02" || x.Status == "EOT01")).FirstOrDefault();
-                    //if (OrderWork != null)
-                    //{
-                    //    canCreate = false;
-                    //}
-                    //else if (Aggrement.TypeStateServiceId == 4)
-                    //{
-                    //    canCreate = false;
-                    //}
-                    //if (canCreate)
-                    //{
-                    //    var client = Aggrement.Clients.Where(x => x.TypeUser == "CLI01").First();
-                    //    string tipeOrder = "";
-                    //    switch (data["typeOrder"].ToString())
-                    //    {
-                    //        case "OT001":
-                    //            tipeOrder = "Inspeccion / Verificacion";
-                    //            break;
-                    //        case "OT002":
-                    //            tipeOrder = "Corte";
-                    //            break;
-                    //        case "OT003":
-                    //            tipeOrder = "Reconexion";
-                    //            break;
-                    //        case "OT004":
-                    //            tipeOrder = "Mantenimiento / Sustitucion";
-                    //            break;
-                    //    }
-                    //    msgs.Add($"La cuenta {Aggrement.Account} con nombre de cliente {client.Name} {client.LastName} no se pudo generar una orden de tipo {tipeOrder}");
-                    //    continue;
-                    //}
+
+                        OrderWork = Aggrement.OrderWork.Where(x => x.Type == "OT003" && (x.Status == "EOT02" || x.Status == "EOT01")).FirstOrDefault();
+                        var deb = Aggrement.Debts.Where(x => x.Status == "ED001" || x.Status == "ED011" || x.Status == "ED007" || x.Status == "ED004").ToList();
+                        if (OrderWork != null && deb.Count() > 0)
+                        {
+                            canCreate = false;
+                        }
+
+                        //else if (deb.Count() > 0)
+                        //{
+                        //    canCreate = false;
+                        //}
+
+                        if (!canCreate)
+                        {
+                            var client = Aggrement.Clients.Where(x => x.TypeUser == "CLI01").First();
+                            string tipeOrder = "";
+                            switch (data["typeOrder"].ToString())
+                            {
+                                case "OT001":
+                                    tipeOrder = "Inspeccion / Verificacion";
+                                    break;
+                                case "OT002":
+                                    tipeOrder = "Corte";
+                                    break;
+                                case "OT003":
+                                    tipeOrder = "Reconexion";
+                                    break;
+                                case "OT004":
+                                    tipeOrder = "Mantenimiento / Sustitucion";
+                                    break;
+                            }
+                            msgs.Add($"La cuenta {Aggrement.Account} con nombre de cliente {client.Name} {client.LastName} no se pudo generar una orden de tipo {tipeOrder}");
+                            continue;
+                        }
+                    }
                     OrderWork = new OrderWork()
                     {
 
@@ -236,9 +244,9 @@ namespace Siscom.Agua.Api.Controllers
 
 
                 }
-                if(msgs.Count > 0)
+                if (msgs.Count > 0)
                 {
-                    return StatusCode(StatusCodes.Status200OK, new {reazon = msgs, msg = "Algunas ordenes no se pudieron generar", id = OrderWork.Id });
+                    return StatusCode(StatusCodes.Status200OK, new { reazon = msgs, msg = "Algunas ordenes no se pudieron generar", id = "" });
                 }
 
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Orden generada correctamente", id = OrderWork.Id });
