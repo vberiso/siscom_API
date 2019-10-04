@@ -110,7 +110,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
         }
-
+        
         [HttpPost("OrderWorks/GetByIds")]
         public async Task<IActionResult> GetListOrderWorks([FromBody] List<int> list)
         {
@@ -144,7 +144,36 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        [HttpGet("FromAccount/{account}")]
+        public async Task<IActionResult> GetFromAccount([FromRoute] string account)
+        {            
+            try
+            {  
+                var agreement = _context.Agreements.Where(a => a.Account == account)
+                    .Include(x => x.TypeIntake)
+                    .Include(x => x.TypeConsume)
+                    .Include(x => x.OrderWork)
+                        .ThenInclude(x => x.TechnicalStaff)
+                    .Include(x => x.Clients)
+                    .Include(x => x.Addresses)
+                        .ThenInclude(x => x.Suburbs)
+                            .ThenInclude(x => x.Towns)
+                                .ThenInclude(x => x.States)
+                                    .ThenInclude(x => x.Countries)
+                    .First();
 
+                if (agreement == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(agreement);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("error:" + ex.Message);
+            }
+        }
 
         [HttpPost("OrderWorks")]
         public async Task<IActionResult> Create([FromBody] object collection)
