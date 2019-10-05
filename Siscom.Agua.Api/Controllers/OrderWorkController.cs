@@ -502,10 +502,10 @@ namespace Siscom.Agua.Api.Controllers
             DateTime.TryParse(dateEnd, out DEnd);
             try
             {
-                var generadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT01").ToListAsync();
-                var asignadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT02").ToListAsync();
-                var ejecutadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT03").ToListAsync();
-                var noEjecutada = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd && g.Status == "EOT04").ToListAsync();
+                var generadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd.AddDays(1) && g.Status == "EOT01").ToListAsync();
+                var asignadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd.AddDays(1) && g.Status == "EOT02").ToListAsync();
+                var ejecutadas = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd.AddDays(1) && g.Status == "EOT03").ToListAsync();
+                var noEjecutada = _context.OrderWorks.Where(g => g.DateOrder >= Dstart && g.DateOrder <= DEnd.AddDays(1) && g.Status == "EOT04").ToListAsync();
 
                 var list = await Task.WhenAll(generadas, asignadas, ejecutadas, noEjecutada);
                 if (list[0].Count == 0 && list[1].Count == 0 && list[2].Count == 0 && list[3].Count == 0)

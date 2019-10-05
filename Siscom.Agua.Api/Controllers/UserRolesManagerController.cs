@@ -184,11 +184,12 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("AllUsers")]
         public async Task<IActionResult> GetAllUsers()
         {
+            try
+            {
+                List<ViewUsersVM> newlistUsers = new List<ViewUsersVM>();
+                var users = _context.Users.ToList();
 
-            List<ViewUsersVM> newlistUsers = new List<ViewUsersVM>();
-            var users = _context.Users.ToList();
-
-            foreach (var list in users)
+                foreach (var list in users)
             {
                 if (list.DivitionId == 0)
                 {
@@ -232,7 +233,7 @@ namespace Siscom.Agua.Api.Controllers
                             lastname = list.LastName,
                             secondlastname = list.SecondLastName,
                             name = list.Name,
-                            divitionName = divition.Name,
+                            divitionName = divition?.Name,
                             id = list.Id,
                             nameRol = nameRol.Name,
                         });
@@ -245,7 +246,13 @@ namespace Siscom.Agua.Api.Controllers
                     //newlistUsers.rolName = "prueba";
                 }
             }
-            return Ok(newlistUsers);
+                return Ok(newlistUsers);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e);
+            }
+            
         }
 
         [HttpPut("changeRol/{id}")]
