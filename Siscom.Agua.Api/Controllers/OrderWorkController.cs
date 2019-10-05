@@ -39,13 +39,19 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet("OrderWorks/{id?}")]
-        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo = null, [FromQuery] bool withOrder = false)
+        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo = null, [FromQuery] bool withOrder = false, [FromQuery] string account= null)
         {
             if (id == null)
             {
-                System.Linq.IQueryable<OrderWork> query = _context.OrderWorks;
+                System.Linq.IQueryable<OrderWork> query = _context.OrderWorks.Include(x => x.Agreement);
+                
                 if (folio == null)
                 {
+                  
+                    if (account != null)
+                    {
+                        query = query.Where(x => x.Agreement.Account == account);
+                    }
                     if (fecha != null)
                     {
                         fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
@@ -69,9 +75,9 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     query = query.Where(x => x.Folio == folio);
                 }
-                query = query.Include(x => x.Agreement)
 
-                        .OrderBy(x => x.Folio);
+
+                query = query.OrderBy(x => x.Folio);
 
                 var OrderWorks = query.ToList();
 
