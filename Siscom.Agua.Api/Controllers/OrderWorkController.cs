@@ -25,8 +25,8 @@ namespace Siscom.Agua.Api.Controllers
 {
     [Route("api/[controller]")]
     [Produces("application/json")]
-    //[ApiController]
-    //[Authorize]
+    [ApiController]
+    [Authorize]
     public class OrderWorkController : ControllerBase
     {
 
@@ -310,13 +310,18 @@ namespace Siscom.Agua.Api.Controllers
                     };
                     _context.OrderWorkStatus.Add(Status);
                 }
-                int id_agreement = OrderWork.Agreement.Id;
-                OrderWork.Agreement = null;
+                int id_agreement = 0; ;
+                if (OrderWork.Agreement != null)
+                {
+                     id_agreement = OrderWork.Agreement.Id;
+                    OrderWork.Agreement = null;
+                }
+                
                 
                 _context.OrderWorks.Update(OrderWork);
                 //_context.Entry(OrderWork).State = EntityState.Modified;
                 _context.SaveChanges();
-                if ((OrderWork.Type == "OT002" || OrderWork.Type == "OT003") && OrderWork.Status == "EOT03")
+                if ((OrderWork.Type == "OT002" || OrderWork.Type == "OT003") && OrderWork.Status == "EOT03" && id_agreement!=0)
                 {
                     var agreement = _context.Agreements.Where(x => x.Id == id_agreement).First();
                     agreement.TypeStateServiceId = OrderWork.Type == "OT002" ? 3 : 1;
