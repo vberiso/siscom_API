@@ -310,10 +310,20 @@ namespace Siscom.Agua.Api.Controllers
                     };
                     _context.OrderWorkStatus.Add(Status);
                 }
+                int id_agreement = OrderWork.Agreement.Id;
                 OrderWork.Agreement = null;
+                
                 _context.OrderWorks.Update(OrderWork);
                 //_context.Entry(OrderWork).State = EntityState.Modified;
                 _context.SaveChanges();
+                if ((OrderWork.Type == "OT002" || OrderWork.Type == "OT003") && OrderWork.Status == "EOT03")
+                {
+                    var agreement = _context.Agreements.Where(x => x.Id == id_agreement).First();
+                    agreement.TypeStateServiceId = OrderWork.Type == "OT002" ? 3 : 1;
+
+                    _context.Agreements.Update(agreement);
+                    _context.SaveChanges();
+                }
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Orden actualizada correctamente", id = OrderWork.Id });
             }
             catch (Exception ex)
