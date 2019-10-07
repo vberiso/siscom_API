@@ -310,7 +310,7 @@ namespace Siscom.Agua.Api.Controllers
                     };
                     _context.OrderWorkStatus.Add(Status);
                 }
-
+                OrderWork.Agreement = null;
                 _context.OrderWorks.Update(OrderWork);
                 //_context.Entry(OrderWork).State = EntityState.Modified;
                 _context.SaveChanges();
