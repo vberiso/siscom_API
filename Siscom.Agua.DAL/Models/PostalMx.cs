@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 
-namespace Siscom.Agua.Api.Model
+namespace Siscom.Agua.DAL.Models
 {
-    public class PostalMX
+    [Table("Postal_Mx")]
+    public class PostalMx
     {
-        public int IdPostalmx { get; set; }
-        public int DCodigo { get; set; }
-        public string DAsenta { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("IdPostalmx")]
+        public int Id { get; set; }
+        [Column("codigo"), StringLength(5)]
+        public string Codigo { get; set; }
+        [Column("asenta"), StringLength(5)]
+        public string Asenta { get; set; }
         public string DTipoAsenta { get; set; }
         public string DMunicipio { get; set; }
         public string DEstado { get; set; }
