@@ -23,9 +23,19 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/PostalMxes
         [HttpGet]
-        public IEnumerable<PostalMx> GetPostalMx()
+        //public IEnumerable<PostalMx> GetPostalMx()
+        public async Task<IActionResult> GetPostalMx()
         {
-            return _context.PostalMx;
+            try
+            {
+                var x = _context.PostalMx;
+                return Ok(x);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+            
         }
 
         // GET: api/PostalMxes/5

@@ -32,7 +32,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("oficina"), StringLength(5)]
         public int Oficina { get; set; }
         [Column("cod_cp"), StringLength(2)]
-        public int CCp { get; set; }
+        public int? CCp { get; set; }
         [Column("cod_tipo_asenta"), StringLength(2)]
         public int CTipoAsenta { get; set; }
         [Column("cod_municipio"), StringLength(3)]
@@ -42,6 +42,6 @@ namespace Siscom.Agua.DAL.Models
         [Column("zona"), StringLength(20)]
         public string Zona { get; set; }
         [Column("cve_ciudad"), StringLength(2)]
-        public int CveCiudad { get; set; }
+        public int? CveCiudad { get; set; }
     }
 }
