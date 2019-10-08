@@ -15,20 +15,33 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("codigo"), StringLength(5)]
         public string Codigo { get; set; }
-        [Column("asenta"), StringLength(5)]
+        [Column("asenta"), StringLength(150)]
         public string Asenta { get; set; }
-        public string DTipoAsenta { get; set; }
-        public string DMunicipio { get; set; }
-        public string DEstado { get; set; }
-        public string DCiudad { get; set; }
-        public int DCp { get; set; }
+        [Column("tipo_asenta"), StringLength(150)]
+        public string TipoAsenta { get; set; }
+        [Column("municipio"), StringLength(150)]
+        public string Municipio { get; set; }
+        [Column("estado"), StringLength(150)]
+        public string Estado { get; set; }
+        [Column("ciudad"), StringLength(150)]
+        public string Ciudad { get; set; }
+        [Column("cp"), StringLength(6)]
+        public int Cp { get; set; }
+        [Column("cod_estado"), StringLength(2)]
         public int CEstado { get; set; }
-        public int COficina { get; set; }
+        [Column("oficina"), StringLength(5)]
+        public int Oficina { get; set; }
+        [Column("cod_cp"), StringLength(2)]
         public int CCp { get; set; }
+        [Column("cod_tipo_asenta"), StringLength(2)]
         public int CTipoAsenta { get; set; }
-        public int CMnpio { get; set; }
+        [Column("cod_municipio"), StringLength(3)]
+        public int CMunicipio { get; set; }
+        [Column("id_asenta_cpcons"), StringLength(4)]
         public int IdAsentaCpcons { get; set; }
-        public string DZona { get; set; }
-        public int CCveCiudad { get; set; }
+        [Column("zona"), StringLength(20)]
+        public string Zona { get; set; }
+        [Column("cve_ciudad"), StringLength(2)]
+        public int CveCiudad { get; set; }
     }
 }
