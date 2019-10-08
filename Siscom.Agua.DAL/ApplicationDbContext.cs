@@ -220,6 +220,8 @@ namespace Siscom.Agua.DAL
         /// 
         public DbSet<AccountsAccumulated> AccountsAccumulated { get; set; }
 
+        public DbSet<PostalMx> PostalMx { get; set; }
+
 
         public ApplicationDbContext()
         {
