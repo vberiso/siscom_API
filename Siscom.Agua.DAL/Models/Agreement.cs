@@ -39,7 +39,8 @@ namespace Siscom.Agua.DAL.Models
         public string TypeAgreement { get; set; }
         [Column("route"), StringLength(50), Required]
         public string Route { get; set; }
-
+        [Column("token"), StringLength(11)]
+        public string Token { get; set; }
         //[ForeignKey("TypeService")]
         public int TypeServiceId { get; set; }
         public TypeService TypeService { get; set; }
