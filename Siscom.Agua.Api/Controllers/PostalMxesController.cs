@@ -47,7 +47,7 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var postalMx = await _context.PostalMx.FindAsync(id);
+            var postalMx = _context.PostalMx.Where(x => x.Cp == id).ToList();
 
             if (postalMx == null)
             {
