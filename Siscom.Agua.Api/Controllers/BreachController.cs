@@ -613,7 +613,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             var value = await _context.BreachLists.Where(b => b.Id == list.BreachListId).FirstOrDefaultAsync();
 
-                            value.HaveBonification = false;
+                            //value.HaveBonification = false;
 
 
                             var getLicense = await _context.Breaches.Where(z => z.LicensePlate.Contains(breanch.LicensePlate)).ToListAsync();
