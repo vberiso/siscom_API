@@ -40,14 +40,14 @@ namespace Siscom.Agua.Api.Controllers
 
         // GET: api/PostalMxes/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPostalMx([FromRoute] int id)
+        public async Task<IActionResult> GetPostalMx([FromRoute] string id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var postalMx = _context.PostalMx.Where(x => x.Cp == id).ToList();
+            var postalMx = _context.PostalMx.Where(x => x.Codigo == id).ToList();
 
             if (postalMx == null)
             {
