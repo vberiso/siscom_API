@@ -474,14 +474,19 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
+            var search = name + '%';
 
             if (val == 1)
             {
-                var orderSale = _context.TaxUsers
-                                     .Include(x => x.TaxAddresses)
-                                     .Include(z => z.OrderSales)
-                                     .Where(x => x.Name == name)
-                                     .ToList();
+                var orderSale = from s in _context.TaxUsers
+                                where EF.Functions.Like(s.Name, search)
+                                select s;
+
+                /*_context.TaxUsers
+                                 .Include(x => x.TaxAddresses)
+                                 .Include(z => z.OrderSales)
+                                 .Where(x => x.Name == name)
+                                 .ToList();*/
 
                 if (orderSale == null)
                 {
@@ -493,11 +498,15 @@ namespace Siscom.Agua.Api.Controllers
             }
             else
             {
-                var orderSale = _context.TaxUsers
-                                   .Include(x => x.TaxAddresses)
-                                   .Include(z => z.OrderSales)
-                                   .Where(x => x.Name == name && x.IsProvider == true)
-                                   .ToList();
+                var orderSale = from s in _context.TaxUsers
+                                where EF.Functions.Like(s.Name, search)
+                                select s;
+
+                /*_context.TaxUsers
+                               .Include(x => x.TaxAddresses)
+                               .Include(z => z.OrderSales)
+                               .Where(x => x.Name == name && x.IsProvider == true)
+                               .ToList();*/
 
                 if (orderSale == null)
                 {
