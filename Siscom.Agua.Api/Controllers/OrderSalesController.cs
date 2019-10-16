@@ -445,12 +445,15 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-           
+            var search = rfc + '%';
 
-            var orderSale = await _context.TaxUsers
+            var orderSale = from s in _context.TaxUsers
+                            where EF.Functions.Like(s.RFC, search)
+                            select s;
+
+                /*_context.TaxUsers
                                           .Include(x => x.TaxAddresses)
-                                          .Where(x => x.RFC == rfc)
-                                          .FirstOrDefaultAsync();
+                                          .Any(x => x.RFC == rfc).ToString();*/
 
             if (orderSale == null)
             {
@@ -513,19 +516,22 @@ namespace Siscom.Agua.Api.Controllers
         [Authorize]
         public IActionResult GetOrderSalesRFC([FromRoute] string rfc, int val)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
+            var search = rfc + '%';
 
             if (val == 1)
             {
-                var orderSale = _context.TaxUsers
-                                     .Include(x => x.TaxAddresses)
-                                     .Include(z => z.OrderSales)
-                                     .Where(x => x.RFC == rfc)
-                                     .ToList();
+                
+
+                var orderSale = from s in _context.TaxUsers
+                                where EF.Functions.Like(s.RFC, search)
+                                select s;
+
+                /*_context.TaxUsers
+                                 .Include(x => x.TaxAddresses)
+                                 .Include(z => z.OrderSales)
+                                 .Where(x => x.RFC == rfc)
+                                 .ToList();*/
 
                 if (orderSale == null)
                 {
@@ -537,11 +543,16 @@ namespace Siscom.Agua.Api.Controllers
             }
             else
             {
-                var orderSale = _context.TaxUsers
+
+                var orderSale = from s in _context.TaxUsers
+                                where EF.Functions.Like(s.RFC, search) && s.IsProvider == true
+                                select s;
+
+                /*_context.TaxUsers
                                    .Include(x => x.TaxAddresses)
                                    .Include(z => z.OrderSales)
                                    .Where(x => x.RFC == rfc && x.IsProvider == true)
-                                   .ToList();
+                                   .ToList();*/
 
                 if (orderSale == null)
                 {
