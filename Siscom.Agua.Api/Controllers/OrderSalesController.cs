@@ -445,15 +445,14 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var search = rfc + '%';
 
-            var orderSale = from s in _context.TaxUsers
+            var orderSale = _context.TaxUsers.Where(x => x.RFC == rfc)
+                                          .Include(x => x.TaxAddresses).FirstOrDefault();
+
+
+                /*from s in _context.TaxUsers
                             where EF.Functions.Like(s.RFC, search)
-                            select s;
-
-                /*_context.TaxUsers
-                                          .Include(x => x.TaxAddresses)
-                                          .Any(x => x.RFC == rfc).ToString();*/
+                            select s;*/
 
             if (orderSale == null)
             {
