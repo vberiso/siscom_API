@@ -91,6 +91,7 @@ namespace Siscom.Agua.DAL
         public DbSet<TransactionFolio> TransactionFolios { get; set; }
         public DbSet<TransactionDetail> TransactionDetails { get; set; }
         public DbSet<CancelAuthorization> CancelAuthorization { get; set; }
+        public DbSet<TransactionCancellationRequest> TransactionCancellationRequests { get; set; }
 
         /// <summary> 
         /// Groups

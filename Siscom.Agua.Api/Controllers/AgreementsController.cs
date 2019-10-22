@@ -552,6 +552,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
                                     ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
+                                    ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -591,7 +592,8 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
-                                            NumDerivades = Convert.ToInt32(result[9])
+                                            NumDerivades = Convert.ToInt32(result[9]),
+                                            Debit = Convert.ToInt32(result[10])
                                         });
                                     }
                                 }
@@ -635,6 +637,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
                                     ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
+                                    ",(Select ISNULL(Sum(D.amount - D.on_account),0) from [dbo].Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from [dbo].Status St Where St.GroupStatusId = 4)) Debit " + 
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -660,7 +663,8 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
-                                            NumDerivades = Convert.ToInt32(result[9])
+                                            NumDerivades = Convert.ToInt32(result[9]),
+                                            Debit = Convert.ToInt32(result[10])
                                         });
                                     }
                                 }
@@ -705,6 +709,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
                                     ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
+                                    ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -729,7 +734,8 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
-                                            NumDerivades = Convert.ToInt32(result[9])
+                                            NumDerivades = Convert.ToInt32(result[9]),
+                                            Debit = Convert.ToInt32(result[10])
                                         });
                                     }
                                 }
@@ -773,6 +779,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
                                     ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
+                                    ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -797,7 +804,8 @@ namespace Siscom.Agua.Api.Controllers
                                             WithDiscount = Convert.ToBoolean(result[6]),
                                             Address = result[7].ToString(),
                                             Type = result[8].ToString(),
-                                            NumDerivades = Convert.ToInt32(result[9])
+                                            NumDerivades = Convert.ToInt32(result[9]),
+                                            Debit = Convert.ToInt32(result[10])
                                         });
                                     }
                                 }

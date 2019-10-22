@@ -17,5 +17,6 @@ namespace Siscom.Agua.Api.Model
         public string Status { get; set; }
         public string Type { get; set; }
         public int    NumDerivades { get; set; }
+        public decimal Debit { get; set; }
     }
 }
