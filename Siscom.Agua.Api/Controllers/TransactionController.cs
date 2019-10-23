@@ -316,7 +316,7 @@ namespace Siscom.Agua.Api.Controllers
 
             lstMovs.ToList().ForEach(x =>
             {
-                if (x.Operacion == "Cobro" || x.Operacion == "Cancelación")
+                if (x.Operacion == "Cobro" || x.Operacion.Contains("Cancelaci"))
                 {
                     x.HaveInvoice = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().HaveTaxReceipt;
                     x.IdPayment = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().Id;
