@@ -55,6 +55,12 @@ namespace Siscom.Agua.Api.Controllers
                         item.Status = "ET003";
                         _context.Entry(item).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
+
+                        var tmpPay = _context.Payments.FirstOrDefault(p => p.Id == item.PaymentId);
+                        tmpPay.HaveTaxReceipt = false;
+                        _context.Entry(tmpPay).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+
                         refresh++;
                     }
                     count++;

@@ -354,7 +354,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 command.CommandText = "[dbo].[sp_DebtsAyunt]";
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add(new SqlParameter("@idColonias", IdsCol));
+                command.Parameters.Add(new SqlParameter("@idColonias", IdsCol.Contains("Todos") ? "" : IdsCol));
+                command.Parameters.Add(new SqlParameter("@todos", IdsCol.Contains("Todos") ? 1 : 0 ));
                 command.CommandTimeout = 900;
 
                 this._context.Database.OpenConnection();
@@ -375,7 +376,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 command.CommandText = "[dbo].[sp_DebtsAgua]";
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add(new SqlParameter("@idColonias", IdsCol));
+                command.Parameters.Add(new SqlParameter("@idColonias", IdsCol.Contains("Todos") ? "" : IdsCol));
+                command.Parameters.Add(new SqlParameter("@todos", IdsCol.Contains("Todos") ? 1 : 0));
                 command.CommandTimeout = 900;
 
                 this._context.Database.OpenConnection();

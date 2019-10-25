@@ -53,6 +53,29 @@ namespace Siscom.Agua.Api.Controllers
             
         }
 
+        [HttpGet("all")]
+        public IEnumerable<SuburbVM> GetSuburbsAll(int TownsId)
+        {
+            if (_context.Towns.Where(x => x.Id == TownsId).SingleOrDefault() != null)
+            {
+                var a = _context.Suburbs.Include(r => r.Regions)
+                                        .Include(c => c.Clasifications)                                        
+                                        .Select(x => new SuburbVM
+                                        {
+                                            Id = x.Id,
+                                            Name = x.Name,
+                                            ClasificationId = x.Clasifications.Id,
+                                            RegionId = x.Regions.Id,
+                                            SuburbId = x.Towns.StateId
+                                        }).ToList().OrderByDescending(x => x.Name);
+                return a;
+            }
+            else
+            {
+                return Enumerable.Empty<SuburbVM>();
+            }
+        }
+
         // GET: api/Suburbs/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSuburb([FromRoute] int id)
