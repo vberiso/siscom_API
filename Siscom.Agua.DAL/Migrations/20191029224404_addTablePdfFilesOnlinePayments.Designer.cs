@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191029224404_addTablePdfFilesOnlinePayments")]
+    partial class addTablePdfFilesOnlinePayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2108,7 +2110,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 10, 30, 18, 5, 30, 876, DateTimeKind.Local).AddTicks(1104));
+                        .HasDefaultValue(new DateTime(2019, 10, 29, 16, 44, 3, 899, DateTimeKind.Local).AddTicks(3093));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2128,39 +2130,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("BranchOfficeId");
 
                     b.ToTable("Folio");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.FolioAccountStatement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_folio_account_statement")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("is_active")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Prefix")
-                        .HasColumnName("prefix")
-                        .HasMaxLength(3);
-
-                    b.Property<int>("Secuential")
-                        .HasColumnName("secuential");
-
-                    b.Property<string>("Suffixes")
-                        .HasColumnName("suffixes")
-                        .HasMaxLength(3);
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnName("type")
-                        .HasMaxLength(5);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FolioAccountStatements");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.FolioOrderSale", b =>

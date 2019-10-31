@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191029000732_AddTablesPartialPayments")]
+    partial class AddTablesPartialPayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2108,7 +2110,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 10, 30, 18, 5, 30, 876, DateTimeKind.Local).AddTicks(1104));
+                        .HasDefaultValue(new DateTime(2019, 10, 28, 18, 7, 30, 907, DateTimeKind.Local).AddTicks(557));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2128,39 +2130,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("BranchOfficeId");
 
                     b.ToTable("Folio");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.FolioAccountStatement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_folio_account_statement")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("is_active")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Prefix")
-                        .HasColumnName("prefix")
-                        .HasMaxLength(3);
-
-                    b.Property<int>("Secuential")
-                        .HasColumnName("secuential");
-
-                    b.Property<string>("Suffixes")
-                        .HasColumnName("suffixes")
-                        .HasMaxLength(3);
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnName("type")
-                        .HasMaxLength(5);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FolioAccountStatements");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.FolioOrderSale", b =>
@@ -2520,42 +2489,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("notification_files");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.OnlinePaymentFile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("online_payment_file_id")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Account")
-                        .HasColumnName("account");
-
-                    b.Property<DateTime>("DateGenerated")
-                        .HasColumnName("date_generated");
-
-                    b.Property<string>("Folio")
-                        .HasColumnName("folio");
-
-                    b.Property<int>("Month")
-                        .HasColumnName("month");
-
-                    b.Property<byte[]>("PDFInvoce")
-                        .HasColumnName("pdf_invoce");
-
-                    b.Property<string>("Token")
-                        .HasColumnName("token");
-
-                    b.Property<int>("Year")
-                        .HasColumnName("year");
-
-                    b.Property<int>("idAgreement")
-                        .HasColumnName("id_agreement");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("online_payment_file");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.OrderParameters", b =>

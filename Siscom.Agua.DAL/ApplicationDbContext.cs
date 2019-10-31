@@ -214,6 +214,7 @@ namespace Siscom.Agua.DAL
 
         public DbSet<ReasonCatalog> ReasonCatalog { get; set; }
         public DbSet<OrderWorkReasonCatalog> OrderWorkReasonCatalog { get; set; }
+        public DbSet<FolioAccountStatement> FolioAccountStatements { get; set; }
 
         /// <summary>
         /// Otros
@@ -223,6 +224,20 @@ namespace Siscom.Agua.DAL
 
         public DbSet<PostalMx> PostalMx { get; set; }
 
+        /// <summary>
+        /// Convenios
+        /// </summary>
+        public DbSet<PartialPayment> PartialPayments { get; set; }
+        public DbSet<PartialPaymentDetail> PartialPaymentDetails { get; set; }
+        public DbSet<PartialPaymentDetailStatus> PartialPaymentDetailStatuses { get; set; }
+        public DbSet<PartialPaymentDetailConcept> PartialPaymentDetailConcepts { get; set; }
+        public DbSet<PartialPaymentDebt> PartialPaymentDebts { get; set; }
+
+        /// <summary>
+        /// PDFPaymentOnline
+        /// </summary>
+        /// 
+        public DbSet<OnlinePaymentFile> OnlinePaymentFiles { get; set; }
 
         public ApplicationDbContext()
         {
@@ -803,7 +818,12 @@ namespace Siscom.Agua.DAL
             builder.Entity<FolioOrderWork>()
                   .Property(x => x.IsActive)
                   .HasDefaultValue(true);
+            #endregion
 
+            #region FolioAccountStatement           
+            builder.Entity<FolioAccountStatement>()
+                  .Property(x => x.IsActive)
+                  .HasDefaultValue(true);
             #endregion
 
             #region INPC
@@ -1037,6 +1057,92 @@ namespace Siscom.Agua.DAL
             builder.Entity<PaymentDetail>()
                    .Property(x => x.Tax)
                    .HasDefaultValue(0);
+            #endregion
+
+            #region PartialPayment
+                builder.Entity<PartialPayment>()
+                       .Property(p => p.Amount)
+                       .HasColumnType("decimal(18, 2)");
+
+                builder.Entity<PartialPayment>()
+                       .Property(p => p.InitialPayment)
+                       .HasColumnType("decimal(18, 2)");
+
+                builder.Entity<PartialPayment>()
+                       .Property(x => x.ExpirationDate)
+                       .HasColumnType("date");
+
+                builder.Entity<PartialPayment>()
+                       .Property(x => x.FromDate)
+                       .HasColumnType("date");
+
+                builder.Entity<PartialPayment>()
+                       .Property(x => x.UntilDate)
+                       .HasColumnType("date");
+
+                builder.Entity<PartialPayment>()
+                       .HasOne<Agreement>(a => a.Agreement)
+                       .WithMany(s => s.PartialPayments)
+                       .HasForeignKey(s => s.AgreementId);
+
+            #endregion
+
+            #region PartialPaymentDetail
+                builder.Entity<PartialPaymentDetail>()
+                    .Property(p => p.Amount)
+                    .HasColumnType("decimal(18, 2)");
+
+                builder.Entity<PartialPaymentDetail>()
+                       .Property(p => p.OnAccount)
+                       .HasColumnType("decimal(18, 2)");
+
+                builder.Entity<PartialPaymentDetail>()
+                       .Property(p => p.Amount)
+                       .HasColumnType("decimal(18, 2)");
+
+                builder.Entity<PartialPaymentDetail>()
+                       .HasOne<PartialPayment>(a => a.PartialPayment)
+                       .WithMany(s => s.PartialPaymentDetails)
+                       .HasForeignKey(s => s.PartialPaymentId);
+            #endregion
+
+            #region PartialPaymentDetailStatus
+                builder.Entity<PartialPaymentDetailStatus>()
+                       .HasOne<PartialPaymentDetail>(a => a.PartialPaymentDetail)
+                       .WithMany(s => s.PartialPaymentDetailStatuses)
+                       .HasForeignKey(s => s.PartialPaymentDetailId);
+
+            #endregion
+
+            #region PartialPaymentDetailConcept
+                builder.Entity<PartialPaymentDetailConcept>()
+                       .HasOne<PartialPaymentDetail>(a => a.PartialPaymentDetail)
+                       .WithMany(s => s.PartialPaymentDetailConcepts)
+                       .HasForeignKey(s => s.PartialPaymentDetailId);
+
+                builder.Entity<PartialPaymentDetailConcept>()
+                       .Property(p => p.Amount)
+                       .HasColumnType("decimal(18, 2)");
+
+                builder.Entity<PartialPaymentDetailConcept>()
+                       .Property(p => p.OnAccount)
+                       .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region PartialPaymentDebt
+                builder.Entity<PartialPaymentDebt>()
+                       .HasOne<PartialPayment>(a => a.PartialPayment)
+                       .WithMany(s => s.PartialPaymentDebts)
+                       .HasForeignKey(s => s.PartialPaymentId);
+
+                builder.Entity<PartialPaymentDebt>()
+                           .Property(p => p.Amount)
+                           .HasColumnType("decimal(18, 2)");
+
+                builder.Entity<PartialPaymentDebt>()
+                       .Property(p => p.OnAccount)
+                       .HasColumnType("decimal(18, 2)");
+
             #endregion
 
             #region Product
