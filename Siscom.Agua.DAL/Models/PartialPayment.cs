@@ -46,6 +46,16 @@ namespace Siscom.Agua.DAL.Models
         public string Observations { get; set; }
         public int AgreementId { get; set; }
         public Agreement Agreement { get; set; }
+        [Column("signature_name"), StringLength(200)]
+        public string SignatureName { get; set; }
+        [Column("identification_card"), StringLength(200)]
+        public string IdentificationCard { get; set; }
+        [Column("identification_number"), StringLength(200)]
+        public string IdentificationNumber { get; set; }
+        [Column("email"), StringLength(200)]
+        public string Email { get; set; }
+        [Column("phone"), StringLength(200)]
+        public string Phone { get; set; }
         public ICollection<PartialPaymentDetail> PartialPaymentDetails { get; set; }
         public ICollection<PartialPaymentDebt> PartialPaymentDebts { get; set; }
     }
