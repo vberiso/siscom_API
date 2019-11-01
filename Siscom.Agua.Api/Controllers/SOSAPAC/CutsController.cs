@@ -141,17 +141,21 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             }
         }
 
-        [HttpGet("GetFiles")]
-        public async Task<IActionResult> GetFiles()
+        [HttpGet("GetFiles/{TypeFile?}")]
+        public async Task<IActionResult> GetFiles([FromRoute] string TypeFile = "FI001")
         {
-            return Ok(await _context.NotificationFiles.Select(x => new FileNotifications
+            var archivos = await _context.NotificationFiles.Select(x => new FileNotifications
             {
                 Id = x.Id,
                 FileName = x.FileName,
                 GenerationDate = x.GenerationDate,
                 UserName = x.UserName,
                 UserId = x.UserId,
-            }).OrderByDescending(x => x.GenerationDate).ToListAsync());
+                Folio = x.Folio,
+                TotalRecords = x.TotalRecords,
+                TypeFile = x.TypeFile
+            }).Where(x => x.TypeFile == TypeFile).OrderByDescending(x => x.GenerationDate).ToListAsync();
+            return Ok(archivos);
         }
 
 
@@ -165,7 +169,8 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 GenerationDate = x.GenerationDate,
                 UserName = x.UserName,
                 UserId = x.UserId,
-                PDFNotifications = x.PDFNotifications
+                PDFNotifications = x.PDFNotifications,
+                Folio = x.Folio
             }).FirstOrDefaultAsync());
         }
 
@@ -219,6 +224,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                     {
                         Notification.Add(await _context.Notifications.Select(x => new NotificationVM
                         {
+
                             Id = x.Id,
                             AgreementId = x.AgreementId,
                             Folio = x.Folio,
@@ -268,41 +274,186 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
            
         }
 
-        [HttpPost("AddFileResult")]
-        public async Task<IActionResult> addPDF(IFormFile AttachedFile)
+        [HttpPost("ayuntamiento")]
+        public async Task<IActionResult> PostNotificationsAyuntamiento([FromBody] string Agreements)
+        {
+            List<string> agreements = new List<string>(Agreements.Split(","));
+            List<object> LAgremments = new List<object>();
+            int idNotification = 0;
+            List<string> error = new List<string>();
+            try
+            {
+                List<string> statusDeuda = new List<string>() { "ED001", "ED004", "ED007", "ED011" };
+                foreach (var item in Agreements.Split(","))
+                {
+                    using (var command = _context.Database.GetDbConnection().CreateCommand())
+                    {
+                        command.CommandText = "[dbo].[generate_notification]";
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@id_agreement",
+                            DbType = DbType.Int32,
+                            Value = Convert.ToInt32(item)
+                        });
+
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@error",
+                            DbType = DbType.String,
+                            Size = 200,
+                            Direction = ParameterDirection.Output
+                        });
+                        //@IdNotification
+                        command.Parameters.Add(new SqlParameter
+                        {
+                            ParameterName = "@IdNotification",
+                            DbType = DbType.Int32,
+                            Direction = ParameterDirection.Output
+                        });
+
+                        this._context.Database.OpenConnection();
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            if (!string.IsNullOrEmpty(command.Parameters["@error"].Value.ToString()))
+                                error.Add("El contrado (ID: " + item + ") -> " + command.Parameters["@error"].Value.ToString());
+                            else
+                                idNotification = Convert.ToInt32(command.Parameters["@IdNotification"].Value.ToString());
+                        }
+                    }
+                    if (idNotification != 0)
+                    {
+                        var notifi = await _context.Notifications.Where(x => x.Id == idNotification).FirstOrDefaultAsync();
+
+                        var agre = await _context.Agreements
+                              .Include(x => x.Debts)
+                                    .ThenInclude(x => x.DebtDetails)
+                                 .Include(x => x.Addresses)
+                                        .ThenInclude(x => x.Suburbs)
+                                            .ThenInclude(x => x.Towns)
+                                                        .ThenInclude(x => x.States)
+                                .Include(x => x.Clients).Where(x => x.Id == int.Parse(item)).FirstOrDefaultAsync();
+                        agre.Debts = agre.Debts.Where(d => statusDeuda.Contains(d.Status)).ToList();
+                        agre.Clients = agre.Clients.Where(c => c.TypeUser == "CLI01").ToList();
+                        agre.Addresses = agre.Addresses.Where(a => a.TypeAddress == "DIR01").ToList();
+
+                        LAgremments.Add(new { agreement = agre, notifi,
+
+                            idNotification });
+                       
+                    }
+
+                    idNotification = 0;
+                }
+
+                if (error.Count > 0)
+                {
+                    if (agreements.Count != error.Count)
+                    {
+                        return StatusCode((int)TypeError.Code.PartialContent, new { Error = string.Format($"Se completaron {agreements.Count - error.Count} de {agreements.Count} de el proceso de notificación pero no se genero notificacion para las siguientes cuentas ID: [{string.Join(Environment.NewLine, error)}]") });
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo realizar el proceso de descuentos por las siguientes razones: [{string.Join(Environment.NewLine, error)}]") });
+                    }
+
+                }
+                else
+                {
+                    return Ok(LAgremments);
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = $"Agreement List: {Agreements}";
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción de notificaciones" });
+            }
+
+        }
+        [HttpPost("UPdatePDF/{idFile?}")]
+        public async Task<IActionResult> UPdatePDF(IFormFile AttachedFile, [FromRoute] string idFile )
+        {
+            var file = _context.NotificationFiles.Find(int.Parse(idFile));
+            if (AttachedFile != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+
+                    await AttachedFile.CopyToAsync(memoryStream);
+                    file.PDFNotifications = memoryStream.ToArray();
+                }
+                _context.SaveChanges();
+            }
+            return Ok();
+        }
+        [HttpPost("AddFileResult/{TypeFile?}/{TotalRecords?}")]
+        public async Task<IActionResult> addPDF(IFormFile AttachedFile, [FromRoute] string TypeFile = "FI001", [FromRoute] int TotalRecords = 0)
         {
             FileNotifications NotificationsData = null;
+            NotificationFiles file =null;
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     NotificationsData = JsonConvert.DeserializeObject<FileNotifications>(Request.Form["Data"].ToString());
-                    NotificationFiles file = new NotificationFiles();
+                    file = new NotificationFiles();
                     file.UserId = NotificationsData.UserId;
                     file.UserName = NotificationsData.UserName;
                     file.GenerationDate = NotificationsData.GenerationDate;
                     file.FileName = NotificationsData.FileName;
+                    file.TypeFile = TypeFile;
+                    file.TotalRecords = TotalRecords;
 
-                    using (var memoryStream = new MemoryStream())
+                    if (AttachedFile != null)
                     {
-                        await AttachedFile.CopyToAsync(memoryStream);
-                        file.PDFNotifications = memoryStream.ToArray();
+                        using (var memoryStream = new MemoryStream())
+                        {
+
+                            await AttachedFile.CopyToAsync(memoryStream);
+                            file.PDFNotifications = memoryStream.ToArray();
+                        }
                     }
 
                     await _context.NotificationFiles.AddAsync(file);
                     await _context.SaveChangesAsync();
+                    if (NotificationsData.notifications != null) {
+                        NotificationsData.notifications.ToList().ForEach(x =>
+                        {
+                            var notif = _context.Notifications.Find(x.Id);
+                            notif.NotificationFiles = file.Id;
+                            _context.Entry(notif).State = EntityState.Modified;
+                            _context.SaveChanges();
 
-                    NotificationsData.notifications.ToList().ForEach(x =>
+                        });
+                    }
+                    else
                     {
-                        var notif = _context.Notifications.Find(x.Id);
-                        notif.NotificationFiles = file.Id;
-                        _context.Entry(notif).State = EntityState.Modified;
-                        _context.SaveChanges();
+                        var Idnotifications = NotificationsData.IdNotification.Split(",").ToList();
+                        if (Idnotifications.Count >0) {
+                            Idnotifications.ForEach(x =>
+                            {
+                                var notif = _context.Notifications.Where(n => n.Id.ToString() == x).FirstOrDefault();
+                                if (notif != null)
+                                {
+                                    notif.NotificationFiles = file.Id;
+                                    _context.Entry(notif).State = EntityState.Modified;
+                                    _context.SaveChanges();
+                                }
 
-                    });
+                            });
+                        }
+                    }
                     scope.Complete();
                 }
-                return Ok();
+               
+                return Ok(file.Id);
             }
             catch (Exception e)
             {

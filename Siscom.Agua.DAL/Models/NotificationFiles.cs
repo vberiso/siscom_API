@@ -21,5 +21,14 @@ namespace Siscom.Agua.DAL.Models
         public string FileName { get; set; }
         [Column("pdf_notifications")]
         public byte[] PDFNotifications { get; set; }
+
+        [Column("type_file")]
+        public string TypeFile { get; set; }
+
+        [Column("folio")]
+        public string Folio { get; set; }
+
+        [Column("total_records")]
+        public int TotalRecords { get; set; }
     }
 }

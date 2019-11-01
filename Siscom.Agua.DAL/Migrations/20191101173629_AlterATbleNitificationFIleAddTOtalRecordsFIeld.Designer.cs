@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191101173629_AlterATbleNitificationFIleAddTOtalRecordsFIeld")]
+    partial class AlterATbleNitificationFIleAddTOtalRecordsFIeld
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2130,39 +2132,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Folio");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.FolioAccountStatement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_folio_account_statement")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("is_active")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Prefix")
-                        .HasColumnName("prefix")
-                        .HasMaxLength(3);
-
-                    b.Property<int>("Secuential")
-                        .HasColumnName("secuential");
-
-                    b.Property<string>("Suffixes")
-                        .HasColumnName("suffixes")
-                        .HasMaxLength(3);
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnName("type")
-                        .HasMaxLength(5);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FolioAccountStatements");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.FolioOrderSale", b =>
                 {
                     b.Property<int>("Id")
@@ -2505,11 +2474,22 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("file_name")
                         .HasMaxLength(200);
 
+                    b.Property<string>("Folio")
+                        .HasColumnName("folio");
+
                     b.Property<DateTime>("GenerationDate")
                         .HasColumnName("generation_date");
 
                     b.Property<byte[]>("PDFNotifications")
                         .HasColumnName("pdf_notifications");
+
+                    b.Property<int>("TotalRecords")
+                        .HasColumnName("total_records");
+
+                    b.Property<string>("TypeFile")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("type_file")
+                        .HasDefaultValue("FI001");
 
                     b.Property<string>("UserId")
                         .HasColumnName("user_id");
@@ -2520,42 +2500,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("notification_files");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.OnlinePaymentFile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("online_payment_file_id")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Account")
-                        .HasColumnName("account");
-
-                    b.Property<DateTime>("DateGenerated")
-                        .HasColumnName("date_generated");
-
-                    b.Property<string>("Folio")
-                        .HasColumnName("folio");
-
-                    b.Property<int>("Month")
-                        .HasColumnName("month");
-
-                    b.Property<byte[]>("PDFInvoce")
-                        .HasColumnName("pdf_invoce");
-
-                    b.Property<string>("Token")
-                        .HasColumnName("token");
-
-                    b.Property<int>("Year")
-                        .HasColumnName("year");
-
-                    b.Property<int>("idAgreement")
-                        .HasColumnName("id_agreement");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("online_payment_file");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.OrderParameters", b =>
@@ -2842,6 +2786,9 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("type")
                         .HasMaxLength(6);
 
+                    b.Property<int?>("aviso")
+                        .HasColumnName("aviso");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AgrementId");
@@ -2914,223 +2861,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Origin_Payment");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPayment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_partial_payment")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AgreementId");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnName("amount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("Email")
-                        .HasColumnName("email")
-                        .HasMaxLength(200);
-
-                    b.Property<DateTime>("ExpirationDate")
-                        .HasColumnName("expiration_date")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Folio")
-                        .HasColumnName("folio")
-                        .HasMaxLength(30);
-
-                    b.Property<DateTime>("FromDate")
-                        .HasColumnName("from_date")
-                        .HasColumnType("date");
-
-                    b.Property<string>("IdentificationCard")
-                        .HasColumnName("identification_card")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("IdentificationNumber")
-                        .HasColumnName("identification_number")
-                        .HasMaxLength(200);
-
-                    b.Property<decimal>("InitialPayment")
-                        .HasColumnName("initial_payment")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<int>("NumberOfPayments")
-                        .HasColumnName("number_of_payments");
-
-                    b.Property<string>("Observations")
-                        .HasColumnName("observations")
-                        .HasMaxLength(1000);
-
-                    b.Property<DateTime>("PartialPaymentDate")
-                        .HasColumnName("partial_payment_date");
-
-                    b.Property<string>("Phone")
-                        .HasColumnName("phone")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("SignatureName")
-                        .HasColumnName("signature_name")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("Status")
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("TypeIntake")
-                        .HasColumnName("type_intake")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("TypeService")
-                        .HasColumnName("type_service")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime>("UntilDate")
-                        .HasColumnName("until_date")
-                        .HasColumnType("date");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgreementId");
-
-                    b.ToTable("partial_payment");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPaymentDebt", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_partial_payment_debt")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnName("amount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<int>("DebtId")
-                        .HasColumnName("DebtId");
-
-                    b.Property<decimal>("OnAccount")
-                        .HasColumnName("on_account")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<int>("PartialPaymentId");
-
-                    b.Property<string>("Status")
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PartialPaymentId");
-
-                    b.ToTable("Partial_Payment_Debt");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPaymentDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_partial_payment_detail")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnName("amount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("OnAccount")
-                        .HasColumnName("on_account")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<int>("PartialPaymentId");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnName("payment_date");
-
-                    b.Property<int>("PaymentId");
-
-                    b.Property<int>("PaymentNumber")
-                        .HasColumnName("payment_number");
-
-                    b.Property<DateTime>("RelaseDate")
-                        .HasColumnName("relase_date");
-
-                    b.Property<int>("RelaseDebtId")
-                        .HasColumnName("relase_debtId");
-
-                    b.Property<string>("Status")
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PartialPaymentId");
-
-                    b.ToTable("partial_payment_detail");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPaymentDetailConcept", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_partial_payment_detail_concept")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnName("amount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("CodeConcept")
-                        .HasColumnName("code_concept")
-                        .HasMaxLength(5);
-
-                    b.Property<bool>("HaveTax")
-                        .HasColumnName("have_tax");
-
-                    b.Property<string>("NameConcept")
-                        .HasColumnName("name_concept")
-                        .HasMaxLength(500);
-
-                    b.Property<decimal>("OnAccount")
-                        .HasColumnName("on_account")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<int>("PartialPaymentDetailId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PartialPaymentDetailId");
-
-                    b.ToTable("Partial_Payment_Detail_Concept");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPaymentDetailStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_partial_payment_detail_status")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("PartialPaymentDetailId");
-
-                    b.Property<DateTime>("PartialPaymentDetailStatusDate")
-                        .HasColumnName("partial_payment_detail_status_date");
-
-                    b.Property<string>("Status")
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("User")
-                        .HasColumnName("user")
-                        .HasMaxLength(80);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PartialPaymentDetailId");
-
-                    b.ToTable("partial_payment_detail_status");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.PayMethod", b =>
@@ -3621,10 +3351,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("id_region")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Description")
-                        .HasColumnName("description")
-                        .HasMaxLength(80);
 
                     b.Property<int>("Name")
                         .HasColumnName("name");
@@ -5429,46 +5155,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.OrderWork", "OrderWork")
                         .WithMany("OrderWorkStatus")
                         .HasForeignKey("OrderWorkId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPayment", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
-                        .WithMany("PartialPayments")
-                        .HasForeignKey("AgreementId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPaymentDebt", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.PartialPayment", "PartialPayment")
-                        .WithMany("PartialPaymentDebts")
-                        .HasForeignKey("PartialPaymentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPaymentDetail", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.PartialPayment", "PartialPayment")
-                        .WithMany("PartialPaymentDetails")
-                        .HasForeignKey("PartialPaymentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPaymentDetailConcept", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.PartialPaymentDetail", "PartialPaymentDetail")
-                        .WithMany("PartialPaymentDetailConcepts")
-                        .HasForeignKey("PartialPaymentDetailId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPaymentDetailStatus", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.PartialPaymentDetail", "PartialPaymentDetail")
-                        .WithMany("PartialPaymentDetailStatuses")
-                        .HasForeignKey("PartialPaymentDetailId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

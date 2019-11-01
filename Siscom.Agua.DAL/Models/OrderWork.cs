@@ -57,6 +57,10 @@ namespace Siscom.Agua.DAL.Models
         [Column("TechnicalStaffId")]
         public int? TechnicalStaffId { get; set; }
 
+        [Column("aviso")]
+        public int? aviso { get; set; }
+
+
         public TechnicalStaff TechnicalStaff { get; set; }
 
         public Agreement Agreement { get; set; }

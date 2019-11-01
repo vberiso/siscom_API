@@ -882,7 +882,9 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region NotificationFiles
-
+            builder.Entity<NotificationFiles>()
+                .Property(x => x.TypeFile)
+                .HasDefaultValue("FI001");
             #endregion
 
             #region OrderSale

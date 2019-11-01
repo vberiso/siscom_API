@@ -31,7 +31,7 @@ namespace Siscom.Agua.Api.Controllers
     {
 
         private readonly ApplicationDbContext _context;
-
+        private List<string> statusDeuda = new List<string>() { "ED001", "ED004", "ED007", "ED011" };
         public OrderWorkController(ApplicationDbContext context)
         {
 
@@ -120,14 +120,18 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("OrderWorks/GetByIds")]
         public async Task<IActionResult> GetListOrderWorks([FromBody] List<int> list)
         {
-            List<Agreement> agreements = new List<Agreement>();
+            List<object> agreements = new List<object>();
             try
             {
+               
+
                 foreach (var item in list)
                 {
-                    var OrderWork = _context.OrderWorks.Where(x => x.Id == item).First();
+                    var OrderWork = _context.OrderWorks.Where(x => x.Id == item).Include(x => x.TechnicalStaff).First();
                     var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
                         .Include(x => x.TypeIntake)
+                        .Include(x => x.Debts)
+                            .ThenInclude(x => x.DebtDetails)
                         .Include(x => x.TypeConsume)
                         .Include(x => x.OrderWork)
                             .ThenInclude(x => x.TechnicalStaff)
@@ -138,7 +142,16 @@ namespace Siscom.Agua.Api.Controllers
                                     .ThenInclude(x => x.States)
                                         .ThenInclude(x => x.Countries)
                         .First();
-                    agreements.Add(agreement);
+                    agreement.Debts = agreement.Debts.Where(d =>  statusDeuda.Contains(d.Status)).ToList();
+                    agreement.OrderWork = new List<OrderWork>() { OrderWork };
+
+
+                    agreements.Add(JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(agreement, Formatting.Indented,
+                           new JsonSerializerSettings
+                           {
+                               ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                           })));
+                  
                 }
 
 
@@ -181,8 +194,34 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
-        [HttpPost("OrderWorks")]
-        public async Task<IActionResult> Create([FromBody] object collection)
+        private int ValidationOrderWorkAviso(Agreement agreement, bool isAyuntamiento)
+        {
+       
+            agreement.Debts = agreement.Debts.Where(x => statusDeuda.Contains(x.Status)).ToList();
+            if (agreement.Debts.Count > 0) {
+                DateTime maxPeriod = agreement.Debts.Max(x => x.UntilDate);
+                DateTime minPeriod = agreement.Debts.Min(x => x.FromDate);
+                DateTime toDay = DateTime.Now;
+                var notificaciones = _context.Notifications.Where(x => x.AgreementId == agreement.Id && (x.NotificationDate >= minPeriod && x.NotificationDate <= maxPeriod)).ToList();
+                if (notificaciones.Count < 2)
+                {
+                    return 0;
+                }
+
+                var orders = agreement.OrderWork.Where(x => x.Type == "OT006" && (x.DateOrder >= minPeriod && x.DateOrder <= maxPeriod)).ToList();
+                if (orders.Where(x => x.Status == "EOT01" || x.Status == "EOT02").ToList().Count == 1)
+                {
+                    return 0;
+                }
+                int numOrders = orders.Where(x => x.Status == "EOT03").ToList().Count;
+                return numOrders == 0 ? 1 : (numOrders == 1 ? 2 : 0);
+
+
+            }
+            return 0;
+        }
+        [HttpPost("OrderWorks/{isAyuntamiento?}")]
+        public async Task<IActionResult> Create([FromBody] object collection ,[FromRoute] bool isAyuntamiento = false)
         {
             int ApplyIds = 0;
             var data = JObject.Parse(collection.ToString());
@@ -194,10 +233,13 @@ namespace Siscom.Agua.Api.Controllers
                 OrderWork OrderWork = null;
                 Agreement Aggrement;
                 bool canCreate;
+                int? aviso = null;
                 foreach (string id in ids)
                 {
                     canCreate = true;
-                    if (data["typeOrder"].ToString() == "OT003")
+                  
+                    
+                    if (data["typeOrder"].ToString() == "OT003" || data["typeOrder"].ToString() == "OT006")
                     {
                         Aggrement = _context.Agreements.Where(x => x.Id == int.Parse(id))
                             .Include(x => x.Clients)
@@ -205,12 +247,22 @@ namespace Siscom.Agua.Api.Controllers
                             .Include(x => x.Debts)
                             .First();
 
-
-                        OrderWork = Aggrement.OrderWork.Where(x => x.Type == "OT003" && (x.Status == "EOT02" || x.Status == "EOT01")).FirstOrDefault();
-                        var deb = Aggrement.Debts.Where(x => x.Status == "ED001" || x.Status == "ED011" || x.Status == "ED007" || x.Status == "ED004").ToList();
-                        if (OrderWork != null || deb.Count() > 0 || Aggrement.TypeStateServiceId != 3)
+                        if (data["typeOrder"].ToString() == "OT006")
                         {
-                            canCreate = false;
+                            aviso = ValidationOrderWorkAviso(Aggrement, isAyuntamiento);
+
+                            canCreate = aviso == 0 ? false : true;
+                               
+                            
+                        }
+                        else
+                        {
+                            OrderWork = Aggrement.OrderWork.Where(x => x.Type == "OT003" && (x.Status == "EOT02" || x.Status == "EOT01")).FirstOrDefault();
+                            var deb = Aggrement.Debts.Where(x => x.Status == "ED001" || x.Status == "ED011" || x.Status == "ED007" || x.Status == "ED004").ToList();
+                            if (OrderWork != null || deb.Count() > 0 || Aggrement.TypeStateServiceId != 3)
+                            {
+                                canCreate = false;
+                            }
                         }
 
                         //else if (deb.Count() > 0)
@@ -236,6 +288,9 @@ namespace Siscom.Agua.Api.Controllers
                                 case "OT004":
                                     tipeOrder = "Mantenimiento / Sustitucion";
                                     break;
+                                case "OT006":
+                                    tipeOrder = "Aviso de deuda";
+                                    break;
                             }
                             msgs.Add($"La cuenta {Aggrement.Account} con nombre de cliente {client.Name} {client.LastName} no se pudo generar una orden de tipo {tipeOrder}");
                             continue;
@@ -254,7 +309,8 @@ namespace Siscom.Agua.Api.Controllers
                         Status = "EOT01",
                         Observation = data["Observation"].ToString(),
                         Folio = "f",
-                        Activities = data["Activities"].ToString()
+                        Activities = data["Activities"].ToString(),
+                        aviso = aviso
 
 
                     };

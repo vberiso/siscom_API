@@ -2450,7 +2450,44 @@ namespace Siscom.Agua.Api.Controllers
             
             return null;
         }
-    }
+
+        [HttpPost("getAccountStatus")]
+        public async Task<IActionResult> getAccountStatus([FromBody] List<string> id_agremmnents)
+        {
+           
+            List<string> statusDeuda = new List<string>() { "ED001", "ED004", "ED007", "ED011" };
+     
+            var agreement = _context.Agreements
+               .Include(x => x.AgreementDetails)
+                   .Include(x => x.TypeService)
+                   .Include(x => x.TypeIntake)
+                   .Include(x => x.Clients)
+                   .Include(x => x.Addresses)
+                       .ThenInclude(x => x.Suburbs)
+                           .ThenInclude(x => x.Towns)
+                               .ThenInclude(x => x.States)
+               .Include(x => x.Debts)
+                   .ThenInclude(x => x.DebtDetails)
+               .Where(x => id_agremmnents.Contains(x.Id.ToString()) )
+
+
+               .ToList();
+
+
+            agreement.ForEach(x => {
+                x.Debts = x.Debts.Where(d => statusDeuda.Contains(d.Status)).ToList();
+                x.Clients = x.Clients.Where(c => c.TypeUser == "CLI01").ToList();
+                x.Addresses = x.Addresses.Where(a => a.TypeAddress == "DIR01").ToList();
+
+            });
+         
+
+            return Ok(agreement);
+        }
+
+
+
+        }
 
 
 
