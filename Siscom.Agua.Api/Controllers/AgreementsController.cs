@@ -2460,7 +2460,11 @@ namespace Siscom.Agua.Api.Controllers
             var agreement = _context.Agreements
                .Include(x => x.AgreementDetails)
                    .Include(x => x.TypeService)
+                   .Include(x => x.TypeUse)
                    .Include(x => x.TypeIntake)
+                   .Include(x => x.TypeStateService)
+                   .Include(x => x.TypeRegime)
+                   .Include(x => x.Diameter)
                    .Include(x => x.Clients)
                    .Include(x => x.Addresses)
                        .ThenInclude(x => x.Suburbs)
