@@ -130,7 +130,14 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     else
                     {
-                        if (item.Type != "TIP02" && item.Type != "TIP03")
+                        if (item.Type == "TIP06")                            
+                        {
+                            //Cuando es un convenio es necesario buscar el accountNumber y unitMeasurement primero en services, si no existe se asume
+                            //que es un producto, pues esa razon se hace esta doble busqueda.                            
+                            var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)) != null ? _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)).CodeConcept : _context.ProductParams.FirstOrDefault(x => x.ProductId == int.Parse(d.CodeConcept)).CodeConcept });                            
+                            tmpClaves.AddRange(tmpConceptos);
+                        }
+                        else if (item.Type != "TIP02" && item.Type != "TIP03")
                         {
                             var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)).CodeConcept });
                             tmpClaves.AddRange(tmpConceptos.ToList());
@@ -852,7 +859,28 @@ namespace Siscom.Agua.Api.Controllers
                                     string _accountNumber = String.Empty;
                                     string _unitMeasurement = String.Empty;
 
-                                    if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
+                                    if (debtFind.Type == "TIP06") 
+                                    {
+                                        //Cuando es un convenio es necesario buscar el accountNumber y unitMeasurement primero en services, si no existe se asume
+                                        //que es un producto, pues esa razon se hace esta doble busqueda.
+                                        var _serviceParam = await _context.ServiceParams
+                                                                          .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0"))
+                                                                          .FirstOrDefaultAsync();
+                                        if(_serviceParam == null)
+                                        {
+                                            var _productParam = await _context.ProductParams
+                                                                          .Where(x => x.ProductId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0"))
+                                                                          .FirstOrDefaultAsync();
+                                            _accountNumber = _productParam != null ? _productParam.CodeConcept : String.Empty;
+                                            _unitMeasurement = _productParam != null ? _productParam.UnitMeasurement : String.Empty;
+                                        }
+                                        else
+                                        {
+                                            _accountNumber = _serviceParam != null ? _serviceParam.CodeConcept : String.Empty;
+                                            _unitMeasurement = _serviceParam != null ? _serviceParam.UnitMeasurement : String.Empty;
+                                        }
+                                    }
+                                    else if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
                                     {
                                         var _serviceParam = await _context.ServiceParams
                                                                           .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0"))
@@ -887,12 +915,26 @@ namespace Siscom.Agua.Api.Controllers
                                     _context.PaymentDetails.Add(paymentDetail);
                                     await _context.SaveChangesAsync();
                                 }
+
+
+                                //Si es un pago de convenio se actuliza el registro del convenio.
+                                if (debtFind.Type == "TIP06")
+                                {
+                                    PartialPaymentDetail ppd = _context.PartialPaymentDetails.FirstOrDefault(p => p.RelaseDebtId == debtFind.Id);
+                                    ppd.Status = "CUT03";
+                                    ppd.OnAccount = debt.OnAccount;
+                                    ppd.PaymentDate = DateTime.UtcNow.ToLocalTime();
+                                    ppd.PaymentId = payment.Id;
+                                    _context.Entry(ppd).State = EntityState.Modified;
+                                    await _context.SaveChangesAsync();
+                                }
+                                
                             }
                             else
                                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El estado - {0} de la deuda - {1}, no permite el pago", debtFind.Status, debtFind.Id) });
                         }
                     }
-
+                    
                     scope.Complete();
                 }
             }
