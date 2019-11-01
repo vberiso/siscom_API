@@ -68,6 +68,7 @@ namespace Siscom.Agua.DAL
         public DbSet<AgreementFile> AgreementFiles { get; set; }
         public DbSet<AgreementComment> AgreementComments { get; set; }
         public DbSet<AgreementRulerCalculation> AgreementRulerCalculations { get; set; }
+        public DbSet<AccountStatusInFile> AccountStatusInFiles { get; set; }
         /// <summary>
         /// Accounting
         /// </summary>
@@ -283,6 +284,13 @@ namespace Siscom.Agua.DAL
             builder.Entity<AccountingCode>()
                .Property(x => x.IsActive)
                .HasDefaultValue(true);
+            #endregion
+
+            #region AccountStatusInFile
+            builder.Entity<AccountStatusInFile>()
+                   .HasOne<Agreement>(sc => sc.Agreement)
+                   .WithMany(s => s.AccountStatusInFiles)
+                   .HasForeignKey(sc => sc.AgreementId);
             #endregion
 
             #region Agreement
