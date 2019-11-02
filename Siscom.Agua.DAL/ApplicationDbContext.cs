@@ -239,6 +239,7 @@ namespace Siscom.Agua.DAL
         /// </summary>
         /// 
         public DbSet<OnlinePaymentFile> OnlinePaymentFiles { get; set; }
+        
 
         public ApplicationDbContext()
         {
@@ -1604,12 +1605,23 @@ namespace Siscom.Agua.DAL
                    .WithMany(s => s.ViewProfiles)
                    .HasForeignKey(sc => sc.RoleId);
             #endregion
+            builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
 
+            builder.Entity<ViewProfile>()
+                   .HasOne<View>(sc => sc.View)
+                   .WithMany(s => s.ViewProfiles)
+                   .HasForeignKey(sc => sc.ViewId);
+
+            builder.Entity<ViewProfile>()
+                   .HasOne<ApplicationRol>(sc => sc.ApplicationRol)
+                   .WithMany(s => s.ViewProfiles)
+                   .HasForeignKey(sc => sc.RoleId);
             #region otros
             builder.Entity<ReasonCatalog>()
               .Property(x => x.IsActive)
               .HasDefaultValue(true);
             #endregion
+           
 
             base.OnModelCreating(builder);
         }

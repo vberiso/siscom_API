@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model.SOSAPAC;
@@ -605,6 +606,89 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             int monthsApart = 12 * (startDate.Year - endDate.Year) + startDate.Month - endDate.Month;
             return Math.Abs(monthsApart);
         }
+
+        [HttpPost("getFilesAccountStatus")]
+        public async Task<IActionResult> getFilesAccountStatuss([FromBody] List<int> idAgreements = null)
+        {
+            IQueryable<Siscom.Agua.DAL.Models.AccountStatusInFile> query = _context.AccountStatusInFiles;
+            List<object> Agrements = new List<object>();
+            if (idAgreements.Count >0)
+            {
+                query = query.Where(x => idAgreements.Contains(x.Id));
+
+            }
+            var files = query.ToList();
+            try
+            {
+                files.ForEach(x =>
+                {
+                    var agree = _context.Agreements
+                                        .Include(a => a.Addresses)
+                                            .ThenInclude(s => s.Suburbs)
+                                                .ThenInclude(t => t.Towns)
+                                                    .ThenInclude(st => st.States)
+                                        .Include(c => c.Clients)
+                                        .Include(ad =>ad.AccountStatusInFiles)
+                                        .Include(ti => ti.TypeIntake)
+                                        .Include(ts => ts.TypeStateService)
+                                        .Include(sd => sd.TypeService)
+                                        .Include(tc => tc.TypeConsume)
+                                        .Include(ad => ad.AgreementDetails)
+                                        .Include(di => di.AgreementDiscounts)
+                                            .ThenInclude(d => d.Discount)
+                    .Where(a => a.Id == x.AgreementId).First();
+                    agree.AccountStatusInFiles = new List<AccountStatusInFile>() { x };
+                    Agrements.Add(new { agreement = agree});
+                });
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+
+            return Ok(Agrements);
+        }
+        [HttpPost("addFilesAccountStatus")]
+        public async Task<IActionResult> addFilesAccountStatus([FromBody] object dataP )
+        {
+            List<int> files = null;
+            NotificationFiles file = null;
+            try
+            {
+                var OData = JObject.Parse(JsonConvert.SerializeObject(dataP));
+                List<int> idAgreements = JsonConvert.DeserializeObject<List<int>>(JsonConvert.SerializeObject(OData["idAgreements"]));
+                FileNotifications data = JsonConvert.DeserializeObject<FileNotifications>(JsonConvert.SerializeObject(OData["Data"]));
+                files = new List<int>();
+                //var data = JsonConvert.DeserializeObject<FileNotifications>(Request.Form["Data"].ToString());
+                idAgreements.ForEach(x =>{
+                    var Afile = new AccountStatusInFile() {
+                        AgreementId =x,
+                        FileName = data.FileName,
+                        GenerationDate = data.GenerationDate,
+                        UserId = data.UserId,
+                        UserName = data.UserName
+
+                    };
+                    _context.AccountStatusInFiles.Add(Afile);
+                     _context.SaveChanges();
+                    files.Add( Afile.Id);
+                });
+                return Ok(files);
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(JsonConvert.SerializeObject(files));
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para subir el archivo de las notificaciones" });
+            }
+        }
+
 
         #endregion
     }
