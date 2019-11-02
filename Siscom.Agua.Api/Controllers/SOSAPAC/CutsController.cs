@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.Api.Model.SOSAPAC;
 using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
@@ -610,6 +611,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         [HttpPost("getFilesAccountStatus")]
         public async Task<IActionResult> getFilesAccountStatuss([FromBody] List<int> idAgreements = null)
         {
+            List<string> statusDeuda = new List<string>() { "ED001", "ED004", "ED007", "ED011" };
             IQueryable<Siscom.Agua.DAL.Models.AccountStatusInFile> query = _context.AccountStatusInFiles;
             List<object> Agrements = new List<object>();
             if (idAgreements.Count >0)
@@ -629,6 +631,8 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                                                     .ThenInclude(st => st.States)
                                         .Include(c => c.Clients)
                                         .Include(ad =>ad.AccountStatusInFiles)
+                                        .Include(d => d.Debts)
+                                         .ThenInclude(dd => dd.DebtDetails)
                                         .Include(ti => ti.TypeIntake)
                                         .Include(ts => ts.TypeStateService)
                                         .Include(sd => sd.TypeService)
@@ -638,7 +642,13 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                                             .ThenInclude(d => d.Discount)
                     .Where(a => a.Id == x.AgreementId).First();
                     agree.AccountStatusInFiles = new List<AccountStatusInFile>() { x };
-                    Agrements.Add(new { agreement = agree});
+                    agree.Debts = agree.Debts.Where(d => statusDeuda.Contains(d.Status)).ToList();
+                    Agrements.Add(new  { agreement = JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(agree,new JsonSerializerSettings
+                    {
+                        PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                        Formatting = Formatting.Indented,
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    })) }) ;
                 });
             }
             catch (Exception e)
