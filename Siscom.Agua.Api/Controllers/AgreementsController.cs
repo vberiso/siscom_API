@@ -245,7 +245,8 @@ namespace Siscom.Agua.Api.Controllers
                                        .ThenInclude(s => s.Suburbs)
                                            .ThenInclude(t => t.Towns)
                                                .ThenInclude(st => st.States)
-                                     .Include(x => x.AgreementComments);
+                                     .Include(x => x.AgreementComments)
+                                     .Include(x => x.PartialPayments);
 
                 List<Siscom.Agua.DAL.Models.Agreement> agreement;
 

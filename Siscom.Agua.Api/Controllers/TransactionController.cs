@@ -1506,6 +1506,23 @@ namespace Siscom.Agua.Api.Controllers
                             //_context.DebtStatuses.Add(debtStatus);                    //<-----------------------------------------------------------
                             //await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
 
+                            //Si es un adeudo de convenio, se cambio el estadio para es convenio.
+                            if (debt.Type == "TIP06") 
+                            {
+                                PartialPaymentDetail PPD = await _context.PartialPaymentDetails.FirstOrDefaultAsync(p => p.RelaseDebtId == debt.Id && p.PaymentId == payment.Id);
+                                if (PPD != null) 
+                                {
+                                    PPD.OnAccount = 0;
+                                    PPD.Status = "CUT02";
+                                    
+                                    PPD.PaymentDate = new DateTime(1900, 01, 01);
+                                    //_context.Entry(PPD).State = EntityState.Modified;         //<-----------------------------------------------------------
+                                    //await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
+                                    _context.PartialPaymentDetails.Update(PPD);
+                                    _context.SaveChanges();
+                                }                                
+                            }
+
                             removeItem = false;
                         }
                     }
@@ -2851,6 +2868,20 @@ namespace Siscom.Agua.Api.Controllers
                                 await _context.SaveChangesAsync();
                                 removeItem = true;
                             }
+
+                            //Si es un adeudo de convenio, se cambio el estadio para es convenio.
+                            if (debt.Type == "TIP06")
+                            {
+                                PartialPaymentDetail PPD = await _context.PartialPaymentDetails.FirstOrDefaultAsync(p => p.RelaseDebtId == debt.Id && p.PaymentId == paymentData.Id);
+                                if (PPD != null)
+                                {
+                                    PPD.OnAccount = 0;
+                                    PPD.Status = "CUT02";
+                                    PPD.PaymentDate = new DateTime(1900, 01, 01);
+                                    _context.Entry(PPD).State = EntityState.Modified;         //<-----------------------------------------------------------
+                                    await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
+                                }
+                            }
                             removeItem = false;
                         }
                     }
@@ -3662,6 +3693,20 @@ namespace Siscom.Agua.Api.Controllers
                                 _context.Entry(await _context.DebtStatuses.FindAsync(statusDebt.First().Id)).State = EntityState.Deleted;
                                 await _context.SaveChangesAsync();
                                 removeItem = true;
+                            }
+
+                            //Si es un adeudo de convenio, se cambio el estado para el convenio.
+                            if (debt.Type == "TIP06")
+                            {
+                                PartialPaymentDetail PPD = await _context.PartialPaymentDetails.FirstOrDefaultAsync(p => p.RelaseDebtId == debt.Id && p.PaymentId == paymentData.Id);
+                                if (PPD != null)
+                                {
+                                    PPD.OnAccount = 0;
+                                    PPD.Status = "CUT02";
+                                    PPD.PaymentDate = new DateTime(1900, 01, 01);
+                                    _context.Entry(PPD).State = EntityState.Modified;         //<-----------------------------------------------------------
+                                    await _context.SaveChangesAsync();                        //<-----------------------------------------------------------
+                                }
                             }
                             removeItem = false;
                         }
