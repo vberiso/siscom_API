@@ -194,7 +194,7 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
-        private int ValidationOrderWorkAviso(Agreement agreement, bool isAyuntamiento)
+        private string ValidationOrderWorkAviso(Agreement agreement, bool isAyuntamiento)
         {
        
             agreement.Debts = agreement.Debts.Where(x => statusDeuda.Contains(x.Status)).ToList();
@@ -205,20 +205,20 @@ namespace Siscom.Agua.Api.Controllers
                 var notificaciones = _context.Notifications.Where(x => x.AgreementId == agreement.Id && (x.NotificationDate >= minPeriod && x.NotificationDate <= maxPeriod)).ToList();
                 if (notificaciones.Count < 2)
                 {
-                    return 0;
+                    return " 1, debe tener minimo dos notificaciones";
                 }
 
                 var orders = agreement.OrderWork.Where(x => x.Type == "OT006" && (x.DateOrder >= minPeriod && x.DateOrder <= maxPeriod)).ToList();
                 if (orders.Where(x => x.Status == "EOT01" || x.Status == "EOT02").ToList().Count == 1)
                 {
-                    return 0;
+                    return ", no debe de estar en estatus cortado";
                 }
                 int numOrders = orders.Where(x => x.Status == "EOT03").ToList().Count;
-                return numOrders == 0 ? 1 : (numOrders == 1 ? 2 : 0);
+                return numOrders == 0 ? "1" : (numOrders == 1 ? "2" : "2, porque tiene una orden de aviso de deuda 1 que aun no se ha ejecutado.");
 
 
             }
-            return 0;
+            return ", debe tener deuda";
         }
         [HttpPost("OrderWorks/{isAyuntamiento?}")]
         public async Task<IActionResult> Create([FromBody] object collection ,[FromRoute] bool isAyuntamiento = false)
@@ -233,7 +233,8 @@ namespace Siscom.Agua.Api.Controllers
                 OrderWork OrderWork = null;
                 Agreement Aggrement;
                 bool canCreate;
-                int? aviso = null;
+                string avisoError = "";
+                int aviso = 0 ;
                 foreach (string id in ids)
                 {
                     canCreate = true;
@@ -249,9 +250,12 @@ namespace Siscom.Agua.Api.Controllers
 
                         if (data["typeOrder"].ToString() == "OT006")
                         {
-                            aviso = ValidationOrderWorkAviso(Aggrement, isAyuntamiento);
+                            
+                            avisoError = ValidationOrderWorkAviso(Aggrement, isAyuntamiento);
+                            bool isNumeric = int.TryParse(avisoError, out aviso);
 
-                            canCreate = aviso == 0 ? false : true;
+
+                            canCreate = isNumeric;
                                
                             
                         }
@@ -290,9 +294,10 @@ namespace Siscom.Agua.Api.Controllers
                                     break;
                                 case "OT006":
                                     tipeOrder = "Aviso de deuda";
+                                     
                                     break;
                             }
-                            msgs.Add($"La cuenta {Aggrement.Account} con nombre de cliente {client.Name} {client.LastName} no se pudo generar una orden de tipo {tipeOrder}");
+                            msgs.Add($"La cuenta {Aggrement.Account} con nombre de cliente {client.Name} {client.LastName} no se pudo generar una orden de tipo {tipeOrder}{avisoError}");
                             continue;
                         }
                     }
