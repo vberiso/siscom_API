@@ -211,10 +211,10 @@ namespace Siscom.Agua.Api.Controllers
                 var orders = agreement.OrderWork.Where(x => x.Type == "OT006" && (x.DateOrder >= minPeriod && x.DateOrder <= maxPeriod)).ToList();
                 if (orders.Where(x => x.Status == "EOT01" || x.Status == "EOT02").ToList().Count == 1)
                 {
-                    return ", no debe de estar en estatus cortado";
+                    return ", porque tiene una orden de aviso de adeudo en proceso";
                 }
                 int numOrders = orders.Where(x => x.Status == "EOT03").ToList().Count;
-                return numOrders == 0 ? "1" : (numOrders == 1 ? "2" : "2, porque tiene una orden de aviso de deuda 1 que aun no se ha ejecutado.");
+                return numOrders == 0 ? "1" : (numOrders == 1 ? "2" : ", porque ya tiene dos ordenes de aviso de adeudo.");
 
 
             }
