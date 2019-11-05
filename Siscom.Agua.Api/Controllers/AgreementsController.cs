@@ -2467,6 +2467,7 @@ namespace Siscom.Agua.Api.Controllers
                    .Include(x => x.TypeRegime)
                    .Include(x => x.Diameter)
                    .Include(x => x.Clients)
+                   
                    .Include(x => x.Addresses)
                        .ThenInclude(x => x.Suburbs)
                            .ThenInclude(x => x.Towns)

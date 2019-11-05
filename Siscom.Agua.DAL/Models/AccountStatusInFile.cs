@@ -25,6 +25,9 @@ namespace Siscom.Agua.DAL.Models
         public string Folio { get; set; }
         [Column("AgreementId")]
         public int AgreementId { get; set; }
+
+        [Column("PDFBytes")]
+        public byte[] PDFBytes { get; set; }
         public Agreement Agreement { get; set; }
     }
 }

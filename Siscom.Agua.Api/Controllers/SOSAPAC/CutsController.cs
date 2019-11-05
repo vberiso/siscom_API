@@ -410,6 +410,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                     file.UserName = NotificationsData.UserName;
                     file.GenerationDate = NotificationsData.GenerationDate;
                     file.FileName = NotificationsData.FileName;
+                 
                     file.TypeFile = TypeFile;
                     file.TotalRecords = TotalRecords;
 
@@ -435,7 +436,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
 
                         });
                     }
-                    else
+                    else if(NotificationsData.IdNotification != null)
                     {
                         var Idnotifications = NotificationsData.IdNotification.Split(",").ToList();
                         if (Idnotifications.Count >0) {
@@ -609,54 +610,58 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         }
 
         [HttpPost("getFilesAccountStatus")]
-        public async Task<IActionResult> getFilesAccountStatuss([FromBody] List<int> idAgreements = null)
+        public async Task<IActionResult> getFilesAccountStatuss([FromBody] int idAgreements = 0)
         {
             List<string> statusDeuda = new List<string>() { "ED001", "ED004", "ED007", "ED011" };
             IQueryable<Siscom.Agua.DAL.Models.AccountStatusInFile> query = _context.AccountStatusInFiles;
             List<object> Agrements = new List<object>();
-            if (idAgreements.Count >0)
-            {
-                query = query.Where(x => idAgreements.Contains(x.Id));
+            //if (idAgreements.Count >0)
+            //{
+            //    query = query.Where(x => idAgreements.Contains(x.Id));
 
-            }
-            var files = query.ToList();
+            //}
+            //var files = query.ToList();
             try
             {
-                files.ForEach(x =>
-                {
-                    var agree = _context.Agreements
-                                        .Include(a => a.Addresses)
-                                            .ThenInclude(s => s.Suburbs)
-                                                .ThenInclude(t => t.Towns)
-                                                    .ThenInclude(st => st.States)
-                                        .Include(c => c.Clients)
-                                        .Include(ad =>ad.AccountStatusInFiles)
-                                        .Include(d => d.Debts)
-                                         .ThenInclude(dd => dd.DebtDetails)
-                                        .Include(ti => ti.TypeIntake)
-                                        .Include(ts => ts.TypeStateService)
-                                        .Include(sd => sd.TypeService)
-                                        .Include(tc => tc.TypeConsume)
-                                        .Include(ad => ad.AgreementDetails)
-                                        .Include(di => di.AgreementDiscounts)
-                                            .ThenInclude(d => d.Discount)
-                    .Where(a => a.Id == x.AgreementId).First();
-                    agree.AccountStatusInFiles = new List<AccountStatusInFile>() { x };
-                    agree.Debts = agree.Debts.Where(d => statusDeuda.Contains(d.Status)).ToList();
-                    Agrements.Add(new  { agreement = JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(agree,new JsonSerializerSettings
-                    {
-                        PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                        Formatting = Formatting.Indented,
-                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                    })) }) ;
-                });
+                //files.ForEach(x =>
+                //{
+                //    var agree = _context.Agreements
+                //                        .Include(a => a.Addresses)
+                //                            .ThenInclude(s => s.Suburbs)
+                //                                .ThenInclude(t => t.Towns)
+                //                                    .ThenInclude(st => st.States)
+                //                        .Include(c => c.Clients)
+                //                        .Include(ad =>ad.AccountStatusInFiles)
+                //                        .Include(d => d.Debts)
+                //                         .ThenInclude(dd => dd.DebtDetails)
+                //                        .Include(ti => ti.TypeIntake)
+                //                        .Include(ts => ts.TypeStateService)
+                //                        .Include(sd => sd.TypeService)
+                //                        .Include(tc => tc.TypeConsume)
+                //                        .Include(ad => ad.AgreementDetails)
+                //                        .Include(di => di.AgreementDiscounts)
+                //                            .ThenInclude(d => d.Discount)
+                //    .Where(a => a.Id == x.AgreementId).First();
+                //    agree.AccountStatusInFiles = new List<AccountStatusInFile>() { x };
+                //    agree.Debts = agree.Debts.Where(d => statusDeuda.Contains(d.Status)).ToList();
+                //    Agrements.Add(new  { agreement = JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(agree,new JsonSerializerSettings
+                //    {
+                //        PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                //        Formatting = Formatting.Indented,
+                //        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                //    })) }) ;
+                //});
+
+                var file = _context.AccountStatusInFiles.Find(idAgreements);
+
+                return Ok(file);
             }
             catch (Exception e)
             {
                 return null;
             }
 
-            return Ok(Agrements);
+            //return Ok(Agrements);
         }
         [HttpPost("addFilesAccountStatus")]
         public async Task<IActionResult> addFilesAccountStatus([FromBody] object dataP )
@@ -670,20 +675,21 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 FileNotifications data = JsonConvert.DeserializeObject<FileNotifications>(JsonConvert.SerializeObject(OData["Data"]));
                 files = new List<int>();
                 //var data = JsonConvert.DeserializeObject<FileNotifications>(Request.Form["Data"].ToString());
-                idAgreements.ForEach(x =>{
+                
                     var Afile = new AccountStatusInFile() {
-                        AgreementId =x,
+                        AgreementId = idAgreements.First(),
                         FileName = data.FileName,
                         GenerationDate = data.GenerationDate,
                         UserId = data.UserId,
+                        PDFBytes = data.PDFNotifications,
                         UserName = data.UserName
 
                     };
                     _context.AccountStatusInFiles.Add(Afile);
                      _context.SaveChanges();
-                    files.Add( Afile.Id);
-                });
-                return Ok(files);
+             //       files.Add( Afile.Id);
+             
+                return Ok(Afile.Id);
             }
             catch (Exception e)
             {
