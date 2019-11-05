@@ -222,6 +222,7 @@ namespace Siscom.Agua.DAL
         /// </summary>
         /// 
         public DbSet<AccountsAccumulated> AccountsAccumulated { get; set; }
+        public DbSet<InspectionFine> InspectionFines { get; set; }
 
         public DbSet<PostalMx> PostalMx { get; set; }
 
@@ -842,6 +843,16 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<INPC>()
                   .Property(p => p.Value)
+                  .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region InspectionFine
+            builder.Entity<InspectionFine>()
+                  .Property(x => x.IsActive)
+                  .HasDefaultValue(true);
+
+            builder.Entity<InspectionFine>()
+                  .Property(p => p.Amount)
                   .HasColumnType("decimal(18, 2)");
             #endregion
 

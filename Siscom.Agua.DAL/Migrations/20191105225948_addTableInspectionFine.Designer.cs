@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191105225948_addTableInspectionFine")]
+    partial class addTableInspectionFine
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,9 +150,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<DateTime>("GenerationDate")
                         .HasColumnName("generation_date");
-
-                    b.Property<byte[]>("PDFBytes")
-                        .HasColumnName("PDFBytes");
 
                     b.Property<string>("UserId")
                         .HasColumnName("user_id");
