@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191107172208_AddTablePhotosOrderWork")]
+    partial class AddTablePhotosOrderWork
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2144,7 +2146,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 11, 7, 14, 40, 47, 590, DateTimeKind.Local).AddTicks(7544));
+                        .HasDefaultValue(new DateTime(2019, 11, 7, 11, 22, 7, 110, DateTimeKind.Local).AddTicks(3073));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3430,20 +3432,14 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("id_photos_orderWork")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("DatePhoto")
+                    b.Property<string>("DatePhoto")
                         .HasColumnName("date_photo");
-
-                    b.Property<string>("NameFile")
-                        .HasColumnName("name_file");
 
                     b.Property<int>("OrderWorkId")
                         .HasColumnName("OrderWorkId");
 
                     b.Property<string>("PathFile")
                         .HasColumnName("path_file");
-
-                    b.Property<long>("Size")
-                        .HasColumnName("size");
 
                     b.Property<string>("User")
                         .HasColumnName("user");

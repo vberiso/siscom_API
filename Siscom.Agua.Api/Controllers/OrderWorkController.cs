@@ -89,6 +89,7 @@ namespace Siscom.Agua.Api.Controllers
                 var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
                     .Include(x => x.OrderWorkReasonCatalogs)
                     .ThenInclude(x => x.ReasonCatalog)
+                    .Include(x => x.PhotosOrderWork)
                     .First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
 
@@ -96,6 +97,7 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.TypeConsume)
                     .Include(x => x.OrderWork)
                         .ThenInclude(x => x.TechnicalStaff)
+                        
 
                     .Include(x => x.Clients)
                     .Include(x => x.Addresses)
@@ -616,6 +618,23 @@ namespace Siscom.Agua.Api.Controllers
             catch (Exception error)
             {
                 return StatusCode((int)TypeError.Code.NotFound, new { Error = "Ocurrió un problema con la petición... " + error });
+            }
+        }
+        [HttpPost("uploadFile")]
+        public async Task<IActionResult> UoloadFile([FromBody] List<PhotosOrderWork> Photos)
+        {
+            try
+            {
+                foreach (var Photo in Photos)
+                {
+                    _context.Add(Photo);
+                    _context.SaveChanges();
+                }
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
             }
         }
 

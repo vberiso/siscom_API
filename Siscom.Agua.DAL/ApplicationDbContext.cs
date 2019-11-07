@@ -215,6 +215,7 @@ namespace Siscom.Agua.DAL
 
         public DbSet<ReasonCatalog> ReasonCatalog { get; set; }
         public DbSet<OrderWorkReasonCatalog> OrderWorkReasonCatalog { get; set; }
+        public DbSet<PhotosOrderWork> PhotosOrderWork { get; set; }
         public DbSet<FolioAccountStatement> FolioAccountStatements { get; set; }
 
         /// <summary>
@@ -979,6 +980,14 @@ namespace Siscom.Agua.DAL
             builder.Entity<OrderWorkStatus>()
                .HasOne<OrderWork>(a => a.OrderWork)
                .WithMany(s => s.OrderWorkStatus)
+               .HasForeignKey(s => s.OrderWorkId);
+
+            #endregion
+
+            #region PhotosOrderWork
+            builder.Entity<PhotosOrderWork>()
+               .HasOne<OrderWork>(a => a.OrderWork)
+               .WithMany(s => s.PhotosOrderWork)
                .HasForeignKey(s => s.OrderWorkId);
 
             #endregion

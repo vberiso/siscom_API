@@ -12,6 +12,8 @@ namespace Siscom.Agua.DAL.Models
         public OrderWork()
         {
             OrderWorkReasonCatalogs = new HashSet<OrderWorkReasonCatalog>();
+            PhotosOrderWork = new HashSet<PhotosOrderWork>();
+            OrderWorkStatus = new HashSet<OrderWorkStatus>();
            
         }
 
@@ -68,6 +70,7 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<OrderWorkStatus> OrderWorkStatus { get; set; }
 
         public ICollection<OrderWorkReasonCatalog> OrderWorkReasonCatalogs { get; set; }
+        public ICollection<PhotosOrderWork> PhotosOrderWork { get; set; }
 
 
 

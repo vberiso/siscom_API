@@ -572,8 +572,8 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
-        [HttpPost("runSpAsignarDeb")]
-        public async Task<IActionResult> ExectSpFormatoss()
+        [HttpPost("runSpAsignarDeb/{procedure}")]
+        public async Task<IActionResult> ExectSpFormatoss([FromRoute] string procedure)
         {
 
             var body = "";
@@ -599,7 +599,7 @@ namespace Siscom.Agua.Api.Controllers
                     parameters = JsonConvert.DeserializeObject<List<SPParameters>>(body);
                 }
                 parameters.Add(new SPParameters { Key = "error", Size = 200, Direccion = ParameterDirection.InputOutput, DbType = DbType.String, Value = "" });
-                result = await new RunSP(this, _context).runProcedure("OrderWork_Update", parameters);
+                result = await new RunSP(this, _context).runProcedure(procedure, parameters);
                 return Ok(result);
 
 
