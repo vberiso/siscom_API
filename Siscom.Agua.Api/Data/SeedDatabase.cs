@@ -12,18 +12,25 @@ namespace Siscom.Agua.Api.Data
     {
         public static async void Initialize(IServiceProvider serviceProvider)
         {
-            //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            ////var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            //var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
-            //string[] roleNames = { "Super", "Admin", "User", "Isabi", "Transito", "Supervisor","GenerarOrden" };
-            ////string[] roleNames = { "Super", "Admin", "User", "Supervisor" };
-            ////////    //await context.Database.EnsureDeletedAsync();
-            ////////    //await context.Database.MigrateAsync();
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            IdentityResult roleResult;
+            //var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
+            // Roles Agua
+            string[] roleNamesAgua = { "Super", "Supervisor", "Operador", "Cortes", "Admin", "User", "Ordenes", "Multas"};
 
-            //IdentityResult roleResult;
-            ////IdentityResult result;
+            foreach (var roleName in roleNamesAgua)
+            {
+                //creating the roles and seeding them to the database
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
+                if (!roleExist)
+                {
+                    roleResult = await roleManager.CreateAsync(new ApplicationRol(roleName));
+                }
+            }
+            //string[] roleNamesAyuntamiento = { "Super", "Admin", "User", "Supervisor", "Isabi", "Transito", "GenerarOrden"  };
 
-            //foreach (var roleName in roleNames)
+            //foreach (var roleName in roleNamesAyuntamiento)
             //{
             //    //creating the roles and seeding them to the database
             //    var roleExist = await roleManager.RoleExistsAsync(roleName);
@@ -32,6 +39,10 @@ namespace Siscom.Agua.Api.Data
             //        roleResult = await roleManager.CreateAsync(new ApplicationRol(roleName));
             //    }
             //}
+            //////    //await context.Database.EnsureDeletedAsync();
+            //////    //await context.Database.MigrateAsync();
+
+
 
             //    if (!context.Users.Any())
             //    {
