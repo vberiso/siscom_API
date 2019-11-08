@@ -194,7 +194,7 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         error = command.Parameters["@error"].Value.ToString();
                         folio = command.Parameters["@folio"].Value.ToString();
-                        
+
                     }
                     if (string.IsNullOrEmpty(error))
                     {
@@ -221,5 +221,292 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+        [HttpGet("FindPartialPaymentAgreement/{idAgreement}")]
+        public async Task<IActionResult> FindPartialPaymentAgreement([FromRoute] int idAgreement)
+        {
+            List<PartialPaymentAgreement> partial = new List<PartialPaymentAgreement>();
+
+            try
+            {
+                using (var connection = _context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "select p.id_partial_payment , " +
+                            "p.folio, convert(varchar,p.partial_payment_date, 103) partial_payment_date , " +
+                            "p.amount , p.number_of_payments , " +
+                            "s.[description], p.expiration_date from partial_payment p , " +
+                            "Status s where p.AgreementId = '" + idAgreement + "' and s.id_status = p.status";
+
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            while (await result.ReadAsync())
+                            {
+                                partial.Add(new PartialPaymentAgreement
+                                {
+                                    idPartialPayment = Convert.ToInt32(result[0]),
+                                    folio = result[1].ToString(),
+                                    partialPaymentDate = result[2].ToString(),
+                                    amount = Convert.ToDecimal(result[3]),
+                                    numberPayments = Convert.ToInt32(result[4]),
+                                    description = result[5].ToString(),
+                                    expiration_date = result[6].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    if (partial.Count > 0)
+                    {
+                        return Ok(partial);
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo buscar el convenio") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = idAgreement.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
+            }
+        }
+
+        [HttpGet("FindPartialPaymentAmount/{PartialPaymentId}")]
+        public async Task<IActionResult> FindPartialPaymentAmount([FromRoute] int PartialPaymentId)
+        {
+            List<PartialPaymentAmount> partial = new List<PartialPaymentAmount>();
+
+            try
+            {
+                using (var connection = _context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "select pp.payment_number, " +
+                            "pp.amount, pp.on_account, s.[description], " +
+                            "convert(varchar,pp.relase_date, 103) relase_date, " +
+                            "convert(varchar,pp.payment_date, 103) payment_date from partial_payment_detail pp , " +
+                            "Status s where pp.PartialPaymentId = '" + PartialPaymentId + "' " +
+                            "and s.id_status = pp.status";
+
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            while (await result.ReadAsync())
+                            {
+                                partial.Add(new PartialPaymentAmount
+                                {
+                                    paymentNumber = Convert.ToInt32(result[0]),
+                                    amount = Convert.ToDecimal(result[1]),
+                                    onAccount = Convert.ToDecimal(result[2]),
+                                    description = result[3].ToString(),
+                                    releaseDate = result[4].ToString(),
+                                    paymentDay = result[5].ToString(),
+                                });
+                            }
+                        }
+                    }
+                    if (partial.Count > 0)
+                    {
+                        return Ok(partial);
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo buscar el convenio") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = PartialPaymentId.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
+            }
+        }
+
+        [HttpGet("FindPartialPaymentConcepts/{PartialPaymentId}")]
+        public async Task<IActionResult> FindPartialPaymentConcepts([FromRoute] int PartialPaymentId)
+        {
+            List<PartialPaymentConcept> partial = new List<PartialPaymentConcept>();
+
+            try
+            {
+                using (var connection = _context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "select ppdc.name_concept, " +
+                            "sum(ppdc.amount) amount from partial_payment_detail ppd , " +
+                            "Partial_Payment_Detail_Concept ppdc where ppd.PartialPaymentId = '" + PartialPaymentId + "'  " +
+                            " and ppdc.PartialPaymentDetailId = ppd.id_partial_payment_detail " +
+                            " group by ppdc.name_concept";
+
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            while (await result.ReadAsync())
+                            {
+                                partial.Add(new PartialPaymentConcept
+                                {
+                                    nameConcept = result[0].ToString(),
+                                    amount = Convert.ToDecimal(result[1]),
+                                });
+                            }
+                        }
+                    }
+                    if (partial.Count > 0)
+                    {
+                        return Ok(partial);
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo buscar el convenio") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = PartialPaymentId.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
+            }
+        }
+
+        [HttpGet("FindPartialPaymentReceipts/{PartialPaymentId}")]
+        public async Task<IActionResult> FindPartialPaymentReceipts([FromRoute] int PartialPaymentId)
+        {
+            List<PartialPaymentReceipts> partial = new List<PartialPaymentReceipts>();
+
+            try
+            {
+                using (var connection = _context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "select (select t.[description] from [Type] t where t.id_type = d.[type]) [type], (d.amount - d.on_account) amount," +
+                            " d.from_date, " +
+                            "d.until_date from partial_payment p, " +
+                            "Partial_Payment_Debt pd, " +
+                            "Debt d where p.id_partial_payment = '" + PartialPaymentId + "' and pd.PartialPaymentId = p.id_partial_payment  " +
+                            "and d.id_debt = pd.DebtId";
+
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            while (await result.ReadAsync())
+                            {
+                                partial.Add(new PartialPaymentReceipts
+                                {
+                                    type = result[0].ToString(),
+                                    amount = Convert.ToDecimal(result[1]),
+                                    fromDate = result[2].ToString(),
+                                    untilDate = result[3].ToString()
+                                });
+                            }
+                        }
+                    }
+                    if (partial.Count > 0)
+                    {
+                        return Ok(partial);
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudieron buscar los recibos convenidos") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = PartialPaymentId.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar los recibos convenidos" });
+            }
+        }
+
+        [HttpGet("FindPartialPaymentToAgree/{idAgreement}")]
+        public async Task<IActionResult> FindPartialPaymentToAgree([FromRoute] int idAgreement)
+        {
+            List<PartialPaymentAgree> partial = new List<PartialPaymentAgree>();
+
+            try
+            {
+                using (var connection = _context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "select (select t.[description] from [Type] t where t.id_type = d.[type]) [type]," +
+                            " d.from_date, d.until_date, (d.amount - d.on_account) amount," +
+                            " d.[year], " +
+                            "d.DebtPeriodId from Debt d where d.AgreementId = '" + idAgreement + "' " +
+                            "and d.[status] in ('ED001','ED004','ED007','ED011') " +
+                            "and d.[type] <> 'TIP06'";
+
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            while (await result.ReadAsync())
+                            {
+                                partial.Add(new PartialPaymentAgree
+                                {
+                                    type = result[0].ToString(),
+                                    fromDate = result[1].ToString(),
+                                    untilDate = result[2].ToString(),
+                                    amount = Convert.ToDecimal(result[3]),
+                                    year = Convert.ToInt32(result[4]),
+                                    debtPeriodId = Convert.ToInt32(result[5]),
+                                });
+                            }
+                        }
+                    }
+                    if (partial.Count > 0)
+                    {
+                        return Ok(partial);
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo buscar el convenio") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = idAgreement.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
+            }
+        }
     }
 }
