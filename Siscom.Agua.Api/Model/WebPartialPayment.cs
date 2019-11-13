@@ -15,6 +15,7 @@ namespace Siscom.Agua.Api.Model
         public string idCard { get; set; }
         public string email { get; set; }
         public string phone { get; set; }
+        public int releaseDay { get; set; }
         public string folioConvenio { get; set; }
         public string error { get; set; }
     }

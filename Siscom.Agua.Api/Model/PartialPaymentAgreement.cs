@@ -14,5 +14,7 @@ namespace Siscom.Agua.Api.Model
         public int numberPayments { get; set; }
         public string description { get; set; }
         public string expiration_date { get; set; }
+        public int AgreementId { get; set; }
+        public int Account { get; set; }
     }
 }

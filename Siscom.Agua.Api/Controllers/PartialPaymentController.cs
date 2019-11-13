@@ -134,7 +134,7 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     else
                     {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo cancelar el convenio: [{error}]") });
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo cancelar el convenio:  [{error}]") });
 
 
                     }
@@ -175,6 +175,7 @@ namespace Siscom.Agua.Api.Controllers
                     command.Parameters.Add(new SqlParameter("@identification_card", partial.idCard));
                     command.Parameters.Add(new SqlParameter("@email", partial.email));
                     command.Parameters.Add(new SqlParameter("@phone", partial.phone));
+                    command.Parameters.Add(new SqlParameter("@release_days", partial.releaseDay));
                     command.Parameters.Add(new SqlParameter
                     {
                         ParameterName = "@error",
@@ -221,8 +222,8 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
-        [HttpGet("FindPartialPaymentAgreement/{idAgreement}")]
-        public async Task<IActionResult> FindPartialPaymentAgreement([FromRoute] int idAgreement)
+        [HttpGet("FindPartialPaymentAgreement/{account}/{idAgreement}")]
+        public async Task<IActionResult> FindPartialPaymentAgreement([FromRoute] string account, [FromRoute] int idAgreement)
         {
             List<PartialPaymentAgreement> partial = new List<PartialPaymentAgreement>();
 
@@ -233,12 +234,22 @@ namespace Siscom.Agua.Api.Controllers
                     await connection.OpenAsync();
                     using (var command = connection.CreateCommand())
                     {
-                        command.CommandText = "select p.id_partial_payment , " +
+                        if (account != "false" && idAgreement == 0)
+                        {
+                            command.CommandText = "select p.id_partial_payment , " +
                             "p.folio, convert(varchar,p.partial_payment_date, 103) partial_payment_date , " +
-                            "p.amount , p.number_of_payments , " +
-                            "s.[description], p.expiration_date from partial_payment p , " +
-                            "Status s where p.AgreementId = '" + idAgreement + "' and s.id_status = p.status";
-
+                            "p.amount , p.number_of_payments , p.AgreementId," +
+                            "s.[description], p.expiration_date, a.account from partial_payment p , " +
+                            "Status s, Agreement a where p.AgreementId = a.id_agreement and s.id_status = p.status and a.account = '" + account + "'";
+                        }
+                        if (idAgreement != 0 && account == "false")
+                        {
+                            command.CommandText = "select p.id_partial_payment , " +
+                            "p.folio, convert(varchar,p.partial_payment_date, 103) partial_payment_date , " +
+                            "p.amount , p.number_of_payments , p.AgreementId," +
+                            "s.[description], p.expiration_date, a.account from partial_payment p , " +
+                            "Status s, Agreement a where p.AgreementId = '" + idAgreement + "' and s.id_status = p.status and a.id_agreement = p.AgreementId";
+                        }
                         using (var result = await command.ExecuteReaderAsync())
                         {
                             while (await result.ReadAsync())
@@ -250,8 +261,10 @@ namespace Siscom.Agua.Api.Controllers
                                     partialPaymentDate = result[2].ToString(),
                                     amount = Convert.ToDecimal(result[3]),
                                     numberPayments = Convert.ToInt32(result[4]),
-                                    description = result[5].ToString(),
-                                    expiration_date = result[6].ToString(),
+                                    AgreementId = Convert.ToInt32(result[5]),
+                                    description = result[6].ToString(),
+                                    expiration_date = result[7].ToString(),
+                                    Account = Convert.ToInt32(result[8])
                                 });
                             }
                         }
@@ -273,7 +286,68 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
                 systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
                 systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
-                systemLog.Parameter = idAgreement.ToString();
+                systemLog.Parameter = account;
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
+            }
+        }
+
+        [HttpGet("FindPartialPaymentFolio/{folio}")]
+        public async Task<IActionResult> FindPartialPaymentFolio([FromRoute] string folio)
+        {
+            List<PartialPaymentAgreement> partial = new List<PartialPaymentAgreement>();
+
+            try
+            {
+                using (var connection = _context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "select p.id_partial_payment , " +
+                            "p.folio, convert(varchar,p.partial_payment_date, 103) partial_payment_date , " +
+                            "p.amount , p.number_of_payments, p.AgreementId," +
+                            "s.[description], p.expiration_date, agr.account from partial_payment p , " +
+                            "Status s, Agreement agr where p.folio = '" + folio + "' and s.id_status = p.status and agr.id_agreement = p.AgreementId";
+
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            while (await result.ReadAsync())
+                            {
+                                partial.Add(new PartialPaymentAgreement
+                                {
+                                    idPartialPayment = Convert.ToInt32(result[0]),
+                                    folio = result[1].ToString(),
+                                    partialPaymentDate = result[2].ToString(),
+                                    amount = Convert.ToDecimal(result[3]),
+                                    numberPayments = Convert.ToInt32(result[4]),
+                                    AgreementId = Convert.ToInt32(result[5]),
+                                    description = result[6].ToString(),
+                                    expiration_date = result[7].ToString(),
+                                    Account = Convert.ToInt32(result[8])
+                                });
+                            }
+                        }
+                    }
+                    if (partial.Count > 0)
+                    {
+                        return Ok(partial);
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo buscar el convenio") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = folio.ToString();
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
@@ -295,7 +369,8 @@ namespace Siscom.Agua.Api.Controllers
                         command.CommandText = "select pp.payment_number, " +
                             "pp.amount, pp.on_account, s.[description], " +
                             "convert(varchar,pp.relase_date, 103) relase_date, " +
-                            "convert(varchar,pp.payment_date, 103) payment_date from partial_payment_detail pp , " +
+                            "convert(varchar,pp.payment_date, 103) payment_date, "+
+                            "convert(varchar, pp.release_period, 103), release_period from partial_payment_detail pp , " +
                             "Status s where pp.PartialPaymentId = '" + PartialPaymentId + "' " +
                             "and s.id_status = pp.status";
 
@@ -311,6 +386,7 @@ namespace Siscom.Agua.Api.Controllers
                                     description = result[3].ToString(),
                                     releaseDate = result[4].ToString(),
                                     paymentDay = result[5].ToString(),
+                                    releasePeriod = result[6].ToString()
                                 });
                             }
                         }

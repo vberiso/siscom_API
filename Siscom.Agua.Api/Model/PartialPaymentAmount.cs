@@ -13,5 +13,6 @@ namespace Siscom.Agua.Api.Model
         public string description { get; set; }
         public string releaseDate { get; set; }
         public string paymentDay { get; set; }
+        public string releasePeriod { get; set; }
     }
 }
