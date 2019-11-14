@@ -242,7 +242,15 @@ namespace Siscom.Agua.DAL
         /// </summary>
         /// 
         public DbSet<OnlinePaymentFile> OnlinePaymentFiles { get; set; }
+
+
+        /// <summary>
+        /// PagosAnuales
+        /// </summary>
+        /// 
+        public DbSet<PagosAnuales> PagosAnuales { get; set; }
         
+
 
         public ApplicationDbContext()
         {

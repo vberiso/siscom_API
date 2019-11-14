@@ -19,6 +19,7 @@ using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
+using Siscom.Agua.Api.runSp;
 using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.Api.Services.Security;
 using Siscom.Agua.Api.Services.Settings;
@@ -239,6 +240,7 @@ namespace Siscom.Agua.Api.Controllers
                 var query = _context.Agreements
                                      .Include(x => x.Clients)
                                      .Include(x => x.TypeStateService)
+                                     .Include(x => x.AgreementDiscounts)
                                      .Include(x => x.AgreementDetails)
                                      .Include(x => x.TypeIntake)
                                      .Include(x => x.Addresses)
@@ -649,7 +651,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
-                                    "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +                                                                        
+                                    "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
@@ -2445,15 +2447,16 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("countAgrements/{year}/{mes}")]
         public async Task<IActionResult> CuntAgreements([FromRoute] string year, string mes)
         {
-            var a=_context.Agreements.ToList();
+            var a = _context.Agreements.ToList();
             List<object> oc = new List<object>();
-            a.ForEach(x =>{
+            a.ForEach(x =>
+            {
                 var payments = _context.Payments.Include(p => p.PaymentDetails)
                 .ThenInclude(pd => pd.Debt)
                 .ToList();
                 oc.Add(new { Agrement = x, Payments = payments });
             });
-            
+
             return null;
         }
 
@@ -2472,7 +2475,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 query = query
               .Include(x => x.TypeStateService);
-                   
+
             }
 
             //.Include(x => x.TypeStateService)
@@ -2504,9 +2507,64 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
+        [HttpPost("GeneratePagosAnuales/{AgreementId}/{porcentajeDiscount}")]
+        public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int porcentajeDiscount, [FromBody] List<int> DebtsId)
+        {
+            //using (var transaction = _context.Database.BeginTransaction())
+            //{
+                DateTime date = DateTime.Now;
+                try
+                {
+                foreach (var x in DebtsId) { 
+                    //DebtsId.ForEach(x =>
+                    
+                        var PagoAnual = new PagosAnuales()
+                        {
+                            AgreementId = AgreementId,
+                            DateDebt = date,
+                            DebtId = x,
+                            Status = "ED001"
 
+                        };
 
+                        _context.PagosAnuales.Add(PagoAnual);
+                        await _context.SaveChangesAsync();
+                        await ApplyDiscount(x, porcentajeDiscount);
+
+                    }
+                    //transaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest);
+                }
+                return Ok();
+            //}
+            
         }
+
+        private async Task ApplyDiscount(int DebtId, int porcentajeDiscount)
+        {
+            List<SPParameters> parameters = new List<SPParameters> {
+                new SPParameters{Key ="id", Value = DebtId.ToString() },
+                new SPParameters{Key ="porcentage_value", Value = porcentajeDiscount.ToString() },
+                new SPParameters{Key ="discount_value", Value = "0" },
+                new SPParameters{Key ="text_discount", Value = "Descuento aplicado por pago anual", DbType= DbType.String, Size = 50 },
+                new SPParameters{Key ="option", Value = "1" },
+                new SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },
+                new SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
+
+
+                };
+            var ss = await new RunSP(this, _context).runProcedureNT("billing_Adjusment", parameters);
+        }
+
+        [HttpPost("getSimulateDebt/{AgreementId}/{year}")]
+        public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int year)
+        {
+        }
+
+    }
 
 
 
@@ -2520,6 +2578,6 @@ namespace Siscom.Agua.Api.Controllers
     }
 
 
-   
+
 
 }

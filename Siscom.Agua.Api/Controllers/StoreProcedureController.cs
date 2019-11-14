@@ -47,6 +47,7 @@ namespace Siscom.Agua.Api.Controllers
 
             int mesesEfectuados = 0;
             object result = null;
+            List<int> ids = new List<int>();
             for (int i = start_month; i <= end_month; i++)
             {
                 List<SPParameters> parameters = new List<SPParameters> {
@@ -54,7 +55,9 @@ namespace Siscom.Agua.Api.Controllers
                 new SPParameters{Key ="from_month", Value = i.ToString() },
                 new SPParameters{Key ="from_year", Value = from_year.ToString() },
                 new SPParameters{Key ="simulate", Value = simulate.ToString() },
-                new SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
+         
+                new SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""},
+                new SPParameters { Key = "DebtIdNew", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
 
 
                 };
@@ -64,6 +67,17 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     result = await new RunSP(this, _context).runProcedureNT("accrual_period", parameters);
                     parameters = null;
+                    if (simulate == 1)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        var data = JObject.Parse(JsonConvert.SerializeObject(result));
+                        var SPParameters = JsonConvert.DeserializeObject<SPParameters >(JsonConvert.SerializeObject( data["paramsOut"][1]));
+
+                        ids.Add(int.Parse( SPParameters.Value));
+                    }
                     mesesEfectuados++;
 
                 }
@@ -101,8 +115,10 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         return StatusCode((int)TypeError.Code.Ok, new { Message = $"Se registrarón todos, pero no se pudo registrar el comentario", data = result });
                     }
+                    return StatusCode((int)TypeError.Code.Ok, new { Message = $"Se registrarón todos los meses correctamente", data = ids });
                 }
             }
+            
 
             return StatusCode((int)TypeError.Code.Ok, new { Message = $"Se registrarón todos los meses correctamente", data = result });
         }
