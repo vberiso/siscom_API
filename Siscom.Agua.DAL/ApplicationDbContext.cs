@@ -229,6 +229,11 @@ namespace Siscom.Agua.DAL
         public DbSet<PostalMx> PostalMx { get; set; }
 
         /// <summary>
+        /// Campañas
+        /// </summary>
+        public DbSet<CondonationCampaing> CondonationCampaings { get; set; }
+
+        /// <summary>
         /// Convenios
         /// </summary>
         public DbSet<PartialPayment> PartialPayments { get; set; }

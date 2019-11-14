@@ -149,7 +149,16 @@ namespace Siscom.Agua.Api.Controllers
                                                             !x.Name.Contains("INFDES"))
                                                             .ToListAsync();
             return Ok(campaign);
-        } 
+        }
+
+        [HttpGet("Condonations")]
+        public async Task<IActionResult> ExistCondonations()
+        {
+            var tmpCond = await _context.CondonationCampaings.Where(c => c.IsActive == true &&
+                                                                            c.StartDate < DateTime.Now &&
+                                                                            c.EndDate > DateTime.Now).ToListAsync();
+            return Ok(tmpCond);
+        }
 
         [HttpGet("{mac}")]
         public async Task<IActionResult> FindTerminalMac([FromRoute] string mac)
@@ -233,5 +242,17 @@ namespace Siscom.Agua.Api.Controllers
         {
             return _context.SystemParameters.Any(e => e.Id == id);
         }
+
+
+        [HttpGet("GetConfiguration")]
+        public async Task<IActionResult> GetConfiguration([FromRoute] int teminalUserId)
+        {
+            
+
+           
+
+            return Ok("Ok");
+        }
+
     }
 }

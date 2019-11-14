@@ -16,7 +16,9 @@
     <Compile Remove="Migrations\20191011170422_addTableTransactionCancellationRequest.cs" />
     <Compile Remove="Migrations\20191011170422_addTableTransactionCancellationRequest.Designer.cs" />
     <Compile Remove="Migrations\20191101205604_CreateTableAccountStatusInFile.cs" />
-    <Compile Remove="Migrations\20191101205604_CreateTableAccountStatusInFile.Designer.cs" /> 
+    <Compile Remove="Migrations\20191101205604_CreateTableAccountStatusInFile.Designer.cs" />
+    <Compile Remove="Migrations\20191111173345_addTableCondonationCampaing.cs" />
+    <Compile Remove="Migrations\20191111173345_addTableCondonationCampaing.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>

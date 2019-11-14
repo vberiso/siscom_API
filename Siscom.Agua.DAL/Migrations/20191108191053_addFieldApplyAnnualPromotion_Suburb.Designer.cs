@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191108191053_addFieldApplyAnnualPromotion_Suburb")]
+    partial class addFieldApplyAnnualPromotion_Suburb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1386,53 +1388,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Client");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.CondonationCampaing", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_condonation_campaign")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Alias")
-                        .HasColumnName("alias")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("Codes")
-                        .HasColumnName("codes")
-                        .HasMaxLength(200);
-
-                    b.Property<DateTime>("CondonationFrom")
-                        .HasColumnName("condonation_from");
-
-                    b.Property<DateTime>("CondonationUntil")
-                        .HasColumnName("condonation_until");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnName("end_date");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnName("name")
-                        .HasMaxLength(50);
-
-                    b.Property<short>("Percentage")
-                        .HasColumnName("percentage");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnName("start_date");
-
-                    b.Property<string>("Types")
-                        .HasColumnName("tipes")
-                        .HasMaxLength(100);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CondonationCampaings");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Consumption", b =>
                 {
                     b.Property<int>("Id")
@@ -1634,71 +1589,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("AgreementId");
 
                     b.ToTable("Debt");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtAnnual", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_debt_annual")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AgreementId")
-                        .HasColumnName("agreement_id");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnName("Amount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("CodeConcept")
-                        .HasColumnName("code_concept")
-                        .HasMaxLength(5);
-
-                    b.Property<DateTime>("DebitDate")
-                        .HasColumnName("debit_date");
-
-                    b.Property<int>("DebtId")
-                        .HasColumnName("debt_id");
-
-                    b.Property<DateTime>("FromDate")
-                        .HasColumnName("from_date")
-                        .HasColumnType("date");
-
-                    b.Property<bool>("HaveTax")
-                        .HasColumnName("have_tax");
-
-                    b.Property<string>("NameConcept")
-                        .HasColumnName("name_concept")
-                        .HasMaxLength(500);
-
-                    b.Property<int>("Sequential")
-                        .HasColumnName("sequential");
-
-                    b.Property<string>("Status")
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("Type")
-                        .HasColumnName("type")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("TypeIntake")
-                        .HasColumnName("type_intake")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("TypeService")
-                        .HasColumnName("type_service");
-
-                    b.Property<DateTime>("UntilDate")
-                        .HasColumnName("until_date")
-                        .HasColumnType("date");
-
-                    b.Property<short>("Year")
-                        .HasColumnName("year");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("debt_annual");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtCalculation", b =>
@@ -2256,7 +2146,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 11, 14, 13, 41, 49, 52, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 11, 8, 13, 10, 52, 373, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3010,9 +2900,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateStimated")
                         .HasColumnName("date_stimated");
 
-                    b.Property<int?>("DebtId")
-                        .HasColumnName("DebtId");
-
                     b.Property<string>("Folio")
                         .IsRequired()
                         .HasColumnName("folio")
@@ -3115,31 +3002,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Origin_Payment");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PagosAnuales", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_pagos_anuales")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AgreementId")
-                        .HasColumnName("AgreementId");
-
-                    b.Property<DateTime>("DateDebt")
-                        .HasColumnName("DateDebt");
-
-                    b.Property<int>("DebtId")
-                        .HasColumnName("DebtId");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnName("Status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PagosAnuales");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.PartialPayment", b =>
                 {
                     b.Property<int>("Id")
@@ -3190,9 +3052,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<DateTime>("PartialPaymentDate")
                         .HasColumnName("partial_payment_date");
-
-                    b.Property<int>("Periodicity")
-                        .HasColumnName("periodicity");
 
                     b.Property<string>("Phone")
                         .HasColumnName("phone")
@@ -3286,10 +3145,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("RelaseDebtId")
                         .HasColumnName("relase_debtId");
-
-                    b.Property<DateTime>("ReleasePeriod")
-                        .HasColumnName("release_period")
-                        .HasColumnType("date");
 
                     b.Property<string>("Status")
                         .HasColumnName("status")
