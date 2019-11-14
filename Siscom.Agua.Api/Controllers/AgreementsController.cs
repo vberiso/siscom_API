@@ -2562,6 +2562,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("getSimulateDebt/{AgreementId}/{year}")]
         public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int year)
         {
+            return Ok();
         }
 
     }

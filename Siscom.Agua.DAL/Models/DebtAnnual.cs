@@ -25,6 +25,8 @@ namespace Siscom.Agua.DAL.Models
         public string TypeService { get; set; }
         [Column("year")]
         public Int16 Year { get; set; }
+        [Column("type"), StringLength(5)]
+        public string Type { get; set; }
         [Column("status"), StringLength(5)]
         public string Status { get; set; }
         [Column("sequential")]
@@ -39,5 +41,7 @@ namespace Siscom.Agua.DAL.Models
         public bool HaveTax { get; set; }
         [Column("debt_id")]
         public int DebtId { get; set; }
+        [Column("agreement_id")]
+        public int AgreementId { get; set; }
     }
 }
