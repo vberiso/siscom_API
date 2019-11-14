@@ -33,6 +33,8 @@ namespace Siscom.Agua.DAL.Models
         public int RelaseDebtId { get; set; }
         [Column("payment_date")]
         public DateTime PaymentDate { get; set; }
+        [Column("release_period")]
+        public DateTime ReleasePeriod { get; set; }
         public int PaymentId { get; set; }
         public int PartialPaymentId { get; set; }
         public PartialPayment PartialPayment { get; set; }

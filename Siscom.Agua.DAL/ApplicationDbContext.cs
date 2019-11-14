@@ -111,6 +111,7 @@ namespace Siscom.Agua.DAL
         /// Calculation of debt
         /// </summary> 
         public DbSet<Debt> Debts { get; set; }
+        public DbSet<DebtAnnual> DebtAnnual { get; set; }
         public DbSet<DebtDetail> DebtDetails { get; set; }
         public DbSet<DebtStatus> DebtStatuses { get; set; }
         public DbSet<TypePeriod> TypePeriods { get; set; }
@@ -638,6 +639,21 @@ namespace Siscom.Agua.DAL
                  .HasDefaultValue("1900-01-01");
             #endregion
 
+            #region DebtAnnual
+            builder.Entity<DebtAnnual>()
+                  .Property(x => x.FromDate)
+                  .HasColumnType("date");
+
+            builder.Entity<DebtAnnual>()
+                   .Property(x => x.UntilDate)
+                   .HasColumnType("date");
+
+            builder.Entity<DebtAnnual>()
+                   .Property(p => p.Amount)
+                   .HasColumnType("decimal(18, 2)");
+
+            #endregion
+
             #region DebtDetail
             builder.Entity<DebtDetail>()
                    .HasOne<Debt>(a => a.Debt)
@@ -1132,6 +1148,10 @@ namespace Siscom.Agua.DAL
                        .HasColumnType("decimal(18, 2)");
 
                 builder.Entity<PartialPaymentDetail>()
+                      .Property(p => p.ReleasePeriod)
+                      .HasColumnType("date");
+
+            builder.Entity<PartialPaymentDetail>()
                        .HasOne<PartialPayment>(a => a.PartialPayment)
                        .WithMany(s => s.PartialPaymentDetails)
                        .HasForeignKey(s => s.PartialPaymentId);

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191112172544_AddFieldsPartialPayments")]
+    partial class AddFieldsPartialPayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1589,64 +1591,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Debt");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtAnnual", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_debt_annual")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnName("Amount")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("CodeConcept")
-                        .HasColumnName("code_concept")
-                        .HasMaxLength(5);
-
-                    b.Property<DateTime>("DebitDate")
-                        .HasColumnName("debit_date");
-
-                    b.Property<int>("DebtId")
-                        .HasColumnName("debt_id");
-
-                    b.Property<DateTime>("FromDate")
-                        .HasColumnName("from_date")
-                        .HasColumnType("date");
-
-                    b.Property<bool>("HaveTax")
-                        .HasColumnName("have_tax");
-
-                    b.Property<string>("NameConcept")
-                        .HasColumnName("name_concept")
-                        .HasMaxLength(500);
-
-                    b.Property<int>("Sequential")
-                        .HasColumnName("sequential");
-
-                    b.Property<string>("Status")
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("TypeIntake")
-                        .HasColumnName("type_intake")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("TypeService")
-                        .HasColumnName("type_service");
-
-                    b.Property<DateTime>("UntilDate")
-                        .HasColumnName("until_date")
-                        .HasColumnType("date");
-
-                    b.Property<short>("Year")
-                        .HasColumnName("year");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("debt_annual");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtCalculation", b =>
                 {
                     b.Property<int>("Id")
@@ -2202,7 +2146,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 11, 14, 13, 25, 10, 284, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 11, 12, 11, 25, 42, 815, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");

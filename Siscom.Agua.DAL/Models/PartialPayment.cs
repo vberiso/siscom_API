@@ -56,6 +56,8 @@ namespace Siscom.Agua.DAL.Models
         public string Email { get; set; }
         [Column("phone"), StringLength(200)]
         public string Phone { get; set; }
+        [Column("periodicity")]
+        public int Periodicity { get; set; }
         public ICollection<PartialPaymentDetail> PartialPaymentDetails { get; set; }
         public ICollection<PartialPaymentDebt> PartialPaymentDebts { get; set; }
     }

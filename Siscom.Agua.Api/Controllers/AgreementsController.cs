@@ -2448,10 +2448,10 @@ namespace Siscom.Agua.Api.Controllers
             var a=_context.Agreements.ToList();
             List<object> oc = new List<object>();
             a.ForEach(x =>{
-                var paymenhts = _context.Payments.Include(p => p.PaymentDetails)
+                var payments = _context.Payments.Include(p => p.PaymentDetails)
                 .ThenInclude(pd => pd.Debt)
                 .ToList();
-                oc.Add(new { Agrement = x, Payments = paymenhts });
+                oc.Add(new { Agrement = x, Payments = payments });
             });
             
             return null;
