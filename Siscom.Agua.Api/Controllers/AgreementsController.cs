@@ -2465,11 +2465,14 @@ namespace Siscom.Agua.Api.Controllers
         {
 
             List<string> statusDeuda = new List<string>() { "ED001", "ED004", "ED007", "ED011" };
-            System.Linq.IQueryable<Agreement> query = _context.Agreements.
-                 Include(x => x.TypeService)
+            System.Linq.IQueryable<Agreement> query = _context.Agreements
+                .Include(x => x.TypeService)
                    .Include(x => x.TypeUse)
                    .Include(x => x.AgreementDetails)
-                   .Include(x => x.TypeIntake);
+                   .Include(x => x.TypeIntake)
+                   .Include(x => x.PartialPayments)
+                        .ThenInclude(pp => pp.PartialPaymentDetails)
+                            .ThenInclude(ppc => ppc.PartialPaymentDetailConcepts);
             if (!ISayuntamiento)
             {
 
@@ -2490,8 +2493,6 @@ namespace Siscom.Agua.Api.Controllers
                .Include(x => x.Debts)
                    .ThenInclude(x => x.DebtDetails)
                .Where(x => id_agremmnents.Contains(x.Id.ToString()))
-
-
                .ToList();
 
 
@@ -2500,7 +2501,7 @@ namespace Siscom.Agua.Api.Controllers
                 x.Debts = x.Debts.Where(d => statusDeuda.Contains(d.Status)).ToList();
                 x.Clients = x.Clients.Where(c => c.TypeUser == "CLI01").ToList();
                 x.Addresses = x.Addresses.Where(a => a.TypeAddress == "DIR01").ToList();
-
+                x.PartialPayments = x.PartialPayments.Where(z => z.Status == "COV01").ToList();
             });
 
 

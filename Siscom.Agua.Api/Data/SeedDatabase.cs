@@ -12,22 +12,22 @@ namespace Siscom.Agua.Api.Data
     {
         public static async void Initialize(IServiceProvider serviceProvider)
         {
-            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-            IdentityResult roleResult;
-            //var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
-            // Roles Agua
-            string[] roleNamesAgua = { "Super", "Supervisor", "Operador", "Cortes", "Admin", "User", "Ordenes", "Multas"};
+            //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            //IdentityResult roleResult;
+            ////var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            //var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRol>>();
+            //// Roles Agua
+            //string[] roleNamesAgua = { "Super", "Supervisor", "Operador", "Cortes", "Admin", "User", "Ordenes", "Multas"};
 
-            foreach (var roleName in roleNamesAgua)
-            {
-                //creating the roles and seeding them to the database
-                var roleExist = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExist)
-                {
-                    roleResult = await roleManager.CreateAsync(new ApplicationRol(roleName));
-                }
-            }
+            //foreach (var roleName in roleNamesAgua)
+            //{
+            //    //creating the roles and seeding them to the database
+            //    var roleExist = await roleManager.RoleExistsAsync(roleName);
+            //    if (!roleExist)
+            //    {
+            //        roleResult = await roleManager.CreateAsync(new ApplicationRol(roleName));
+            //    }
+            //}
             //string[] roleNamesAyuntamiento = { "Super", "Admin", "User", "Supervisor", "Isabi", "Transito", "GenerarOrden"  };
 
             //foreach (var roleName in roleNamesAyuntamiento)
