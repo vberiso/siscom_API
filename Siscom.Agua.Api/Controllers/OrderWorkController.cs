@@ -39,52 +39,53 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet("OrderWorks/{id?}")]
-        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo = null, [FromQuery] bool withOrder = false, [FromQuery] string account= null)
+        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo = null, [FromQuery] bool withOrder = false, [FromQuery] string account = null)
         {
-            if (id == null)
-            {
-                System.Linq.IQueryable<OrderWork> query = _context.OrderWorks.Include(x => x.Agreement);
-                
-                if (folio == null)
-                {
-                  
-                    if (account != null)
-                    {
-                        query = query.Where(x => x.Agreement.Account == account);
-                    }
-                    if (fecha != null)
-                    {
-                        fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
-                        query = query.Where(x => x.DateOrder.ToString("dd-MM-yyyy") == fecha);
-                    }
-                    if (status != null)
-                    {
-                        query = query.Where(x => x.Status == status);
-                    }
-
-                    if (type != null)
-                    {
-                        query = query.Where(x => x.Type == type);
-                    }
-                    if (IsMasivo != null)
-                    {
-                        query = query.Where(x => x.Status == "EOT01");
-                    }
-                }
-                else
-                {
-                    query = query.Where(x => x.Folio == folio);
-                }
-
-
-                query = query.OrderBy(x => x.Folio);
-
-                var OrderWorks = query.ToList();
-
-                return Ok(OrderWorks);
-            }
             try
             {
+                if (id == null)
+                {
+                    System.Linq.IQueryable<OrderWork> query = _context.OrderWorks.Include(x => x.Agreement);
+
+                    if (folio == null)
+                    {
+
+                        if (account != null)
+                        {
+                            query = query.Where(x => x.Agreement.Account == account);
+                        }
+                        if (fecha != null)
+                        {
+                            fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
+                            query = query.Where(x => x.DateOrder.ToString("dd-MM-yyyy") == fecha);
+                        }
+                        if (status != null)
+                        {
+                            query = query.Where(x => x.Status == status);
+                        }
+
+                        if (type != null)
+                        {
+                            query = query.Where(x => x.Type == type);
+                        }
+                        if (IsMasivo != null)
+                        {
+                            query = query.Where(x => x.Status == "EOT01");
+                        }
+                    }
+                    else
+                    {
+                        query = query.Where(x => x.Folio == folio);
+                    }
+
+
+                    query = query.OrderBy(x => x.Folio);
+
+                    var OrderWorks = query.ToList();
+
+                    return Ok(OrderWorks);
+                }
+
 
                 var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
                     .Include(x => x.OrderWorkReasonCatalogs)
@@ -97,7 +98,7 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.TypeConsume)
                     .Include(x => x.OrderWork)
                         .ThenInclude(x => x.TechnicalStaff)
-                        
+
 
                     .Include(x => x.Clients)
                     .Include(x => x.Addresses)
@@ -118,7 +119,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
         }
-        
+
         [HttpPost("OrderWorks/GetByIds")]
         public async Task<IActionResult> GetListOrderWorks([FromBody] List<int> list)
         {
@@ -317,8 +318,9 @@ namespace Siscom.Agua.Api.Controllers
                         Observation = data["Observation"].ToString(),
                         Folio = "f",
                         Activities = data["Activities"].ToString(),
-                        aviso = aviso
-
+                        aviso = aviso,
+                        
+                        
 
                     };
                     _context.OrderWorks.Add(OrderWork);
@@ -330,7 +332,7 @@ namespace Siscom.Agua.Api.Controllers
                         IdStatus = "EOT01",
                         OrderWorkId = OrderWork.Id,
                         User = data["applicant"].ToString(),
-                        OrderWorkStatusDate = DateTime.Now
+                        OrderWorkStatusDate = DateTime.Now,
 
                     };
                     _context.OrderWorkStatus.Add(Status);
@@ -351,7 +353,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message, msg = "Solo se pudieron generar las primeras " + ApplyIds + " ordenes" });
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex, msg = "Solo se pudieron generar las primeras " + ApplyIds + " ordenes" });
             }
         }
 

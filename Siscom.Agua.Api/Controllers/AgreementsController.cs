@@ -2489,6 +2489,9 @@ namespace Siscom.Agua.Api.Controllers
                                .ThenInclude(x => x.States)
                .Include(x => x.Debts)
                    .ThenInclude(x => x.DebtDetails)
+               .Include(x => x.PartialPayments)
+                        .ThenInclude(pd => pd.PartialPaymentDetails)
+                            .ThenInclude(ppc => ppc.PartialPaymentDetailConcepts)
                .Where(x => id_agremmnents.Contains(x.Id.ToString()))
 
 
@@ -2500,7 +2503,8 @@ namespace Siscom.Agua.Api.Controllers
                 x.Debts = x.Debts.Where(d => statusDeuda.Contains(d.Status)).ToList();
                 x.Clients = x.Clients.Where(c => c.TypeUser == "CLI01").ToList();
                 x.Addresses = x.Addresses.Where(a => a.TypeAddress == "DIR01").ToList();
-
+                if (x.PartialPayments.Count > 0)
+                    x.PartialPayments = x.PartialPayments.Where(z => z.Status == "COV01").ToList();
             });
 
 

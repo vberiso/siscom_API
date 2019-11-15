@@ -63,7 +63,7 @@ namespace Siscom.Agua.DAL.Models
         public int? aviso { get; set; }
 
         [Column("DebtId")]
-        public int? DebtId { get; set; }
+        public int DebtId { get; set; }
 
 
         //public Debt Debt { get; set; }

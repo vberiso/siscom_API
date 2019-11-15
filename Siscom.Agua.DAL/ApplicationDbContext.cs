@@ -665,6 +665,13 @@ namespace Siscom.Agua.DAL
                    .Property(p => p.Amount)
                    .HasColumnType("decimal(18, 2)");
 
+            builder.Entity<DebtAnnual>()
+                   .Property(p => p.OriginalAmount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DebtAnnual>()
+                   .Property(p => p.DiscountAmount)
+                   .HasColumnType("decimal(18, 2)");
             #endregion
 
             #region DebtDetail

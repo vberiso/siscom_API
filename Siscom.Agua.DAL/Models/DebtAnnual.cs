@@ -43,5 +43,11 @@ namespace Siscom.Agua.DAL.Models
         public int DebtId { get; set; }
         [Column("agreement_id")]
         public int AgreementId { get; set; }
+        [Column("discount"), StringLength(50)]
+        public string Discount { get; set; }
+        [Column("original_amount")]
+        public decimal OriginalAmount { get; set; }
+        [Column("discount_amount")]
+        public decimal DiscountAmount { get; set; }
     }
 }

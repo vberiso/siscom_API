@@ -18,7 +18,11 @@
     <Compile Remove="Migrations\20191101205604_CreateTableAccountStatusInFile.cs" />
     <Compile Remove="Migrations\20191101205604_CreateTableAccountStatusInFile.Designer.cs" />
     <Compile Remove="Migrations\20191111173345_addTableCondonationCampaing.cs" />
-    <Compile Remove="Migrations\20191111173345_addTableCondonationCampaing.Designer.cs" /> 
+    <Compile Remove="Migrations\20191111173345_addTableCondonationCampaing.Designer.cs" />
+    <Compile Remove="Migrations\20191115234344_addFieldDebtIdOrderWork.cs" />
+    <Compile Remove="Migrations\20191115234344_addFieldDebtIdOrderWork.Designer.cs" />
+    <Compile Remove="Migrations\20191115234452_addFieldDebtIdOrderWork.cs" />
+    <Compile Remove="Migrations\20191115234452_addFieldDebtIdOrderWork.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>
