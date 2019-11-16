@@ -256,6 +256,10 @@ namespace Siscom.Agua.DAL
         public DbSet<PagosAnuales> PagosAnuales { get; set; }
         
 
+        /// <summary>
+        /// Tabla temporal para condonacion anual.
+        /// </summary>
+        public DbSet<MovimientosDebt> MovimientosDebts { get; set; }
 
         public ApplicationDbContext()
         {

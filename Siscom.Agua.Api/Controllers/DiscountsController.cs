@@ -186,7 +186,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 using (var command = _context.Database.GetDbConnection().CreateCommand())
                 {
-                    command.CommandText = "[dbo].[campaing_recharges]";
+                    //command.CommandText = "[dbo].[campaing_recharges]";
+                    command.CommandText = "[dbo].[campaing_recharges_global]";
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add(new SqlParameter("@id_agreement", idAgreement));
                     command.Parameters.Add(new SqlParameter

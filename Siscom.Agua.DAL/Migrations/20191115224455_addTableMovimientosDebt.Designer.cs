@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191115224455_addTableMovimientosDebt")]
+    partial class addTableMovimientosDebt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1660,14 +1662,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("DebtId")
                         .HasColumnName("debt_id");
 
-                    b.Property<string>("Discount")
-                        .HasColumnName("discount")
-                        .HasMaxLength(50);
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnName("discount_amount")
-                        .HasColumnType("decimal(18, 2)");
-
                     b.Property<DateTime>("FromDate")
                         .HasColumnName("from_date")
                         .HasColumnType("date");
@@ -1678,10 +1672,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<string>("NameConcept")
                         .HasColumnName("name_concept")
                         .HasMaxLength(500);
-
-                    b.Property<decimal>("OriginalAmount")
-                        .HasColumnName("original_amount")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("Sequential")
                         .HasColumnName("sequential");
@@ -2268,7 +2258,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2019, 11, 15, 14, 6, 46, 994, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2019, 11, 15, 16, 44, 54, 89, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
