@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
@@ -2519,14 +2520,14 @@ namespace Siscom.Agua.Api.Controllers
                 DateTime date = DateTime.Now;
                 try
                 {
-                foreach (var x in DebtsId) { 
+                foreach (var x in DebtsId) {
                     //DebtsId.ForEach(x =>
-                    
-                        var PagoAnual = new PagosAnuales()
+                   var idDebt =  await ApplyDiscount(x, porcentajeDiscount);
+                    var PagoAnual = new PagosAnuales()
                         {
                             AgreementId = AgreementId,
                             DateDebt = date,
-                            DebtId = x,
+                            DebtId = idDebt,
                             Status = "ED001"
                             
                             
@@ -2534,7 +2535,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         _context.PagosAnuales.Add(PagoAnual);
                         await _context.SaveChangesAsync();
-                        await ApplyDiscount(x, porcentajeDiscount);
+                       
 
                     }
                     //transaction.Commit();
@@ -2548,7 +2549,7 @@ namespace Siscom.Agua.Api.Controllers
             
         }
 
-        private async Task ApplyDiscount(int DebtId, int porcentajeDiscount)
+        private async Task<int> ApplyDiscount(int DebtId, int porcentajeDiscount)
         {
             List<SPParameters> parameters = new List<SPParameters> {
                 new SPParameters{Key ="id", Value = DebtId.ToString() },
@@ -2557,11 +2558,15 @@ namespace Siscom.Agua.Api.Controllers
                 new SPParameters{Key ="text_discount", Value = "Descuento aplicado por pago anual", DbType= DbType.String, Size = 50 },
                 new SPParameters{Key ="option", Value = "1" },
                 new SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },
+                new SPParameters{Key ="Debt", Value = "", Direccion= ParameterDirection.Output, DbType= DbType.String, Size = 30 },
                 new SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
 
 
                 };
             var ss = await new RunSP(this, _context).runProcedureNT("billing_Adjusment", parameters);
+            var data = JObject.Parse(JsonConvert.SerializeObject(ss));
+            var SPParameters = JsonConvert.DeserializeObject<SPParameters>(JsonConvert.SerializeObject(data["paramsOut"][1]));
+            return int.Parse(SPParameters.Value);
         }
 
         [HttpPost("getSimulateDebt/{AgreementId}/{year}")]
