@@ -2528,7 +2528,8 @@ namespace Siscom.Agua.Api.Controllers
                             DateDebt = date,
                             DebtId = x,
                             Status = "ED001"
-
+                            
+                            
                         };
 
                         _context.PagosAnuales.Add(PagoAnual);
