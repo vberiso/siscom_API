@@ -13,5 +13,8 @@ namespace Siscom.Agua.Api.Model
         public decimal amount { get; set; }
         public int year { get; set; }
         public int debtPeriodId { get; set; }
+        public int AgreementId { get; set; }
+        public bool haveTax { get; set; }
+        public string nameConcept { get; set; }
     }
 }

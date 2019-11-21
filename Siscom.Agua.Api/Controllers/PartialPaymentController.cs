@@ -370,7 +370,8 @@ namespace Siscom.Agua.Api.Controllers
                             "pp.amount, pp.on_account, s.[description], " +
                             "convert(varchar,pp.relase_date, 103) relase_date, " +
                             "convert(varchar,pp.payment_date, 103) payment_date, "+
-                            "convert(varchar, pp.release_period, 103), release_period from partial_payment_detail pp , " +
+                            "convert(varchar, pp.release_period, 103), release_period " +
+                            "from partial_payment_detail pp , " +
                             "Status s where pp.PartialPaymentId = '" + PartialPaymentId + "' " +
                             "and s.id_status = pp.status";
 
@@ -539,10 +540,18 @@ namespace Siscom.Agua.Api.Controllers
                     using (var command = connection.CreateCommand())
                     {
                         command.CommandText = "select (select t.[description] from [Type] t where t.id_type = d.[type]) [type]," +
-                            " d.from_date, d.until_date, (d.amount - d.on_account) amount," +
-                            " d.[year], " +
-                            "d.DebtPeriodId from Debt d where d.AgreementId = '" + idAgreement + "' " +
-                            "and d.[status] in ('ED001','ED004','ED007','ED011') " +
+                            " d.from_date," +
+                            " d.until_date," +
+                            " (dd.amount - dd.on_account) amount," +
+                            " d.[year]," +
+                            " d.DebtPeriodId," +
+                            " d.AgreementId," +
+                            " dd.have_tax," +
+                            " dd.name_concept " +
+                            "from Debt d " +
+                            "inner join Debt_Detail dd on d.id_debt = dd.DebtId " +
+                            "where d.AgreementId = '" + idAgreement + "' " +
+                            "and d.[status] in ('ED001','ED004','ED007','ED011')" +
                             "and d.[type] <> 'TIP06'";
 
                         using (var result = await command.ExecuteReaderAsync())
@@ -557,6 +566,9 @@ namespace Siscom.Agua.Api.Controllers
                                     amount = Convert.ToDecimal(result[3]),
                                     year = Convert.ToInt32(result[4]),
                                     debtPeriodId = Convert.ToInt32(result[5]),
+                                    AgreementId = Convert.ToInt32(result[6]),
+                                    haveTax = Convert.ToBoolean(result[7]),
+                                    nameConcept = result[8].ToString()
                                 });
                             }
                         }
