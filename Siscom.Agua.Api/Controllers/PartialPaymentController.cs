@@ -596,5 +596,58 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
             }
         }
+
+        [HttpGet("FindPartialPaymentDebt/{PartialPaymentId}")]
+        public async Task<IActionResult> FindPartialPaymentDebt([FromRoute] int PartialPaymentId)
+        {
+            List<PartialPaymentDebts> partial = new List<PartialPaymentDebts>();
+
+            try
+            {
+                using (var connection = _context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "select sum(r.amount) amount, r.name_concept, sum(r.iva) iva from(select(b.[amount]) amount, b.name_concept, b.have_tax," +
+                            " case when b.have_tax = 1 then b.amount * 0.16 else 0 end iva from[dbo].[partial_payment_detail] a, [dbo].[Partial_Payment_Detail_Concept] b " +
+                            "where PartialPaymentId = '" + PartialPaymentId + "' and b.PartialPaymentDetailId = a.id_partial_payment_detail) r group by r.name_concept";
+
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            while (await result.ReadAsync())
+                            {
+                                partial.Add(new PartialPaymentDebts
+                                {
+                                    amount = Convert.ToDecimal(result[0]),
+                                    nameConcept = result[1].ToString(),
+                                    iva = Convert.ToDecimal(result[2])
+                                });
+                            }
+                        }
+                    }
+                    if (partial.Count > 0)
+                    {
+                        return Ok(partial);
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo buscar el convenio") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = PartialPaymentId.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
+            }
+        }
     }
 }
