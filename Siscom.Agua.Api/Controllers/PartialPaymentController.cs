@@ -609,7 +609,7 @@ namespace Siscom.Agua.Api.Controllers
                     await connection.OpenAsync();
                     using (var command = connection.CreateCommand())
                     {
-                        command.CommandText = "select sum(r.amount) amount, r.name_concept, sum(r.iva) iva from(select(b.[amount]) amount, b.name_concept, b.have_tax," +
+                        command.CommandText = "select sum(r.amount) amount, sum(r.on_account) on_account, r.name_concept, sum(r.iva) iva from(select(b.[amount]) amount, b.on_account, b.name_concept, b.have_tax," +
                             " case when b.have_tax = 1 then b.amount * 0.16 else 0 end iva from[dbo].[partial_payment_detail] a, [dbo].[Partial_Payment_Detail_Concept] b " +
                             "where PartialPaymentId = '" + PartialPaymentId + "' and b.PartialPaymentDetailId = a.id_partial_payment_detail) r group by r.name_concept";
 
@@ -620,8 +620,9 @@ namespace Siscom.Agua.Api.Controllers
                                 partial.Add(new PartialPaymentDebts
                                 {
                                     amount = Convert.ToDecimal(result[0]),
-                                    nameConcept = result[1].ToString(),
-                                    iva = Convert.ToDecimal(result[2])
+                                    on_account = Convert.ToDecimal(result[1]),
+                                    nameConcept = result[2].ToString(),
+                                    iva = Convert.ToDecimal(result[3])
                                 });
                             }
                         }
