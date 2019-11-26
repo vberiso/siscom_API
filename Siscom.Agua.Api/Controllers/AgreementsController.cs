@@ -321,6 +321,9 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return NotFound();
             }
+
+            agreement.AgreementLogs = _context.AgreementLogs.Where(al => al.AgreementId == id).ToList();
+            
             return Ok(agreement);
         }
 

@@ -840,6 +840,15 @@ namespace Siscom.Agua.Api.Controllers
                                 _context.DebtStatuses.Add(debtStatus);
                                 await _context.SaveChangesAsync();
 
+                                //Se veririfica si es un pago anual
+                                PagosAnuales pagosAnuales = _context.PagosAnuales.FirstOrDefault(pa => pa.DebtId == debtFind.Id && pa.Status == "ED001");
+                                if (pagosAnuales != null)
+                                {
+                                    pagosAnuales.Status = "ED005";
+                                    _context.Entry(pagosAnuales).State = EntityState.Modified;
+                                    _context.SaveChanges();
+                                }
+
                                 //Conceptos
                                 foreach (var detail in debt.DebtDetails)
                                 {
@@ -928,7 +937,6 @@ namespace Siscom.Agua.Api.Controllers
                                     _context.Entry(ppd).State = EntityState.Modified;
                                     await _context.SaveChangesAsync();
                                 }
-                                
                             }
                             else
                                 return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("El estado - {0} de la deuda - {1}, no permite el pago", debtFind.Status, debtFind.Id) });
