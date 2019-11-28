@@ -4,11 +4,14 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
+using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Web.Http.Cors;
+using BingMapsRESTToolkit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -47,7 +50,27 @@ namespace Siscom.Agua.Api.Controllers
             this.appSettings = appSettings.Value;
         }
 
+        [HttpGet("geoCodingAddress/{Address}")]
+        public async Task<IActionResult> Geocode([FromRoute] string address)
+        {
+            string url = "http://dev.virtualearth.net/REST/v1/Locations?query=" + address + "&key=AhIAbRyqNDSBafLAHaRkI_6Hte8yirXjBRxVxZBY-1N4o0stWSEpGNjFoARHwpYc";
 
+            using (var client = new WebClient())
+            {
+                string response = client.DownloadString(url);
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Response));
+                using (var es = new MemoryStream(System.Text.Encoding.Unicode.GetBytes(response)))
+                {
+                    var mapResponse = (ser.ReadObject(es) as Response); //Response is one of the Bing Maps DataContracts
+                    Location location = (Location)mapResponse.ResourceSets.First().Resources.First();
+                    return Ok(new GeoCodingAddress
+                    {
+                        Latitude = location.Point.Coordinates[0],
+                        Longitude = location.Point.Coordinates[1]
+                    }); 
+                }
+            }
+        }
 
         // GET: api/Agreements
         [HttpGet("GetSummary/{AgreementId}/{ById?}")]
@@ -1189,7 +1212,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         foreach (var address in agreementvm.Adresses)
                         {
-                            NewAgreement.Addresses.Add(new Address
+                            NewAgreement.Addresses.Add(new Siscom.Agua.DAL.Models.Address
                             {
                                 Street = address.Street,
                                 Outdoor = address.Outdoor,
@@ -2583,7 +2606,6 @@ namespace Siscom.Agua.Api.Controllers
         }
 
     }
-
 
 
 
