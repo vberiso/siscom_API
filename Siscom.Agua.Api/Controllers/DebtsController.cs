@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.DAL;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http.Cors;
@@ -181,6 +183,45 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             return Ok(new { Detail, DebtDiscount });
+        }
+
+        [HttpPost("GetDiscountAnnual/{porcentajeDiscount}")]
+        public async Task<IActionResult> CheckIsAnnual([FromRoute] int porcentajeDiscount, [FromBody] List<int> DebtIds)
+        {
+            decimal descuento = 0;
+            var AllDebtAnnual = new List<int>();
+            bool ApplyMSI = false;
+            List<int> idsDeb = new List<int>();
+            try
+            {
+                DebtIds.ForEach(DebtId =>
+                {
+                    var result = _context.PagosAnuales.Where(x => x.DebtId == DebtId).FirstOrDefault();
+                    var result2 = _context.PromotionDebt.Where(x => x.DebtId == DebtId).FirstOrDefault();
+                    if (result != null)
+                    {
+
+                        if (result2 != null)
+                        {
+                            ApplyMSI = true;
+                            idsDeb.Add(DebtId);
+                        }
+                        else
+                        {
+                            var debt = _context.Debts.Where(x => x.Id == DebtId).FirstOrDefault();
+                            
+
+                             descuento = descuento + Math.Round((((debt.Amount - debt.OnAccount) * porcentajeDiscount) / 100), 2);
+                        }
+                        AllDebtAnnual.Add(DebtId);
+                    }
+                });
+                return Ok(new { descuento , ApplyMSI, ids= idsDeb, AllDebtAnnual });
+            }
+            catch (Exception e)
+            {
+                return Conflict(new { error = "Error" });
+            }
         }
 
 

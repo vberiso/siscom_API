@@ -261,6 +261,14 @@ namespace Siscom.Agua.DAL
         /// </summary>
         public DbSet<MovimientosDebt> MovimientosDebts { get; set; }
 
+        /// <summary>
+        /// Promociones
+        /// </summary>
+        public DbSet<PromotionGroup> PromotionGroup { get; set; }
+        public DbSet<Promotions> Promotions { get; set; }
+        public DbSet<PromotionDebt> PromotionDebt { get; set; }
+
+
         public ApplicationDbContext()
         {
         }

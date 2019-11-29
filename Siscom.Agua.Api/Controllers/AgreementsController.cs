@@ -2538,43 +2538,72 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
-        [HttpPost("GeneratePagosAnuales/{AgreementId}/{porcentajeDiscount}")]
-        public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int porcentajeDiscount, [FromBody] List<int> DebtsId)
+        [HttpPost("GeneratePagosAnuales/{AgreementId}/{porcentajeDiscount}/{user}/{userId}")]
+        public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int porcentajeDiscount, [FromRoute] string user, [FromRoute] string userId, [FromBody] List<int> DebtsId)
         {
             //using (var transaction = _context.Database.BeginTransaction())
             //{
-                DateTime date = DateTime.Now;
-                try
+            DateTime date = DateTime.Now;
+            try
+            {
+                foreach (var x in DebtsId)
                 {
-                foreach (var x in DebtsId) {
                     //DebtsId.ForEach(x =>
-                   var idDebt =  await ApplyDiscount(x, porcentajeDiscount);
-                    var PagoAnual = new PagosAnuales()
-                        {
-                            AgreementId = AgreementId,
-                            DateDebt = date,
-                            DebtId = idDebt,
-                            Status = "ED001"
-                            
-                            
-                        };
-
-                        _context.PagosAnuales.Add(PagoAnual);
-                        await _context.SaveChangesAsync();
-                       
-
+                    int idDebt = x;
+                    if (porcentajeDiscount > 0)
+                    {
+                        idDebt = await ApplyDiscount(x, porcentajeDiscount);
                     }
-                    //transaction.Commit();
+                    else
+                    {
+                        _context.PromotionDebt.Add(new PromotionDebt()
+                        {
+                            DebtApplyPromotion = DateTime.Now,
+                            DebtId = idDebt,
+                            PromotionId = 0,
+                            user = user,
+                            userId = userId
+                            
+                        });
+                    }
+
+                    var PagoAnual = new PagosAnuales()
+                    {
+                        AgreementId = AgreementId,
+                        DateDebt = date,
+                        DebtId = idDebt,
+                        Status = "ED001"
+
+
+                    };
+
+                    _context.PagosAnuales.Add(PagoAnual);
+                    await _context.SaveChangesAsync();
+
+
                 }
-                catch (Exception e)
-                {
-                    return StatusCode(StatusCodes.Status400BadRequest);
-                }
-                return Ok();
+                //transaction.Commit();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+            return Ok();
             //}
-            
+
         }
 
+        [HttpPost("ApplyDiscountt/{porcentajeDiscount}")]
+        public async Task<ActionResult> ApplyDiscountt([FromRoute]  int porcentajeDiscount, [FromBody] List<int> DebtIdd = null)
+        {
+            List<int> newIds = new List<int>();
+            foreach (int debtId in DebtIdd)
+            {
+                var id = await ApplyDiscount(debtId, porcentajeDiscount);
+                newIds.Add(id);
+            }
+            return Ok(newIds);
+        }
         private async Task<int> ApplyDiscount(int DebtId, int porcentajeDiscount)
         {
             List<SPParameters> parameters = new List<SPParameters> {
@@ -2599,7 +2628,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> getSimulateDebt([FromRoute] int AgreementId, [FromRoute] int year)
         {
             var result = _context.DebtAnnual.Where(x => x.AgreementId == AgreementId && x.Year == year).ToList();
-           
+
 
             return Ok(result);
 
