@@ -262,6 +262,7 @@ namespace Siscom.Agua.Api.Controllers
 
                     }
 
+                    
                     order.OnAccount = 0;
                     order.Year = (short)DateTime.UtcNow.ToLocalTime().Year;
                     order.Period = 0;
@@ -271,10 +272,15 @@ namespace Siscom.Agua.Api.Controllers
                     order.ExpirationDate = DateTime.UtcNow.ToLocalTime();
                     var valExpirationDate = Convert.ToInt32(param.NumberColumn);
                     var endDate = order.ExpirationDate.AddDays(valExpirationDate);
+
+
                     var valueDate = endDate.DayOfYear;
                     var valDate = order.DateOrder.DayOfYear;
                     order.ExpirationDate = endDate;
-                    if (valueDate < valDate)
+
+                    DateTime fInicio = DateTime.UtcNow.ToLocalTime();
+                    DateTime fFinal = endDate.Date;
+                    if (fFinal < fInicio)
                     {
                         return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No puedes generar la orden por vigencia vence hasta " + order.ExpirationDate });
 
