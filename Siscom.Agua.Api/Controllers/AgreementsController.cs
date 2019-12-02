@@ -2538,8 +2538,8 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(agreement);
         }
 
-        [HttpPost("GeneratePagosAnuales/{AgreementId}/{porcentajeDiscount}/{user}/{userId}")]
-        public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int porcentajeDiscount, [FromRoute] string user, [FromRoute] string userId, [FromBody] List<int> DebtsId)
+        [HttpPost("GeneratePagosAnuales/{AgreementId}/{porcentajeDiscount}/{user}/{userId}/{IsMSI}")]
+        public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int porcentajeDiscount, [FromRoute] string user, [FromRoute] string userId,[FromRoute] bool IsMSI, [FromBody] List<int> DebtsId)
         {
             //using (var transaction = _context.Database.BeginTransaction())
             //{
@@ -2550,7 +2550,7 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     //DebtsId.ForEach(x =>
                     int idDebt = x;
-                    if (porcentajeDiscount > 0)
+                    if (!IsMSI)
                     {
                         idDebt = await ApplyDiscount(x, porcentajeDiscount);
                     }
