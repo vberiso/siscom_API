@@ -139,7 +139,7 @@ namespace Siscom.Agua.Api.Controllers
                         }
                         else if (item.Type != "TIP02" && item.Type != "TIP03")
                         {
-                            var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)).CodeConcept });
+                            var tmpConceptos = item.Debt.DebtDetails.Select(d => new ClavesProductoServicioSAT() { CodeConcep = d.CodeConcept, Tipo = item.Type, ClaveProdServ = _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)) != null ? _context.ServiceParams.FirstOrDefault(x => x.ServiceId == int.Parse(d.CodeConcept)).CodeConcept : _context.ProductParams.FirstOrDefault(x => x.ProductId == int.Parse(d.CodeConcept)).CodeConcept });
                             tmpClaves.AddRange(tmpConceptos.ToList());
                         }
                         else    //Producto con cuenta.
