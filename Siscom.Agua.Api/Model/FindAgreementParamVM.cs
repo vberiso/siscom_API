@@ -19,5 +19,7 @@ namespace Siscom.Agua.Api.Model
         public int    NumDerivades { get; set; }        
         public decimal Debit { get; set; }
         public string Token { get; set; }
+        public string EndDate { get; set; }
+        public string NameDiscount { get; set; }
     }
 }

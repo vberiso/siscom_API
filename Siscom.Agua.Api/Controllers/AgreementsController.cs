@@ -583,7 +583,9 @@ namespace Siscom.Agua.Api.Controllers
                                     ",TY.name Tipo" +
                                     ",A.num_derivatives Derivadas " +
                                     ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
-                                    ",A.token " +
+                                    ",A.token" +
+                                    ",ADI.end_date" +
+                                    ",DS.name NombreDescuento " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -591,8 +593,9 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
+                                    "INNER JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -625,7 +628,9 @@ namespace Siscom.Agua.Api.Controllers
                                             Type = result[8].ToString(),
                                             NumDerivades = Convert.ToInt32(result[9]),
                                             Debit = Convert.ToInt32(result[10]),
-                                            Token = result[11].ToString()
+                                            Token = result[11].ToString(),
+                                            EndDate = result[12].ToString(),
+                                            NameDiscount = result[13].ToString()
                                         });
                                     }
                                 }
@@ -671,15 +676,18 @@ namespace Siscom.Agua.Api.Controllers
                                     ",A.num_derivatives Derivadas " +
                                     ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
                                     ",A.token " +
+                                    ",ADI.end_date " +
+                                    ",DS.[name] NombreDescuento " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
+                                    "INNER JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.[name]";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -698,7 +706,9 @@ namespace Siscom.Agua.Api.Controllers
                                             Type = result[8].ToString(),
                                             NumDerivades = Convert.ToInt32(result[9]),
                                             Debit = Convert.ToInt32(result[10]),
-                                            Token = result[11].ToString()
+                                            Token = result[11].ToString(),
+                                            EndDate = result[12].ToString(),
+                                            NameDiscount = result[13].ToString()
                                         });
                                     }
                                 }
@@ -2634,10 +2644,64 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+        [HttpGet("getPolygon/{longitude}/{latitude}")]
+        public async Task<IActionResult> getPolygon([FromRoute] decimal longitude, [FromRoute] decimal latitude)
+        {
+            List<Model.Polygon> message = new List<Model.Polygon>();
+
+            try
+            {
+                using (var connection = _context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "Declare @Existe int " +
+                            "SELECT @Existe = count(id) " +
+                            "FROM Polygon " +
+                            "WHERE geom.STIntersects(geography::STGeomFromText('POINT ('+ convert(varchar,'" + latitude + "') +' '+ convert(varchar,'" + longitude + "') +')', 4326)) = 1 " +
+                            "IF @Existe = 0 " +
+                            "BEGIN " +
+                            "PRINT 'FUERA DEL POLIGONO' " +
+                            "SET '" + latitude + "' = 0; " +
+                            "SET '" + longitude + "' = 0; " +
+                            "END";
+
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            while (await result.ReadAsync())
+                            {
+                                message.Add(new Model.Polygon
+                                {
+                                    Message = (result[0]).ToString()
+                                });
+                            }
+                        }
+                    }
+                    if (message.Count > 0)
+                    {
+                        return Ok(message);
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo ubicar en el poligono") });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = message.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
+            }
+        }
     }
-
-
-
 
 
     public class CodeTraslator
