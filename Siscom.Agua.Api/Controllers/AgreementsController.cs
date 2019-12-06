@@ -674,7 +674,6 @@ namespace Siscom.Agua.Api.Controllers
                                     ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
                                     ",A.token " +
                                     ",ADI.end_date " +
-                                    ",DS.[name] NombreDescuento " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
