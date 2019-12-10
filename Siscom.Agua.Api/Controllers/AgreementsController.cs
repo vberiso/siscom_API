@@ -272,7 +272,8 @@ namespace Siscom.Agua.Api.Controllers
                                            .ThenInclude(t => t.Towns)
                                                .ThenInclude(st => st.States)
                                      .Include(x => x.AgreementComments)
-                                     .Include(x => x.PartialPayments);
+                                     .Include(x => x.PartialPayments)
+                                     .ThenInclude(x => x.PartialPaymentDetails);
 
                 List<Siscom.Agua.DAL.Models.Agreement> agreement;
 
@@ -2667,11 +2668,14 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     //DebtsId.ForEach(x =>
                     int idDebt = x;
-                    if (!IsMSI)
+                  
+                    
+                    if (!IsMSI && porcentajeDiscount > 0)
                     {
                         idDebt = await ApplyDiscount(x, porcentajeDiscount);
                     }
-                    else
+                   
+                    else if(IsMSI)
                     {
                         _context.PromotionDebt.Add(new PromotionDebt()
                         {
