@@ -2228,11 +2228,11 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     if (string.IsNullOrEmpty(error))
                     {
-                        return Ok("Se canceló el descuento");
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se cancelar el descuento: [{error}]") });
                     }
                     else
                     {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo cancelar el descuento: [{error}]") });
+                        return Ok("Se canceló el descuento");
                     }
                 }
             }
