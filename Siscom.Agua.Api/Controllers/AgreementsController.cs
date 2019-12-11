@@ -587,6 +587,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",A.token" +
                                     ",ADI.end_date" +
                                     ",DS.name NombreDescuento " +
+                                    ",ADI.is_active " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -596,7 +597,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "LEFT JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name,ADI.is_active";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -631,7 +632,8 @@ namespace Siscom.Agua.Api.Controllers
                                             Debit = Convert.ToInt32(result[10]),
                                             Token = result[11].ToString(),
                                             EndDate = result[12].ToString(),
-                                            NameDiscount = result[13].ToString()
+                                            NameDiscount = result[13].ToString(),
+                                            isActiveDiscount = result[14] == DBNull.Value ? false : bool.Parse(result[14].ToString())
                                         });
                                     }
                                 }
@@ -679,6 +681,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",A.token " +
                                     ",ADI.end_date " +
                                     ",DS.[name] NombreDescuento " +
+                                    ",ADI.is_active " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
@@ -688,7 +691,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(C.name) , ' ' , UPPER(C.last_name), ' ' , UPPER(C.second_last_name)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.[name]";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.[name],ADI.is_active";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -709,7 +712,8 @@ namespace Siscom.Agua.Api.Controllers
                                             Debit = Convert.ToInt32(result[10]),
                                             Token = result[11].ToString(),
                                             EndDate = result[12].ToString(),
-                                            NameDiscount = result[13].ToString()
+                                            NameDiscount = result[13].ToString(),
+                                            isActiveDiscount = result[14] == DBNull.Value ? false : bool.Parse(result[14].ToString())
                                         });
                                     }
                                 }
@@ -756,15 +760,19 @@ namespace Siscom.Agua.Api.Controllers
                                     ",A.num_derivatives Derivadas " +
                                     ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
                                     ",A.token " +
+                                    ",ADI.end_date " +
+                                    ",DS.[name] NombreDescuento " +
+                                    ",ADI.is_active " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
+                                    "LEFT JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE CONCAT(UPPER(AD.street) , ' ' , UPPER(AD.outdoor)) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.[name],ADI.is_active";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     while (await result.ReadAsync())
@@ -782,7 +790,10 @@ namespace Siscom.Agua.Api.Controllers
                                             Type = result[8].ToString(),
                                             NumDerivades = Convert.ToInt32(result[9]),
                                             Debit = Convert.ToInt32(result[10]),
-                                            Token = result[11].ToString()
+                                            Token = result[11].ToString(),
+                                            EndDate = result[12].ToString(),
+                                            NameDiscount = result[13].ToString(),
+                                            isActiveDiscount = result[14] == DBNull.Value ? false : bool.Parse(result[14].ToString())
                                         });
                                     }
                                 }
@@ -828,15 +839,19 @@ namespace Siscom.Agua.Api.Controllers
                                     ",A.num_derivatives Derivadas " +
                                     ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
                                     ",A.token " +
+                                    ",ADI.end_date " +
+                                    ",DS.[name] NombreDescuento " +
+                                    ",ADI.is_active " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
                                     "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
+                                    "LEFT JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "WHERE UPPER(C.rfc) LIKE '%" + search.StringSearch + "%' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.[name],ADI.is_active";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     while (await result.ReadAsync())
@@ -854,7 +869,10 @@ namespace Siscom.Agua.Api.Controllers
                                             Type = result[8].ToString(),
                                             NumDerivades = Convert.ToInt32(result[9]),
                                             Debit = Convert.ToInt32(result[10]),
-                                            Token = result[11].ToString()
+                                            Token = result[11].ToString(),
+                                            EndDate = result[12].ToString(),
+                                            NameDiscount = result[13].ToString(),
+                                            isActiveDiscount = result[14] == DBNull.Value ? false : bool.Parse(result[14].ToString())
                                         });
                                     }
                                 }
@@ -2229,11 +2247,11 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     if (string.IsNullOrEmpty(error))
                     {
-                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se cancelar el descuento: [{error}]") });
+                        return Ok("Se canceló el descuento"); 
                     }
                     else
                     {
-                        return Ok("Se canceló el descuento");
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se cancelar el descuento: [{error}]") });
                     }
                 }
             }
@@ -2569,8 +2587,6 @@ namespace Siscom.Agua.Api.Controllers
                     else
                     {
                         return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"No se pudo agregar el descuento: [{error}]") });
-
-
                     }
                 }
             }

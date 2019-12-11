@@ -21,5 +21,6 @@ namespace Siscom.Agua.Api.Model
         public string Token { get; set; }
         public string EndDate { get; set; }
         public string NameDiscount { get; set; }
+        public bool? isActiveDiscount { get; set; }
     }
 }
