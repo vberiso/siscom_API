@@ -1959,6 +1959,21 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        [HttpGet("getRoutesList")]
+        public async Task<IActionResult> getRoutesList()
+        {
+
+            try
+            {
+                var res = _context.Routes.Where(x => x.Id == x.Id).ToList();
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
         [HttpPost("sendMail/{sendMail}/{idAgreement}")]
         public async Task<IActionResult> SENDMAIL([FromRoute] int sendMail, int idAgreement)

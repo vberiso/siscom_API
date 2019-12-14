@@ -264,7 +264,7 @@ namespace Siscom.Agua.Api.Controllers
                                     AgreementId = Convert.ToInt32(result[5]),
                                     description = result[6].ToString(),
                                     expiration_date = result[7].ToString(),
-                                    Account = Convert.ToInt32(result[8])
+                                    Account = result[8].ToString()
                                 });
                             }
                         }
@@ -325,7 +325,7 @@ namespace Siscom.Agua.Api.Controllers
                                     AgreementId = Convert.ToInt32(result[5]),
                                     description = result[6].ToString(),
                                     expiration_date = result[7].ToString(),
-                                    Account = Convert.ToInt32(result[8])
+                                    Account = result[8].ToString()
                                 });
                             }
                         }
