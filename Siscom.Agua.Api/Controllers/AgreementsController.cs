@@ -263,10 +263,12 @@ namespace Siscom.Agua.Api.Controllers
             {
                 var query = _context.Agreements
                                      .Include(x => x.Clients)
+                                        .ThenInclude(x => x.Contacts)
                                      .Include(x => x.TypeStateService)
                                      .Include(x => x.AgreementDiscounts)
                                      .Include(x => x.AgreementDetails)
                                      .Include(x => x.TypeIntake)
+                                     
                                      .Include(x => x.Addresses)
                                        .ThenInclude(s => s.Suburbs)
                                            .ThenInclude(t => t.Towns)
@@ -2827,6 +2829,45 @@ namespace Siscom.Agua.Api.Controllers
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para buscar el convenio" });
             }
+        }
+
+        [HttpPost("UpdateContacts")]
+        public async Task<IActionResult> UpdateContacts(object data)
+        {
+            try
+            {
+                var d = JObject.Parse(JsonConvert.SerializeObject(data));
+                ClientVM ClientVM = JsonConvert.DeserializeObject<ClientVM>(JsonConvert.SerializeObject(d["ClientVM"]));
+                List<ContactVM> ContactVM = JsonConvert.DeserializeObject<List<ContactVM>>(JsonConvert.SerializeObject(d["ContactVM"]));
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var client = _context.Clients.Where(x => x.Id == ClientVM.Id).FirstOrDefault();
+                    if (client != null)
+                    {
+                        client.EMail = ClientVM.EMail;
+                        _context.Clients.Update(client);
+                    }
+                    Contact contact;
+                    ContactVM.ForEach(x =>
+                    {
+                        contact = _context.Contacts.Where(c => c.Id == x.Id ).FirstOrDefault();
+                        if (contact != null)
+                        {
+                            contact.PhoneNumber = x.PhoneNumber;
+                            _context.Contacts.Update(contact);
+                        }
+
+                    });
+                    _context.SaveChanges();
+                    scope.Complete();
+                }
+                return Ok(new { Success  = "Éxito"});
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new { error = "Ocurrio un error" });
+            }
+
         }
     }
 
