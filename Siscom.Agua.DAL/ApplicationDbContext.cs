@@ -140,6 +140,7 @@ namespace Siscom.Agua.DAL
         public DbSet<TaxReceipt> TaxReceipts { get; set; }
         public DbSet<TaxReceiptCancel> TaxReceiptCancels { get; set; }
         public DbSet<DetailOfPaymentMethods> DetailOfPaymentMethods { get; set; }
+        public DbSet<FilesTimbrado> FilesTimbrados { get; set; }
 
         /// <summary>
         /// Route
