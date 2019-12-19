@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Siscom.Agua.Api.Enums;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -48,7 +50,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         // PUT: api/AgreementRulerCalculations/5
-        [HttpPut("{id}")]
+        [HttpPost("{id}")]
         public async Task<IActionResult> PutAgreementRulerCalculation([FromRoute] int id, [FromBody] AgreementRulerCalculation agreementRulerCalculation)
         {
             if (!ModelState.IsValid)
@@ -61,15 +63,37 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(agreementRulerCalculation).State = EntityState.Modified;
+            //_context.Entry(agreementRulerCalculation).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                AgreementRulerCalculation agreementd = agreementRulerCalculation;
+                agreementd.IsActive = agreementRulerCalculation.IsActive;
+
+                    AgreementRulerCalculation service = new AgreementRulerCalculation(); 
+                    var consulta = await _context.AgreementRulerCalculations.Where(x => x.AgreementId == agreementd.AgreementId && x.ServiceId == agreementd.ServiceId && x.IsActive == agreementd.IsActive).ToListAsync();
+
+                if(consulta.Count < 1)
+                {
+                    AgreementRulerCalculation log = new AgreementRulerCalculation()
+                    {
+                        ServiceId = agreementd.ServiceId,
+                        Amount = agreementd.Amount,
+                        DateIN = agreementd.DateIN,
+                        IsActive = agreementd.IsActive,
+                        AgreementId = agreementd.AgreementId
+                    };
+                    _context.AgreementRulerCalculations.Add(log);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!AgreementRulerCalculationExists(id))
+                if (AgreementRulerCalculationExists(id))
                 {
                     return NotFound();
                 }
@@ -79,22 +103,80 @@ namespace Siscom.Agua.Api.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/AgreementRulerCalculations
-        [HttpPost]
-        public async Task<IActionResult> PostAgreementRulerCalculation([FromBody] AgreementRulerCalculation agreementRulerCalculation)
+        [HttpPost("ActiveAgreementRulerCalculationState/{agreementId}/{serviceId}/{id}")]
+        public async Task<IActionResult> ActiveAgreementRulerCalculationState([FromRoute] int agreementId, [FromRoute] int serviceId, [FromRoute] int Id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.AgreementRulerCalculations.Add(agreementRulerCalculation);
-            await _context.SaveChangesAsync();
+            try
+            {
+                using (_context)
+                {
+                    var service = await _context.AgreementRulerCalculations.Where(x => x.AgreementId == agreementId && x.ServiceId == serviceId && x.IsActive == true).ToListAsync();
+                    var result = _context.AgreementRulerCalculations.SingleOrDefault(x => x.AgreementId == agreementId && x.ServiceId == serviceId && x.IsActive == false && x.Id == Id);
+                    if(service.Count < 1)
+                    {
+                        if (result.IsActive == false)
+                        {
+                            result.IsActive = true;
+                            _context.SaveChanges();
+                            return Ok(result);
+                        }
+                        else
+                        {
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = "La regla de cálculo ya está activa" });
+                        }
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Ya existe una regla de cálculo para este concepto" });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
-            return CreatedAtAction("GetAgreementRulerCalculation", new { id = agreementRulerCalculation.AgreementId }, agreementRulerCalculation);
+
+        [HttpPost("UnactiveAgreementRulerCalculationState/{agreementId}/{serviceId}")]
+        public async Task<IActionResult> UnactiveAgreementRulerCalculationState([FromRoute] int agreementId, [FromRoute] int serviceId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                using (_context)
+                {
+                    var result = _context.AgreementRulerCalculations.SingleOrDefault(x => x.AgreementId == agreementId && x.ServiceId == serviceId && x.IsActive == true);
+                    
+                        if (result.IsActive == true)
+                        {
+                            result.IsActive = false;
+                            _context.SaveChanges();
+                            return Ok(result);
+                        }
+                        else
+                        {
+                            return StatusCode((int)TypeError.Code.Conflict, new { Error = "La regla de cálculo ya está inactiva" });
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         // DELETE: api/AgreementRulerCalculations/5
