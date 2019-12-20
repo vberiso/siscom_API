@@ -4,6 +4,594 @@
         <name>Siscom.Agua.Api</name>
     </assembly>
     <members>
+        <member name="T:TimboxCancelacionSandboxWS.folios">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folios.folio">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.folio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folio.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folio.rfc_receptor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folio.total">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.consultar_documento_relacionado_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_documento_relacionado_result.resultado">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_documento_relacionado_result.relacionados_padres">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_documento_relacionado_result.relacionados_hijos">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.procesar_respuesta_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.procesar_respuesta_result.folios">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.folios_respuestas">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folios_respuestas.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folios_respuestas.rfc_emisor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folios_respuestas.total">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folios_respuestas.respuesta">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.respuestas">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.respuestas.folios_respuestas">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.consultar_peticiones_pendientes_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_peticiones_pendientes_result.codestatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_peticiones_pendientes_result.uuids">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.consultar_estatus_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_estatus_result.codigo_estatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_estatus_result.es_cancelable">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_estatus_result.estado">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.consultar_estatus_result.estatus_cancelacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.cancelar_cfdi_seguro_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.cancelar_cfdi_seguro_result.folios_cancelacion">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.cancelar_cfdi_seguro_result.acuse_cancelacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.cancelar_cfdi_externo_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.cancelar_cfdi_externo_result.folios_cancelacion">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.cancelar_cfdi_externo_result.acuse_cancelacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.folio_externo">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folio_externo.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folio_externo.rfc_receptor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folio_externo.total">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folio_externo.fecha_timbrado">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folio_externo.tipo_comprobante">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.folios_externo">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.folios_externo.folio_externo">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionSandboxWS.cancelar_cfdi_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.cancelar_cfdi_result.folios_cancelacion">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionSandboxWS.cancelar_cfdi_result.acuse_cancelacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.folios">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folios.folio">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.folio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folio.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folio.rfc_receptor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folio.total">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.consultar_documento_relacionado_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_documento_relacionado_result.resultado">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_documento_relacionado_result.relacionados_padres">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_documento_relacionado_result.relacionados_hijos">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.procesar_respuesta_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.procesar_respuesta_result.folios">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.folios_respuestas">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folios_respuestas.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folios_respuestas.rfc_emisor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folios_respuestas.total">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folios_respuestas.respuesta">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.respuestas">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.respuestas.folios_respuestas">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.consultar_peticiones_pendientes_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_peticiones_pendientes_result.codestatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_peticiones_pendientes_result.uuids">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.consultar_estatus_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_estatus_result.codigo_estatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_estatus_result.es_cancelable">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_estatus_result.estado">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.consultar_estatus_result.estatus_cancelacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.cancelar_cfdi_seguro_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.cancelar_cfdi_seguro_result.folios_cancelacion">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.cancelar_cfdi_seguro_result.acuse_cancelacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.cancelar_cfdi_externo_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.cancelar_cfdi_externo_result.folios_cancelacion">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.cancelar_cfdi_externo_result.acuse_cancelacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.folio_externo">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folio_externo.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folio_externo.rfc_receptor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folio_externo.total">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folio_externo.fecha_timbrado">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folio_externo.tipo_comprobante">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.folios_externo">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.folios_externo.folio_externo">
+            <remarks/>
+        </member>
+        <member name="T:TimboxCancelacionWS.cancelar_cfdi_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.cancelar_cfdi_result.folios_cancelacion">
+            <remarks/>
+        </member>
+        <member name="P:TimboxCancelacionWS.cancelar_cfdi_result.acuse_cancelacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.timbrar_cfdi_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.timbrar_cfdi_result.xml">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.consulta_rfc_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.consulta_rfc_result.codigo">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.consulta_rfc_result.status">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.consulta_rfc_result.informacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.obtener_consumo_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.obtener_consumo_result.plan_actual">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.obtener_consumo_result.creditos_asignados">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.obtener_consumo_result.creditos_usados">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.obtener_consumo_result.inicio_plan">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.obtener_consumo_result.fin_plan">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.recuperar_comprobante_referencia">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.recuperar_comprobante_referencia.estatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.recuperar_comprobante_referencia.cantidad">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.recuperar_comprobante_referencia.comprobantes">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.external_id">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.external_id.external_id1">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.recuperar_comprobante_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.recuperar_comprobante_result.estatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.recuperar_comprobante_result.cantidad">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.recuperar_comprobante_result.comprobantes">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.buscar_acuse_recepcion_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.buscar_acuse_recepcion_result.acuses">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.buscar_acuse_recepcion_result.uuids_erroneos">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.buscar_acuse_recepcion_result.uuids_no_encontrados">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.uuid.uuid1">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.parametros_acuse">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_acuse.uuids">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_acuse.fecha_timbrado_inicio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_acuse.fecha_timbrado_fin">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.buscar_cfdis_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.buscar_cfdis_result.estatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.buscar_cfdis_result.cantidad">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.buscar_cfdis_result.comprobantes">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.parametros_cfdis">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.rfc_emisor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.rfc_receptor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.fecha_emision_inicio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.fecha_emision_fin">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.fecha_timbrado_inicio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.fecha_timbrado_fin">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.cancelado">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.external_id">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.folio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.serie">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.limit">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.parametros_cfdis.offset">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.timbrar_zip_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.timbrar_zip_result.xml">
+            <remarks/>
+        </member>
+        <member name="T:TimboxSandboxWS.timbrar_cfdi_referencia_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxSandboxWS.timbrar_cfdi_referencia_result.xml">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.timbrar_cfdi_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.timbrar_cfdi_result.xml">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.consulta_rfc_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.consulta_rfc_result.codigo">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.consulta_rfc_result.status">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.consulta_rfc_result.informacion">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.obtener_consumo_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.obtener_consumo_result.plan_actual">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.obtener_consumo_result.creditos_asignados">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.obtener_consumo_result.creditos_usados">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.obtener_consumo_result.inicio_plan">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.obtener_consumo_result.fin_plan">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.recuperar_comprobante_referencia">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.recuperar_comprobante_referencia.estatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.recuperar_comprobante_referencia.cantidad">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.recuperar_comprobante_referencia.comprobantes">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.external_id">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.external_id.external_id1">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.recuperar_comprobante_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.recuperar_comprobante_result.estatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.recuperar_comprobante_result.cantidad">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.recuperar_comprobante_result.comprobantes">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.buscar_acuse_recepcion_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.buscar_acuse_recepcion_result.acuses">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.buscar_acuse_recepcion_result.uuids_erroneos">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.buscar_acuse_recepcion_result.uuids_no_encontrados">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.uuid.uuid1">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.parametros_acuse">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_acuse.uuids">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_acuse.fecha_timbrado_inicio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_acuse.fecha_timbrado_fin">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.buscar_cfdis_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.buscar_cfdis_result.estatus">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.buscar_cfdis_result.cantidad">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.buscar_cfdis_result.comprobantes">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.parametros_cfdis">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.rfc_emisor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.rfc_receptor">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.fecha_emision_inicio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.fecha_emision_fin">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.fecha_timbrado_inicio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.fecha_timbrado_fin">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.cancelado">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.external_id">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.uuid">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.folio">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.serie">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.limit">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.parametros_cfdis.offset">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.timbrar_zip_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.timbrar_zip_result.xml">
+            <remarks/>
+        </member>
+        <member name="T:TimboxWS.timbrar_cfdi_referencia_result">
+            <remarks/>
+        </member>
+        <member name="P:TimboxWS.timbrar_cfdi_referencia_result.xml">
+            <remarks/>
+        </member>
         <member name="M:Siscom.Agua.Api.Controllers.AgreementsController.FindAgreementParam(Siscom.Agua.Api.Model.SearchAgreementVM)">
              <summary>
             
@@ -118,6 +706,12 @@
             
              </remarks>
              
+        </member>
+        <member name="M:Siscom.Agua.Api.Controllers.FacturacionController.GetNumeroCertificado">
+            <summary>
+            //Facturacion con Timbox
+            </summary>
+            
         </member>
         <!-- Badly formed XML comment ignored for member "T:Siscom.Agua.Api.Controllers.FolioController" -->
         <member name="M:Siscom.Agua.Api.Controllers.FolioController.GetFolio">
@@ -741,6 +1335,377 @@
             <param name="inputFile"></param>
             <param name="outputFile"></param>
             <param name="password"></param>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.CfdiRelacionados">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Emisor">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Receptor">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Conceptos">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Impuestos">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Complemento">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Addenda">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Version">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Serie">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Folio">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Fecha">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Sello">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.FormaPago">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.FormaPagoSpecified">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.NoCertificado">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Certificado">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.CondicionesDePago">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.SubTotal">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Descuento">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.DescuentoSpecified">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Moneda">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.TipoCambio">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.TipoCambioSpecified">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Total">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.TipoDeComprobante">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.MetodoPago">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.MetodoPagoSpecified">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.LugarExpedicion">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.Comprobante.Confirmacion">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteCfdiRelacionados">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteCfdiRelacionados.CfdiRelacionado">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteCfdiRelacionados.TipoRelacion">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteCfdiRelacionadosCfdiRelacionado">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteCfdiRelacionadosCfdiRelacionado.UUID">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteEmisor">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteEmisor.Rfc">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteEmisor.Nombre">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteEmisor.RegimenFiscal">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteReceptor">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteReceptor.Rfc">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteReceptor.Nombre">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteReceptor.ResidenciaFiscal">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteReceptor.ResidenciaFiscalSpecified">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteReceptor.NumRegIdTrib">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteReceptor.UsoCFDI">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.Impuestos">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.InformacionAduanera">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.CuentaPredial">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.ComplementoConcepto">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.Parte">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.ClaveProdServ">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.NoIdentificacion">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.Cantidad">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.ClaveUnidad">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.Unidad">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.Descripcion">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.ValorUnitario">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.Importe">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.Descuento">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConcepto.DescuentoSpecified">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestos">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestos.Traslados">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestos.Retenciones">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosTraslado">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosTraslado.Base">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosTraslado.Impuesto">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosTraslado.TipoFactor">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosTraslado.TasaOCuota">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosTraslado.TasaOCuotaSpecified">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosTraslado.Importe">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosTraslado.ImporteSpecified">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosRetencion">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosRetencion.Base">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosRetencion.Impuesto">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosRetencion.TipoFactor">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosRetencion.TasaOCuota">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoImpuestosRetencion.Importe">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoInformacionAduanera">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoInformacionAduanera.NumeroPedimento">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoCuentaPredial">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoCuentaPredial.Numero">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoComplementoConcepto">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoComplementoConcepto.Any">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.InformacionAduanera">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.ClaveProdServ">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.NoIdentificacion">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.Cantidad">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.Unidad">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.Descripcion">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.ValorUnitario">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.ValorUnitarioSpecified">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.Importe">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParte.ImporteSpecified">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParteInformacionAduanera">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteConceptoParteInformacionAduanera.NumeroPedimento">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestos">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestos.Retenciones">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestos.Traslados">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestos.TotalImpuestosRetenidos">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestos.TotalImpuestosRetenidosSpecified">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestos.TotalImpuestosTrasladados">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestos.TotalImpuestosTrasladadosSpecified">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestosRetencion">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestosRetencion.Impuesto">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestosRetencion.Importe">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestosTraslado">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestosTraslado.Impuesto">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestosTraslado.TipoFactor">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestosTraslado.TasaOCuota">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteImpuestosTraslado.Importe">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteComplemento">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteComplemento.Any">
+            <remarks/>
+        </member>
+        <member name="T:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteAddenda">
+            <remarks/>
+        </member>
+        <member name="P:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.ComprobanteAddenda.Any">
+            <remarks/>
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.SelloDigital.Sellar(System.String,System.Byte[],System.String)">
+            <summary>
+            metodo que realiza el sello reciviendo el archivo key como matriaz de bytes
+            </summary>
+            <param name="CadenaOriginal"></param>
+            <param name="ArchivoClavePrivada"></param>
+            <param name="lPassword"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Siscom.Agua.Api.Services.TimbradoTimbox.Utils.SelloDigital.leerCER(System.Byte[],System.String@,System.String@,System.String@,System.String@)">
+            <summary>
+            lee el codigo del certificado enviado este como matriz de bytes
+            </summary>
+            <param name="NombreArchivo">certificado en matriz de bytes</param>
+            <param name="Inicio"></param>
+            <param name="Final"></param>
+            <param name="Serie"></param>
+            <param name="Numero"></param>
+            <returns></returns>
         </member>
     </members>
 </doc>

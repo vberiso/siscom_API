@@ -24,6 +24,8 @@ using System.Net.Http.Headers;
 using System.Dynamic;
 using System.Net;
 using System.Globalization;
+using Siscom.Agua.DAL.Models;
+
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -35,9 +37,18 @@ namespace Siscom.Agua.Api.Controllers
         private readonly ApplicationDbContext _context;
         static HttpClient client;
 
+        //Sandbox 
+        TimboxSandboxWS.timbrado_cfdi33_portClient cliente_timbrar;
+        TimboxSandboxWS.timbrar_cfdi_result responseWs = new TimboxSandboxWS.timbrar_cfdi_result();
+        //Productivo
+        TimboxWS.timbrado_cfdi33_portClient cliente_timbrarProd;
+        TimboxWS.timbrar_cfdi_result responseWsProd = new TimboxWS.timbrar_cfdi_result();
+
         public FacturacionController(ApplicationDbContext context)
         {
             _context = context;
+            cliente_timbrar = new TimboxSandboxWS.timbrado_cfdi33_portClient();
+            cliente_timbrarProd = new TimboxWS.timbrado_cfdi33_portClient();
         }
 
         // GET: api/OrderSales
@@ -314,10 +325,189 @@ namespace Siscom.Agua.Api.Controllers
             }            
         }
 
+        //Facturacion online
+        [HttpPost("TimbrarTimbox/{pIdPayment}")]
+        public async Task<IActionResult> getTimbrarTimbox([FromBody]Comprobante comprobante, [FromRoute]int pIdPayment)
+        {
+            string rutaXML, rutaXMLFinal;
+            string resultadoFinal;
+            XmlDocument xmlDocument;
+            try
+            {
+                AppContext.SetSwitch("Switch.System.Xml.AllowDefaultResolver", true);
+
+                //Se obtiene la ubicacion de los archivos de facturacion del emisor de la factura.
+                FilesTimbrado FTxslt = _context.FilesTimbrados.FirstOrDefault(f => f.IsActive == true && f.NameFile.Contains(".xslt"));
+                FilesTimbrado FTcer = _context.FilesTimbrados.FirstOrDefault(f => f.IsActive == true && f.NameFile.Contains(".cer"));
+                FilesTimbrado FTkey = _context.FilesTimbrados.FirstOrDefault(f => f.IsActive == true && f.NameFile.Contains(".key"));
+
+                //Obtenemos el numero de certificado del .cer
+                comprobante.NoCertificado = ObtenerNumeroCertificado();
+
+                //Creamos el archivo xml.                
+                string textXML = CreateXML(comprobante, string.Format("{0}_{1}_{2}_{3}.xml", "XmlPrev", comprobante.Emisor.Rfc, comprobante.Receptor.Rfc, comprobante.Folio), out rutaXML);
+
+                //Se crea la cadena original
+                string cadenaoriginal = "";
+                XslCompiledTransform transformador = new XslCompiledTransform(true);
+                transformador.Load(FTxslt.PathFile + FTxslt.NameFile);
+
+                string nombreFile = string.Format("{0}_{1}_{2}_{3}.xml", "XmlPrev", comprobante.Emisor.Rfc, comprobante.Receptor.Rfc, comprobante.Folio);
+                using (StringWriter sw = new StringWriter())
+                {
+                    using (XmlWriter xwo = XmlWriter.Create(sw, transformador.OutputSettings))
+                    {
+                        transformador.Transform(rutaXML, xwo);
+                        cadenaoriginal = sw.ToString();
+                    }
+                }
+
+                SelloDigital SD = new SelloDigital();
+                comprobante.Certificado = SD.Certificado(FTcer.PathFile + FTcer.NameFile);
+                comprobante.Sello = SD.Sellar(cadenaoriginal, FTkey.PathFile + FTkey.NameFile, FTkey.PassKey);
+
+                string textXMLFinal = CreateXML(comprobante, string.Format("{0}_{1}_{2}_{3}.xml", "Xml", comprobante.Emisor.Rfc, comprobante.Receptor.Rfc, comprobante.Serie + comprobante.Folio), out rutaXMLFinal);
+
+                //conversion de xml a base64
+                XmlDocument doc_xml = new XmlDocument();
+                doc_xml.Load(rutaXMLFinal);
+                byte[] base64 = Encoding.UTF8.GetBytes(doc_xml.InnerXml);
+                string converB64tXml = Convert.ToBase64String(base64);
+
+                //Se obtienen los datos de autenticacion
+                var user = _context.SystemParameters.FirstOrDefault(s => s.Name.Contains("USERTIMBOX") && s.IsActive == true);
+                var pass = _context.SystemParameters.FirstOrDefault(s => s.Name.Contains("PASSTIMBOX") && s.IsActive == true);
+                if (user != null && pass != null)
+                {
+                    var ambiente = _context.SystemParameters.FirstOrDefault(x => x.Name.Contains("CFDITEST"));
+                    if (ambiente.TextColumn.Contains("F") || ambiente.TextColumn.Contains("f"))
+                    {
+                        responseWsProd = await cliente_timbrarProd.timbrar_cfdiAsync(user.TextColumn, pass.TextColumn, converB64tXml);
+                        resultadoFinal = responseWsProd.xml; //.Replace("\n", "").Replace("\\\"", "\"");
+                    }
+                    else
+                    {
+                        responseWs = await cliente_timbrar.timbrar_cfdiAsync(user.TextColumn, pass.TextColumn, converB64tXml);
+                        resultadoFinal = responseWs.xml; //.Replace("\n", "").Replace("\\\"", "\"");
+                    }
+
+                    //Se genera xml para salvarlo en disco.
+                    string path = rutaDescaga();
+                    string nombreXML = string.Format("\\{0}_{1}_{2}.xml", comprobante.Emisor.Rfc, comprobante.Receptor.Rfc, comprobante.Serie + comprobante.Folio);
+                    xmlDocument = new XmlDocument();
+                    xmlDocument.LoadXml(resultadoFinal);
+                    xmlDocument.Save(path + nombreXML);
+
+                    //Se rescata el UUID del sat.                   
+                    XmlNodeList elemList = xmlDocument.GetElementsByTagName("tfd:TimbreFiscalDigital");                    
+                    string Uuid = elemList.Item(0).Attributes["UUID"].Value;
+                    
+                    var userOnline = _context.Users.FirstOrDefault(x => x.Name.Contains("Online") && x.IsActive == true);
+
+                    //Se guarda registro en BD
+                    TaxReceipt xMLS = new TaxReceipt();
+                    xMLS.TaxReceiptDate = DateTime.Now;
+                    xMLS.XML = xmlDocument.OuterXml;
+                    xMLS.FielXML = Uuid;
+                    xMLS.RFC = comprobante.Receptor.Rfc;
+                    xMLS.Type = "CAT03";
+                    xMLS.Status = "ET001";
+                    xMLS.PaymentId = pIdPayment;
+                    xMLS.UserId = userOnline != null ? userOnline.Id : "378c0632-2e7c-4d0f-b5b5-8821d21bd2f0";
+                    xMLS.IdXmlFacturama = "Timbox";
+                    xMLS.UsoCFDI = comprobante.Receptor.UsoCFDI;
+                    _context.TaxReceipts.Add(xMLS);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    return StatusCode((int)TypeError.Code.Conflict , new { Error = "Sin usuario de autenticación a Timbox." });
+                }
+
+                //Se eliminan los documentos temporales.
+                if (System.IO.File.Exists(rutaXML))
+                    System.IO.File.Delete(rutaXML);
+                if (System.IO.File.Exists(rutaXMLFinal))
+                    System.IO.File.Delete(rutaXMLFinal);
+
+                var fromXml = JsonConvert.SerializeXmlNode(xmlDocument);                
+                return Ok(fromXml);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = ex.Message });
+            }
+        }
+
+        //Cancelar facturas de timbox
+        [HttpPost("CancelarFacturasTimbox")]
+        public async Task<IActionResult> getCancelarFacturasTimbox([FromBody]List<Siscom.Agua.Api.Model.FolioCancelacion> foliosCancelacion)
+        {
+            try
+            {
+                //Se obtiene la ubicacion de los archivos de facturacion del emisor de la factura.
+                FilesTimbrado CerPem = _context.FilesTimbrados.FirstOrDefault(f => f.IsActive == true && f.NameFile.Contains("cer.pem"));
+                FilesTimbrado KeyPem = _context.FilesTimbrados.FirstOrDefault(f => f.IsActive == true && f.NameFile.Contains("key.pem"));
+
+                //Obtengo los archivos pem.
+                string file_cer_pem = System.IO.File.ReadAllText(CerPem.PathFile + CerPem.NameFile);
+                string file_key_pem = System.IO.File.ReadAllText(KeyPem.PathFile + KeyPem.NameFile);
+
+                //Obtengo la base actual.
+                var RFCActual = _context.SystemParameters.FirstOrDefault(s => s.Name.Contains("RFC"));
+
+                //Se obtienen los datos de autenticacion
+                var user = _context.SystemParameters.FirstOrDefault(s => s.Name.Contains("USERTIMBOX") && s.IsActive == true);
+                var pass = _context.SystemParameters.FirstOrDefault(s => s.Name.Contains("PASSTIMBOX") && s.IsActive == true);
+
+                var ambiente = _context.SystemParameters.FirstOrDefault(x => x.Name.Contains("CFDITEST"));
+                if (ambiente.TextColumn.Contains("F") || ambiente.TextColumn.Contains("f"))   //Produccion
+                {
+                    TimboxCancelacionWS.folios folios_datos = new TimboxCancelacionWS.folios();
+                    var lista_folios = new List<TimboxCancelacionWS.folio>();
+                    foreach (var i in foliosCancelacion)
+                        lista_folios.Add(new TimboxCancelacionWS.folio { uuid = i.UUID, rfc_receptor = i.ReceptorRFC, total = i.Total.ToString() });
+                    folios_datos.folio = lista_folios.ToArray();
+
+                    TimboxCancelacionWS.cancelacion_portClient clienteCancelacionSandbox = new TimboxCancelacionWS.cancelacion_portClient();
+                    TimboxCancelacionWS.cancelar_cfdi_result response = new TimboxCancelacionWS.cancelar_cfdi_result();
+
+                    response = await clienteCancelacionSandbox.cancelar_cfdiAsync(user.TextColumn, pass.TextColumn, RFCActual.TextColumn, folios_datos, file_cer_pem, file_key_pem);
+
+                    XmlDocument acuse_cancelacion = new XmlDocument();
+                    acuse_cancelacion.LoadXml(response.folios_cancelacion);
+
+                    return Ok(response.folios_cancelacion.ToString());
+                }
+                else                                                                          //Desarrollo
+                {
+                    TimboxCancelacionSandboxWS.folios folios_datos = new TimboxCancelacionSandboxWS.folios();
+                    var lista_folios = new List<TimboxCancelacionSandboxWS.folio>();
+                    foreach (var i in foliosCancelacion)
+                        lista_folios.Add(new TimboxCancelacionSandboxWS.folio { uuid = i.UUID, rfc_receptor = i.ReceptorRFC, total = i.Total.ToString() });
+                    folios_datos.folio = lista_folios.ToArray();
+
+                    TimboxCancelacionSandboxWS.cancelacion_portClient clienteCancelacionSandbox = new TimboxCancelacionSandboxWS.cancelacion_portClient();
+                    TimboxCancelacionSandboxWS.cancelar_cfdi_result response = new TimboxCancelacionSandboxWS.cancelar_cfdi_result();
+
+                    response = await clienteCancelacionSandbox.cancelar_cfdiAsync(user.TextColumn, pass.TextColumn, RFCActual.TextColumn, folios_datos, file_cer_pem, file_key_pem);
+
+                    XmlDocument acuse_cancelacion = new XmlDocument();
+                    acuse_cancelacion.LoadXml(response.folios_cancelacion);
+
+                    return Ok(response.folios_cancelacion.ToString());
+                }                
+            }
+            catch(Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = ex.Message });
+            }
+        }
+
 
         //Cancelaciones en grupo para Facturama.
-        [HttpGet("CancelarFacturas/{idsFacturama}")]
-        public async Task<IActionResult> getCancelarFacturas([FromRoute]string idsFacturama)
+        [HttpPost("CancelarFacturasFacturama")]
+        public async Task<IActionResult> getCancelarFacturas([FromBody]string idsFacturama)
         {
             try
             {
