@@ -179,6 +179,37 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        [HttpPost("UnactiveAllAgreementRulerCalculationState/{agreementId}")]
+        public async Task<IActionResult> UnactiveAllAgreementRulerCalculationState([FromRoute] int agreementId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                using (_context)
+                {
+                    var result = await _context.AgreementRulerCalculations.Where(x => x.AgreementId == agreementId && x.IsActive == true).ToArrayAsync();
+
+                    foreach(var data in result)
+                    {
+                        if (data.IsActive == true)
+                        {
+                            data.IsActive = false;
+                        }
+                    }
+                    _context.SaveChanges();
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         // DELETE: api/AgreementRulerCalculations/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAgreementRulerCalculation([FromRoute] int id)
