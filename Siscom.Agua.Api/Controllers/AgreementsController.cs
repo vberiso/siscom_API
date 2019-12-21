@@ -266,6 +266,7 @@ namespace Siscom.Agua.Api.Controllers
                                         .ThenInclude(x => x.Contacts)
                                      .Include(x => x.TypeStateService)
                                      .Include(x => x.AgreementDiscounts)
+                                     .ThenInclude(x => x.Discount)
                                      .Include(x => x.AgreementDetails)
                                      .Include(x => x.TypeIntake)
                                      
@@ -275,7 +276,8 @@ namespace Siscom.Agua.Api.Controllers
                                                .ThenInclude(st => st.States)
                                      .Include(x => x.AgreementComments)
                                      .Include(x => x.PartialPayments)
-                                     .ThenInclude(x => x.PartialPaymentDetails);
+                                     .ThenInclude(x => x.PartialPaymentDetails)
+                                     .Include(x => x.AgreementRulerCalculations);
 
                 List<Siscom.Agua.DAL.Models.Agreement> agreement;
 

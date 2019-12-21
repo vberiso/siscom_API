@@ -242,7 +242,11 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 parameters.Add(new SPParameters { Key = "error", Size = 200, Direccion = ParameterDirection.InputOutput, DbType = DbType.String, Value = "" });
 
+                if (formato == "fza_formatoH2" && parameters.Where(x => x.Key == "isAccounts").FirstOrDefault().Value != "1")
+                {
+                    return StatusCode((int)TypeError.Code.Ok, new { data = await resolveFormatoH2o(parameters) });
 
+                }
                 if (formato == "fza_formato3" || formato == "fza_formato2")
                 {
 
@@ -366,6 +370,162 @@ namespace Siscom.Agua.Api.Controllers
 
 
             return StatusCode((int)TypeError.Code.Ok, new { data = result });
+        }
+
+        private async Task<List<object>> resolveFormatoH2o(List<SPParameters> SPParameters)
+        {
+            var result = await new RunSP(this, _context).runProcedureNT("fza_formatoH2", SPParameters, 1);
+            string mes = SPParameters.Where(x => x.Key == "mesPresentar").FirstOrDefault()?.Value;
+            string year = SPParameters.Where(x => x.Key == "yearPeriodo").FirstOrDefault()?.Value;
+            string newMes = mes;
+            string newYear = year;
+            if (int.Parse(mes) == 1)
+            {
+                newMes = "12";
+                newYear = (int.Parse(year) - 1).ToString();
+            }
+            else
+            {
+                newMes = (int.Parse(mes) - 1).ToString();
+            }
+           var Lresult = new List<object>() { result};
+            var nextAccumulated = _context.AccountsAccumulated.Where(x => x.type == "actual" && x.Mes.ToString() == mes && x.Year.ToString() == year).FirstOrDefault()?.Accumulated;
+            if (nextAccumulated != null)
+            {
+                newMes = mes;
+                newYear = year;
+            }
+            var AccumulatedAc = _context.AccountsAccumulated.Where(x =>   x.type == "actual" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault()?.Accumulated;
+            var AccumulatedAn = _context.AccountsAccumulated.Where(x => x.type == "anteriores" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault()?.Accumulated;
+            var AccumulatedAm = _context.AccountsAccumulated.Where(x =>  x.type == "ambos" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault()?.Accumulated;
+
+            bool create = false;
+            if (nextAccumulated == null)
+            {
+                //var now = DateTime.Now;
+                //DateTime ultimoDia;
+                //if (now.Month < 12) {
+                //     ultimoDia = DateTime.Parse(now.Year + "-" + now.Month + 1 + "-01");
+                //    ultimoDia.AddDays(-1);
+                //}
+                //else
+                //{
+                //    ultimoDia = DateTime.Parse(now.Year + "-" + now.Month + "-31");
+                //}
+
+                //if (now.Day <= ultimoDia.Day)
+                //{
+
+                //}
+
+
+                if (int.Parse(year) == DateTime.Now.Year && int.Parse(mes) < DateTime.Now.Month)
+                {
+                    create = true;
+                }
+                else if (int.Parse(year) < DateTime.Now.Year && int.Parse(mes) == 12 && DateTime.Now.Month == 1)
+                {
+                    create = true;
+                }
+                if (create)
+                {
+                    List<object> usuarios = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(Lresult.First()));
+                    usuarios = usuarios.Where(x =>int.Parse( JObject.Parse(x.ToString())["from_date"].ToString() )<=  int.Parse(year) ).ToList();
+                    SetAccumulatedAyuntamiento(year, mes, new List<List<object>>() { usuarios });
+                   
+                }
+
+                create = true;
+
+
+
+            }
+
+
+            Lresult.Add(create.ToString());
+
+
+            Lresult.Add(new List<object>() { AccumulatedAc == null ? 0 : AccumulatedAc, AccumulatedAn == null ? 0 : AccumulatedAn, AccumulatedAm == null ? 0 : AccumulatedAm });
+
+
+            newMes = (int.Parse(mes) + 1).ToString();
+
+            return Lresult;
+        }
+
+        private void SetAccumulatedAyuntamiento(string year, string mes, List<List<object>> currentNewAccounts)
+        {
+            string newMes = (int.Parse(mes) - 1).ToString();
+            string newYear = year;
+
+            if (mes == "1")
+            {
+                newMes = "12";
+                newYear = (int.Parse(year) - 1).ToString();
+            }
+
+            var AccumulatedAc = _context.AccountsAccumulated.Where(x => x.type == "actual" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
+
+            var AccumulatedAn = _context.AccountsAccumulated.Where(x =>   x.type == "anteriores" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
+
+            var AccumulatedAm = _context.AccountsAccumulated.Where(x =>  x.type == "ambos" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
+
+
+            newMes = (int.Parse(mes) + 1).ToString();
+            newYear = year;
+
+            int TotalAm = 0, TotalAn= 0, TotalAc= 0;
+            
+                var Distict = currentNewAccounts.First().Select(x => JObject.Parse(JsonConvert.SerializeObject(x))["id_agreement"].ToString()).Distinct().ToList();
+                Distict.ForEach(x =>
+                {
+                    var Actual = currentNewAccounts.First().Where(c => JObject.Parse(JsonConvert.SerializeObject(c))["id_agreement"].ToString() == x && int.Parse(JObject.Parse(JsonConvert.SerializeObject(c))["from_date"].ToString()) == int.Parse(year)).FirstOrDefault();
+                    var Anteriores = currentNewAccounts.First().Where(c => JObject.Parse(JsonConvert.SerializeObject(c))["id_agreement"].ToString() == x && int.Parse(JObject.Parse(JsonConvert.SerializeObject(c))["from_date"].ToString()) < int.Parse(year)).FirstOrDefault();
+                    if (Actual != null && Anteriores == null)
+                    {
+                        TotalAc = TotalAc + 1;
+
+                    }
+                    else if (Actual == null && Anteriores != null)
+                    {
+                        TotalAn = TotalAn + 1;
+                    }
+                    else
+                    {
+                        TotalAm = TotalAm + 1;
+                    }
+
+
+                });
+          
+
+            if (AccumulatedAc != null)
+            {
+                TotalAc = TotalAc + AccumulatedAc.Accumulated;
+              
+            }
+            _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = TotalAc, IsMedido = false, Mes = int.Parse(mes), Year = int.Parse(year), type = "actual" });
+
+
+           
+           
+            if (AccumulatedAn != null)
+            {
+                TotalAn = TotalAn + AccumulatedAn.Accumulated;
+             
+            }
+            _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = TotalAn, IsMedido = false, Mes = int.Parse(mes), Year = int.Parse(year), type = "anteriores" });
+           
+
+          
+            if (AccumulatedAm != null)
+            {
+                TotalAm = TotalAm + AccumulatedAm.Accumulated;
+                
+            }
+            _context.AccountsAccumulated.Add(new AccountsAccumulated() { Accumulated = TotalAm, IsMedido = false, Mes = int.Parse(mes), Year = int.Parse(year), type = "ambos" });
+           
+            _context.SaveChanges();
         }
 
         private void SetAccumulated(string year, string mes, bool isMedido, List<List<object>> currentNewAccounts)

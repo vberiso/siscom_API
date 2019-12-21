@@ -138,6 +138,7 @@ namespace Siscom.Agua.Api.runSp
 
             try
             {
+                var assa = _context.Database.GetDbConnection();
 
                 var dataTable = new DataTable();
                 using (var command = _context.Database.GetDbConnection().CreateCommand())
