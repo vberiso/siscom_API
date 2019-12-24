@@ -439,6 +439,40 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        private string ActualizaRegistros(List<Siscom.Agua.Api.Model.FolioCancelacion> pFC, TimboxCancelacionWS.cancelar_cfdi_result response)
+        {
+            XmlDocument foliosCancelacion = new XmlDocument();
+            foliosCancelacion.LoadXml(response.folios_cancelacion);
+            XmlNodeList codigo = foliosCancelacion.GetElementsByTagName("codigo");
+            if(codigo[0].InnerXml.ToString().Contains("201"))
+            {
+                foreach (var folio in pFC)
+                {
+                    var tax = _context.TaxReceipts.Find(folio.TaxReceiptId);
+                    if (tax != null)
+                    {
+                        //Se cambia el status del tax receipt.
+                        tax.Status = "ET002";
+                        _context.Update(tax);
+                        _context.SaveChanges();
+
+                        Encoding encoding = Encoding.UTF8;
+                        //Se guarda acuse de cancelacion
+                        TaxReceiptCancel taxReceiptCancel = new TaxReceiptCancel();
+                        taxReceiptCancel.Status = "Canceled";
+                        taxReceiptCancel.Message = "La factura se ha cancelado existosamente";
+                        taxReceiptCancel.RequestDateCancel = DateTime.Now;
+                        taxReceiptCancel.CancelationDate = DateTime.Now;
+                        taxReceiptCancel.AcuseXml = encoding.GetBytes(response.acuse_cancelacion);
+                        taxReceiptCancel.TaxReceiptId = folio.TaxReceiptId;
+                        _context.TaxReceiptCancels.Add(taxReceiptCancel);
+                        _context.SaveChanges();
+                    }
+                }
+            }
+            return codigo[0].InnerXml.ToString();
+        }
+
         //Cancelar facturas de timbox
         [HttpPost("CancelarFacturasTimbox")]
         public async Task<IActionResult> getCancelarFacturasTimbox([FromBody]List<Siscom.Agua.Api.Model.FolioCancelacion> foliosCancelacion)
@@ -469,15 +503,24 @@ namespace Siscom.Agua.Api.Controllers
                         lista_folios.Add(new TimboxCancelacionWS.folio { uuid = i.UUID, rfc_receptor = i.ReceptorRFC, total = i.Total.ToString() });
                     folios_datos.folio = lista_folios.ToArray();
 
-                    TimboxCancelacionWS.cancelacion_portClient clienteCancelacionSandbox = new TimboxCancelacionWS.cancelacion_portClient();
+                    TimboxCancelacionWS.cancelacion_portClient clienteCancelacion = new TimboxCancelacionWS.cancelacion_portClient();
                     TimboxCancelacionWS.cancelar_cfdi_result response = new TimboxCancelacionWS.cancelar_cfdi_result();
 
-                    response = await clienteCancelacionSandbox.cancelar_cfdiAsync(user.TextColumn, pass.TextColumn, RFCActual.TextColumn, folios_datos, file_cer_pem, file_key_pem);
+                    response = await clienteCancelacion.cancelar_cfdiAsync(user.TextColumn, pass.TextColumn, RFCActual.TextColumn, folios_datos, file_cer_pem, file_key_pem);
 
-                    XmlDocument acuse_cancelacion = new XmlDocument();
-                    acuse_cancelacion.LoadXml(response.folios_cancelacion);
+                    string resAct = ActualizaRegistros(foliosCancelacion, response);
 
-                    return Ok(response.folios_cancelacion.ToString());
+                    if (resAct.Contains("201") || resAct.Contains("202"))
+                    {
+                        XmlDocument acuse_cancelacion = new XmlDocument();
+                        acuse_cancelacion.LoadXml(response.folios_cancelacion);
+                        return Ok(response.folios_cancelacion.ToString());
+                    }
+                    else
+                    {
+                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No fue posible cancelar operación." });
+                    }
+                    
                 }
                 else                                                                          //Desarrollo
                 {

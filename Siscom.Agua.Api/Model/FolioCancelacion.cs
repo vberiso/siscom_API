@@ -10,5 +10,7 @@ namespace Siscom.Agua.Api.Model
         public string UUID { get; set; }
         public string ReceptorRFC { get; set; }
         public decimal Total { get; set; }
+        public int PaymentId { get; set; }
+        public int TaxReceiptId { get; set; }
     }
 }
