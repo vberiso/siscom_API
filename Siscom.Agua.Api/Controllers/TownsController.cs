@@ -78,7 +78,7 @@ namespace Siscom.Agua.Api.Controllers
             var towncontent = await _context.Towns.FindAsync(town.Id);
             if (towncontent == null)
             {
-                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el munucipio") });
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = string.Format("Favor de verificar el municipio") });
             }
 
             towncontent.Name = town.Name;

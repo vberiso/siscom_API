@@ -39,6 +39,19 @@ namespace Siscom.Agua.Api.Controllers
             }            
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllCancelationRequest([FromRoute] int id)
+        {
+            try
+            {
+                return Ok(_context.TransactionCancellationRequests);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No se pudo obtener el objeto TransactionCancelationRequest." });
+            }
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> PostCancelationRequest([FromBody] TransactionCancellationRequest pTCR)
