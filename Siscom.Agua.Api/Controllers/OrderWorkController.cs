@@ -432,7 +432,7 @@ namespace Siscom.Agua.Api.Controllers
                         array = _context.SystemParameters.Where(x => x.Name == "RECO1").Select(x => x.TextColumn).FirstOrDefault().Split(",");
                         array.ToList().ForEach(x =>
                         {
-                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x) && y.IsActive == 1).Select(y => new ProductVM
                             {
                                 Id = y.ProductId,
                                 Name = y.Product.Name,
@@ -444,7 +444,7 @@ namespace Siscom.Agua.Api.Controllers
                         array = _context.SystemParameters.Where(x => x.Name == "RECO2").Select(x => x.TextColumn).FirstOrDefault().Split(",");
                         array.ToList().ForEach(x =>
                         {
-                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x) && y.IsActive == 1).Select(y => new ProductVM
                             {
                                 Id = y.ProductId,
                                 Name = y.Product.Name,
@@ -456,7 +456,7 @@ namespace Siscom.Agua.Api.Controllers
                         array = _context.SystemParameters.Where(x => x.Name == "RECO3").Select(x => x.TextColumn).FirstOrDefault().Split(",");
                         array.ToList().ForEach(x =>
                         {
-                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x) && y.IsActive == 1).Select(y => new ProductVM
                             {
                                 Id = y.ProductId,
                                 Name = y.Product.Name,
@@ -468,7 +468,7 @@ namespace Siscom.Agua.Api.Controllers
                         array = _context.SystemParameters.Where(x => x.Name == "RECO1").Select(x => x.TextColumn).FirstOrDefault().Split(",");
                         array.ToList().ForEach(x =>
                         {
-                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x) && y.IsActive == 1).Select(y => new ProductVM
                             {
                                 Id = y.ProductId,
                                 Name = y.Product.Name,
@@ -480,7 +480,7 @@ namespace Siscom.Agua.Api.Controllers
                         array = _context.SystemParameters.Where(x => x.Name == "RECO1").Select(x => x.TextColumn).FirstOrDefault().Split(",");
                         array.ToList().ForEach(x =>
                         {
-                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x)).Select(y => new ProductVM
+                            products.Add(_context.TariffProducts.Include(y => y.Product).Where(y => y.ProductId == Convert.ToInt32(x) && y.IsActive == 1).Select(y => new ProductVM
                             {
                                 Id = y.ProductId,
                                 Name = y.Product.Name,
