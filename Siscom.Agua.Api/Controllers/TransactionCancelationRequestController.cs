@@ -64,7 +64,7 @@ namespace Siscom.Agua.Api.Controllers
                     tcrVM.BranchOffice = "Sin Determinar";
 
                 if (transaction.TransactionFolios != null)
-                    tcrVM.PrintingFolio = transaction.TransactionFolios.FirstOrDefault().Folio;
+                    tcrVM.PrintingFolio = applicationUser.Serial + "-" +  transaction.TransactionFolios.FirstOrDefault().Folio.Remove(0,1);
                 else
                     tcrVM.PrintingFolio = "----------";
 
