@@ -227,6 +227,32 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        #region OnlinePayments
+        [HttpPost("PostTransactionOnlinePayment")]
+        public async Task<IActionResult> PostTransactionOnlinePayment([FromBody] Model.OnlinePayments.TransactionStatus pPaymentConcepts)
+        {
+            Payment payment = new Payment();
+            payment.Account = pPaymentConcepts.Account;
+            payment.AgreementId = pPaymentConcepts.AgreementId;
+            payment.BranchOffice = "Pago en Linea";
+            payment.PaymentDate = pPaymentConcepts.DateTransaction;
+            payment.Subtotal = pPaymentConcepts.Amount;
+            payment.Tax = pPaymentConcepts.Tax;
+            payment.Total = pPaymentConcepts.Total;
+            payment.Rounding = pPaymentConcepts.Rounding;
+            payment.Status = pPaymentConcepts.Status;
+            payment.Type = pPaymentConcepts.Type;
+            payment.OriginPaymentId = 2;
+            payment.ExternalOriginPaymentId = 1;
+            payment.PayMethodId = pPaymentConcepts.Type == "OP001" ? 4 : 3;
+            
+
+            return Ok();
+        }
+        #endregion
+
+        #region SAC
+
         [HttpPost("SistemaAdministracionContable/{idPayment}")]
         public async Task<IActionResult> PostSAC([FromRoute] int idPayment)
         {
@@ -278,6 +304,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
         }
+        
         [HttpPost("SistemaAdministracionContable/Cancel/{idPayment}")]
         public async Task<IActionResult> CancelSAC([FromRoute] int idPayment)
         {
@@ -328,5 +355,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para ejecutar la transacción" });
             }
         }
+
+        #endregion
     }
 }

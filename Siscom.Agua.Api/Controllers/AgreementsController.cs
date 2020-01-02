@@ -134,7 +134,6 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(summary);
         }
 
-
         // GET: api/Agreements/5
         [HttpGet("{id}", Name = "GetAgreementById")]
         public async Task<IActionResult> GetAgreement([FromRoute] int id)
@@ -155,8 +154,6 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(agreement);
         }
-
-
 
         [HttpGet("comparateAccount/{account}/{idIntake}")]
         public async Task<IActionResult> CompareteAccount([FromRoute] string account, int idIntake)
@@ -194,10 +191,6 @@ namespace Siscom.Agua.Api.Controllers
 
 
         }
-
-
-
-
 
         [HttpGet("AgreementByAccount/{AcountNumber}")]
         public async Task<IActionResult> GetGetAgreementByAccount([FromRoute] string AcountNumber)
@@ -354,7 +347,6 @@ namespace Siscom.Agua.Api.Controllers
             
             return Ok(agreement);
         }
-
 
         [HttpGet("AgreementsDerivate/{account}")]
         public async Task<IActionResult> GetAgreementsDerivate([FromRoute] string account)
@@ -901,7 +893,6 @@ namespace Siscom.Agua.Api.Controllers
             return BadRequest();
         }
 
-
         //PUT: api/Agreements/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAgreement([FromRoute] int id, [FromBody] AgreementVM agreementvm)
@@ -1053,8 +1044,6 @@ namespace Siscom.Agua.Api.Controllers
             }
             return NoContent();
         }
-
-
 
         // POST: api/Agreements
         [HttpPost]
@@ -1379,8 +1368,6 @@ namespace Siscom.Agua.Api.Controllers
             return redirect;
         }
 
-
-
         [HttpPut("agreementDetail/{id}")]
         public async Task<IActionResult> PutAgreementDetail([FromRoute] int id, [FromBody]    AgreementDetail agree)
         {
@@ -1448,21 +1435,12 @@ namespace Siscom.Agua.Api.Controllers
             return _context.AgreementDetails.Any(e => e.AgreementId == id);
         }
 
-
-
-
         [HttpGet(Name = "GetAccountById")]
         public async Task<IActionResult> GetAccountById(int id)
         {
             var data = _context.Agreements.Find(id);
             return StatusCode((int)TypeError.Code.Ok, new { Success = "El número de cuenta asignado fue: " + data.Account });
         }
-
-
-
-
-
-
 
         [HttpPost("AddDiscount")]
         public async Task<IActionResult> AddDiscount([FromBody]  AgreementDiscounttVM agreementDiscountt)
@@ -1696,8 +1674,6 @@ namespace Siscom.Agua.Api.Controllers
 
 
         }
-
-
 
         // DELETE: api/Agreements/5
         [HttpDelete("{id}")]
