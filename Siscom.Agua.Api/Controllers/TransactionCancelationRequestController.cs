@@ -49,7 +49,7 @@ namespace Siscom.Agua.Api.Controllers
                 if(transaction != null)
                     tcrVM.Amount = transaction.Total;
                 else
-                    tcrVM.Amount = 0.00;
+                    tcrVM.Amount = 0.00M;
 
                 ApplicationUser applicationUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == transaction.TerminalUser.UserId);
                 if (applicationUser != null)                
