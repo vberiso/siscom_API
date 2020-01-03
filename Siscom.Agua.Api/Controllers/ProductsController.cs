@@ -114,8 +114,9 @@ namespace Siscom.Agua.Api.Controllers
                                                         x.IsActive == true).ToListAsync();
             }
 
+            //var childParent = await Preorder2(product);
             var childParent = Preorder(product);
-            //var childParent = product;
+            ////var childParent = product;
 
             if (product == null)
             {
@@ -128,10 +129,7 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
-       
-
-
-        private IEnumerable<Product>Preorder(IEnumerable<Product> list)
+        private IEnumerable<Product> Preorder(IEnumerable<Product> list)
         {
 
             var nodesByParent = list.GroupBy(x => x.Parent)
@@ -155,6 +153,36 @@ namespace Siscom.Agua.Api.Controllers
                 else
                     stack.Pop();
             }
+        }
+
+        //Este metdo lo cree ya que el original no era async, por lo cual nunca lo esperaba la llamada original.
+        private async Task<IEnumerable<Product>> Preorder2(IEnumerable<Product> list)
+        {
+            List<Product> products = new List<Product>();
+
+            var nodesByParent = list.GroupBy(x => x.Parent)
+                                    .ToDictionary(xs => xs.Key,
+                                    xs => xs.OrderBy(x => x.Id).GetEnumerator());
+
+            var stack = new Stack<IEnumerator<Product>>();
+            var a = nodesByParent.FirstOrDefault().Key;
+            stack.Push(nodesByParent[nodesByParent.FirstOrDefault().Key]);
+
+            while (stack.Count > 0)
+            {
+                var nodes = stack.Peek();
+                if (nodes.MoveNext())
+                {
+                    products.Add(nodes.Current);
+                    IEnumerator<Product> children;
+                    if (nodesByParent.TryGetValue(nodes.Current.Id, out children))
+                        stack.Push(children);
+                }
+                else
+                    stack.Pop();
+            }
+
+            return (products.AsEnumerable<Product>());
         }
 
         /// <summary>
