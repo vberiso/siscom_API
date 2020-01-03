@@ -33,6 +33,9 @@ namespace Siscom.Agua.Api.Controllers
                 Siscom.Agua.Api.Model.TransactionCancellationRequestVM tcrVM = new Model.TransactionCancellationRequestVM();
                 TransactionCancellationRequest TCR = await _context.TransactionCancellationRequests.FirstOrDefaultAsync(t => t.TransactionId == id);
 
+                if (TCR == null)
+                    return Ok(TCR);
+
                 tcrVM.Id = TCR.Id;
                 tcrVM.Status = TCR.Status;
                 tcrVM.DateRequest = TCR.DateRequest;
