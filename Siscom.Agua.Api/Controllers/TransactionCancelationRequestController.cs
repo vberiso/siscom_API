@@ -79,6 +79,57 @@ namespace Siscom.Agua.Api.Controllers
             }            
         }
 
+        [HttpGet("{date}/{id}")]
+        public async Task<IActionResult> GetCancelationRequestByDate([FromRoute] DateTime date, int id)
+        {
+            try
+            {
+                Siscom.Agua.Api.Model.TransactionCancellationRequestVM tcrVM = new Model.TransactionCancellationRequestVM();
+                TransactionCancellationRequest TCR = await _context.TransactionCancellationRequests.FirstOrDefaultAsync(t => t.DateRequest == date);
+
+                tcrVM.Id = TCR.Id;
+                tcrVM.Status = TCR.Status;
+                tcrVM.DateRequest = TCR.DateRequest;
+                tcrVM.Reason = TCR.Reason;
+                tcrVM.Manager = TCR.Manager;
+                tcrVM.DateAuthorization = TCR.DateAuthorization;
+                tcrVM.KeyFirebase = TCR.KeyFirebase;
+                tcrVM.TransactionId = TCR.TransactionId;
+
+                Transaction transaction = await _context.Transactions
+                    .Include(tr => tr.TerminalUser)
+                    .Include(tf => tf.TransactionFolios)
+                    .FirstOrDefaultAsync(t => t.Id == id);
+                if (transaction != null)
+                    tcrVM.Amount = transaction.Total;
+                else
+                    tcrVM.Amount = 0.00M;
+
+                ApplicationUser applicationUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == transaction.TerminalUser.UserId);
+                if (applicationUser != null)
+                    tcrVM.UserName = string.Format("{0} {1} {2}", applicationUser.UserName, applicationUser.LastName, applicationUser.SecondLastName);
+                else
+                    tcrVM.UserName = "Desconocido";
+
+                Payment payment = await _context.Payments.FirstOrDefaultAsync(p => p.TransactionFolio == transaction.Folio);
+                if (payment != null)
+                    tcrVM.BranchOffice = payment.BranchOffice;
+                else
+                    tcrVM.BranchOffice = "Sin Determinar";
+
+                if (transaction.TransactionFolios != null)
+                    tcrVM.PrintingFolio = applicationUser.Serial + "-" + transaction.TransactionFolios.FirstOrDefault().Folio.Remove(0, 1);
+                else
+                    tcrVM.PrintingFolio = "----------";
+
+                return Ok(tcrVM);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No se pudo obtener el objeto TransactionCancelationRequest." });
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllCancelationRequest([FromRoute] int id)
         {
