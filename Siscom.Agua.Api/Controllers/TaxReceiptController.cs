@@ -96,6 +96,24 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(taxReceipt);
         }
 
+        [HttpGet("FromPaymentId/Canceled/{id}")]
+        public async Task<IActionResult> GetFromPaymentIdCanceled([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var taxReceipt = await _context.TaxReceipts.LastOrDefaultAsync(x => x.PaymentId == id && x.Status == "ET002");
+
+            if (taxReceipt == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(taxReceipt);
+        }
+
         // GET: api/TaxReceipts/1
         [HttpGet("TaxReceiptFromGroup")]
         public async Task<IActionResult> GetTaxReceiptFromGroup()

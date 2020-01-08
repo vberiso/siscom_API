@@ -518,7 +518,7 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     else
                     {
-                        return StatusCode((int)TypeError.Code.BadRequest, new { Error = "No fue posible cancelar operación." });
+                        return StatusCode((int)TypeError.Code.BadRequest, new { error = "No fue posible cancelar operación." });
                     }
                     
                 }
