@@ -807,6 +807,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.TransactionFolio = transaction.Folio;
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
                     payment.Account = transaction.Account;
+                    payment.TerminalUserId = transaction.TerminalUser.Id;
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
@@ -1147,6 +1148,7 @@ namespace Siscom.Agua.Api.Controllers
                     //Account
                     payment.Account = transaction.Account;
                     payment.OrderSaleId = pPaymentOrders.Transaction.OrderSaleId;
+                    payment.TerminalUserId = transaction.TerminalUser.Id;
 
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();

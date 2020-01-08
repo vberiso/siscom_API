@@ -655,6 +655,7 @@ namespace Siscom.Agua.Api.Controllers
             var number = 20;
 
 
+            var currentUserName = this.User.Claims.ToList()[1].Value;
 
             if (!ModelState.IsValid)
             {
@@ -751,7 +752,7 @@ namespace Siscom.Agua.Api.Controllers
                     _orderSale.Observation = orderSale.Observation;
                     _orderSale.IdOrigin = orderSale.IdOrigin;
                     _orderSale.TaxUserId = _taxUser.Id;
-
+                    _orderSale.UserName = currentUserName;
                     if (orderSale.DivisionId == 2)
                     {
                         _orderSale.ExpirationDate = DateTime.UtcNow.ToLocalTime().Date.AddDays(number);

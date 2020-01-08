@@ -28,7 +28,9 @@
     <Compile Remove="Migrations\20191227194202_CreateTablesPromotions.cs" />
     <Compile Remove="Migrations\20191227194202_CreateTablesPromotions.Designer.cs" />
     <Compile Remove="Migrations\20191227224547_CreateTablesPromotions.cs" />
-    <Compile Remove="Migrations\20191227224547_CreateTablesPromotions.Designer.cs" /> 
+    <Compile Remove="Migrations\20191227224547_CreateTablesPromotions.Designer.cs" />
+    <Compile Remove="Migrations\20200108223955_AddFieldTerminalUserIdOntablePayment.cs" />
+    <Compile Remove="Migrations\20200108223955_AddFieldTerminalUserIdOntablePayment.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>

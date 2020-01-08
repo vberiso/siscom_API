@@ -58,6 +58,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("ObservationInvoice"), StringLength(600)]
         public string ObservationInvoice { get; set; }
 
+        public int TerminalUserId { get; set; }
 
         //[ForeignKey("OriginPayment")]
         public int OriginPaymentId { get; set; }

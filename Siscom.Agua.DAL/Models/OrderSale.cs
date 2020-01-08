@@ -44,8 +44,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_origin")]
         public int IdOrigin { get; set; }       
         [Required,Column("expiration_date")]
-        public DateTime ExpirationDate { get; set; }        
-
+        public DateTime ExpirationDate { get; set; }
+        public string UserName { get; set; }
         public int DivisionId { get; set; }
         public Division Division { get; set; }
 
