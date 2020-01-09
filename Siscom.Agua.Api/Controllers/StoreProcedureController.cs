@@ -75,7 +75,15 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         var data = JObject.Parse(JsonConvert.SerializeObject(result));
                         var SPParameters = JsonConvert.DeserializeObject<SPParameters >(JsonConvert.SerializeObject( data["paramsOut"][1]));
-
+                        var SPParameterserror = JsonConvert.DeserializeObject<SPParameters >(JsonConvert.SerializeObject( data["paramsOut"][0]));
+                        if (simulate == 1)
+                        {
+                            break;
+                        }
+                        if (SPParameterserror.Value != "")
+                        {
+                            break;
+                        }
                         ids.Add(int.Parse( SPParameters.Value));
                     }
                     mesesEfectuados++;
@@ -93,6 +101,13 @@ namespace Siscom.Agua.Api.Controllers
 
             if (simulate != 1)
             {
+                var data = JObject.Parse(JsonConvert.SerializeObject(result));
+                
+                var SPParameterserror = JsonConvert.DeserializeObject<SPParameters>(JsonConvert.SerializeObject(data["paramsOut"][0]));
+                if (SPParameterserror.Value != "")
+                {
+                    return StatusCode((int)TypeError.Code.Ok, new { Message = $"Se registrarón todos, pero no se pudo registrar el comentario", data = result });
+                }
                 var body = "";
 
                 using (var reader = new StreamReader(Request.Body))
@@ -430,9 +445,13 @@ namespace Siscom.Agua.Api.Controllers
                 if (create)
                 {
                     List<object> usuarios = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(Lresult.First()));
-                    usuarios = usuarios.Where(x =>int.Parse( JObject.Parse(x.ToString())["from_date"].ToString() )<=  int.Parse(year) ).ToList();
-                    SetAccumulatedAyuntamiento(year, mes, new List<List<object>>() { usuarios });
-                   
+                    //usuarios = usuarios.Where(x =>int.Parse( JObject.Parse(x.ToString())["from_date"].ToString() )<=  int.Parse(year) ).ToList();
+                    if ( int.Parse( year) == 2019)
+                    {
+
+                        SetAccumulatedAyuntamiento(year, mes, new List<List<object>>() { usuarios });
+                    }
+
                 }
 
                 create = true;
@@ -469,35 +488,60 @@ namespace Siscom.Agua.Api.Controllers
             var AccumulatedAn = _context.AccountsAccumulated.Where(x =>   x.type == "anteriores" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
 
             var AccumulatedAm = _context.AccountsAccumulated.Where(x =>  x.type == "ambos" && x.Mes.ToString() == newMes && x.Year.ToString() == newYear).FirstOrDefault();
-
-
-            newMes = (int.Parse(mes) + 1).ToString();
-            newYear = year;
+            DateTime dateEnd;
+            var dateStart = Convert.ToDateTime("01-" + mes + "-" + year);
+            if (int.Parse(mes )== 12)
+            {
+                newMes ="1";
+                newYear =(int.Parse( year) +1).ToString();
+                dateEnd = Convert.ToDateTime("01-01-" + (int.Parse(year) + 1).ToString());
+               
+            }
+            else
+            {
+                newMes = (int.Parse(mes) + 1).ToString();
+                newYear = year;
+                dateEnd = Convert.ToDateTime("01-" + (int.Parse(mes) + 1) + "-" + year);
+            }
 
             int TotalAm = 0, TotalAn= 0, TotalAc= 0;
-            
-                var Distict = currentNewAccounts.First().Select(x => JObject.Parse(JsonConvert.SerializeObject(x))["id_agreement"].ToString()).Distinct().ToList();
-                Distict.ForEach(x =>
+
+            //if (mes == "12")
+            //{
+            //    dateEnd = Convert.ToDateTime("01-01-" + (int.Parse(year) + 1).ToString());
+            //}
+            //else
+            //{
+            //    dateEnd = Convert.ToDateTime("01-" + (int.Parse(mes) + 1) + "-" + year);
+            //}
+            List<Model.AccountsPayVM> Periods;
+
+            Periods = JsonConvert.DeserializeObject<List<Model.AccountsPayVM>>(JsonConvert.SerializeObject( currentNewAccounts.First()));
+
+            Periods = Periods.Where(x => x.payment_date >= dateStart && x.payment_date <= dateEnd).ToList();
+
+            var Distict = Periods.Select(x => x.id_agreement).Distinct().ToList();
+            foreach (var x in Distict)
+            {
+                var Actual = Periods.Where(c => c.id_agreement == x && c.from_date >= int.Parse(year)).FirstOrDefault();
+                var Anteriores = Periods.Where(c => c.id_agreement == x && c.from_date < int.Parse(year)).FirstOrDefault();
+                if (Actual != null && Anteriores == null)
                 {
-                    var Actual = currentNewAccounts.First().Where(c => JObject.Parse(JsonConvert.SerializeObject(c))["id_agreement"].ToString() == x && int.Parse(JObject.Parse(JsonConvert.SerializeObject(c))["from_date"].ToString()) == int.Parse(year)).FirstOrDefault();
-                    var Anteriores = currentNewAccounts.First().Where(c => JObject.Parse(JsonConvert.SerializeObject(c))["id_agreement"].ToString() == x && int.Parse(JObject.Parse(JsonConvert.SerializeObject(c))["from_date"].ToString()) < int.Parse(year)).FirstOrDefault();
-                    if (Actual != null && Anteriores == null)
-                    {
-                        TotalAc = TotalAc + 1;
+                    TotalAc = TotalAc + 1;
 
-                    }
-                    else if (Actual == null && Anteriores != null)
-                    {
-                        TotalAn = TotalAn + 1;
-                    }
-                    else
-                    {
-                        TotalAm = TotalAm + 1;
-                    }
+                }
+                else if (Actual == null && Anteriores != null)
+                {
+                    TotalAn = TotalAn + 1;
+                }
+                else
+                {
+                    TotalAm = TotalAm + 1;
+                }
 
 
-                });
-          
+            }
+
 
             if (AccumulatedAc != null)
             {

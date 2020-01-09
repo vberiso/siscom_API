@@ -2674,12 +2674,17 @@ namespace Siscom.Agua.Api.Controllers
             //{
             DateTime date = DateTime.Now;
             try
+                
             {
+                int index = 1;
                 foreach (var x in DebtsId)
                 {
                     //DebtsId.ForEach(x =>
                     int idDebt = x;
-                  
+                    if (!IsMSI && ((date.Month == 1 && index == 12 && porcentajeDiscount == 0) || (date.Month == 2 && index == 11 && porcentajeDiscount == 0)))
+                    {
+                        porcentajeDiscount = 50;
+                    }
                     
                     if (!IsMSI && porcentajeDiscount > 0)
                     {
@@ -2711,7 +2716,7 @@ namespace Siscom.Agua.Api.Controllers
 
                     _context.PagosAnuales.Add(PagoAnual);
                     await _context.SaveChangesAsync();
-
+                    index = index+1;
 
                 }
                 //transaction.Commit();
