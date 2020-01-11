@@ -57,8 +57,10 @@ namespace Siscom.Agua.DAL.Models
         public int OrderSaleId { get; set; }
         [Column("ObservationInvoice"), StringLength(600)]
         public string ObservationInvoice { get; set; }
-
+        [Column("TerminalUserId")]
         public int TerminalUserId { get; set; }
+        [Column("ImpressionSheet")]
+        public string ImpressionSheet { get; set; }
 
         //[ForeignKey("OriginPayment")]
         public int OriginPaymentId { get; set; }

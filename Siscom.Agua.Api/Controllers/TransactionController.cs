@@ -786,6 +786,7 @@ namespace Siscom.Agua.Api.Controllers
 
                     await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
 
+                    TransactionFolio transactionFolio = await _context.TransactionFolios.FirstOrDefaultAsync(x => x.TransactionId == transaction.Id);
                     //PAGOS                           
                     payment.PaymentDate = transaction.DateTransaction;
                     payment.BranchOffice = terminalUser.Terminal.BranchOffice.Name;
@@ -808,6 +809,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.ExternalOriginPayment = transaction.ExternalOriginPayment;
                     payment.Account = transaction.Account;
                     payment.TerminalUserId = transaction.TerminalUser.Id;
+                    payment.ImpressionSheet = transactionFolio.Folio;
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
@@ -1123,6 +1125,7 @@ namespace Siscom.Agua.Api.Controllers
                     }
 
                     await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+                    TransactionFolio transactionFolio = await _context.TransactionFolios.FirstOrDefaultAsync(x => x.TransactionId == transaction.Id);
 
                     //PAGOS                           
                     payment.PaymentDate = transaction.DateTransaction;
@@ -1149,6 +1152,7 @@ namespace Siscom.Agua.Api.Controllers
                     payment.Account = transaction.Account;
                     payment.OrderSaleId = pPaymentOrders.Transaction.OrderSaleId;
                     payment.TerminalUserId = transaction.TerminalUser.Id;
+                    payment.ImpressionSheet = transactionFolio.Folio;
 
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
