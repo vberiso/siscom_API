@@ -362,9 +362,6 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para generar order de cobro" });
             }
 
-
-
-
             return StatusCode((int)TypeError.Code.Ok, new { Success = "Orden de cobro generada" });
         }
 
@@ -421,13 +418,6 @@ namespace Siscom.Agua.Api.Controllers
 
             return Ok(breach);
         }
-
-
-
-
-
-
-
 
         //POST: API/BREACH
         [HttpPost]

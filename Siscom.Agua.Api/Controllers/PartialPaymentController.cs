@@ -531,7 +531,6 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> FindPartialPaymentToAgree([FromRoute] int idAgreement)
         {
             List<PartialPaymentAgree> partial = new List<PartialPaymentAgree>();
-
             try
             {
                 using (var connection = _context.Database.GetDbConnection())

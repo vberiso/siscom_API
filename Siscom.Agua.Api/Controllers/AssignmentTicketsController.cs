@@ -38,7 +38,7 @@ namespace Siscom.Agua.Api.Controllers
             return _context.AssignmentTickets.Include(c=>c.TransitPolice);
         }
 
-        // GET: api/AssignmentTickets/5
+        //GET: api/AssignmentTickets/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAssignmentTicket([FromRoute] int id)
         {
@@ -48,6 +48,24 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             var assignmentTicket = await _context.AssignmentTickets.FindAsync(id);
+
+            if (assignmentTicket == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(assignmentTicket);
+        }
+
+        [HttpGet("ByFolio/{folio}")]
+        public async Task<IActionResult> GetAssignmentTicketByFolio([FromRoute] int folio)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var assignmentTicket = await _context.AssignmentTickets.Where(x => x.Folio == folio).ToListAsync();
 
             if (assignmentTicket == null)
             {
