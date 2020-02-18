@@ -543,7 +543,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
 
-            if (AccumulatedAc != null)
+            if (AccumulatedAc != null && int.Parse(mes) != 2)
             {
                 TotalAc = TotalAc + AccumulatedAc.Accumulated;
               
@@ -553,7 +553,7 @@ namespace Siscom.Agua.Api.Controllers
 
            
            
-            if (AccumulatedAn != null)
+            if (AccumulatedAn != null && int.Parse(mes) != 2)
             {
                 TotalAn = TotalAn + AccumulatedAn.Accumulated;
              
@@ -562,7 +562,7 @@ namespace Siscom.Agua.Api.Controllers
            
 
           
-            if (AccumulatedAm != null)
+            if (AccumulatedAm != null && int.Parse(mes) != 2)
             {
                 TotalAm = TotalAm + AccumulatedAm.Accumulated;
                 
