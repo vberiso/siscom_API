@@ -195,53 +195,61 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("AgreementByAccount/{AcountNumber}")]
         public async Task<IActionResult> GetGetAgreementByAccount([FromRoute] string AcountNumber)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var agreement = await _context.Agreements
+                                          .Include(x => x.Clients)
+                                            .ThenInclude(contact => contact.Contacts)
+                                          .Include(x => x.Addresses)
+                                            .ThenInclude(s => s.Suburbs)
+                                          .Include(ts => ts.TypeService)
+                                          .Include(tu => tu.TypeUse)
+                                          .Include(tc => tc.TypeConsume)
+                                          .Include(tr => tr.TypeRegime)
+                                          .Include(tp => tp.TypePeriod)
+                                          .Include(tcb => tcb.TypeCommertialBusiness)
+                                          .Include(tss => tss.TypeStateService)
+                                          .Include(ti => ti.TypeIntake)
+                                          .Include(di => di.Diameter)
+                                          .Include(tc => tc.TypeClassification)
+                                          .Include(tss => tss.TypeStateService)
+                                          .Include(ags => ags.AgreementServices)
+                                            .ThenInclude(x => x.Service)
+                                          .Include(ad => ad.AgreementDiscounts)
+                                          .ThenInclude(d => d.Discount)
+                                          .Include(ad => ad.AgreementDetails)
+                                          .Include(af => af.AgreementFiles)
+                                          .FirstOrDefaultAsync(a => a.Account == AcountNumber);
+
+                agreement.Addresses.ToList().ForEach(x =>
+                {
+                    x.Suburbs = _context.Suburbs.Include(r => r.Regions)
+                                                .Include(c => c.Clasifications)
+                                                .Include(t => t.Towns)
+                                                    .ThenInclude(s => s.States)
+                                                    .ThenInclude(c => c.Countries)
+                                                .Where(i => i.Id == x.Suburbs.Id)
+                                                .SingleOrDefault();
+                });
+
+
+                if (agreement == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(agreement);
             }
-
-            var agreement = await _context.Agreements
-                                      .Include(x => x.Clients)
-                                        .ThenInclude(contact => contact.Contacts)
-                                      .Include(x => x.Addresses)
-                                        .ThenInclude(s => s.Suburbs)
-                                      .Include(ts => ts.TypeService)
-                                      .Include(tu => tu.TypeUse)
-                                      .Include(tc => tc.TypeConsume)
-                                      .Include(tr => tr.TypeRegime)
-                                      .Include(tp => tp.TypePeriod)
-                                      .Include(tcb => tcb.TypeCommertialBusiness)
-                                      .Include(tss => tss.TypeStateService)
-                                      .Include(ti => ti.TypeIntake)
-                                      .Include(di => di.Diameter)
-                                      .Include(tc => tc.TypeClassification)
-                                      .Include(tss => tss.TypeStateService)
-                                      .Include(ags => ags.AgreementServices)
-                                        .ThenInclude(x => x.Service)
-                                      .Include(ad => ad.AgreementDiscounts)
-                                      .ThenInclude(d => d.Discount)
-                                      .Include(ad => ad.AgreementDetails)
-                                      .Include(af => af.AgreementFiles)
-                                      .FirstOrDefaultAsync(a => a.Account == AcountNumber);
-
-            agreement.Addresses.ToList().ForEach(x =>
-            {
-                x.Suburbs = _context.Suburbs.Include(r => r.Regions)
-                                            .Include(c => c.Clasifications)
-                                            .Include(t => t.Towns)
-                                                .ThenInclude(s => s.States)
-                                                .ThenInclude(c => c.Countries)
-                                            .Where(i => i.Id == x.Suburbs.Id)
-                                            .SingleOrDefault();
-            });
-
-
-            if (agreement == null)
+            catch(Exception ex)
             {
                 return NotFound();
             }
-
-            return Ok(agreement);
+            
         }
 
         // GET: api/Agreements/

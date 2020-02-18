@@ -549,8 +549,9 @@ namespace Siscom.Agua.Api.Controllers
 
 
         //Cancelaciones en grupo para Facturama.
+        //ej: idsPayments = '364501,365343,361740,362243,...'
         [HttpPost("CancelarFacturasFacturama")]
-        public async Task<IActionResult> getCancelarFacturas([FromBody]string idsFacturama)
+        public async Task<IActionResult> getCancelarFacturas([FromBody]string idsPayments)
         {
             try
             {
@@ -563,7 +564,7 @@ namespace Siscom.Agua.Api.Controllers
                 var byteArray = Encoding.ASCII.GetBytes("gfdsystems:gfds1st95");
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 
-                var ids = idsFacturama.Split(",");
+                var ids = idsPayments.Split(",");
                 int TotalPeticiones = ids.Count(), TotalCanceladas = 0, TotalPendientes = 0;
                 foreach(var id in ids)
                 {
@@ -587,7 +588,7 @@ namespace Siscom.Agua.Api.Controllers
                                     Message = respCancel.Message,
                                     RequestDateCancel = DateTime.ParseExact(respCancel.RequestDate, "yyyy-MM-ddTHH:mm:ss", CultureInfo.CurrentCulture),
                                     CancelationDate = DateTime.ParseExact(respCancel.CancelationDate, "yyyy-MM-ddTHH:mm:ss", CultureInfo.CurrentCulture),
-                                    AcuseXml = encoding.GetBytes(respCancel.AcuseXmlBase64),
+                                    //AcuseXml = respCancel.AcuseXmlBase64 == null ? null : encoding.GetBytes(respCancel.AcuseXmlBase64),
                                     TaxReceiptId = tax.Id
                                 };
                                 _context.TaxReceiptCancels.Add(taxReceiptCancel);
@@ -614,7 +615,63 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest( "Error" );
             }
         }
-               
+
+        //Obtiene los status de un grupo de facturas.
+        [HttpGet("StatusFacturasFacturama")]
+        public async Task<IActionResult> getStatusFacturas([FromBody]string idsFacturama)
+        {
+            try
+            {
+                client = new HttpClient();
+                // Update port # in the following line.
+                client.BaseAddress = new Uri("https://api.facturama.mx/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
+                var byteArray = Encoding.ASCII.GetBytes("gfdsystems:gfds1st95");
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
+                var ids = idsFacturama.Split(",");
+                int TotalPeticiones = ids.Count(), TotalCanceladas = 0, TotalPendientes = 0, TotalActivas = 0;
+                List<Model.FacturaFacturamaStatus> lstfacturaFacturamaStatuses = new List<Model.FacturaFacturamaStatus>();
+                foreach (var id in ids)
+                {                    
+                    HttpResponseMessage response = await client.GetAsync($"api-lite/cfdis/{id}");
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        var definition = new { Status = "", Id = "", Folio = "", Date = "", Total = "" };
+                        var respStatus = JsonConvert.DeserializeAnonymousType(jsonString, definition);
+
+                        Model.FacturaFacturamaStatus factura = new Model.FacturaFacturamaStatus()
+                        {
+                            Id = respStatus.Id,
+                            Status = respStatus.Status,
+                            Folio = respStatus.Folio,
+                            Date = DateTime.ParseExact(respStatus.Date, "yyyy-MM-ddTHH:mm:ss", CultureInfo.CurrentCulture),
+                            Total = decimal.Parse(respStatus.Total)
+                        };
+                        lstfacturaFacturamaStatuses.Add(factura);
+
+                        if (respStatus.Status == "active")                        
+                            TotalActivas++;                        
+                        else if (respStatus.Status.Contains("ancel"))
+                            TotalCanceladas++;
+                        else                        
+                            TotalPendientes++;
+                        
+                    }
+                    
+                }
+
+                return Ok(lstfacturaFacturamaStatuses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error");
+            }
+        }
+
 
     }
 }

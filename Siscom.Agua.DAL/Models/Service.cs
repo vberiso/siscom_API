@@ -30,6 +30,8 @@ namespace Siscom.Agua.DAL.Models
         public bool IsActive { get; set; }
         [Required, Column("in_agreement")]
         public bool InAgreement { get; set; }
+        [Column("account_number"), StringLength(20), Required]
+        public string AccountNumber { get; set; }
 
         public ICollection<AgreementService> AgreementServices { get; set; }
         public ICollection<Tariff> Tariffs { get; set; }
