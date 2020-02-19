@@ -150,5 +150,19 @@ namespace Siscom.Agua.Api.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpGet("getAllUsers")]
+
+        public async Task<IActionResult> GetAllUsers()
+        {
+            return Ok(await _context.Users.Where(x => x.IsActive == true).Select(x => new { 
+                Name = x.Name,
+                LastName = x.LastName,
+                SecondLastName = x.SecondLastName,
+                Email = x.Email,
+                UserName = x.UserName,
+                PasswordHash = x.PasswordHash
+            }).ToListAsync());
+        }
     }
 }
