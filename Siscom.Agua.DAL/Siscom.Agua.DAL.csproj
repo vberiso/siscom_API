@@ -32,7 +32,9 @@
     <Compile Remove="Migrations\20200108223955_AddFieldTerminalUserIdOntablePayment.cs" />
     <Compile Remove="Migrations\20200108223955_AddFieldTerminalUserIdOntablePayment.Designer.cs" />
     <Compile Remove="Migrations\20200210172815_addFieldAccountNumberToTableSERVICE.cs" />
-    <Compile Remove="Migrations\20200210172815_addFieldAccountNumberToTableSERVICE.Designer.cs" /> 
+    <Compile Remove="Migrations\20200210172815_addFieldAccountNumberToTableSERVICE.Designer.cs" />
+    <Compile Remove="Migrations\20200229172601_addTableDispatchOrder.cs" />
+    <Compile Remove="Migrations\20200229172601_addTableDispatchOrder.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>

@@ -219,6 +219,7 @@ namespace Siscom.Agua.DAL
         public DbSet<OrderWorkReasonCatalog> OrderWorkReasonCatalog { get; set; }
         public DbSet<PhotosOrderWork> PhotosOrderWork { get; set; }
         public DbSet<FolioAccountStatement> FolioAccountStatements { get; set; }
+        public DbSet<DispatchOrder> DispatchOrders { get; set; }
 
         /// <summary>
         /// Otros
