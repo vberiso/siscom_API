@@ -38,8 +38,8 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        [Route("login/{isMobile?}")]
+        public async Task<IActionResult> Login([FromBody] LoginModel model, [FromRoute] bool isMobile = false)
         {
             var env = appSettings.ValidAudience;
             //string rolname = string.Empty;
@@ -100,17 +100,36 @@ namespace Siscom.Agua.Api.Controllers
                             claims: claims,
                             signingCredentials: new Microsoft.IdentityModel.Tokens.SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
                         );
-                    return Ok(new
+                    if (isMobile)
                     {
-                        user = user.Id,
-                        fullName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName),
-                        token = new JwtSecurityTokenHandler().WriteToken(token),
-                        expiration = token.ValidTo.ToLocalTime(),
-                        RolName = listRoles,
-                        Divition = user.DivitionId,
-                        CanStamp = user.CanStamp,
-                        Serial = user.Serial
-                    });
+                        return Ok(new
+                        {
+                            user = user.Id,
+                            fullName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName),
+                            token = new JwtSecurityTokenHandler().WriteToken(token),
+                            expiration = token.ValidTo.ToLocalTime(),
+                            RolName = listRoles,
+                            Divition = user.DivitionId,
+                            CanStamp = user.CanStamp,
+                            Serial = user.Serial,
+                            email = user.Email
+                        });
+                    }
+                    else
+                    {
+                        return Ok(new
+                        {
+                            user = user.Id,
+                            fullName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName),
+                            token = new JwtSecurityTokenHandler().WriteToken(token),
+                            expiration = token.ValidTo.ToLocalTime(),
+                            RolName = listRoles,
+                            Divition = user.DivitionId,
+                            CanStamp = user.CanStamp,
+                            Serial = user.Serial
+                        });
+                    }
+                   
                 }
                 else
                 {
