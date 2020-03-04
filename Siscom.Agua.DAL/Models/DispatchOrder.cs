@@ -29,5 +29,7 @@ namespace Siscom.Agua.DAL.Models
         public DateTime DateAsign { get; set; }
         [Column("date_attended")]
         public DateTime DateAttended { get; set; }
+        [Column("date_synchronized")]
+        public DateTime DateSynchronized { get; set; }
     }
 }
