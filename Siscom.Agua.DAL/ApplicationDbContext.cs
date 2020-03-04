@@ -269,6 +269,12 @@ namespace Siscom.Agua.DAL
         public DbSet<PromotionGroup> PromotionGroup { get; set; }
         public DbSet<Promotions> Promotions { get; set; }
         public DbSet<PromotionDebt> PromotionDebt { get; set; }
+        public DbSet<DebtCampaign> DebtCampaign { get; set; }
+        public DbSet<DebtCampaignFiles> DebtCampaignFiles { get; set; }
+        
+
+
+
 
 
         public ApplicationDbContext()
@@ -1690,6 +1696,26 @@ namespace Siscom.Agua.DAL
                    .HasOne<ApplicationRol>(sc => sc.ApplicationRol)
                    .WithMany(s => s.ViewProfiles)
                    .HasForeignKey(sc => sc.RoleId);
+
+
+            #region DebtCampaign
+
+            builder.Entity<DebtCampaign>()
+                 .Property(x => x.Status)
+                 .HasDefaultValue("ECD01");
+
+            builder.Entity<DebtCampaignFiles>()
+                 .Property(x => x.IsInvitation)
+                 .HasDefaultValue(true);
+      
+
+
+
+        builder.Entity<DebtCampaign>()
+                .HasOne<Agreement>(sc => sc.Agreement)
+                .WithMany(s => s.DebtCampaign)
+                .HasForeignKey(b => b.AgreementId);
+            #endregion
             #region otros
             builder.Entity<ReasonCatalog>()
               .Property(x => x.IsActive)

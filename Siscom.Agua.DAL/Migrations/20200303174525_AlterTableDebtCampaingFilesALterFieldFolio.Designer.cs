@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200303174525_AlterTableDebtCampaingFilesALterFieldFolio")]
+    partial class AlterTableDebtCampaingFilesALterFieldFolio
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2309,39 +2311,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Discount_Campaign");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DispatchOrder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_dispatch_order")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateAsign")
-                        .HasColumnName("date_asign");
-
-                    b.Property<DateTime>("DateAttended")
-                        .HasColumnName("date_attended");
-
-                    b.Property<string>("IMEI")
-                        .HasColumnName("IMEI")
-                        .HasMaxLength(50);
-
-                    b.Property<int>("OrderWorkId")
-                        .HasColumnName("orderworkid");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
-
-                    b.Property<int>("TechnicalStaffId")
-                        .HasColumnName("technicalstaffid");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DispatchOrder");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Division", b =>

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200227223651_AddTableDebtCampaign")]
+    partial class AddTableDebtCampaign
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1757,14 +1759,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("AgreementId")
                         .HasColumnName("AgreementId");
 
-                    b.Property<string>("Consumo")
-                        .HasColumnName("consumo");
-
                     b.Property<DateTime>("DateSubscription")
                         .HasColumnName("date_subscription");
-
-                    b.Property<string>("DebtId")
-                        .HasColumnName("DebtId");
 
                     b.Property<int>("EndYearDebt")
                         .HasColumnName("end_year_debt");
@@ -1780,9 +1776,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<int>("Ruta")
                         .HasColumnName("ruta");
-
-                    b.Property<string>("Servicios")
-                        .HasColumnName("servicios");
 
                     b.Property<int>("StartYearDebt")
                         .HasColumnName("start_year_debt");
@@ -1806,47 +1799,10 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AgreementId");
+                    b.HasIndex("AgreementId")
+                        .IsUnique();
 
                     b.ToTable("DebtCampaign");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtCampaignFiles", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_debt_campaign_files")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("FileName")
-                        .HasColumnName("file_name")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("Folio")
-                        .HasColumnName("folio");
-
-                    b.Property<DateTime>("GenerationDate")
-                        .HasColumnName("generation_date");
-
-                    b.Property<bool>("IsInvitation")
-                        .ValueGeneratedOnAdd()
-                        .HasDefaultValue(true);
-
-                    b.Property<byte[]>("PDF")
-                        .HasColumnName("pdf");
-
-                    b.Property<int>("TotalRecords")
-                        .HasColumnName("total_records");
-
-                    b.Property<string>("UserId")
-                        .HasColumnName("user_id");
-
-                    b.Property<string>("UserName")
-                        .HasColumnName("user_name");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("debt_campaign_files");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtDetail", b =>
@@ -2311,39 +2267,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Discount_Campaign");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.DispatchOrder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_dispatch_order")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateAsign")
-                        .HasColumnName("date_asign");
-
-                    b.Property<DateTime>("DateAttended")
-                        .HasColumnName("date_attended");
-
-                    b.Property<string>("IMEI")
-                        .HasColumnName("IMEI")
-                        .HasMaxLength(50);
-
-                    b.Property<int>("OrderWorkId")
-                        .HasColumnName("orderworkid");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnName("status")
-                        .HasMaxLength(5);
-
-                    b.Property<int>("TechnicalStaffId")
-                        .HasColumnName("technicalstaffid");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DispatchOrder");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Division", b =>
                 {
                     b.Property<int>("Id")
@@ -2445,7 +2368,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 3, 3, 11, 45, 24, 323, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2020, 2, 27, 16, 36, 50, 147, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -5829,8 +5752,8 @@ namespace Siscom.Agua.DAL.Migrations
             modelBuilder.Entity("Siscom.Agua.DAL.Models.DebtCampaign", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
-                        .WithMany("DebtCampaign")
-                        .HasForeignKey("AgreementId")
+                        .WithOne("DebtCampaign")
+                        .HasForeignKey("Siscom.Agua.DAL.Models.DebtCampaign", "AgreementId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

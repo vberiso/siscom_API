@@ -238,6 +238,7 @@ namespace Siscom.Agua.Api.Controllers
                 bool canCreate;
                 string avisoError = "";
                 int aviso = 0 ;
+                List<int> IdsOrderWork = new List<int>();
                 foreach (string id in ids)
                 {
                     canCreate = true;
@@ -339,6 +340,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
                     _context.SaveChanges();
+                    IdsOrderWork.Add(OrderWork.Id);
 
                     ApplyIds++;
 
@@ -348,7 +350,10 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     return StatusCode(StatusCodes.Status200OK, new { reazon = msgs, msg = "Algunas ordenes no se pudieron generar", id = "" });
                 }
-
+                if (IdsOrderWork.Count > 1)
+                {
+                    return StatusCode(StatusCodes.Status200OK, new { msg = "Ordenes generadas correctamente", ids = IdsOrderWork, masivo = true });
+                }
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Orden generada correctamente", id = OrderWork.Id });
             }
             catch (Exception ex)

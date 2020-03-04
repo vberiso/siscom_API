@@ -24,6 +24,7 @@ namespace Siscom.Agua.DAL.Models
             AgreementRulerCalculations = new HashSet<AgreementRulerCalculation>();
             PartialPayments = new HashSet<PartialPayment>();
             AccountStatusInFiles = new HashSet<AccountStatusInFile>();
+            DebtCampaign = new HashSet<DebtCampaign>();
         }
 
         [Column("id_agreement"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -79,6 +80,8 @@ namespace Siscom.Agua.DAL.Models
         public int DiameterId { get; set; }
         public Diameter Diameter { get; set; }
 
+        public ICollection<DebtCampaign> DebtCampaign { get; set; }
+
         public int TypeClassificationId { get; set; }
         public TypeClassification TypeClassification { get; set; }
 
@@ -100,5 +103,7 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<OrderWork> OrderWork { get; set; }
         public ICollection<PartialPayment> PartialPayments { get; set; }
         public ICollection<AccountStatusInFile> AccountStatusInFiles { get; set; }
+
+
     }
 }
