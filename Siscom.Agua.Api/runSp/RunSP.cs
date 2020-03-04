@@ -170,6 +170,10 @@ namespace Siscom.Agua.Api.runSp
                         data = new List<object>();
                         if (ISdatatable == 1)
                         {
+                            if ( command.Parameters["@error"].Value.ToString() != "")
+                            {
+                                return "error: " + command.Parameters["@error"].Value.ToString();
+                            }
                             dataTable.Load(result);
                             return dataTable;
                         }

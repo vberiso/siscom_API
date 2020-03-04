@@ -31,48 +31,71 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
+        [HttpPost("CreateRecordFile/{FileName}/{TotalRecords}/{invitation}")]
+        public async Task<IActionResult> CreateRecordFile([FromBody] object data,[FromRoute] string FileName = "", [FromRoute] int TotalRecords = 0, [FromRoute] bool invitation = true)
+        {
+            try
+            {
+                
+                var file = new DebtCampaignFiles();
+                var Data = JObject.Parse(JsonConvert.SerializeObject( data ));
+
+                file.UserId = Data["UserId"].ToString();
+                file.UserName = Data["UserName"].ToString();
+                file.TotalRecords = TotalRecords;
+                file.FileName = FileName;
+                file.GenerationDate = DateTime.Now;
+                file.IsInvitation = invitation;
+
+                _context.DebtCampaignFiles.Add(file);
+                await _context.SaveChangesAsync();
+                file.IsInvitation = invitation;
+                await _context.SaveChangesAsync();
+                _context.Entry(file).Reload();
+                return Ok(new { file.Folio, file.Id });
+            }
+            catch (Exception e)
+            {
+                return Ok(new {error= "Ocurrio yn error"});
+            }
+
+        }
         /// <summary>
         /// Get list of Accounts Apply for Campaign
         /// </summary>
         /// <returns></returns>
-        // GET: api/DebtCampaign
-        //[HttpPost("CreateRecordFile")]
-        //public async Task<IActionResult> CreateRecordFile(IFormFile AttachedFile, [FromRoute] string FileName = "", [FromRoute] int TotalRecords = 0, [FromRoute] bool invitation = true, [FromRoute] string folio = "")
-        //{
+            // GET: api/DebtCampaign
+            //[HttpPost("CreateRecordFile")]
+            //public async Task<IActionResult> CreateRecordFile(IFormFile AttachedFile, [FromRoute] string FileName = "", [FromRoute] int TotalRecords = 0, [FromRoute] bool invitation = true, [FromRoute] string folio = "")
+            //{
 
 
-        //}
-        [HttpPost("UploadFile/{FileName}/{TotalRecords}/{invitation}/{folio?}")]
-        public async Task<IActionResult> UploadFile(IFormFile AttachedFile, [FromRoute] string FileName = "", [FromRoute] int TotalRecords = 0, [FromRoute] bool invitation = true, [FromRoute] string folio = "")
+            //}
+        [HttpPost("UploadFile/{Id}")]
+        public async Task<IActionResult> UploadFile(IFormFile AttachedFile, [FromRoute] int Id)
         {
 
             try
             {
-                var file = new DebtCampaignFiles();
-                var Data = JObject.Parse(Request.Form["Data"].ToString());
-                if (AttachedFile != null)
+
+                var file = _context.DebtCampaignFiles.Where(x => x.Id == Id).FirstOrDefault();
+
+                if (AttachedFile != null && file!= null)
                 {
                     using (var memoryStream = new MemoryStream())
                     {
 
                         await AttachedFile.CopyToAsync(memoryStream);
                         file.PDF = memoryStream.ToArray();
-                        file.UserId = Data["UserId"].ToString();
-                        file.UserName = Data["UserName"].ToString();
-                        file.TotalRecords = TotalRecords;
-                        file.FileName = FileName;
-                        file.GenerationDate = DateTime.Now;
-                        file.Folio = folio;
-                       
+
+
                     }
-                    _context.DebtCampaignFiles.Add(file);
                     await _context.SaveChangesAsync();
-                    file.IsInvitation = invitation;
-                    _context.DebtCampaignFiles.Update(file);
-                    await _context.SaveChangesAsync();
-                    
                 }
-                return Ok(file.Folio);
+
+
+
+                return Ok();
             }
             catch (Exception e)
             {
