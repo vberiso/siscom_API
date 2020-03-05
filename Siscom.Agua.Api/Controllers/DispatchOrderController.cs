@@ -31,7 +31,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> getAgremmentsOfStaff([FromRoute] int id)
         {
-            var dispatchOrder = _context.DispatchOrders.FirstOrDefaultAsync(x => x.Id == id);
+            var dispatchOrder =  await _context.DispatchOrders.FirstOrDefaultAsync(x => x.Id == id);
             return StatusCode(StatusCodes.Status200OK, dispatchOrder);
         }
 
