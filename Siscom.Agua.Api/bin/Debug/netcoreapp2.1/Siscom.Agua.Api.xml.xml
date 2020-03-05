@@ -693,7 +693,7 @@
             <param name="id">Mandatory</param>
             <returns></returns>
         </member>
-        <member name="M:Siscom.Agua.Api.Controllers.DebtCampaignController.UploadFile(Microsoft.AspNetCore.Http.IFormFile,System.String,System.Int32,System.Boolean,System.String)">
+        <member name="M:Siscom.Agua.Api.Controllers.DebtCampaignController.UploadFile(Microsoft.AspNetCore.Http.IFormFile,System.Int32)">
             <summary>
             Get list of Accounts Apply for Campaign
             </summary>
