@@ -78,6 +78,68 @@ namespace Siscom.Agua.Api.Controllers
             return BadRequest();
         }
 
+        [HttpPost("AddUsersOT")]
+        public async Task<IActionResult> PostAddUserOT([FromBody] TechnicalStaffVM addUser)
+        {
+            IdentityResult result;
+            var tmpDivision = await  _context.Divisions.FirstOrDefaultAsync(d => d.Name.Contains("ORDEN DE TRABAJO") );
+            addUser.DivisionId = tmpDivision != null ? tmpDivision.Id : 2;
+            ApplicationUser user = new ApplicationUser()
+            {                
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = addUser.Nick,
+                Name = addUser.Name,
+                Email = addUser.Email,
+                PhoneNumber = addUser.Phone,
+                LastName = "",
+                SecondLastName = "OT",
+                DivitionId = addUser.DivisionId,
+                IsActive = addUser.IsActive
+            };
+            string password = CrearPassword(6);
+            result = await UserManager.CreateAsync(user, password);
+
+            if (!result.Succeeded)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(Environment.NewLine, result.Errors.Select(x => x.Description)) });
+            }
+
+            var tmpRol = await  _context.TechnicalRoles.FirstOrDefaultAsync(t => t.Id == addUser.TechnicalRoleId);
+            string strRoleName = tmpRol != null ? tmpRol.Name : "RECONECTOR";
+            result = await UserManager.AddToRoleAsync(user, strRoleName);
+            if (!result.Succeeded)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(Environment.NewLine, result.Errors.Select(x => x.Description)) });
+            }
+
+            if (result.Succeeded)
+            {
+                try
+                {
+                    //Agrego el registro el tecnical staff
+                    TechnicalStaff technicalStaff = new TechnicalStaff()
+                    {
+                        Name = addUser.Name,
+                        Phone = addUser.Phone,
+                        IsActive = addUser.IsActive,
+                        OrderWorks = addUser.OrderWorks,
+                        TechnicalRoleId = addUser.TechnicalRoleId,
+                        TechnicalTeamId = addUser.TechnicalTeamId
+                    };
+                    _context.TechnicalStaffs.Add(technicalStaff);
+                    _context.SaveChanges();
+
+                    return StatusCode(StatusCodes.Status200OK, new { msg = "Usuario creado con éxito Contraseña: " + password + " ,tambien se genero el usuario OT.", id = technicalStaff.Id, pass = password });
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode((int)TypeError.Code.Ok, new { Error = "Usuario creado con éxito Contraseña: " + password + " ,No se genero el usuario de OT", id = 0, pass = password });
+                }
+            }
+
+            return BadRequest();
+        }
+
         [HttpPost("AddUsersTransitPolice")]
         public async Task<IActionResult> AddTransitPolice ([FromBody] TransitPoliceVM addUser)
         {
