@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200305230022_addFieldUserIdtoTecnicalStaff")]
+    partial class addFieldUserIdtoTecnicalStaff
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2342,10 +2344,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<int>("TechnicalStaffId")
                         .HasColumnName("technicalstaffid");
 
-                    b.Property<string>("UserId")
-                        .HasColumnName("user_id")
-                        .HasMaxLength(150);
-
                     b.HasKey("Id");
 
                     b.ToTable("DispatchOrder");
@@ -2452,7 +2450,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 3, 5, 16, 6, 33, 884, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2020, 3, 5, 17, 0, 21, 217, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3805,11 +3803,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("AssignedUser")
                         .HasColumnName("assigned_user")
-                        .HasMaxLength(150);
-
-                    b.Property<string>("Brand")
-                        .HasColumnName("brand")
-                        .HasMaxLength(25);
+                        .HasMaxLength(30);
 
                     b.Property<string>("IdDevice")
                         .HasColumnName("id_device")
@@ -3820,10 +3814,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<DateTime>("LastUpdateDate")
                         .HasColumnName("last_update_date");
-
-                    b.Property<string>("Model")
-                        .HasColumnName("model")
-                        .HasMaxLength(25);
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnName("phone_number")

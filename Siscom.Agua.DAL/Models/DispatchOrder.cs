@@ -21,6 +21,8 @@ namespace Siscom.Agua.DAL.Models
 
         [Column("technicalstaffid")]
         public int TechnicalStaffId { get; set; }
+        [Column("user_id"), StringLength(150)]
+        public string UserId { get; set; }
 
         [Column("IMEI"), StringLength(50)]
         public string IMEI { get; set; }

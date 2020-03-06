@@ -64,8 +64,6 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             {
                 var Staffs = _context.TechnicalStaffs
                     .Include(x => x.TechnicalRole)
-                
-                                       
                     .Include(x => x.TechnicalTeam).ToList();
                
                 return Ok(Staffs);
@@ -74,6 +72,23 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 .Include(x => x.TechnicalRole)
                     .Include(x => x.TechnicalTeam)
                 .First();
+
+            var userOT = await _context.Users.FirstOrDefaultAsync(x => x.Id == Staff.UserId);
+
+            Siscom.Agua.Api.Model.TechnicalStaffVM technicalStaffVM = new Model.TechnicalStaffVM()
+            {
+                Id = Staff.Id,
+                Name = Staff.Name,
+                Phone = Staff.Phone,
+                IsActive = Staff.IsActive,
+                TechnicalRoleId = Staff.TechnicalRoleId,
+                TechnicalTeamId = Staff.TechnicalTeamId,
+                Nick = userOT.UserName,
+                IMEI = "",
+                Email = userOT.Email,
+                DivisionId = userOT.DivitionId
+            };
+
             return Ok(Staff);
         }
 

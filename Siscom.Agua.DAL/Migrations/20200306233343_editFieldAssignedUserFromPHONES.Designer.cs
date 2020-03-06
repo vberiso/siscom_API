@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200306233343_editFieldAssignedUserFromPHONES")]
+    partial class editFieldAssignedUserFromPHONES
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2452,7 +2454,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 3, 5, 16, 6, 33, 884, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2020, 3, 6, 17, 33, 41, 844, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3807,10 +3809,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("assigned_user")
                         .HasMaxLength(150);
 
-                    b.Property<string>("Brand")
-                        .HasColumnName("brand")
-                        .HasMaxLength(25);
-
                     b.Property<string>("IdDevice")
                         .HasColumnName("id_device")
                         .HasMaxLength(30);
@@ -3820,10 +3818,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<DateTime>("LastUpdateDate")
                         .HasColumnName("last_update_date");
-
-                    b.Property<string>("Model")
-                        .HasColumnName("model")
-                        .HasMaxLength(25);
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnName("phone_number")

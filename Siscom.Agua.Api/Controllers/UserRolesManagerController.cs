@@ -84,6 +84,7 @@ namespace Siscom.Agua.Api.Controllers
             IdentityResult result;
             var tmpDivision = await  _context.Divisions.FirstOrDefaultAsync(d => d.Name.Contains("ORDEN DE TRABAJO") );
             addUser.DivisionId = tmpDivision != null ? tmpDivision.Id : 2;
+            string password = CrearPassword(6);
             ApplicationUser user = new ApplicationUser()
             {                
                 SecurityStamp = Guid.NewGuid().ToString(),
@@ -91,12 +92,11 @@ namespace Siscom.Agua.Api.Controllers
                 Name = addUser.Name,
                 Email = addUser.Email,
                 PhoneNumber = addUser.Phone,
-                LastName = "",
+                LastName = password,
                 SecondLastName = "OT",
                 DivitionId = addUser.DivisionId,
                 IsActive = addUser.IsActive
-            };
-            string password = CrearPassword(6);
+            };            
             result = await UserManager.CreateAsync(user, password);
 
             if (!result.Succeeded)
@@ -124,10 +124,20 @@ namespace Siscom.Agua.Api.Controllers
                         IsActive = addUser.IsActive,
                         OrderWorks = addUser.OrderWorks,
                         TechnicalRoleId = addUser.TechnicalRoleId,
-                        TechnicalTeamId = addUser.TechnicalTeamId
+                        TechnicalTeamId = addUser.TechnicalTeamId,
+                        UserId = user.Id
                     };
                     _context.TechnicalStaffs.Add(technicalStaff);
                     _context.SaveChanges();
+
+                    //Edito el registro en Phones, para saber a que usuario se asigno el telefono.                    
+                    Phones tmpPhone = await _context.Phones.FirstOrDefaultAsync(p => p.PhoneNumber == addUser.Phone);
+                    if(tmpPhone != null)
+                    {
+                        tmpPhone.AssignedUser = user.Id;
+                        _context.Entry(tmpPhone).State = EntityState.Modified;                       
+                        _context.SaveChanges();
+                    }
 
                     return StatusCode(StatusCodes.Status200OK, new { msg = "Usuario creado con éxito Contraseña: " + password + " ,tambien se genero el usuario OT.", id = technicalStaff.Id, pass = password });
                 }

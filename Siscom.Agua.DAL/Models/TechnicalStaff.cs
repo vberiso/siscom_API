@@ -20,6 +20,8 @@ namespace Siscom.Agua.DAL.Models
         public string Phone { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
+        [Column("user_id"), Required, StringLength(150)]
+        public string UserId { get; set; }
         [Column("TechnicalRoleId"), Required]
         public int TechnicalRoleId { get; set; }
         public TechnicalRole TechnicalRole { get; set; }

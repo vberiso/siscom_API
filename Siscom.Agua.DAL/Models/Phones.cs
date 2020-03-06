@@ -17,7 +17,7 @@ namespace Siscom.Agua.DAL.Models
         public string IdDevice { get; set; }
         [Column("phone_number"), StringLength(20), DataType(DataType.PhoneNumber)]
         public string PhoneNumber { get; set; }
-        [Column("assigned_user"), StringLength(30)]
+        [Column("assigned_user"), StringLength(150)]
         public string AssignedUser { get; set; }
         [Column("is_active")]
         public bool IsActive { get; set; }
