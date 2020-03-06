@@ -25,5 +25,9 @@ namespace Siscom.Agua.DAL.Models
         public DateTime RegisterDate { get; set; }
         [Column("last_update_date")]
         public DateTime LastUpdateDate { get; set; }
+        [Column("brand"), StringLength(25)]
+        public string Brand { get; set; }
+        [Column("model"), StringLength(25)]
+        public string Model { get; set; }
     }
 }
