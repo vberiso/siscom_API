@@ -49,6 +49,24 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(phones);
         }
 
+        [HttpGet("Device/{idDevice}")]
+        public async Task<IActionResult> GetPhonesDevice([FromRoute] string idDevice)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var phones = await _context.Phones.FirstOrDefaultAsync(x => x.IdDevice == idDevice);
+
+            if (phones == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(phones);
+        }
+
         // PUT: api/Phones/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPhones([FromRoute] int id, [FromBody] Phones phones)
