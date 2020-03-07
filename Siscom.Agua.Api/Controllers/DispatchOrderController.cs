@@ -28,12 +28,21 @@ namespace Siscom.Agua.Api.Controllers
             _context = context;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("DispatchOrderById/{id}")]
         public async Task<IActionResult> getAgremmentsOfStaff([FromRoute] int id)
         {
             var dispatchOrder =  await _context.DispatchOrders.FirstOrDefaultAsync(x => x.Id == id);
             return StatusCode(StatusCodes.Status200OK, dispatchOrder);
         }
+
+        [HttpGet("DispatchOrderByUserId/{userId}")]
+        public async Task<IActionResult> getAgremmentsOfStaffByUserId([FromRoute] String userId)
+        {
+            var dispatchOrder = new List<DispatchOrder>();
+            dispatchOrder = _context.DispatchOrders.Where(x => x.UserId == userId && x.Status == "DSO01").ToList();
+            return StatusCode(StatusCodes.Status200OK, dispatchOrder);
+        }
+
 
         [HttpPost()]
         public async Task<IActionResult> PostDispatchOrder([FromBody] DispatchOrder dispatchOrder)
