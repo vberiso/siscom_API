@@ -74,7 +74,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 .First();
 
             var userOT = await _context.Users.FirstOrDefaultAsync(x => x.Id == Staff.UserId);
-
+            
             Siscom.Agua.Api.Model.TechnicalStaffVM technicalStaffVM = new Model.TechnicalStaffVM()
             {
                 Id = Staff.Id,
@@ -83,13 +83,14 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 IsActive = Staff.IsActive,
                 TechnicalRoleId = Staff.TechnicalRoleId,
                 TechnicalTeamId = Staff.TechnicalTeamId,
-                Nick = userOT.UserName,
+                Nick = userOT != null ? userOT.UserName : "",
                 IMEI = "",
-                Email = userOT.Email,
-                DivisionId = userOT.DivitionId
+                Email = userOT != null ? userOT.Email : "",
+                DivisionId = userOT != null ? userOT.DivitionId : 0,
+                UserId = userOT != null ? userOT.Id : ""
             };
 
-            return Ok(Staff);
+            return Ok(technicalStaffVM);
         }
 
         [HttpPost("Staffs")]

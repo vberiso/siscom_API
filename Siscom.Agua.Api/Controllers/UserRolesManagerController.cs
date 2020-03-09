@@ -150,6 +150,63 @@ namespace Siscom.Agua.Api.Controllers
             return BadRequest();
         }
 
+        [HttpPost("UpdateStaffOT/{id}")]
+        public async Task<IActionResult> UpdateStaffOT([FromRoute] int id, [FromBody] TechnicalStaffVM user)
+        {
+            try
+            {
+                //Verfico si cambio algo en el usuario
+                var userApp = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.UserId);
+                if(userApp != null && (userApp.UserName != user.Nick || userApp.Name != user.Name || userApp.Email != user.Email || userApp.PhoneNumber != user.Phone || userApp.DivitionId != user.DivisionId || userApp.IsActive != user.IsActive) )
+                {
+                    userApp.UserName = user.Nick;
+                    userApp.Name = user.Name;
+                    userApp.Email = user.Email;
+                    userApp.PhoneNumber = user.Phone;
+                    userApp.DivitionId = user.DivisionId;
+                    userApp.IsActive = user.IsActive;
+                    _context.Users.Update(userApp);
+                    _context.SaveChanges();
+                }
+
+                //Verifico si cambio algun campo del userStaff
+                var staff = _context.TechnicalStaffs.Where(x => x.Id == id).First();
+                //Edito primero el registro en Phones si cambio.
+                if (staff != null && staff.Phone != user.Phone)
+                {
+                    Phones oldPhone = await _context.Phones.FirstOrDefaultAsync(p => p.PhoneNumber == staff.Phone);
+                    oldPhone.AssignedUser = null;
+                    //_context.Entry(oldPhone).State = EntityState.Modified;
+
+                    Phones newPhone = await _context.Phones.FirstOrDefaultAsync(p => p.PhoneNumber == user.Phone);
+                    newPhone.AssignedUser = user.UserId;
+                    //_context.Entry(newPhone).State = EntityState.Modified;
+                    _context.Phones.UpdateRange(new List<Phones>(){oldPhone, newPhone});
+                    _context.SaveChanges();
+                }
+                //Edito el technicalStaff si tiene cambios.                
+                if(staff != null && (staff.Name != user.Name || staff.IsActive != user.IsActive || staff.Phone != user.Phone || staff.TechnicalRoleId != user.TechnicalRoleId || staff.TechnicalTeamId != user.TechnicalTeamId))
+                {
+                    staff.Name = user.Name;
+                    staff.IsActive = user.IsActive;
+                    staff.Phone = user.Phone;
+                    staff.TechnicalRoleId = user.TechnicalRoleId;
+                    staff.TechnicalTeamId = user.TechnicalTeamId;
+                    _context.TechnicalStaffs.Update(staff);
+                    _context.SaveChanges();
+                }
+
+                
+
+                return StatusCode(StatusCodes.Status200OK, new { msg = "Los datos se actualizaron correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message });
+            }
+
+        }
+
         [HttpPost("AddUsersTransitPolice")]
         public async Task<IActionResult> AddTransitPolice ([FromBody] TransitPoliceVM addUser)
         {
