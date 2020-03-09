@@ -38,10 +38,11 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpPost]
-        [Route("login/{isMobile?}")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model, [FromRoute] bool isMobile = false)
+        [Route("login/{isMobile?}/{idDevice?}")]
+        public async Task<IActionResult> Login([FromBody] LoginModel model, [FromRoute] bool isMobile = false, [FromRoute] string idDevice = null)
         {
             var env = appSettings.ValidAudience;
+            bool isRegister = false;
             //string rolname = string.Empty;
              var listRoles = new List<string>();
             if (!ModelState.IsValid)
@@ -100,6 +101,10 @@ namespace Siscom.Agua.Api.Controllers
                             claims: claims,
                             signingCredentials: new Microsoft.IdentityModel.Tokens.SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
                         );
+                    if(idDevice != null)
+                    {
+                        isRegister = _context.Phones.Any(x => x.IdDevice == idDevice);
+                    }
                     if (isMobile)
                     {
                         return Ok(new
@@ -112,7 +117,8 @@ namespace Siscom.Agua.Api.Controllers
                             Divition = user.DivitionId,
                             CanStamp = user.CanStamp,
                             Serial = user.Serial,
-                            email = user.Email
+                            email = user.Email,
+                            hasRecord = isRegister
                         });
                     }
                     else
