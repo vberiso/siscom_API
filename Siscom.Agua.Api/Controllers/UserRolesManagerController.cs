@@ -155,50 +155,133 @@ namespace Siscom.Agua.Api.Controllers
         {
             try
             {
-                //Verfico si cambio algo en el usuario
-                var userApp = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.UserId);
-                if(userApp != null && (userApp.UserName != user.Nick || userApp.Name != user.Name || userApp.Email != user.Email || userApp.PhoneNumber != user.Phone || userApp.DivitionId != user.DivisionId || userApp.IsActive != user.IsActive) )
+                string password;
+                TechnicalStaff technicalStaff;
+                //Verifio si el usuario a actualizar ya tiene ligado un user
+                if (user.UserId.Contains("nuevo"))
                 {
-                    userApp.UserName = user.Nick;
-                    userApp.Name = user.Name;
-                    userApp.Email = user.Email;
-                    userApp.PhoneNumber = user.Phone;
-                    userApp.DivitionId = user.DivisionId;
-                    userApp.IsActive = user.IsActive;
-                    _context.Users.Update(userApp);
-                    _context.SaveChanges();
-                }
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        IdentityResult result;
+                        var tmpDivision = await _context.Divisions.FirstOrDefaultAsync(d => d.Name.Contains("ORDEN DE TRABAJO"));
+                        user.DivisionId = tmpDivision != null ? tmpDivision.Id : 2;
+                        password = CrearPassword(6);
+                        ApplicationUser AppUser = new ApplicationUser()
+                        {
+                            SecurityStamp = Guid.NewGuid().ToString(),
+                            UserName = user.Nick,
+                            Name = user.Name,
+                            Email = user.Email,
+                            PhoneNumber = user.Phone,
+                            LastName = password,
+                            SecondLastName = "OT",
+                            DivitionId = user.DivisionId,
+                            IsActive = user.IsActive
+                        };
+                        result = await UserManager.CreateAsync(AppUser, password);
 
-                //Verifico si cambio algun campo del userStaff
-                var staff = _context.TechnicalStaffs.Where(x => x.Id == id).First();
-                //Edito primero el registro en Phones si cambio.
-                if (staff != null && staff.Phone != user.Phone)
+                        if (!result.Succeeded)
+                            return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(Environment.NewLine, result.Errors.Select(x => x.Description)) });
+
+                        var tmpRol = await _context.TechnicalRoles.FirstOrDefaultAsync(t => t.Id == user.TechnicalRoleId);
+                        var tmpRolApp = await _context.Roles.FirstOrDefaultAsync(r => r.Name.Contains(tmpRol.Name));
+                        string strRoleName = tmpRolApp != null ? tmpRolApp.Name : "RECONECTOR";
+                        result = await UserManager.AddToRoleAsync(AppUser, strRoleName);
+
+                        if (!result.Succeeded)
+                            return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Join(Environment.NewLine, result.Errors.Select(x => x.Description)) });
+
+                        //Edito el registro del tecnical staff
+                        technicalStaff = await _context.TechnicalStaffs.FirstOrDefaultAsync(t => t.Id == user.Id); //new TechnicalStaff()
+                        technicalStaff.UserId = AppUser.Id;
+                        technicalStaff.Phone = AppUser.PhoneNumber;
+                        _context.TechnicalStaffs.Update(technicalStaff);
+                        await _context.SaveChangesAsync();
+
+                        //Edito el registro en Phones, para saber a que usuario se asigno el telefono.                    
+                        Phones tmpPhone = await _context.Phones.FirstOrDefaultAsync(p => p.PhoneNumber == user.Phone);
+                        if (tmpPhone != null)
+                        {
+                            tmpPhone.AssignedUser = AppUser.Id;
+                            _context.Entry(tmpPhone).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+                        }
+
+                        scope.Complete();
+                    }                    
+
+                    return StatusCode(StatusCodes.Status200OK, new { msg = "Usuario creado con éxito Contraseña: " + password + " ,tambien se actualizó el usuario OT.", id = technicalStaff.Id, pass = password });                                           
+                }
+                else
                 {
-                    Phones oldPhone = await _context.Phones.FirstOrDefaultAsync(p => p.PhoneNumber == staff.Phone);
-                    oldPhone.AssignedUser = null;
-                    //_context.Entry(oldPhone).State = EntityState.Modified;
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        //Verfico si cambio algo en el usuario
+                        var userApp = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.UserId);
+                        if (userApp != null && (userApp.UserName != user.Nick || userApp.Name != user.Name || userApp.Email != user.Email || userApp.PhoneNumber != user.Phone || userApp.DivitionId != user.DivisionId || userApp.IsActive != user.IsActive))
+                        {
+                            userApp.UserName = user.Nick;
+                            userApp.Name = user.Name;
+                            userApp.Email = user.Email;
+                            userApp.PhoneNumber = user.Phone;
+                            userApp.DivitionId = user.DivisionId;
+                            userApp.IsActive = user.IsActive;
+                            _context.Users.Update(userApp);
+                            await _context.SaveChangesAsync();
+                        }
 
-                    Phones newPhone = await _context.Phones.FirstOrDefaultAsync(p => p.PhoneNumber == user.Phone);
-                    newPhone.AssignedUser = user.UserId;
-                    //_context.Entry(newPhone).State = EntityState.Modified;
-                    _context.Phones.UpdateRange(new List<Phones>(){oldPhone, newPhone});
-                    _context.SaveChanges();
-                }
-                //Edito el technicalStaff si tiene cambios.                
-                if(staff != null && (staff.Name != user.Name || staff.IsActive != user.IsActive || staff.Phone != user.Phone || staff.TechnicalRoleId != user.TechnicalRoleId || staff.TechnicalTeamId != user.TechnicalTeamId))
-                {
-                    staff.Name = user.Name;
-                    staff.IsActive = user.IsActive;
-                    staff.Phone = user.Phone;
-                    staff.TechnicalRoleId = user.TechnicalRoleId;
-                    staff.TechnicalTeamId = user.TechnicalTeamId;
-                    _context.TechnicalStaffs.Update(staff);
-                    _context.SaveChanges();
-                }
+                        //Verifico si cambio algun campo del userStaff
+                        var staff = _context.TechnicalStaffs.Where(x => x.Id == id).First();
+                        //Edito primero el registro en Phones si cambio.
+                        if (staff != null && staff.Phone != user.Phone)
+                        {
+                            Phones oldPhone = await _context.Phones.FirstOrDefaultAsync(p => p.PhoneNumber == staff.Phone);
+                            if(oldPhone != null)
+                            {
+                                oldPhone.AssignedUser = null;
+                                _context.Entry(oldPhone).State = EntityState.Modified;
+                                await _context.SaveChangesAsync();
+                            }                            
 
-                
+                            Phones newPhone = await _context.Phones.FirstOrDefaultAsync(p => p.PhoneNumber == user.Phone);
+                            if(newPhone != null)
+                            {
+                                newPhone.AssignedUser = user.UserId;
+                                _context.Entry(newPhone).State = EntityState.Modified;
+                                await _context.SaveChangesAsync();
+                            }                            
+                        }
+                        //Edito el rol de usuario
+                        if(staff != null && staff.TechnicalRoleId != user.TechnicalRoleId)
+                        {
+                            var tmpNewRol = await _context.TechnicalRoles.FirstOrDefaultAsync(t => t.Id == user.TechnicalRoleId);
+                            var tmpNewRolApp = await _context.Roles.FirstOrDefaultAsync(r => r.Name.Contains(tmpNewRol.Name));
+                            string strNewRoleName = tmpNewRolApp != null ? tmpNewRolApp.Name : "RECONECTOR";
+                            var newResult = await UserManager.AddToRoleAsync(userApp, strNewRoleName);
 
-                return StatusCode(StatusCodes.Status200OK, new { msg = "Los datos se actualizaron correctamente" });
+                            var tmpOldRol = await _context.TechnicalRoles.FirstOrDefaultAsync(t => t.Id == staff.TechnicalRoleId);
+                            var tmpOldRolApp = await _context.Roles.FirstOrDefaultAsync(r => r.Name.Contains(tmpOldRol.Name));
+                            string strOldRoleName = tmpOldRolApp != null ? tmpOldRolApp.Name : "RECONECTOR";                            
+                            var oldResult = await UserManager.RemoveFromRoleAsync(userApp, strOldRoleName);
+                        }
+
+                        //Edito el technicalStaff si tiene cambios.                
+                        if (staff != null && (staff.Name != user.Name || staff.IsActive != user.IsActive || staff.Phone != user.Phone || staff.TechnicalRoleId != user.TechnicalRoleId || staff.TechnicalTeamId != user.TechnicalTeamId))
+                        {
+                            staff.Name = user.Name;
+                            staff.IsActive = user.IsActive;
+                            staff.Phone = user.Phone;
+                            staff.TechnicalRoleId = user.TechnicalRoleId;
+                            staff.TechnicalTeamId = user.TechnicalTeamId;
+                            _context.TechnicalStaffs.Update(staff);
+                            await _context.SaveChangesAsync();
+                        }
+
+                        scope.Complete();
+                    }                    
+                                       
+                    return StatusCode(StatusCodes.Status200OK, new { msg = "Los datos se actualizaron correctamente" });
+                }  
             }
             catch (Exception ex)
             {

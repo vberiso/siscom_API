@@ -30,6 +30,16 @@ namespace Siscom.Agua.Api.Controllers
             return _context.Phones;
         }
 
+        [HttpGet("FreeAndFrom/{id}")]
+        public async Task<IEnumerable<Phones>> GetPhonesFreeAndFrom([FromRoute] string id)
+        {
+            List<Phones> lstPhones = await _context.Phones.Where(p => string.IsNullOrEmpty(p.AssignedUser)).ToListAsync();
+            Phones phonesFromUser = await _context.Phones.FirstOrDefaultAsync(p => p.AssignedUser == id);
+            if(phonesFromUser != null)
+                lstPhones.Add(phonesFromUser);
+            return lstPhones;
+        }
+
         // GET: api/Phones/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPhones([FromRoute] int id)
