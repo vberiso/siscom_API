@@ -275,7 +275,7 @@ namespace Siscom.Agua.DAL
         /// <summary>
         /// Ot Mobile
         /// </summary>
-        public DbSet<Phones> Phones { get; set; }
+        public DbSet<Phones> Phones { get; set; } 
 
 
 
