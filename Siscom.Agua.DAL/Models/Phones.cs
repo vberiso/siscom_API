@@ -28,6 +28,6 @@ namespace Siscom.Agua.DAL.Models
         [Column("brand"), StringLength(25)]
         public string Brand { get; set; }
         [Column("model"), StringLength(25)]
-        public string Model { get; set; }
+        public string Model { get; set; } 
     }
 }
