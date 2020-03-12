@@ -1706,9 +1706,9 @@ namespace Siscom.Agua.DAL
                  .Property(x => x.Status)
                  .HasDefaultValue("ECD01");
 
-            builder.Entity<DebtCampaignFiles>()
-                 .Property(x => x.IsInvitation)
-                 .HasDefaultValue(true);
+            //builder.Entity<DebtCampaignFiles>()
+            //     .Property(x => x.IsInvitation)
+            //     .HasDefaultValue(true);
       
 
 
@@ -1716,7 +1716,7 @@ namespace Siscom.Agua.DAL
         builder.Entity<DebtCampaign>()
                 .HasOne<Agreement>(sc => sc.Agreement)
                 .WithMany(s => s.DebtCampaign)
-                .HasForeignKey(b => b.AgreementId);
+                .HasForeignKey(b => b.AgreementId); 
             #endregion
             #region otros
             builder.Entity<ReasonCatalog>()
