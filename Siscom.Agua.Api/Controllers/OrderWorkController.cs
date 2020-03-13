@@ -126,7 +126,7 @@ namespace Siscom.Agua.Api.Controllers
             List<object> agreements = new List<object>();
             try
             {
-               
+
 
                 foreach (var item in list)
                 {
@@ -145,7 +145,7 @@ namespace Siscom.Agua.Api.Controllers
                                     .ThenInclude(x => x.States)
                                         .ThenInclude(x => x.Countries)
                         .First();
-                    agreement.Debts = agreement.Debts.Where(d =>  statusDeuda.Contains(d.Status)).ToList();
+                    agreement.Debts = agreement.Debts.Where(d => statusDeuda.Contains(d.Status)).ToList();
                     agreement.OrderWork = new List<OrderWork>() { OrderWork };
 
 
@@ -154,7 +154,7 @@ namespace Siscom.Agua.Api.Controllers
                            {
                                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                            })));
-                  
+
                 }
 
 
@@ -168,9 +168,9 @@ namespace Siscom.Agua.Api.Controllers
 
         [HttpGet("FromAccount/{account}")]
         public async Task<IActionResult> GetFromAccount([FromRoute] string account)
-        {            
+        {
             try
-            {  
+            {
                 var agreement = _context.Agreements.Where(a => a.Account == account)
                     .Include(x => x.TypeIntake)
                     .Include(x => x.TypeConsume)
@@ -199,9 +199,10 @@ namespace Siscom.Agua.Api.Controllers
 
         private string ValidationOrderWorkAviso(Agreement agreement, bool isAyuntamiento)
         {
-       
+
             agreement.Debts = agreement.Debts.Where(x => statusDeuda.Contains(x.Status)).ToList();
-            if (agreement.Debts.Count > 0) {
+            if (agreement.Debts.Count > 0)
+            {
                 DateTime maxPeriod = agreement.Debts.Max(x => x.UntilDate);
                 DateTime minPeriod = agreement.Debts.Min(x => x.FromDate);
                 DateTime toDay = DateTime.Now;
@@ -224,7 +225,7 @@ namespace Siscom.Agua.Api.Controllers
             return ", debe tener deuda";
         }
         [HttpPost("OrderWorks/{isAyuntamiento?}")]
-        public async Task<IActionResult> Create([FromBody] object collection ,[FromRoute] bool isAyuntamiento = false)
+        public async Task<IActionResult> Create([FromBody] object collection, [FromRoute] bool isAyuntamiento = false)
         {
             int ApplyIds = 0;
             var data = JObject.Parse(collection.ToString());
@@ -237,13 +238,13 @@ namespace Siscom.Agua.Api.Controllers
                 Agreement Aggrement;
                 bool canCreate;
                 string avisoError = "";
-                int aviso = 0 ;
+                int aviso = 0;
                 List<int> IdsOrderWork = new List<int>();
                 foreach (string id in ids)
                 {
                     canCreate = true;
-                  
-                    
+
+
                     if (data["typeOrder"].ToString() == "OT003" || data["typeOrder"].ToString() == "OT006")
                     {
                         Aggrement = _context.Agreements.Where(x => x.Id == int.Parse(id))
@@ -254,14 +255,14 @@ namespace Siscom.Agua.Api.Controllers
 
                         if (data["typeOrder"].ToString() == "OT006")
                         {
-                            
+
                             avisoError = ValidationOrderWorkAviso(Aggrement, isAyuntamiento);
                             bool isNumeric = int.TryParse(avisoError, out aviso);
 
 
                             canCreate = isNumeric;
-                               
-                            
+
+
                         }
                         else
                         {
@@ -298,7 +299,7 @@ namespace Siscom.Agua.Api.Controllers
                                     break;
                                 case "OT006":
                                     tipeOrder = "Aviso de deuda";
-                                     
+
                                     break;
                             }
                             msgs.Add($"La cuenta {Aggrement.Account} con nombre de cliente {client.Name} {client.LastName} no se pudo generar una orden de tipo {tipeOrder}{avisoError}");
@@ -320,8 +321,8 @@ namespace Siscom.Agua.Api.Controllers
                         Folio = "f",
                         Activities = data["Activities"].ToString(),
                         aviso = aviso,
-                        
-                        
+
+
 
                     };
                     _context.OrderWorks.Add(OrderWork);
@@ -383,15 +384,15 @@ namespace Siscom.Agua.Api.Controllers
                 int id_agreement = 0; ;
                 if (OrderWork.Agreement != null)
                 {
-                     id_agreement = OrderWork.Agreement.Id;
+                    id_agreement = OrderWork.Agreement.Id;
                     OrderWork.Agreement = null;
                 }
-                
-                
+
+
                 _context.OrderWorks.Update(OrderWork);
                 //_context.Entry(OrderWork).State = EntityState.Modified;
                 _context.SaveChanges();
-                if ((OrderWork.Type == "OT002" || OrderWork.Type == "OT003") && OrderWork.Status == "EOT03" && id_agreement!=0)
+                if ((OrderWork.Type == "OT002" || OrderWork.Type == "OT003") && OrderWork.Status == "EOT03" && id_agreement != 0)
                 {
                     var agreement = _context.Agreements.Where(x => x.Id == id_agreement).First();
                     agreement.TypeStateServiceId = OrderWork.Type == "OT002" ? 3 : 1;
@@ -602,11 +603,12 @@ namespace Siscom.Agua.Api.Controllers
                 if (list[0].Count == 0 && list[1].Count == 0 && list[2].Count == 0 && list[3].Count == 0)
                 {
                     return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se encontraron datos en el rango de fecha especificado, posiblemente es una fecha que aun no ha llegado o no hay registros actualmente" });
-                } else
+                }
+                else
                 {
                     return Ok(list);
                 }
-                
+
             }
             catch (Exception error)
             {
@@ -643,6 +645,16 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return Conflict(ex.Message);
             }
+        }
+
+
+        [HttpPost("getStatusTypeOrders")]
+        public async Task<IActionResult> getStatusTypeOrders()
+        {
+           var Types=  _context.Types.Where(x => x.GroupTypeId == 15).ToList();
+           var Status = _context.Statuses.Where(x => x.GroupStatusId == 14).ToList();
+
+            return Ok(new List<object>() { Types, Status});
         }
 
     }
