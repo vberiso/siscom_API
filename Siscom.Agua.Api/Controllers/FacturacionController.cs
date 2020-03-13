@@ -130,12 +130,7 @@ namespace Siscom.Agua.Api.Controllers
                     tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == status && x.UserId == id && x.PDFInvoce != null).ToList();
                 else
                     tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.UserId == id && x.PDFInvoce != null).ToList();
-
-                if (tmp.Count == 0)
-                {
-                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Format("No se encotraron facturas canceladas.") });
-                }
-                                
+                                          
                 return Ok(tmp);
             }
             catch (Exception ex)
