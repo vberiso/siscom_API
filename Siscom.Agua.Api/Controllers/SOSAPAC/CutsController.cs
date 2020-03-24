@@ -328,6 +328,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                         var notifi = await _context.Notifications.Where(x => x.Id == idNotification).FirstOrDefaultAsync();
 
                         var agre = await _context.Agreements
+                            .Include(x => x.AgreementDetails)
                             .Include(x => x.TypeIntake)
                               .Include(x => x.Debts)
                                     .ThenInclude(x => x.DebtDetails)
