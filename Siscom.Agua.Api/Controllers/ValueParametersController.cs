@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
@@ -139,6 +140,53 @@ namespace Siscom.Agua.Api.Controllers
             else
                 val = _context.SystemParameters.Where(x => x.Name == b && x.IsActive == true && (x.StartDate <= today && x.EndDate >= today)).FirstOrDefault();
             return Ok(val);
+        }
+
+        [HttpGet("ReconnectionCosts")]
+        public async Task<IActionResult> GetReconnectionCosts()
+        {
+            List<ReconocetionCostsVM> Product = new List<ReconocetionCostsVM>();
+
+            var a = await _context.SystemParameters
+                .Where(x => x.Name.Contains("RECO") && x.IsActive)
+                .Select(x => new { x.TextColumn, x.Name })
+                .ToListAsync();
+
+            foreach (var item in a)
+            {
+                item.TextColumn.Split(",")
+                    .Select(p => Int32.TryParse(p, out int n) ? n : (int?)null)
+                    .Where(n => n.HasValue)
+                    .Select(n => n.Value)
+                    .ToList()
+                    .ForEach(x =>
+                    {
+
+                        TariffProduct tariff = _context.TariffProducts
+                        .Include(z => z.Product)
+                        .Where(z => z.ProductId == x && z.IsActive == 1)
+                        .FirstOrDefault();
+
+                        ReconocetionCostsVM vM = new ReconocetionCostsVM();
+                        vM.Amount = tariff.Amount;
+                        vM.HaveTax = tariff.HaveTax;
+                        vM.ProductName = tariff.Product.Name;
+                        vM.Type = tariff.Type;
+                        switch (item.Name) {
+                            case "RECO1":
+                                vM.TypeIntake = "HABITACIONAL";
+                            break;
+                            case "RECO2":
+                                vM.TypeIntake = "COMERCIAL";
+                                break;
+                            case "RECO3":
+                                vM.TypeIntake = "INDUSTRIAL";
+                                break;
+                        };
+                        Product.Add(vM);
+                    });
+            }
+            return Ok(Product);
         }
 
         [HttpGet("Campaign")]
