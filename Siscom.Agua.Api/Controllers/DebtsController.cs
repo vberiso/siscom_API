@@ -233,6 +233,17 @@ namespace Siscom.Agua.Api.Controllers
             try
             {
                 var debts = await _context.Debts.Where(d => Ids.Contains(d.Id)).ToListAsync();
+                var Usuario = _context.Users.FirstOrDefault(u => u.Id == user);
+
+                AgreementComment ac = new AgreementComment();
+                ac.DateIn = DateTime.Now;
+                ac.Observation = comentario;
+                ac.IsVisible = true;
+                ac.UserId = user;
+                ac.UserName = Usuario.Name + " " + Usuario.LastName + " " + Usuario.SecondLastName;
+                ac.AgreementId = (int)debts.FirstOrDefault()?.AgreementId;
+                _context.AgreementComments.Add(ac);
+
                 foreach (var item in debts)
                 {                    
                     item.Status = "ED006";
@@ -241,7 +252,7 @@ namespace Siscom.Agua.Api.Controllers
                     DAL.Models.DebtStatus debtStatus = new DAL.Models.DebtStatus();
                     debtStatus.id_status = "ED006";
                     debtStatus.DebtStatusDate = DateTime.Now;
-                    debtStatus.User = user;
+                    debtStatus.User = Usuario.Name + " " + Usuario.LastName + " " + Usuario.SecondLastName;
                     debtStatus.DebtId = item.Id;
                     _context.DebtStatuses.Add(debtStatus);
                 }
