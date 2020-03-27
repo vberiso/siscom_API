@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.DAL;
+using Siscom.Agua.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -224,7 +227,40 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        [HttpPost("Condonation/{user}/{comentario}")]
+        public async Task<IActionResult> Condonation([FromRoute] string user, [FromRoute] string comentario,[FromBody] List<int> Ids)
+        {
+            try
+            {
+                var debts = await _context.Debts.Where(d => Ids.Contains(d.Id)).ToListAsync();
+                foreach (var item in debts)
+                {                    
+                    item.Status = "ED006";
+                    _context.Debts.Update(item);
 
+                    DAL.Models.DebtStatus debtStatus = new DAL.Models.DebtStatus();
+                    debtStatus.id_status = "ED006";
+                    debtStatus.DebtStatusDate = DateTime.Now;
+                    debtStatus.User = user;
+                    debtStatus.DebtId = item.Id;
+                    _context.DebtStatuses.Add(debtStatus);
+                }
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = ex.Message;
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = "DebtController";
+                systemLog.Action = "PostCondonation";
+                systemLog.Parameter = JsonConvert.SerializeObject(Ids);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para condonar debts." });
+            }            
+        }
 
     }
 }
