@@ -234,7 +234,7 @@ namespace Siscom.Agua.Api.Controllers
             {
                 var debts = await _context.Debts.Where(d => Ids.Contains(d.Id)).ToListAsync();
                 var Usuario = _context.Users.FirstOrDefault(u => u.Id == user);
-
+                
                 AgreementComment ac = new AgreementComment();
                 ac.DateIn = DateTime.Now;
                 ac.Observation = comentario;

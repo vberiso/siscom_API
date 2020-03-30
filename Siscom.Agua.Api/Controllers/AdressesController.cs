@@ -151,6 +151,47 @@ namespace Siscom.Agua.Api.Controllers
             return NoContent();
         }
 
+
+        [HttpPut("UpdateCoodinates")]
+        public async Task<IActionResult> PutUpdateCoordinates([FromRoute] int idAgreement, [FromBody] string adressvm)
+        {
+            var Coordenadas = new { id = int.Parse(adressvm.Split(',')[0]) , Lat = adressvm.Split(',')[1], Lon = adressvm.Split(',')[2] };
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {                
+                var add = _context.Adresses.FirstOrDefault(i => i.Id == Coordenadas.id);
+                if (add == null)
+                    return StatusCode((int)TypeError.Code.BadRequest, new { Error = "Los datos no coinciden con la información almacenada, Favor de verificar!" });
+                add.Lat = Coordenadas.Lat;
+                add.Lon = Coordenadas.Lon;
+
+                var Actualizado = _context.Attach(add);
+                Actualizado.Property(x => x.Lat).IsModified = true;
+                Actualizado.Property(x => x.Lon).IsModified = true;
+                await _context.SaveChangesAsync();
+                return Ok("Actualización exitosa");
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(adressvm);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualizar las coordenadas, Favor de verificar!" });
+            }
+
+            return NoContent();
+        }
+
         // POST: api/Adresses
         //[HttpPost]
         //public async Task<IActionResult> PostAdress([FromBody] AdressVM adress)
