@@ -318,7 +318,7 @@ namespace Siscom.Agua.Api.Controllers
                         Type = data["typeOrder"].ToString(),
                         Status = "EOT01",
                         Observation = data["Observation"].ToString(),
-                        Folio = "f",
+                        Folio = data["idsFolios"] == null ? "f" : data["idsFolios"][id].ToString(),
                         Activities = data["Activities"].ToString(),
                         aviso = aviso,
 
