@@ -446,7 +446,7 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     List<object> usuarios = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(Lresult.First()));
                     //usuarios = usuarios.Where(x =>int.Parse( JObject.Parse(x.ToString())["from_date"].ToString() )<=  int.Parse(year) ).ToList();
-                    if ( int.Parse( year) == 2019)
+                    if ( int.Parse( year) >= 2019)
                     {
 
                         SetAccumulatedAyuntamiento(year, mes, new List<List<object>>() { usuarios });
@@ -543,7 +543,7 @@ namespace Siscom.Agua.Api.Controllers
             }
 
 
-            if (AccumulatedAc != null && int.Parse(mes) != 2)
+            if (AccumulatedAc != null && int.Parse(mes) != 1)
             {
                 TotalAc = TotalAc + AccumulatedAc.Accumulated;
               
@@ -553,7 +553,7 @@ namespace Siscom.Agua.Api.Controllers
 
            
            
-            if (AccumulatedAn != null && int.Parse(mes) != 2)
+            if (AccumulatedAn != null && int.Parse(mes) != 1)
             {
                 TotalAn = TotalAn + AccumulatedAn.Accumulated;
              
@@ -562,7 +562,7 @@ namespace Siscom.Agua.Api.Controllers
            
 
           
-            if (AccumulatedAm != null && int.Parse(mes) != 2)
+            if (AccumulatedAm != null && int.Parse(mes) != 1)
             {
                 TotalAm = TotalAm + AccumulatedAm.Accumulated;
                 
