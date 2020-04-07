@@ -274,14 +274,18 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(dataTable);
         }
 
-        [HttpPost("IncomeByConcept")]
-        public async Task<IActionResult> GetIncomeByConcept([FromBody] Siscom.Agua.Api.Model.DataReportes pData)
+        [HttpPost("IncomeByConcept/{sp?}")]
+        public async Task<IActionResult> GetIncomeByConcept([FromBody] Siscom.Agua.Api.Model.DataReportes pData, [FromRoute]string sp="")
         {
             string error = string.Empty;
             var dataTable = new DataTable();
             using (var command = _context.Database.GetDbConnection().CreateCommand())
             {
-                command.CommandText = "[dbo].[sp_IncomeByConcept]";
+                if (string.IsNullOrEmpty(sp))
+                {
+                    sp = "sp_IncomeByConcept";
+                }
+                command.CommandText = $"[dbo].[{sp}]";
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add(new SqlParameter("@fechaInicio", pData.FechaIni));
                 command.Parameters.Add(new SqlParameter("@fechaFin", pData.FechaFin));

@@ -3924,5 +3924,65 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok(transactions);
         }
+
+
+        [HttpGet("FromUserInDayEnlinea/{date}/{idUser}")]
+        public async Task<IActionResult> FromUserInDayEnlinea([FromRoute] string date, string idUser)
+        {
+          
+           
+         
+
+            //Obtengo los pagos correspondientes a las transacciones, que esten activos.
+           
+            var pays = await _context.Payments.Where(p => p.PaymentDate.ToString("yyyy-MM-dd") == date && p.Status == "EP001" && (p.TerminalUserId == -1 || p.TerminalUserId == 0) && p.BranchOffice == "En Linea").ToListAsync();
+
+
+            //Obtengo los pagos cancelados correspondientes a las transacciones, que esten activos.
+
+            pays.AddRange( await _context.Payments.Where(p => p.PaymentDate.ToString("yyyy-MM-dd") == date && p.Status == "EP002" && p.TerminalUserId == -1).ToListAsync());
+
+            List<TransactionMovimientosCaja> lstMovs = pays
+             .Select(t => new TransactionMovimientosCaja()
+             {
+                 IdTransaction = t.Id,
+                 FolioTransaccion = t.TransactionFolio,
+                 Cuenta = t.Account,
+                 Operacion = "Cobro",
+                 FolioImpresion = t.ImpressionSheet,
+                 Hora = t.PaymentDate.ToString("hh:mm tt"),
+                 Total = t.Total
+             })
+             .ToList();
+
+          
+
+            lstMovs.ToList().ForEach(x =>
+            {
+                if (x.Operacion == "Cobro" || x.Operacion.Contains("Cancelaci"))
+                {
+                    x.HaveInvoice = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().HaveTaxReceipt;
+                    x.IdPayment = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().Id;
+                    if (_context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().AgreementId != 0)
+                    {
+                        var idAgreement = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().AgreementId;
+                        var Cliente = _context.Clients.Where(c => c.AgreementId == idAgreement && c.TypeUser == "CLI01").FirstOrDefault();
+                        x.Cliente = Cliente != null ? Cliente.Name + " " + Cliente.LastName + " " + Cliente.SecondLastName : "Contribuyente";
+                    }
+                    else
+                    {
+                        var idOS = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().OrderSaleId;
+                        var OS = _context.OrderSales.Where(o => o.Id == idOS).FirstOrDefault();
+                        var taxUser = _context.TaxUsers.Where(t => t.Id == OS.TaxUserId && t.IsActive == true).FirstOrDefault();
+                        x.Cliente = taxUser != null ? taxUser.Name : "Contribuyente";
+                    }
+                }
+                else
+                    x.HaveInvoice = false;
+            });
+
+            return Ok(lstMovs);
+        }
+
     }
 }
