@@ -713,6 +713,16 @@
              </remarks>
              
         </member>
+        <member name="M:Siscom.Agua.Api.Controllers.DispatchOrderController.SyncData(Siscom.Agua.Api.Model.SyncDataMobileVM)">
+            <summary>
+            Send data from app mobile
+            </summary>
+            <param name="syncData"></param>
+            <returns></returns>
+            <remarks>
+            Date Fields example 2020-04-09 12:39:15
+            </remarks>
+        </member>
         <member name="M:Siscom.Agua.Api.Controllers.FacturacionController.GetNumeroCertificado">
             <summary>
             //Facturacion con Timbox

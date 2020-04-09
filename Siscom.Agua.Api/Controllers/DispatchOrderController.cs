@@ -12,8 +12,10 @@ using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
 using Siscom.Agua.Api.Services.Extension;
+using Siscom.Agua.Api.Services.Providers;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
+using Swashbuckle.AspNetCore.Examples;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -152,11 +154,36 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Send data from app mobile
+        /// </summary>
+        /// <param name="syncData"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Date Fields example 2020-04-09 12:39:15
+        /// </remarks>
         [HttpPost("SyncDataMobile")]
-        public async Task<IActionResult> SyncData([FromBody] SyncDataMobileVM syncData)
+        [SwaggerRequestExample(typeof(SyncDataMobileVM), typeof(SyncDataMobileExampleProvider))]
+        public async Task<IActionResult> SyncData(SyncDataMobileVM syncData)
         {
-            return Ok();
+            if (ModelState.IsValid)
+            {
+                
+                DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
+                OrderWork order = await _context.OrderWorks.FindAsync(dispatch.OrderWorkId);
+                order.Status = syncData.StatusOrderWork;
+                DateTime date;
+                DateTime.TryParse(syncData.DateRealization, out date);
+                order.DateRealization = date;
+                List<Byte[]> vs = new List<byte[]>();
+                syncData.PhotoSyncMobiles.ForEach(x =>
+                {
+                    vs.Add(Convert.FromBase64String(x.Photo));
+                });
+                //Byte[] file = Convert.FromBase64String(syncData.PhotoSyncMobiles.First().Photo);
+                return Ok(vs);
+            }
+            return BadRequest();
         }
 
     }
