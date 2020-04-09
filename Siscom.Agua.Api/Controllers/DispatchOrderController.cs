@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Model;
 using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
@@ -40,6 +41,36 @@ namespace Siscom.Agua.Api.Controllers
         {
             var dispatchOrder = new List<DispatchOrder>();
             dispatchOrder = _context.DispatchOrders.Where(x => x.UserId == userId && x.Status == "DSO01").ToList();
+            try
+            {
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    dispatchOrder.ForEach(x =>
+                    {
+                        var entry = _context.DispatchOrders.Find(x.Id);
+                        x.Status = "DSO02";
+                        x.DateSynchronized = DateTime.Now;
+                        _context.Entry(entry).CurrentValues.SetValues(x);
+                        _context.SaveChanges();
+                    });
+                    scope.Complete();
+                }
+                    
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject("");
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para actualzar el despacho de ordenes" });
+
+            }
+
             return StatusCode(StatusCodes.Status200OK, dispatchOrder);
         }
 
@@ -119,6 +150,13 @@ namespace Siscom.Agua.Api.Controllers
                 helper.AddLog(systemLog);
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar un dispatch_order" });
             }
+        }
+
+
+        [HttpPost("SyncDataMobile")]
+        public async Task<IActionResult> SyncData([FromBody] SyncDataMobileVM syncData)
+        {
+            return Ok();
         }
 
     }

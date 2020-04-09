@@ -657,5 +657,8 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(new List<object>() { Types, Status});
         }
 
+        //Methods from Order Work Mobile
+
+
     }
 }
