@@ -132,7 +132,8 @@ namespace Siscom.Agua.Api.Controllers
                             RolName = listRoles,
                             Divition = user.DivitionId,
                             CanStamp = user.CanStamp,
-                            Serial = user.Serial
+                            Serial = user.Serial,
+                            Email = user.Email
                         });
                     }
                    
@@ -189,5 +190,6 @@ namespace Siscom.Agua.Api.Controllers
                 PasswordHash = x.PasswordHash
             }).ToListAsync());
         }
+               
     }
 }
