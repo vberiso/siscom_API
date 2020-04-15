@@ -11,11 +11,12 @@ namespace Siscom.Agua.DAL.Models
         [Column("id_photos_orderWork"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
-        [Column("OrderWorkId")]
-        public int OrderWorkId { get; set; }
-
+   
         [Column("path_file")]
         public string PathFile { get; set; }
+
+        [Column("type")]
+        public string Type { get; set; }
 
         [Column("date_photo")]
         public DateTime DatePhoto { get; set; }
@@ -32,6 +33,11 @@ namespace Siscom.Agua.DAL.Models
         [Column("user_name")]
         public string UserName { get; set; }
 
+        [Column("blob_photo")]
+        public byte[] BlobPhoto { get; set; }
+
+        [Column("OrderWorkId")]
+        public int OrderWorkId { get; set; }
         public OrderWork OrderWork { get; set; }
 
     }

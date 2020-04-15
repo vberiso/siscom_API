@@ -190,6 +190,18 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(Product);
         }
 
+        [HttpGet("ReasonCatalog")]
+        public async Task<IActionResult> GetReasonCatalog()
+        {
+            return Ok( await _context.ReasonCatalog.Select(x => new
+            {
+                Id = x.Id,
+                Description = x.Description,
+                IsActive = x.IsActive,
+                Type = x.Type
+            }).ToListAsync());
+        }
+
         [HttpGet("Campaign")]
         public async Task<IActionResult> ExistDiscount()
         {
