@@ -75,10 +75,7 @@ namespace Siscom.Agua.DAL.Models
 
         public ICollection<OrderWorkReasonCatalog> OrderWorkReasonCatalogs { get; set; }
         public ICollection<PhotosOrderWork> PhotosOrderWork { get; set; }
-
-
-
-
-
+        public ICollection<LocationOrderWork> LocationOrderWorks { get; set; }
+        
     }
 }

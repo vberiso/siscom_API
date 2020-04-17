@@ -216,7 +216,9 @@ namespace Siscom.Agua.DAL
         public DbSet<OrderParameters> OrderParameters { get; set; }
 
         public DbSet<ReasonCatalog> ReasonCatalog { get; set; }
+        public DbSet<LocationOrderWork> LocationOrderWorks { get; set; }
         public DbSet<OrderWorkReasonCatalog> OrderWorkReasonCatalog { get; set; }
+        public DbSet<LocationOfAttentionOrderWork> LocationOfAttentionOrderWorks { get; set; }
         public DbSet<PhotosOrderWork> PhotosOrderWork { get; set; }
         public DbSet<FolioAccountStatement> FolioAccountStatements { get; set; }
         public DbSet<DispatchOrder> DispatchOrders { get; set; }
@@ -1043,6 +1045,7 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region PhotosOrderWork
+            
             builder.Entity<PhotosOrderWork>()
                .HasOne<OrderWork>(a => a.OrderWork)
                .WithMany(s => s.PhotosOrderWork)
@@ -1067,14 +1070,29 @@ namespace Siscom.Agua.DAL
             #region OrderWorkReasonCatalog
             builder.Entity<OrderWorkReasonCatalog>().HasKey(ORC => new { ORC.OrderWorkId, ORC.ReasonCatalogId });
 
-
             builder.Entity<OrderWorkReasonCatalog>()
                 .HasOne(bc => bc.ReasonCatalog)
                 .WithMany(b => b.OrderWorkReasonCatalogs)
                 .HasForeignKey(bc => bc.ReasonCatalogId);
+
             builder.Entity<OrderWorkReasonCatalog>()
                 .HasOne(bc => bc.OrderWork)
                 .WithMany(c => c.OrderWorkReasonCatalogs)
+                .HasForeignKey(bc => bc.OrderWorkId);
+            #endregion
+
+            #region LocationOrderWork
+            
+            builder.Entity<LocationOrderWork>().HasKey(ORC => new { ORC.OrderWorkId, ORC.LocationOfAttentionOrderWorkId });
+            
+            builder.Entity<LocationOrderWork>()
+               .HasOne(bc => bc.LocationOfAttentionOrderWork)
+               .WithMany(b => b.LocationOrderWorks)
+               .HasForeignKey(bc => bc.LocationOfAttentionOrderWorkId);
+
+            builder.Entity<LocationOrderWork>()
+                .HasOne(bc => bc.OrderWork)
+                .WithMany(c => c.LocationOrderWorks)
                 .HasForeignKey(bc => bc.OrderWorkId);
             #endregion
 

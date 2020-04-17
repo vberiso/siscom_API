@@ -220,7 +220,7 @@ namespace Siscom.Agua.Api.Controllers
                             OrderWorkStatusDate = valid,
                             User = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
                         });
-                        ////_context.SaveChanges();
+                        _context.SaveChanges();
                     }
 
                 }
@@ -246,7 +246,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             System.IO.Directory.CreateDirectory(uploadFilesPath); //Create directory if it doesn't exist
                         }
-                        Guid guid = new Guid();
+                        Guid guid = Guid.NewGuid();
                         string imageName = guid.ToString() + ".jpg";
                         string imgPath = Path.Combine(uploadFilesPath, imageName);
                         byte[] imageBytes = Convert.FromBase64String(item.Photo);
@@ -267,8 +267,8 @@ namespace Siscom.Agua.Api.Controllers
                                 User = syncData.UserIdAPI,
                                 UserName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
                             };
-                            ////_context.PhotosOrderWork.Add(photosOrder);
-                            ////_context.SaveChanges();
+                            _context.PhotosOrderWork.Add(photosOrder);
+                            _context.SaveChanges();
                         }
                         catch (Exception e)
                         {
@@ -289,41 +289,63 @@ namespace Siscom.Agua.Api.Controllers
                 }
 
                 //Update Order
-                ////_context.Entry(order).State = EntityState.Modified;
-                ////_context.SaveChanges();
+                _context.Entry(order).State = EntityState.Modified;
+                _context.SaveChanges();
                 //Update DispatchOrder
-                ////_context.Entry(dispatch).State = EntityState.Modified;
-                ////_context.SaveChanges();
+                _context.Entry(dispatch).State = EntityState.Modified;
+                _context.SaveChanges();
 
-                
-
-                if(order.Status == "EOT03")
+                foreach (var item in syncData.LocationSyncMobiles)
                 {
-                    //var parameters = new SqlParameter[]
-                    //{
-                    //    new SqlParameter() { ParameterName = "@id", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Input, Value = order.AgrementId },
-                    //    new SqlParameter() { ParameterName = "@isAgreement", SqlDbType = System.Data.SqlDbType.Bit, Direction = System.Data.ParameterDirection.Input, Value = 1 },
-                    //    new SqlParameter() { ParameterName = "@idProduct", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Input, Value = syncData.IdReconectionCost },
-                    //    new SqlParameter() { ParameterName = "@Observations", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = syncData.OpeningCommentary + ", " + syncData.FinalCommentary, Size = 800 },
-                    //    new SqlParameter() { ParameterName = "@UserId", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = syncData.UserIdAPI, Size = 450 },
-                    //    new SqlParameter() { ParameterName = "@UserName", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName), Size = 256 },
-                    //    new SqlParameter() { ParameterName = "@TypeOrder", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = order.Type, Size = 5 },
-                    //    new SqlParameter() { ParameterName = "@error", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Output, Size = 200 },
-                    //};
+                    LocationOfAttentionOrderWork location = new LocationOfAttentionOrderWork
+                    {
+                        Latitude = item.Latitud,
+                        Longitude = item.Longitud,
+                        Type = item.Type == "INICIO" ? "LOW01" : "LOW02"
+                    };
 
-                    //using (var command = _context.Database.GetDbConnection().CreateCommand())
-                    //{
-                    //    command.CommandType = System.Data.CommandType.StoredProcedure;
-                    //    command.CommandText = "[dbo].[OrderWork_Update]";
-                    //    command.Parameters.AddRange(parameters);
-                    //    await _context.Database.OpenConnectionAsync();
-                    //    using (var result = await command.ExecuteReaderAsync())
-                    //    {
-                    //        errorSP = command.Parameters["@error"].Value.ToString();
-                    //    }
-                    //}
+                    _context.LocationOfAttentionOrderWorks.Add(location);
+
+                    _context.LocationOrderWorks.Add(new LocationOrderWork
+                    {
+                        OrderWork = order,
+                        LocationOfAttentionOrderWork = location
+                    });
+
+                    _context.SaveChanges();
                 }
-                return Ok();
+
+
+                if (order.Status == "EOT03")
+                {
+                    var parameters = new SqlParameter[]
+                    {
+                        new SqlParameter() { ParameterName = "@id", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Input, Value = order.AgrementId },
+                        new SqlParameter() { ParameterName = "@isAgreement", SqlDbType = System.Data.SqlDbType.Bit, Direction = System.Data.ParameterDirection.Input, Value = 1 },
+                        new SqlParameter() { ParameterName = "@idProduct", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Input, Value = syncData.IdReconectionCost },
+                        new SqlParameter() { ParameterName = "@Observations", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = syncData.OpeningCommentary + ", " + syncData.FinalCommentary, Size = 800 },
+                        new SqlParameter() { ParameterName = "@UserId", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = syncData.UserIdAPI, Size = 450 },
+                        new SqlParameter() { ParameterName = "@UserName", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName), Size = 256 },
+                        new SqlParameter() { ParameterName = "@TypeOrder", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Input, Value = order.Type, Size = 5 },
+                        new SqlParameter() { ParameterName = "@error", SqlDbType = System.Data.SqlDbType.VarChar, Direction = System.Data.ParameterDirection.Output, Size = 200 },
+                    };
+
+                    using (var command = _context.Database.GetDbConnection().CreateCommand())
+                    {
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        command.CommandText = "[dbo].[OrderWork_Update]";
+                        command.Parameters.AddRange(parameters);
+                        await _context.Database.OpenConnectionAsync();
+                        using (var result = await command.ExecuteReaderAsync())
+                        {
+                            errorSP = command.Parameters["@error"].Value.ToString();
+                        }
+                    }
+                }
+                if (string.IsNullOrEmpty(errorSP))
+                    return Ok();
+                else
+                    return Conflict(new { error = "Error al ejecutar la afectación al cobro [sp]" });
             }
             return BadRequest();
         }
