@@ -65,6 +65,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("DebtId")]
         public int? DebtId { get; set; }
 
+        [Column("observation_mobile")]
+        public string ObservationMobile { get; set; }
 
         //public Debt Debt { get; set; }
         public TechnicalStaff TechnicalStaff { get; set; }

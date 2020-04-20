@@ -168,7 +168,7 @@ namespace Siscom.Agua.Api.Controllers
                         .FirstOrDefault();
 
                         ReconocetionCostsVM vM = new ReconocetionCostsVM();
-                        vM.IdReconection = tariff.Id;
+                        vM.IdReconection = tariff.ProductId;
                         vM.Amount = tariff.Amount;
                         vM.HaveTax = tariff.HaveTax;
                         vM.ProductName = tariff.Product.Name;

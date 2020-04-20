@@ -289,6 +289,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
 
                 //Update Order
+                order.ObservationMobile = string.Format("{0} @ {1}", syncData.OpeningCommentary, syncData.FinalCommentary); 
                 _context.Entry(order).State = EntityState.Modified;
                 _context.SaveChanges();
                 //Update DispatchOrder

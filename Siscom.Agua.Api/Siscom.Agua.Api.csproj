@@ -39,11 +39,11 @@
     <PackageReference Include="BingMapsRESTToolkit" Version="1.1.4" />
     <PackageReference Include="Facturama" Version="1.0.0.3" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Cors" Version="5.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.13" />
-    <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="2.1.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.11">
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.17" />
+    <PackageReference Include="microsoft.entityframeworkcore.analyzers" Version="2.1.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

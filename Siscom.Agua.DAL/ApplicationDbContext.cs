@@ -1036,6 +1036,14 @@ namespace Siscom.Agua.DAL
 
             #endregion
 
+            #region OrderWork
+
+            builder.Entity<OrderWork>()
+                .Property(o => o.ObservationMobile)
+                .HasDefaultValue("");
+
+            #endregion
+
             #region OrderWorkStatus
             builder.Entity<OrderWorkStatus>()
                .HasOne<OrderWork>(a => a.OrderWork)
