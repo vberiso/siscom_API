@@ -36,6 +36,9 @@ namespace Siscom.Agua.DAL.Models
         [Column("blob_photo")]
         public byte[] BlobPhoto { get; set; }
 
+        [Column("weight"), StringLength(10)]
+        public string Weight { get; set; }
+
         [Column("OrderWorkId")]
         public int OrderWorkId { get; set; }
         public OrderWork OrderWork { get; set; }

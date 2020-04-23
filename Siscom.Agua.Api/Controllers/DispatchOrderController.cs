@@ -188,6 +188,14 @@ namespace Siscom.Agua.Api.Controllers
                         break;
                     case "NO EJECUTADA":
                         order.Status = "EOT04";
+                        var coment = await _context.ReasonCatalog.Where(x => x.Id == syncData.idReasonCatalog).FirstOrDefaultAsync();
+                        order.ObservationMobile = coment.Description;
+                        await _context.OrderWorkReasonCatalog.AddAsync(new OrderWorkReasonCatalog
+                        {
+                            OrderWork = order,
+                            ReasonCatalog = coment
+                        });
+                        await _context.SaveChangesAsync();
                         break;
 
                 }
@@ -254,6 +262,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             await System.IO.File.WriteAllBytesAsync(imgPath, imageBytes);
                             fi = new FileInfo(imgPath);
+                            var fileSize = FileConverterSize.SizeSuffix(fi.Length);
                             PhotosOrderWork photosOrder = new PhotosOrderWork
                             {
                                 BlobPhoto = imageBytes,
@@ -264,7 +273,8 @@ namespace Siscom.Agua.Api.Controllers
                                 PathFile = imgPath,
                                 Size = fi.Length,
                                 Type = "OTF01",
-                                User = syncData.UserIdAPI,
+                                Weight = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1],
+                            User = syncData.UserIdAPI,
                                 UserName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
                             };
                             _context.PhotosOrderWork.Add(photosOrder);
