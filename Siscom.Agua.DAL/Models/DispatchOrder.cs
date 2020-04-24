@@ -33,5 +33,9 @@ namespace Siscom.Agua.DAL.Models
         public DateTime DateAttended { get; set; }
         [Column("date_synchronized")]
         public DateTime DateSynchronized { get; set; }
+        [Column("latitude"), StringLength(25)]
+        public string Latitude { get; set; }
+        [Column("longitude"), StringLength(25)]
+        public string Longitude { get; set; }
     }
 }
