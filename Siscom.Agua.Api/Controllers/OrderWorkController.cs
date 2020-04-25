@@ -120,6 +120,48 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+
+        [HttpPost("OrderWorksList/{withOrder}")]
+        public async Task<IActionResult> PostOrderWorksList([FromBody] List<int> pIds, [FromRoute]bool withOrder = false)
+        {
+            try
+            {
+                InfoOrderVM info = new InfoOrderVM();
+                info.lstOrderWork = await _context.OrderWorks.Where(x => pIds.Contains(x.Id))
+                    .Include(x => x.OrderWorkReasonCatalogs)
+                    .ThenInclude(x => x.ReasonCatalog)
+                    .Include(x => x.PhotosOrderWork)
+                    .ToListAsync();
+
+                List<int> idsAgr = info.lstOrderWork.Select(o => o.AgrementId).ToList();
+                info.lstAgreements = await _context.Agreements.Where(a => idsAgr.Contains(a.Id))
+                    .Include(x => x.TypeIntake)
+                    .Include(x => x.TypeConsume)
+                    .Include(x => x.OrderWork)
+                        .ThenInclude(x => x.TechnicalStaff)
+                    .Include(x => x.Clients)
+                    .Include(x => x.Addresses)
+                        .ThenInclude(x => x.Suburbs)
+                            .ThenInclude(x => x.Towns)
+                                .ThenInclude(x => x.States)
+                                    .ThenInclude(x => x.Countries)
+                    .ToListAsync();
+
+                if (withOrder)
+                {
+                    return Ok(info);
+                }
+                return Ok(info.lstAgreements);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+
+
+
+
         [HttpPost("OrderWorks/GetByIds")]
         public async Task<IActionResult> GetListOrderWorks([FromBody] List<int> list)
         {
@@ -401,6 +443,83 @@ namespace Siscom.Agua.Api.Controllers
                     _context.SaveChanges();
                 }
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Orden actualizada correctamente", id = OrderWork.Id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message });
+            }
+        }
+
+
+        [HttpPost("OrderWorks/updateMultiple/{user?}")]
+        public async Task<IActionResult> UpdateMultiple([FromRoute] string user, [FromBody] Object data)
+        {
+            try
+            {                
+                var ValObj = JObject.Parse(data.ToString());                
+                List<DispatchOrder> ids = JsonConvert.DeserializeObject<List<DispatchOrder>>(ValObj["ids"].ToString());
+                string idUser = JsonConvert.DeserializeObject<string>(ValObj["idUser"].ToString());
+                string strFecha = ValObj["date"].ToString();
+                DateTime Fecha = new DateTime(int.Parse(strFecha.Split(" ")[0].Split("/")[2]), int.Parse(strFecha.Split(" ")[0].Split("/")[1]), int.Parse(strFecha.Split(" ")[0].Split("/")[0]));
+
+                TechnicalStaff tmpTechnicalStaff = await _context.TechnicalStaffs.FirstOrDefaultAsync(x => x.Id == int.Parse(idUser));
+                
+                var OWs = await _context.OrderWorks.Where(x => ids.Select(d => d.OrderWorkId).Contains(x.Id) && x.Status != "EOT03").ToListAsync();
+                
+                foreach (var item in OWs)
+                {
+                    //Se genera el registro de status para cada orderwork que no sea EOT03 = Ejecutada;
+                    var Status = new OrderWorkStatus()
+                    {
+                        IdStatus = "EOT02",
+                        OrderWorkId = item.Id,
+                        User = user,
+                        OrderWorkStatusDate = DateTime.Now
+                    };
+                    _context.OrderWorkStatus.Add(Status);
+
+                    ////Esto no lo entendi para que es
+                    //int id_agreement = 0;
+                    //if (OrderWork.Agreement != null)
+                    //{
+                    //    id_agreement = OrderWork.Agreement.Id;
+                    //    OrderWork.Agreement = null;
+                    //}
+
+                    //Se actualiza el Order work;
+                    item.Status = "EOT02";
+                    item.TechnicalStaffId = int.Parse(idUser);
+                    item.DateStimated = Fecha;
+                    _context.OrderWorks.Update(item);
+
+                    //Se actualiza el state service del agrement
+                    if ((item.Type == "OT002" || item.Type == "OT003") && item.Status == "EOT03" && item.AgrementId != 0)
+                    {
+                        var agreement = _context.Agreements.Where(x => x.Id == item.AgrementId).First();
+                        agreement.TypeStateServiceId = item.Type == "OT002" ? 3 : 1;
+
+                        _context.Agreements.Update(agreement);                        
+                    }
+                    
+                    //Creacion del Dispatch Order
+                    if (item.Status.Contains("EOT02") && tmpTechnicalStaff != null)
+                    {
+                        DispatchOrder dispatchOrder = new DispatchOrder()
+                        {
+                            Status = "DSO01",
+                            TechnicalStaffId = item.TechnicalStaffId != null ? (int)item.TechnicalStaffId : 0,
+                            OrderWorkId = item.Id,
+                            UserId = tmpTechnicalStaff.UserId,
+                            DateAsign = DateTime.Now,
+                            Longitude = ids.FirstOrDefault(x => x.OrderWorkId == item.Id).Longitude,
+                            Latitude = ids.FirstOrDefault(x => x.OrderWorkId == item.Id).Latitude
+                        };
+                        _context.DispatchOrders.Add(dispatchOrder);                        
+                    }                    
+                }
+                _context.SaveChanges();
+                
+                return StatusCode(StatusCodes.Status200OK, new { msg = "Ordenes actualizadas correctamente"});
             }
             catch (Exception ex)
             {

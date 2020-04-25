@@ -105,6 +105,11 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     else
                     {
+                        dispatchOrder1.Longitude = dispatchOrder.Longitude;
+                        dispatchOrder1.Latitude = dispatchOrder.Latitude;
+                        _context.DispatchOrders.Update(dispatchOrder1);
+                        _context.SaveChanges();
+                        scope.Complete();
                         return StatusCode(StatusCodes.Status200OK, new { msg = "Ya existe un despacho ligado a esta order work" });
                     }                    
                 }
