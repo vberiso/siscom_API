@@ -14,7 +14,7 @@ namespace Siscom.Agua.DAL.Models
             OrderWorkReasonCatalogs = new HashSet<OrderWorkReasonCatalog>();
             PhotosOrderWork = new HashSet<PhotosOrderWork>();
             OrderWorkStatus = new HashSet<OrderWorkStatus>();
-           
+            OrderWorkDetails = new HashSet<OrderWorkDetail>();
         }
 
         [Key]
@@ -70,14 +70,12 @@ namespace Siscom.Agua.DAL.Models
 
         //public Debt Debt { get; set; }
         public TechnicalStaff TechnicalStaff { get; set; }
-
         public Agreement Agreement { get; set; }
-
         public ICollection<OrderWorkStatus> OrderWorkStatus { get; set; }
-
         public ICollection<OrderWorkReasonCatalog> OrderWorkReasonCatalogs { get; set; }
         public ICollection<PhotosOrderWork> PhotosOrderWork { get; set; }
         public ICollection<LocationOrderWork> LocationOrderWorks { get; set; }
+        public ICollection<OrderWorkDetail> OrderWorkDetails { get; set; }
         
     }
 }

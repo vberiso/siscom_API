@@ -183,6 +183,7 @@ namespace Siscom.Agua.Api.Controllers
                 bool validDateOrderWork = true;
                 bool validDatePhoto = true;
                 string exceptionMessage = string.Empty;
+                int idFile = 0;
                 var uploadFilesPath = Path.Combine(appSettings.FilePath, "FotosOT", DateTime.Now.ToString("yyyy-MM-dd"), syncData.UserIdAPI);
                 DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
                 OrderWork order = await _context.OrderWorks.FindAsync(dispatch.OrderWorkId);
@@ -277,13 +278,18 @@ namespace Siscom.Agua.Api.Controllers
                                 OrderWorkId = order.Id,
                                 PathFile = imgPath,
                                 Size = fi.Length,
-                                Type = "OTF01",
+                                Type = item.Type == "Inicio" ? "OTF01" : item.Type == "Final" ? "OTF02" : "OTF03",
                                 Weight = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1],
                             User = syncData.UserIdAPI,
                                 UserName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
                             };
                             _context.PhotosOrderWork.Add(photosOrder);
                             _context.SaveChanges();
+
+                            if(photosOrder.Type == "OTF03")
+                            {
+                                idFile = photosOrder.Id;
+                            }
                         }
                         catch (Exception e)
                         {
@@ -331,8 +337,22 @@ namespace Siscom.Agua.Api.Controllers
                     _context.SaveChanges();
                 }
 
-
-                if (order.Status == "EOT03")
+                if(order.Status == "EOT03" && order.Type == "OT001")
+                {
+                    syncData.InspectionSyncMobiles.ForEach(x => 
+                    {
+                        _context.OrderWorkDetails.Add( new OrderWorkDetail
+                        {
+                            Name = "Inspeccion",
+                            Type = "OTD04",
+                            Value = string.Format("{0}/{1}", x.Parent, x.Data),
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+                    });
+                    _context.SaveChanges();
+                }
+                else if (order.Status == "EOT03" && order.Type == "OT002")
                 {
                     var parameters = new SqlParameter[]
                     {
@@ -357,11 +377,122 @@ namespace Siscom.Agua.Api.Controllers
                             errorSP = command.Parameters["@error"].Value.ToString();
                         }
                     }
+                    if (!string.IsNullOrEmpty(errorSP))
+                        return Conflict(new { error = "Error al ejecutar la afectación al cobro [sp]" });
                 }
-                if (string.IsNullOrEmpty(errorSP))
-                    return Ok();
-                else
-                    return Conflict(new { error = "Error al ejecutar la afectación al cobro [sp]" });
+                else if (order.Status == "EOT03" && order.Type == "OT003")
+                {
+                    
+                    _context.OrderWorkDetails.Add(new OrderWorkDetail
+                    {
+                        Name = "Reconexion",
+                        Type = "OTD05",
+                        Value = _context.Products.Find(syncData.IdReconectionCost).Name,
+                        OrderWork = order,
+                        OrderWorkId = order.Id
+                    });
+                    _context.SaveChanges();
+                }
+                else if (order.Status == "EOT03" && order.Type == "OT004")
+                {
+                    syncData.ActivitySyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Actividad",
+                            Type = "OTD02",
+                            Value = x.ActivitiName,
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+                    });
+                    _context.SaveChanges();
+                }
+                else if (order.Status == "EOT03" && order.Type == "OT005" || order.Type == "OT006")
+                {
+                    _context.OrderWorkDetails.Add(new OrderWorkDetail
+                    {
+                        Name = "Firma",
+                        Type = "OTD01",
+                        Value = idFile.ToString(),
+                        OrderWork = order,
+                        OrderWorkId = order.Id
+                    });
+                    _context.SaveChanges();
+                }
+                else if (order.Status == "EOT03" && order.Type == "OT007")
+                {
+                    _context.OrderWorkDetails.Add(new OrderWorkDetail
+                    {
+                        Name = "Firma",
+                        Type = "OTD01",
+                        Value = idFile.ToString(),
+                        OrderWork = order,
+                        OrderWorkId = order.Id
+                    });
+                    _context.OrderWorkDetails.Add(new OrderWorkDetail
+                    {
+                        Name = "Fuga",
+                        Type = "OTD06",
+                        Value = syncData.Description,
+                        OrderWork = order,
+                        OrderWorkId = order.Id
+                    });
+                    _context.SaveChanges();
+                }
+                else if (order.Status == "EOT03" && order.Type == "OT008")
+                {
+                    if(idFile > 0)
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Firma",
+                            Type = "OTD01",
+                            Value = idFile.ToString(),
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+                        _context.SaveChanges();
+                    }
+                }
+                else if (order.Status == "EOT03" && order.Type == "OT009")
+                {
+                    syncData.ActivitySyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Actividad",
+                            Type = "OTD02",
+                            Value = x.ActivitiName,
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+                    });
+                    syncData.MaterialSyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Material",
+                            Type = "OTD03",
+                            Value = string.Format("{0} {1}",x.Quantity, x.Description),
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+                    });
+                    _context.SaveChanges();
+                }
+                else if (order.Status == "EOT03" && order.Type == "OT0011")
+                {
+                    _context.OrderWorkDetails.Add(new OrderWorkDetail
+                    {
+                        Name = "Valvula",
+                        Type = "OTD07",
+                        Value = syncData.ValveCondition,
+                        OrderWork = order,
+                        OrderWorkId = order.Id
+                    });
+                    _context.SaveChanges();
+                }
             }
             return BadRequest();
         }

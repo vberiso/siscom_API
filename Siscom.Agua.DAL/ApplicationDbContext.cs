@@ -214,7 +214,7 @@ namespace Siscom.Agua.DAL
         public DbSet<OrderWork> OrderWorks { get; set; }
         public DbSet<OrderWorkStatus> OrderWorkStatus { get; set; }
         public DbSet<OrderParameters> OrderParameters { get; set; }
-
+        public DbSet<OrderWorkDetail> OrderWorkDetails { get; set; }
         public DbSet<ReasonCatalog> ReasonCatalog { get; set; }
         public DbSet<LocationOrderWork> LocationOrderWorks { get; set; }
         public DbSet<OrderWorkReasonCatalog> OrderWorkReasonCatalog { get; set; }
@@ -724,7 +724,7 @@ namespace Siscom.Agua.DAL
                .Property(p => p.OldValue)
                .HasColumnType("decimal(18, 2)");
 
-            #endregion           
+            #endregion
 
             #region DebtDiscount
             builder.Entity<DebtDiscount>()
@@ -1041,6 +1041,15 @@ namespace Siscom.Agua.DAL
             builder.Entity<OrderWork>()
                 .Property(o => o.ObservationMobile)
                 .HasDefaultValue("");
+
+            #endregion
+
+            #region OrderWorkDetail
+
+            builder.Entity<OrderWorkDetail>()
+                .HasOne<OrderWork>(o => o.OrderWork)
+                .WithMany(d => d.OrderWorkDetails)
+                .HasForeignKey(k => k.OrderWorkId);
 
             #endregion
 
