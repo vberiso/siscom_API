@@ -351,6 +351,7 @@ namespace Siscom.Agua.Api.Controllers
                         });
                     });
                     _context.SaveChanges();
+                    return Ok();
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT002")
                 {
@@ -379,6 +380,8 @@ namespace Siscom.Agua.Api.Controllers
                     }
                     if (!string.IsNullOrEmpty(errorSP))
                         return Conflict(new { error = "Error al ejecutar la afectación al cobro [sp]" });
+                    else
+                        return Ok();
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT003")
                 {
@@ -392,6 +395,7 @@ namespace Siscom.Agua.Api.Controllers
                         OrderWorkId = order.Id
                     });
                     _context.SaveChanges();
+                    return Ok();
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT004")
                 {
@@ -407,6 +411,7 @@ namespace Siscom.Agua.Api.Controllers
                         });
                     });
                     _context.SaveChanges();
+                    return Ok();
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT005" || order.Type == "OT006")
                 {
@@ -419,6 +424,7 @@ namespace Siscom.Agua.Api.Controllers
                         OrderWorkId = order.Id
                     });
                     _context.SaveChanges();
+                    return Ok();
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT007")
                 {
@@ -439,6 +445,7 @@ namespace Siscom.Agua.Api.Controllers
                         OrderWorkId = order.Id
                     });
                     _context.SaveChanges();
+                    return Ok();
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT008")
                 {
@@ -453,6 +460,7 @@ namespace Siscom.Agua.Api.Controllers
                             OrderWorkId = order.Id
                         });
                         _context.SaveChanges();
+                        return Ok();
                     }
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT009")
@@ -480,6 +488,7 @@ namespace Siscom.Agua.Api.Controllers
                         });
                     });
                     _context.SaveChanges();
+                    return Ok();
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT0011")
                 {
@@ -492,6 +501,7 @@ namespace Siscom.Agua.Api.Controllers
                         OrderWorkId = order.Id
                     });
                     _context.SaveChanges();
+                    return Ok();
                 }
             }
             return BadRequest();
