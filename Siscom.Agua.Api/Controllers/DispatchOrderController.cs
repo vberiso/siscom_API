@@ -345,7 +345,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             Name = "Inspeccion",
                             Type = "OTD04",
-                            Value = string.Format("{0}/{1}", x.Parent, x.Data),
+                            Value = string.Format("{0}@{1}", x.Parent, x.Data),
                             OrderWork = order,
                             OrderWorkId = order.Id
                         });
@@ -482,7 +482,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             Name = "Material",
                             Type = "OTD03",
-                            Value = string.Format("{0} {1}",x.Quantity, x.Description),
+                            Value = string.Format("{0}@{1}",x.Quantity, x.Description),
                             OrderWork = order,
                             OrderWorkId = order.Id
                         });
