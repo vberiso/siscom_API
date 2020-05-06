@@ -44,5 +44,22 @@ namespace Siscom.Agua.Api.Controllers
             return new ObjectResult(notifications);
         }
 
+        [HttpPost("fromFolios")]
+        public async Task<IActionResult> GetFromFolios([FromBody] List<string> folios)
+        {
+            var notifications = await _context.Notifications
+                                              .Include(x => x.NotificationDetails)
+                                              .Where(i => folios.Contains(i.Folio))
+                                              .OrderByDescending(o => o.UntilDate.Year)
+                                              .ToListAsync();
+
+            if (notifications.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                  new { Error = "No tiene notificaciones" });
+
+            }
+            return Ok(notifications);
+        }
     }
 }

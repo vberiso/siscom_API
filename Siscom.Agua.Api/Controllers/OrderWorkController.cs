@@ -91,6 +91,8 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.OrderWorkReasonCatalogs)
                     .ThenInclude(x => x.ReasonCatalog)
                     .Include(x => x.PhotosOrderWork)
+                    .Include(x => x.OrderWorkDetails)
+                    .Include(x => x.LocationOrderWorks)
                     .First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
 
@@ -107,8 +109,18 @@ namespace Siscom.Agua.Api.Controllers
                                 .ThenInclude(x => x.States)
                                     .ThenInclude(x => x.Countries)
                     .First();
-                if (withOrder)
+
+
+                if(OrderWork.LocationOrderWorks != null && OrderWork.LocationOrderWorks.Count > 0)
                 {
+                    foreach (var item in OrderWork.LocationOrderWorks)
+                    {
+                        item.LocationOfAttentionOrderWork = _context.LocationOfAttentionOrderWorks.FirstOrDefault(l => l.Id == item.LocationOfAttentionOrderWorkId);
+                    } 
+                }
+  
+                if (withOrder)
+                {                    
                     return Ok(new List<object>() { agreement, OrderWork });
                 }
                 return Ok(agreement);
@@ -464,7 +476,9 @@ namespace Siscom.Agua.Api.Controllers
 
                 TechnicalStaff tmpTechnicalStaff = await _context.TechnicalStaffs.FirstOrDefaultAsync(x => x.Id == int.Parse(idUser));
                 
-                var OWs = await _context.OrderWorks.Where(x => ids.Select(d => d.OrderWorkId).Contains(x.Id) && x.Status != "EOT03").ToListAsync();
+                var OWs = await _context.OrderWorks
+                    .Include(ow => ow.Agreement)
+                    .Where(x => ids.Select(d => d.OrderWorkId).Contains(x.Id) && x.Status != "EOT03").ToListAsync();
                 
                 foreach (var item in OWs)
                 {
@@ -519,7 +533,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 _context.SaveChanges();
                 
-                return StatusCode(StatusCodes.Status200OK, new { msg = "Ordenes actualizadas correctamente"});
+                return Ok(OWs);
             }
             catch (Exception ex)
             {
