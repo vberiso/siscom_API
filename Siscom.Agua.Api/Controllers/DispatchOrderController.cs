@@ -490,7 +490,7 @@ namespace Siscom.Agua.Api.Controllers
                     _context.SaveChanges();
                     return Ok();
                 }
-                else if (order.Status == "EOT03" && order.Type == "OT0011")
+                else if (order.Status == "EOT03" && order.Type == "OT011")
                 {
                     _context.OrderWorkDetails.Add(new OrderWorkDetail
                     {
