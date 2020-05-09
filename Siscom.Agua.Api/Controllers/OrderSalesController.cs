@@ -240,6 +240,19 @@ namespace Siscom.Agua.Api.Controllers
                         //var list = _context.BreachLists.Where(bl => IdsBreachList.Contains(bl.Id)).ToList();
 
                         var dias = (DateTime.Today - B.DateBreach).TotalDays;
+                        var codeConcepts = _context.Products.Where(x => x.Parent == 3189).Select(x => x.Id.ToString()).ToList();
+                        var newDias = dias + 1;
+                        B.DaysCorralon = newDias.ToString();
+                        var corralon = OS.OrderSaleDetails.Where(x => codeConcepts.Contains(x.CodeConcept)).FirstOrDefault();
+                        if (corralon != null) {
+                            var arrayDes = corralon.NameConcept.Split("-");
+                            corralon.Description = arrayDes[0] + " - " + arrayDes[1] + " - " + arrayDes[2] + " - " + newDias + "Días";
+                            corralon.NameConcept = arrayDes[0] + " - " + arrayDes[1] + " - " + arrayDes[2] + " - " + newDias + "Días";
+                            // OS.Amount = OS.Amount - corralon.Amount;
+                            corralon.Amount = decimal.Parse(newDias.ToString()) * corralon.UnitPrice;
+                            corralon.Quantity = decimal.Parse(newDias.ToString());
+                            OS.Amount = OS.Amount + ((decimal.Parse(newDias.ToString()) - corralon.Quantity) * corralon.Amount);
+                        }
                         foreach (var item in lstCamp)
                         {
                             int DiasVigencia = int.Parse(item.Name.Split("_")[1]);
@@ -251,7 +264,7 @@ namespace Siscom.Agua.Api.Controllers
                                     foreach (var OSD in OS.OrderSaleDetails.ToList())
                                     {
                                         var BD = B.BreachDetails.Where(bd => bd.BreachList.Description == OSD.NameConcept).FirstOrDefault();
-                                        if (BD.BreachList.HaveBonification)
+                                        if (BD != null && BD.BreachList.HaveBonification)
                                         {
                                             OrderSaleDiscount OSDis = new OrderSaleDiscount();
                                             OSDis.CodeConcept = OSD.CodeConcept;
@@ -296,7 +309,7 @@ namespace Siscom.Agua.Api.Controllers
                                     foreach (var OSD in OS.OrderSaleDetails.ToList())
                                     {
                                         var BD = B.BreachDetails.Where(bd => bd.BreachList.Description == OSD.NameConcept).FirstOrDefault();
-                                        if (BD.BreachList.HaveBonification)
+                                        if (BD != null && BD.BreachList.HaveBonification)
                                         {
                                             OrderSaleDiscount tmpOSDis = OS.OrderSaleDiscounts.FirstOrDefault(o => o.OrderSaleDetailId == OSD.Id);
                                             if(tmpOSDis != null)    //Ya existe un registo de descuento para este concepto

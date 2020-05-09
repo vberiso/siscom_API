@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200430185337_AlterTAbleBreachAddFieldsCodeConceptArrastreAndDaysCorralon")]
+    partial class AlterTAbleBreachAddFieldsCodeConceptArrastreAndDaysCorralon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1000,9 +1002,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<string>("CodeConceptArrastre")
                         .HasColumnName("code_concept_arrastre");
-
-                    b.Property<string>("CodeConceptDaysCorralon")
-                        .HasColumnName("code_concept_days_corralon");
 
                     b.Property<string>("Color")
                         .IsRequired()
@@ -2470,7 +2469,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 5, 4, 11, 38, 54, 32, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2020, 4, 30, 13, 53, 36, 443, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");

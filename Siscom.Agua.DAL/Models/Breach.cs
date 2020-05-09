@@ -57,6 +57,23 @@ namespace Siscom.Agua.DAL.Models
         public string Status { get; set; }
         [Column("id_assignment_ticket"),  Required]
         public int AssignmentTicketId { get; set; }
+
+        [Column("code_marca")]
+        public string code_marca { get; set; }
+
+        [Column("code_concept_arrastre")]
+        public string CodeConceptArrastre { get; set; }
+
+        [Column("code_concept_days_corralon")]
+        public string CodeConceptDaysCorralon { get; set; }
+
+
+
+        [Column("days_corralon")]
+        public string DaysCorralon { get; set; }
+
+
+        
         [NotMapped]
         public int TransitPoliceId { get; set; }
         [Required]

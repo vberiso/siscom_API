@@ -239,6 +239,12 @@ namespace Siscom.Agua.Api.Controllers
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
+                    var ststus = new List<string>() { "EO003", "EOS02" };
+                    var orderOld = _context.OrderSales.Where(x => x.Folio == breach.Folio && !ststus.Contains(x.Status)).FirstOrDefault() ;
+                    if (orderOld != null) {
+                        orderOld.ExpirationDate = DateTime.Now.AddDays(-1);
+                        orderOld.Status = "EOS04";
+                    }
 
                     OrderSale order = new OrderSale();
 
@@ -331,7 +337,59 @@ namespace Siscom.Agua.Api.Controllers
                         orderSaleDetails.Add(orderSaleDetail);
                     });
 
+                    if (!string.IsNullOrEmpty( breach.CodeConceptArrastre) ) {
+                        var Arrastre = _context.Products.Where(x => x.Id.ToString() == breach.CodeConceptArrastre).FirstOrDefault();
+                        var Parent = _context.Products.Where(x => x.Id == Arrastre.Parent).FirstOrDefault();
+                        var SuperParent = _context.Products.Where(x => x.Id == Parent.Parent).FirstOrDefault();
+                        var TariffArrastre = _context.TariffProducts.Where(x => x.ProductId.ToString() == breach.CodeConceptArrastre).FirstOrDefault();
+                        orderSaleDetails.Add(
+                            new OrderSaleDetail
+                            {
 
+                                Unity = "SAN",
+                                UnitPrice = TariffArrastre.Amount,
+                                HaveTax = TariffArrastre.HaveTax,
+                                Description = "Arratres " + SuperParent.Name + " - " + Parent.Name + " - " + Arrastre.Name,
+                                CodeConcept = Arrastre.Id.ToString(),
+                                NameConcept = "Arratres " + SuperParent.Name + " - " + Parent.Name + " - " + Arrastre.Name,
+                                Amount = TariffArrastre.Amount,
+                                OnAccount = 0,
+                                Quantity = 1,
+                                idBreachList = 0
+
+                            }
+                            );
+                        order.Amount = order.Amount + TariffArrastre.Amount;
+                    }
+
+                    if (!string.IsNullOrEmpty(breach.CodeConceptDaysCorralon))
+                    {
+                        var days = DateTime.Now - breach.DateBreach ;
+                        var dias = days.Days +1 ;
+                        var Corralon = _context.Products.Where(x => x.Id.ToString() == breach.CodeConceptDaysCorralon).FirstOrDefault();
+                        var Parent = _context.Products.Where(x => x.Id == Corralon.Parent).FirstOrDefault();
+                        var SuperParent = _context.Products.Where(x => x.Id == Parent.Parent).FirstOrDefault();
+                        var TariffCorralon = _context.TariffProducts.Where(x => x.ProductId.ToString() == breach.CodeConceptArrastre).FirstOrDefault();
+                        breach.DaysCorralon = dias.ToString();
+                        orderSaleDetails.Add(
+                            new OrderSaleDetail
+                            {
+
+                                Unity = "SAN",
+                                UnitPrice = TariffCorralon.Amount,
+                                HaveTax = TariffCorralon.HaveTax,
+                                Description = "Corralon " + SuperParent.Name + " - " + Parent.Name + " - " + Corralon.Name +" - "+ dias + " Días",
+                                CodeConcept = Corralon.Id.ToString(),
+                                NameConcept = "Corralon " + SuperParent.Name + " - " + Parent.Name + " - " + Corralon.Name +" - "+ dias + " Días",
+                                Amount = TariffCorralon.Amount * dias,
+                                OnAccount = 0,
+                                Quantity = dias,
+                                idBreachList = 0
+
+                            }
+                            );
+                        order.Amount = order.Amount + (TariffCorralon.Amount * dias);
+                    }
 
                     order.OrderSaleDetails = orderSaleDetails;
                     if (order.OrderSaleDetails == null)
@@ -420,13 +478,14 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         //POST: API/BREACH
-        [HttpPost]
-        public async Task<IActionResult> PostBreach(int BreachId, [FromBody] Breach breanch)
+        [HttpPost("{idsInfra?}/{Cobro?}")]
+        public async Task<IActionResult> PostBreach(int BreachId, [FromBody] Breach breanch, [FromRoute] string idsInfra = "", [FromRoute] string Cobro= "")
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            //Cobro = "2";
 
             Breach NewBreach = new Breach();
 
@@ -570,7 +629,10 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Faltan datos del contribuyente" });
 
                         }
-
+                        NewBreach.code_marca = breanch.code_marca;
+                        NewBreach.CodeConceptArrastre = breanch.CodeConceptArrastre;
+                        NewBreach.DaysCorralon = breanch.DaysCorralon;
+                        NewBreach.CodeConceptDaysCorralon = breanch.CodeConceptDaysCorralon;
                         _context.Breaches.Add(NewBreach);
                         //await _context.SaveChangesAsync();
 
@@ -604,6 +666,7 @@ namespace Siscom.Agua.Api.Controllers
 
 
                         decimal sumBreanch = 0;
+                        var idsBreachList = idsInfra.Split(",").ToList();
 
                         foreach (var list in breanch.BreachDetails)
                         {
@@ -616,7 +679,7 @@ namespace Siscom.Agua.Api.Controllers
                             int cont = getLicense.Count;
 
 
-                            if (cont > 1)
+                            if (Cobro == "1" && idsBreachList.Contains(list.BreachListId.ToString()))
                             {
                                 var valueJudge = value.MaxTimesFactor;
                                 BreachDetail listBreanch = new BreachDetail
@@ -839,7 +902,10 @@ namespace Siscom.Agua.Api.Controllers
                             return StatusCode((int)TypeError.Code.NotAcceptable, new { Message = string.Format("Falta ingresar el usuario que crea la infracción") });
 
                         }
-
+                        NewBreach.code_marca = breanch.code_marca;
+                        NewBreach.CodeConceptArrastre = breanch.CodeConceptArrastre;
+                        NewBreach.DaysCorralon = breanch.DaysCorralon;
+                        NewBreach.CodeConceptDaysCorralon = breanch.CodeConceptDaysCorralon;
 
                         _context.Breaches.Add(NewBreach);
 
@@ -952,6 +1018,8 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBreach([FromRoute] int id, [FromBody] Breach breach)
         {
@@ -1034,6 +1102,65 @@ namespace Siscom.Agua.Api.Controllers
         private bool BreachExist(int id)
         {
             return _context.Breaches.Any(e => e.Id == id);
+        }
+
+
+        [HttpGet("CheckIsMaxInfraccion/{infraccion_id}/{placa}")]
+        public async Task<IActionResult> CheckIsMaxInfraccion([FromRoute] string infraccion_id, [FromRoute] string placa)
+        {
+            var id_infracciones =  infraccion_id.Split("acute;").ToList();
+            var result = _context.Breaches.Include(x =>x.BreachDetails).Where(bl => bl.LicensePlate == placa).ToList();
+            List<string> messages = new List<string>();
+            List<string> idsApply = new List<string>();
+            List<BreachDetail> breanchList = new List<BreachDetail>();
+            if (result.Count > 0) {
+                result.ForEach(x => {
+                    breanchList.AddRange(x.BreachDetails);
+
+                });
+
+                var BreachListR = breanchList.Where(x => id_infracciones.Contains(x.BreachListId.ToString())).Select(x => x.BreachListId).Distinct().ToList();
+               // BreachListR = BreachListR.Select(x =>  x.BreachListId).Distinct().ToList();
+
+                if (BreachListR.Count >0)
+                {
+                    BreachListR.ForEach(x =>
+                    {
+                        var breacListt = _context.BreachLists.Where(bl => bl.Id == x).FirstOrDefault() ;
+                        idsApply.Add(breacListt.Id.ToString());
+                        messages.Add("Fracción "+breacListt.Fraction+ " "+breacListt.Description );
+                    });
+                      
+                }
+            }
+            return Ok(new {messages , idsApply });
+
+        }
+
+        [HttpGet("GetProducsArrastre")]
+        public async Task<IActionResult> GetProducsArrastre()
+        {
+            var products = _context.Products.Where(x => x.Parent == 3182).ToList();
+            return Ok(products);
+        }
+
+
+        [HttpGet("GetProducsCorralon")]
+        public async Task<IActionResult> GetProducsCorralon()
+        {
+            var products = _context.Products.Where(x => x.Parent == 3189).ToList();
+            return Ok(products);
+        }
+
+
+        [HttpGet("findBreachPlaca/{placa}")]
+        public async Task<IActionResult> FindBreachPlaca(string placa)
+        {
+            var breach = _context.Breaches
+                .Include(x => x.BreachDetails)
+                .Include(x => x.BreachWarranties)
+                .Include(x => x.TaxUser).ThenInclude(x => x.TaxAddresses).Where(x => x.LicensePlate == placa).LastOrDefault();
+            return Ok(breach);
         }
     }
 }

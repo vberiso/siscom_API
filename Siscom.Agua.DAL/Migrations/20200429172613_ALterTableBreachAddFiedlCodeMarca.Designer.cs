@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200429172613_ALterTableBreachAddFiedlCodeMarca")]
+    partial class ALterTableBreachAddFiedlCodeMarca
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -998,12 +1000,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("car")
                         .HasMaxLength(100);
 
-                    b.Property<string>("CodeConceptArrastre")
-                        .HasColumnName("code_concept_arrastre");
-
-                    b.Property<string>("CodeConceptDaysCorralon")
-                        .HasColumnName("code_concept_days_corralon");
-
                     b.Property<string>("Color")
                         .IsRequired()
                         .HasColumnName("color")
@@ -1011,9 +1007,6 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.Property<DateTime>("DateBreach")
                         .HasColumnName("date_breach");
-
-                    b.Property<string>("DaysCorralon")
-                        .HasColumnName("days_corralon");
 
                     b.Property<string>("Folio")
                         .IsRequired()
@@ -2470,7 +2463,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 5, 4, 11, 38, 54, 32, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2020, 4, 29, 12, 26, 12, 67, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
