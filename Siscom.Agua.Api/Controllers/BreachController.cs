@@ -339,6 +339,7 @@ namespace Siscom.Agua.Api.Controllers
 
                     if (!string.IsNullOrEmpty( breach.CodeConceptArrastre) ) {
                         var Arrastre = _context.Products.Where(x => x.Id.ToString() == breach.CodeConceptArrastre).FirstOrDefault();
+
                         var Parent = _context.Products.Where(x => x.Id == Arrastre.Parent).FirstOrDefault();
                         var SuperParent = _context.Products.Where(x => x.Id == Parent.Parent).FirstOrDefault();
                         var TariffArrastre = _context.TariffProducts.Where(x => x.ProductId.ToString() == breach.CodeConceptArrastre).FirstOrDefault();
@@ -360,6 +361,7 @@ namespace Siscom.Agua.Api.Controllers
                             }
                             );
                         order.Amount = order.Amount + TariffArrastre.Amount;
+
                     }
 
                     if (!string.IsNullOrEmpty(breach.CodeConceptDaysCorralon))
@@ -369,7 +371,7 @@ namespace Siscom.Agua.Api.Controllers
                         var Corralon = _context.Products.Where(x => x.Id.ToString() == breach.CodeConceptDaysCorralon).FirstOrDefault();
                         var Parent = _context.Products.Where(x => x.Id == Corralon.Parent).FirstOrDefault();
                         var SuperParent = _context.Products.Where(x => x.Id == Parent.Parent).FirstOrDefault();
-                        var TariffCorralon = _context.TariffProducts.Where(x => x.ProductId.ToString() == breach.CodeConceptArrastre).FirstOrDefault();
+                        var TariffCorralon = _context.TariffProducts.Where(x => x.ProductId.ToString() == breach.CodeConceptDaysCorralon).FirstOrDefault();
                         breach.DaysCorralon = dias.ToString();
                         orderSaleDetails.Add(
                             new OrderSaleDetail
