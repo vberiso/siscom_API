@@ -48,7 +48,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> getAgremmentsOfStaffByUserId([FromRoute] String userId)
         {
             var dispatchOrder = new List<DispatchOrder>();
-            dispatchOrder = _context.DispatchOrders.Where(x => x.UserId == userId && x.Status == "DSO01").ToList();
+            dispatchOrder = _context.DispatchOrders.Where(x => x.UserId == userId && x.Status == "DSO01" && x.DateAsign.Date == DateTime.Now.Date).ToList();
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
