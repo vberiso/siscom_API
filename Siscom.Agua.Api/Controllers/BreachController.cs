@@ -325,7 +325,7 @@ namespace Siscom.Agua.Api.Controllers
                             Unity = "SAN",
                             UnitPrice = factor.NumberColumn,
                             HaveTax = false,
-                            Description = na +' ' +article.Article + ' Fracción ' + x.BreachList.Fraction +' '+ x.BreachList.Description,
+                            Description = na + " " +article.Article + " Fracción " + x.BreachList.Fraction + " " + x.BreachList.Description,
                             CodeConcept = serParam.TextColumn,
                             NameConcept = x.BreachList.Description,
                             Amount = x.Amount,
