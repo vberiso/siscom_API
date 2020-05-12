@@ -220,9 +220,9 @@ namespace Siscom.Agua.Api.Controllers
 
             var ticket = await _context.AssignmentTickets
                                                 .Include(s => s.TransitPolice)
-                                                .Where(s => s.Id == breach.AssignmentTicketId).FirstOrDefaultAsync(); 
+                                                .Where(s => s.Id == breach.AssignmentTicketId).FirstOrDefaultAsync();
 
-            
+
             //var orderLast = await _context.OrderSales.Where(o => o.IdOrigin == breach.Id).FirstOrDefaultAsync();
 
             //if (orderLast.Status == "EOS01")
@@ -234,7 +234,7 @@ namespace Siscom.Agua.Api.Controllers
             //var valueUnity = _context.
 
             #endregion
-
+            OrderSale order = new OrderSale();
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -246,7 +246,7 @@ namespace Siscom.Agua.Api.Controllers
                         orderOld.Status = "EOS04";
                     }
 
-                    OrderSale order = new OrderSale();
+                    
 
                     //Temporal en lo que se crea trigger de asignacion de folio
                     order.Folio =  breach.Folio;
@@ -325,7 +325,7 @@ namespace Siscom.Agua.Api.Controllers
                             Unity = "SAN",
                             UnitPrice = factor.NumberColumn,
                             HaveTax = false,
-                            Description = na +' ' +article.Article + ' ' + x.BreachList.Fraction +' '+ x.BreachList.Description,
+                            Description = na +' ' +article.Article + ' Fracción ' + x.BreachList.Fraction +' '+ x.BreachList.Description,
                             CodeConcept = serParam.TextColumn,
                             NameConcept = x.BreachList.Description,
                             Amount = x.Amount,
@@ -422,7 +422,7 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para generar order de cobro" });
             }
 
-            return StatusCode((int)TypeError.Code.Ok, new { Success = "Orden de cobro generada" });
+            return StatusCode((int)TypeError.Code.Ok, new { Success = "Orden de cobro generada", order });
         }
 
 
