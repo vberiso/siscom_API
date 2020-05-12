@@ -1637,10 +1637,11 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region Type
-            builder.Entity<Models.Type>()
-                   .HasOne<GroupType>(a => a.GroupType)
-                   .WithMany(s => s.Types)
-                   .HasForeignKey(s => s.GroupTypeId);
+            //builder.Entity<Models.Type>()
+            //       .HasOne<GroupType>(a => a.GroupType)
+            //       .WithMany(s => s.Types)
+            //       .HasForeignKey(s => s.GroupTypeId);
+            builder.Entity<Models.Type>().HasKey(x => new { x.CodeName, x.GroupTypeId });
             #endregion
 
             #region TypeClassification
