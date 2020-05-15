@@ -143,6 +143,40 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             }
         }
 
+        
+        [HttpGet("GetNotificationByIdsAgreement/{ids}")]
+        public async Task<IActionResult> GetNotificationByIdsAgreement([FromRoute] string ids)
+        {
+            var datatable = new DataTable();
+            try
+            {
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[GetAgreementByIdAgreements]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter { ParameterName = "@AgreemenIds", DbType = DbType.String, Value = ids });
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        datatable.Load(result);
+                    }
+                }
+                if (datatable.Rows.Count <= 0)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "El contribuyente de esta cuenta va al corriente de sus pagos o está en estado cortado, por lo cual no puede mandar una orden de corte" });
+                }
+                else
+                {
+                    return Ok(datatable);
+                }
+            }
+            catch (Exception e)
+            {
+
+                return BadRequest(e);
+            }
+        }
+
         [HttpGet("GetFiles/{TypeFile?}")]
         public async Task<IActionResult> GetFiles([FromRoute] string TypeFile = "FI001")
         {

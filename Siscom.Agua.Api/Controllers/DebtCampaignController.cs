@@ -139,8 +139,20 @@ namespace Siscom.Agua.Api.Controllers
             }
 
         }
-        
 
+        [HttpPost("fromAgreement")]
+        public async Task<IActionResult> fromAgreement([FromBody] List<int> idsAgree)
+        {
+            try
+            {
+                var res = await _context.DebtCampaign.Where(x => idsAgree.Contains(x.AgreementId)).ToListAsync();
+                return Ok(res);
+            }
+            catch (Exception e)
+            {
+                return Conflict(e);
+            }
+        }
 
     }
 }
