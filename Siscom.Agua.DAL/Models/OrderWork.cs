@@ -76,6 +76,7 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<PhotosOrderWork> PhotosOrderWork { get; set; }
         public ICollection<LocationOrderWork> LocationOrderWorks { get; set; }
         public ICollection<OrderWorkDetail> OrderWorkDetails { get; set; }
+        public ICollection<MaterialMovements> MaterialMovements { get; set; }
         
     }
 }

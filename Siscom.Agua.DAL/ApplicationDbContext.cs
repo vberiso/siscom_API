@@ -222,6 +222,9 @@ namespace Siscom.Agua.DAL
         public DbSet<PhotosOrderWork> PhotosOrderWork { get; set; }
         public DbSet<FolioAccountStatement> FolioAccountStatements { get; set; }
         public DbSet<DispatchOrder> DispatchOrders { get; set; }
+        public DbSet<MaterialMovements> MaterialMovements { get; set; }
+        public DbSet<UnitMeasurement> UnitMeasurements { get; set; }
+        public DbSet<MaterialList> MaterialLists { get; set; }
 
         /// <summary>
         /// Otros
@@ -915,6 +918,35 @@ namespace Siscom.Agua.DAL
             builder.Entity<InspectionFine>()
                   .Property(p => p.Amount)
                   .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region MaterialMovements
+
+            builder.Entity<MaterialMovements>().HasKey(x => new { x.MaterialListId, x.OrderWorkId });
+
+            builder.Entity<MaterialMovements>()
+                .HasOne<MaterialList>(x => x.MaterialList)
+                .WithMany(z => z.MaterialMovements)
+                .HasForeignKey(x => x.MaterialListId);
+
+            builder.Entity<MaterialMovements>()
+                .HasOne<OrderWork>(x => x.OrderWork)
+                .WithMany(z => z.MaterialMovements)
+                .HasForeignKey(x => x.OrderWorkId);
+
+            builder.Entity<MaterialMovements>()
+                .Property(x => x.MovementDate)
+                .HasColumnType("date");
+
+            #endregion
+
+            #region MaterialList
+
+            builder.Entity<UnitMeasurement>()
+                .HasOne<MaterialList>(x => x.MaterialList)
+                .WithMany(m => m.UnitMeasurements)
+                .HasForeignKey(x => x.MaterialListId);
+
             #endregion
 
             #region Meter
@@ -1754,6 +1786,7 @@ namespace Siscom.Agua.DAL
                 .WithMany(s => s.DebtCampaign)
                 .HasForeignKey(b => b.AgreementId); 
             #endregion
+
             #region otros
             builder.Entity<ReasonCatalog>()
               .Property(x => x.IsActive)
