@@ -21,6 +21,7 @@ namespace Siscom.Agua.DAL.Models
         public string Name { get; set; }
         [Column("code"), StringLength(25)]
         public string Code { get; set; }
+        [Column("is_active")]
         public bool IsActive { get; set; }
 
         public ICollection<UnitMeasurement> UnitMeasurements { get; set; }

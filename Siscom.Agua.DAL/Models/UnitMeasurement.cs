@@ -16,7 +16,8 @@ namespace Siscom.Agua.DAL.Models
         public string Acronym { get; set; }
         [Column("description"), StringLength(60)]
         public string Description { get; set; }
-        public bool IActive { get; set; }
+        [Column("is_active")]
+        public bool IsActive { get; set; }
         public int MaterialListId { get; set; }
         public MaterialList MaterialList { get; set; }
     }

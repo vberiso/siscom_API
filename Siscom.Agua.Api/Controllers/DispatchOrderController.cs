@@ -486,7 +486,20 @@ namespace Siscom.Agua.Api.Controllers
                             OrderWork = order,
                             OrderWorkId = order.Id
                         });
+
+                        MaterialMovements material = new MaterialMovements
+                        {
+                            MaterialList = _context.MaterialLists.Find(x.IdMaterial),
+                            OrderWork = order,
+                            Quantity = x.Quantity,
+                            Type = "TMM01",
+                            MovementDate = DateTime.Now
+                        };
+
+                        _context.MaterialMovements.Add(material);
                     });
+
+                    
                     _context.SaveChanges();
                     return Ok();
                 }
