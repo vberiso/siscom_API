@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200522171908_addFieldObservationsIntoGroupType")]
+    partial class addFieldObservationsIntoGroupType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2792,55 +2794,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LogginLog");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.MaterialList", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_material")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Code")
-                        .HasColumnName("code")
-                        .HasMaxLength(25);
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Name")
-                        .HasColumnName("name")
-                        .HasMaxLength(60);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MaterialLists");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.MaterialMovements", b =>
-                {
-                    b.Property<int>("MaterialListId")
-                        .HasColumnName("materialList_id");
-
-                    b.Property<int>("OrderWorkId")
-                        .HasColumnName("orderWork_id");
-
-                    b.Property<DateTime>("MovementDate")
-                        .HasColumnName("movement_date")
-                        .HasColumnType("date");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnName("quantity");
-
-                    b.Property<string>("Type")
-                        .HasColumnName("type")
-                        .HasMaxLength(5);
-
-                    b.HasKey("MaterialListId", "OrderWorkId");
-
-                    b.HasIndex("OrderWorkId");
-
-                    b.ToTable("material_movements");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Meter", b =>
@@ -5646,33 +5599,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Type_Use");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.UnitMeasurement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_unit_measurement")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Acronym")
-                        .HasColumnName("acronym")
-                        .HasMaxLength(10);
-
-                    b.Property<string>("Description")
-                        .HasColumnName("description")
-                        .HasMaxLength(60);
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnName("is_active");
-
-                    b.Property<int>("MaterialListId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MaterialListId");
-
-                    b.ToTable("UnitMeasurements");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.VersionApp", b =>
                 {
                     b.Property<int>("Id")
@@ -6156,19 +6082,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.MaterialMovements", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.MaterialList", "MaterialList")
-                        .WithMany("MaterialMovements")
-                        .HasForeignKey("MaterialListId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Siscom.Agua.DAL.Models.OrderWork", "OrderWork")
-                        .WithMany("MaterialMovements")
-                        .HasForeignKey("OrderWorkId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Meter", b =>
                 {
                     b.HasOne("Siscom.Agua.DAL.Models.Agreement", "Agreement")
@@ -6581,14 +6494,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.GroupType", "GroupType")
                         .WithMany("Types")
                         .HasForeignKey("GroupTypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.UnitMeasurement", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.MaterialList", "MaterialList")
-                        .WithMany("UnitMeasurements")
-                        .HasForeignKey("MaterialListId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

@@ -19,6 +19,8 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("name"), StringLength(50), Required]
         public string Name { get; set; }
+        [Column("observations"), StringLength(250)]
+        public string Observations { get; set; }
 
         public ICollection<Type> Types { get; set; }
     }

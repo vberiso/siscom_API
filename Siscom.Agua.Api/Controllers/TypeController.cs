@@ -43,5 +43,28 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(type);
         }
 
+        [HttpGet("ByToolCode/{code}")]
+        public async Task<IActionResult> GetByToolCode([FromRoute] string code)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var groupTypes = await _context.GroupTypes
+                .Include(x => x.Types)
+                .Where(gt => gt.Observations.Contains(code)).ToListAsync();
+
+            //var type = await _context.Types
+            //                        .Include(x => x.GroupType)
+            //                        .Where(x => x.GroupType.Observations.Contains(code)).ToListAsync();
+
+            if(groupTypes == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(groupTypes);
+        }
     }
 }

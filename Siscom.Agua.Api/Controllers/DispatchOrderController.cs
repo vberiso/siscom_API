@@ -83,6 +83,39 @@ namespace Siscom.Agua.Api.Controllers
         }
 
 
+        [HttpPost("DispatchOrderByDateStaff/{date}/{dateEnd}")]
+        public async Task<IActionResult> getDispatchOrderByDateStaff([FromRoute] string date, [FromRoute] string dateEnd, [FromBody] List<int> userIds)
+        {
+            try
+            {
+                DateTime fechaIni = new DateTime(int.Parse(date.Split("-")[2]), int.Parse(date.Split("-")[1]), int.Parse(date.Split("-")[0]));
+                DateTime fechaFin = new DateTime(int.Parse(dateEnd.Split("-")[2]), int.Parse(dateEnd.Split("-")[1]), int.Parse(dateEnd.Split("-")[0]), 23, 59, 59);
+
+                var query = _context.DispatchOrders.AsQueryable();
+                query = query.Where(x => x.DateAsign > fechaIni && x.DateAsign <= fechaFin);
+                if (userIds.Count() > 0 && !userIds.Contains(0))
+                {
+                    query = query.Where(x => userIds.Contains(x.TechnicalStaffId));
+                }
+                var dispatchOrders = await query.ToListAsync();
+
+                if(dispatchOrders.Count == 0)
+                    return StatusCode(StatusCodes.Status204NoContent, new { msg = "Sin información disponible." });
+
+                var staffs = await _context.TechnicalStaffs.Where(s => dispatchOrders.Select(d => d.TechnicalStaffId).Distinct().Contains(s.Id)).ToListAsync();
+
+                var orders = await _context.OrderWorks.Where(o => dispatchOrders.Select(d => d.OrderWorkId).Distinct().Contains(o.Id)).ToListAsync();
+
+                var types = await _context.Types.Where(t => t.GroupTypeId == 15).ToListAsync();
+                                               
+                return StatusCode(StatusCodes.Status200OK, new List<Object> {dispatchOrders, staffs, orders, types});                    
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest , new { error = "No se pudo consultar la información solicitada." });
+            }            
+        }
+
         [HttpPost()]
         public async Task<IActionResult> PostDispatchOrder([FromBody] DispatchOrder dispatchOrder)
         {
