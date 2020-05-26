@@ -37,5 +37,7 @@ namespace Siscom.Agua.DAL.Models
         public string Latitude { get; set; }
         [Column("longitude"), StringLength(25)]
         public string Longitude { get; set; }
+        [Column("have_account")]
+        public bool HaveAccount { get; set; }
     }
 }
