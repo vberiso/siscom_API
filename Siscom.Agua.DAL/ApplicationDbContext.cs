@@ -908,6 +908,11 @@ namespace Siscom.Agua.DAL
             builder.Entity<INPC>()
                   .Property(p => p.Value)
                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<INPC>()
+                  .Property(p => p.Surcharges)
+                  .HasColumnType("decimal(18, 2)");
+
             #endregion
 
             #region InspectionFine

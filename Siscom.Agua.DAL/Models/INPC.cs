@@ -21,5 +21,7 @@ namespace Siscom.Agua.DAL.Models
         public decimal Value { get; set; }
         [Column("is_active"), Required]
         public bool IsActive { get; set; }
+        [Column("surcharges")]
+        public decimal Surcharges { get; set; }
     }
 }
