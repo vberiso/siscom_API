@@ -538,7 +538,7 @@ namespace Siscom.Agua.Api.Controllers
                     await connection.OpenAsync();
                     using (var command = connection.CreateCommand())
                     {
-                        command.CommandText = "select (select t.[description] from [Type] t where t.id_type = d.[type]) [type]," +
+                        command.CommandText = "select (select t.[description] from [Type] t where t.id_type = d.[type] and t.GroupTypeId = 5) [type]," +
                             " d.from_date," +
                             " d.until_date," +
                             " (dd.amount - dd.on_account) amount," +
