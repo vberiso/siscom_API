@@ -140,7 +140,6 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
-
         [HttpPost("OrderWorksList/{withOrder}")]
         public async Task<IActionResult> PostOrderWorksList([FromBody] List<int> pIds, [FromRoute]bool withOrder = false)
         {
@@ -185,9 +184,6 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
-
-
-
         [HttpPost("OrderWorks/GetByIds")]
         public async Task<IActionResult> GetListOrderWorks([FromBody] List<int> list)
         {
@@ -204,8 +200,6 @@ namespace Siscom.Agua.Api.Controllers
                         .Include(x => x.Debts)
                             .ThenInclude(x => x.DebtDetails)
                         .Include(x => x.TypeConsume)
-                        .Include(x => x.OrderWork)
-                            .ThenInclude(x => x.TechnicalStaff)
                         .Include(x => x.Clients)
                         .Include(x => x.Addresses)
                             .ThenInclude(x => x.Suburbs)
@@ -231,6 +225,34 @@ namespace Siscom.Agua.Api.Controllers
             catch (Exception ex)
             {
                 return Ok("");
+            }
+        }
+
+        [HttpPost("OrderWork/WithoutAccountByIds")]
+        public async Task<IActionResult> GetListOrderWorkWithouAccount([FromBody] List<int> list)
+        {
+            try
+            {
+                List<OrderWorkWithoutAccountVM> OWWA = new List<OrderWorkWithoutAccountVM>();
+                foreach (var item in list)
+                {
+                    var order = await _context.OrderWorks.Where(x => x.Id == item).Include(x => x.TechnicalStaff).FirstAsync();
+                    TaxUser taxUser = await _context.TaxUsers
+                        .Include(ta => ta.TaxAddresses)
+                        .Where(x => x.Id == order.TaxUserId)
+                        .FirstOrDefaultAsync();
+                    OWWA.Add(new OrderWorkWithoutAccountVM
+                    {
+                        OrderWork = order,
+                        TaxUser = taxUser
+                    });
+                }
+
+                return Ok(OWWA);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);   
             }
         }
 
@@ -562,7 +584,6 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message });
             }
         }
-
 
         [HttpPost("OrderWorks/updateMultiple/{user?}")]
         public async Task<IActionResult> UpdateMultiple([FromRoute] string user, [FromBody] Object data)

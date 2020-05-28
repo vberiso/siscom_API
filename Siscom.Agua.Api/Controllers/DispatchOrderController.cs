@@ -48,7 +48,10 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> getAgremmentsOfStaffByUserId([FromRoute] String userId)
         {
             var dispatchOrder = new List<DispatchOrder>();
-            dispatchOrder = _context.DispatchOrders.Where(x => x.UserId == userId && x.Status == "DSO01" && x.DateAsign.Date == DateTime.Now.Date).ToList();
+            dispatchOrder = _context.DispatchOrders
+                .Where(x => x.UserId == userId && x.Status == "DSO01" && x.DateAsign.Date == DateTime.Now.Date)
+                .OrderBy(x => x.HaveAccount)
+                .ToList();
             try
             {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -82,6 +85,10 @@ namespace Siscom.Agua.Api.Controllers
             return StatusCode(StatusCodes.Status200OK, dispatchOrder);
         }
 
+        //public async Task<IActionResult> GetOrderWorkWithoutAccount([FromRoute] string )
+        //{
+
+        //}
 
         [HttpPost("DispatchOrderByDateStaff/{date}/{dateEnd}")]
         public async Task<IActionResult> getDispatchOrderByDateStaff([FromRoute] string date, [FromRoute] string dateEnd, [FromBody] List<int> userIds)
@@ -237,6 +244,11 @@ namespace Siscom.Agua.Api.Controllers
                         await _context.SaveChangesAsync();
                         break;
 
+                }
+
+                if(order.Status == "EOT04")
+                {
+                    return Ok();
                 }
 
                 DateTime dateRealization;
