@@ -33,15 +33,23 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         [HttpGet("getAgremmentsOfStaff/{staffId}")]
         public async Task<IActionResult> getAgremmentsOfStaff([FromRoute] string staffId)
         {
+            DateTime DiaActual = DateTime.Now;
+            int delta = DayOfWeek.Monday - DiaActual.DayOfWeek;
+            DateTime LunesSemanaPasada = DiaActual.AddDays(delta - 7);
 
-            var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).Include(x => x.OrderWorks).First();
+            //var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).Include(x => x.OrderWorks).First();
+            var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).First();
+            Staff.OrderWorks = await _context.OrderWorks.Where(ow => ow.TechnicalStaffId == Staff.Id && ow.DateOrder >= LunesSemanaPasada).ToListAsync();
+
             List<Agreement> Agreements = new List<Agreement>();
             foreach (var orderWork in Staff.OrderWorks)
             {
-                orderWork.Agreement = 
+                if(orderWork.AgrementId != 0)
+                {
+                    orderWork.Agreement =
                     _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
-                    .Include(x => x.OrderWork)
-                    
+                    //.Include(x => x.OrderWork)
+
                     .Include(x => x.Clients)
                     .Include(x => x.Addresses)
                         .ThenInclude(x => x.Suburbs)
@@ -50,6 +58,24 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                                     .ThenInclude(x => x.Countries)
                                         .First()
                     ;
+                }
+                else
+                {
+                    orderWork.Agreement = _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
+                                                            .Include(x => x.Clients)
+                                                            .Include(x => x.Addresses)                                                                
+                                                            .First();
+                    orderWork.Agreement.Clients.Clear();
+                    orderWork.Agreement.Clients.Add( _context.TaxUsers.Where(x => x.Id == orderWork.TaxUserId)
+                        .Select(c => new Client() { Id = 0, TypeUser = "CLI01", Name = c.Name, LastName = "" } )
+                        .First());
+                    orderWork.Agreement.Addresses.Clear();
+                    orderWork.Agreement.Addresses.Add(_context.TaxAddresses
+                        .Where(x => x.TaxUserId == orderWork.TaxUserId)
+                        .Select(d => new Address() { Id = 0, TypeAddress = "DIR01", Street = d.Street, Outdoor = d.Outdoor, Indoor = d.Indoor, Suburbs = new Suburb() { Id = 0, Name = d.Suburb, Towns = new Town() { Id = 0, Name = d.Town } } })
+                        .First());
+                }
+                
             }
 
 

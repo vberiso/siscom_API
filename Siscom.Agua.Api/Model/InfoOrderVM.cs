@@ -10,5 +10,6 @@ namespace Siscom.Agua.Api.Model
     {
         public List<OrderWork> lstOrderWork { get; set; }
         public List<Agreement> lstAgreements { get; set; }
+        public List<TaxUser> lstTaxUser { get; set; }
     }
 }

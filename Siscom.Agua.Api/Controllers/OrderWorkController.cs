@@ -118,10 +118,18 @@ namespace Siscom.Agua.Api.Controllers
                         item.LocationOfAttentionOrderWork = _context.LocationOfAttentionOrderWorks.FirstOrDefault(l => l.Id == item.LocationOfAttentionOrderWorkId);
                     } 
                 }
-  
+
+                TaxUser taxUser = new TaxUser();
+                if(OrderWork.AgrementId == 0 && OrderWork.TaxUserId != 0)
+                {
+                    taxUser = await _context.TaxUsers.Where(t => t.Id == OrderWork.TaxUserId)
+                                                    .Include(x => x.TaxAddresses)
+                                                    .FirstOrDefaultAsync();
+                }
+
                 if (withOrder)
                 {                    
-                    return Ok(new List<object>() { agreement, OrderWork });
+                    return Ok(new List<object>() { agreement, OrderWork, taxUser });
                 }
                 return Ok(agreement);
             }
@@ -159,6 +167,12 @@ namespace Siscom.Agua.Api.Controllers
                                     .ThenInclude(x => x.Countries)
                     .ToListAsync();
 
+                
+                List<int> idsTaxUser = info.lstOrderWork.Where(a => a.AgrementId == 0).Select(t => t.TaxUserId).ToList();
+                info.lstTaxUser = await _context.TaxUsers
+                    .Include(d => d.TaxAddresses)
+                    .Where(t => idsTaxUser.Contains(t.Id)).ToListAsync();
+                
                 if (withOrder)
                 {
                     return Ok(info);
@@ -417,6 +431,93 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        [HttpPost("withoutAccount")]
+        public async Task<IActionResult> withoutAccount([FromBody] object collection)
+        {
+            try
+            {
+                int aviso = 0;
+                var data = JObject.Parse(collection.ToString());
+
+                var datos = new
+                {
+                    user = "",
+                    rfc = "",
+                    curp = "",
+                    mail = "",
+                    tel = "",
+                    street = "",
+                    numExt = "",
+                    numInt = "",
+                    suburb = "",
+                    zip = "",
+                    town = "",
+                    state = ""
+                };
+                var datosSinCuenta = JsonConvert.DeserializeAnonymousType(data["Datos"].ToString(), datos);
+
+                TaxUser taxUser = new TaxUser()
+                {
+                    Name = datosSinCuenta.user,
+                    RFC = datosSinCuenta.rfc,
+                    CURP = datosSinCuenta.curp,
+                    PhoneNumber = datosSinCuenta.tel,
+                    EMail = datosSinCuenta.mail,
+                    IsActive = true,
+                    IsProvider = false
+                };
+                _context.TaxUsers.Add(taxUser);
+                _context.SaveChanges();
+
+                TaxAddress taxAddress = new TaxAddress()
+                {
+                    Street = datosSinCuenta.street,
+                    Outdoor = datosSinCuenta.numExt,
+                    Indoor = datosSinCuenta.numInt,
+                    Zip = datosSinCuenta.zip,
+                    Suburb = datosSinCuenta.suburb,
+                    Town = datosSinCuenta.town,
+                    State = datosSinCuenta.state,
+                    TaxUserId = taxUser.Id
+                };
+                _context.TaxAddresses.Add(taxAddress);
+                _context.SaveChanges();
+
+                OrderWork orderWork = new OrderWork()
+                {
+                    AgrementId = 0,
+                    TaxUserId = taxUser.Id,
+                    DateOrder = DateTime.Now,
+                    Applicant = data["applicant"].ToString(),
+                    Type = data["typeOrder"].ToString(),
+                    Status = "EOT01",
+                    Activities = data["Activities"].ToString(),
+                    Observation = data["Observation"].ToString(),
+                    Folio = "f",                    
+                    aviso = aviso
+                };
+                _context.OrderWorks.Add(orderWork);
+                _context.SaveChanges();
+
+                var Status = new OrderWorkStatus()
+                {
+                    IdStatus = "EOT01",
+                    OrderWorkId = orderWork.Id,
+                    User = data["applicant"].ToString(),
+                    OrderWorkStatusDate = DateTime.Now,
+
+                };
+                _context.OrderWorkStatus.Add(Status);
+                _context.SaveChanges();
+
+                return Ok(orderWork);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex, msg = "No se pudo generar la orden." });
+            }
+        }
+
         [HttpPost("OrderWorks/update/{id}/{user?}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromRoute] string user, [FromBody] OrderWork OrderWork)
         {
@@ -526,7 +627,8 @@ namespace Siscom.Agua.Api.Controllers
                             UserId = tmpTechnicalStaff.UserId,
                             DateAsign = DateTime.Now,
                             Longitude = ids.FirstOrDefault(x => x.OrderWorkId == item.Id).Longitude,
-                            Latitude = ids.FirstOrDefault(x => x.OrderWorkId == item.Id).Latitude
+                            Latitude = ids.FirstOrDefault(x => x.OrderWorkId == item.Id).Latitude,
+                            HaveAccount = item.AgrementId == 0 ? false : true
                         };
                         _context.DispatchOrders.Add(dispatchOrder);                        
                     }                    
