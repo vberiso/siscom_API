@@ -242,6 +242,30 @@ namespace Siscom.Agua.Api.Controllers
                             ReasonCatalog = coment
                         });
                         await _context.SaveChangesAsync();
+
+                        dispatch.DateAttended = DateTime.Now;
+                        _context.Entry(dispatch).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+
+                        foreach (var item in syncData.LocationSyncMobiles)
+                        {
+                            LocationOfAttentionOrderWork location = new LocationOfAttentionOrderWork
+                            {
+                                Latitude = item.Latitud,
+                                Longitude = item.Longitud,
+                                Type = item.Type == "INICIO" ? "LOW01" : "LOW02"
+                            };
+
+                            _context.LocationOfAttentionOrderWorks.Add(location);
+
+                            _context.LocationOrderWorks.Add(new LocationOrderWork
+                            {
+                                OrderWork = order,
+                                LocationOfAttentionOrderWork = location
+                            });
+
+                            _context.SaveChanges();
+                        }
                         break;
 
                 }
