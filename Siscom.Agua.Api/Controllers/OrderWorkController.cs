@@ -236,7 +236,7 @@ namespace Siscom.Agua.Api.Controllers
                 List<OrderWorkWithoutAccountVM> OWWA = new List<OrderWorkWithoutAccountVM>();
                 foreach (var item in list)
                 {
-                    var order = await _context.OrderWorks.Where(x => x.Id == item).Include(x => x.TechnicalStaff).FirstAsync();
+                    var order = await _context.OrderWorks.Where(x => x.Id == item).FirstAsync();
                     TaxUser taxUser = await _context.TaxUsers
                         .Include(ta => ta.TaxAddresses)
                         .Where(x => x.Id == order.TaxUserId)
