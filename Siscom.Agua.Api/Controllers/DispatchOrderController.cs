@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -109,18 +110,56 @@ namespace Siscom.Agua.Api.Controllers
                 if(dispatchOrders.Count == 0)
                     return StatusCode(StatusCodes.Status204NoContent, new { msg = "Sin información disponible." });
 
-                var staffs = await _context.TechnicalStaffs.Where(s => dispatchOrders.Select(d => d.TechnicalStaffId).Distinct().Contains(s.Id)).ToListAsync();
-
-                var orders = await _context.OrderWorks.Where(o => dispatchOrders.Select(d => d.OrderWorkId).Distinct().Contains(o.Id)).ToListAsync();
-
+                var staffs = await _context.TechnicalStaffs.Where(s => dispatchOrders.Select(d => d.TechnicalStaffId).Distinct().Contains(s.Id)).ToListAsync();                
                 var types = await _context.Types.Where(t => t.GroupTypeId == 15).ToListAsync();
-                                               
-                return StatusCode(StatusCodes.Status200OK, new List<Object> {dispatchOrders, staffs, orders, types});                    
+                var status = await _context.Statuses.Where(s => s.GroupStatusId == 14 || s.GroupStatusId == 18).ToListAsync();
+                var orders = await _context.OrderWorks
+                    .Include(x => x.Agreement)
+                    .ThenInclude(c => c.Clients)
+                    .Where(o => dispatchOrders.Select(d => d.OrderWorkId).Distinct().Contains(o.Id)).
+                    ToListAsync();
+                var taxUsers = await _context.TaxUsers.Where(t => orders.Where(o => o.AgrementId == 0).Select(x => x.TaxUserId).Contains(t.Id)).ToListAsync();
+
+                return StatusCode(StatusCodes.Status200OK, new List<Object> {dispatchOrders, staffs, orders, types, status, taxUsers});                    
             }
             catch(Exception ex)
             {
                 return StatusCode(StatusCodes.Status400BadRequest , new { error = "No se pudo consultar la información solicitada." });
             }            
+        }
+
+        [HttpPost("getOrderByDateStaff/{date}/{dateEnd}")]
+        public async Task<IActionResult> getOrderByDateStaff([FromRoute] string date, [FromRoute] string dateEnd, [FromBody] List<int> userIds)
+        {
+            try
+            {
+                DateTime fechaIni = new DateTime(int.Parse(date.Split("-")[2]), int.Parse(date.Split("-")[1]), int.Parse(date.Split("-")[0]));
+                DateTime fechaFin = new DateTime(int.Parse(dateEnd.Split("-")[2]), int.Parse(dateEnd.Split("-")[1]), int.Parse(dateEnd.Split("-")[0]), 23, 59, 59);
+                string Ids = string.Join(',', userIds);
+
+                string error = string.Empty;
+                var dataTable = new DataTable();
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[sp_getPointsOrders]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@fechaIni", fechaIni.ToString("yyyy-MM-dd")));
+                    command.Parameters.Add(new SqlParameter("@fechaFin", fechaFin.ToString("yyyy-MM-dd")));
+                    command.Parameters.Add(new SqlParameter("@userIds", Ids));                    
+                    command.CommandTimeout = 6000;
+
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        dataTable.Load(result);
+                    }
+                }
+                return Ok(dataTable);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = "No se pudo consultar la información solicitada." });
+            }
         }
 
         [HttpPost()]
