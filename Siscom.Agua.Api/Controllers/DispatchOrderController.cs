@@ -120,7 +120,7 @@ namespace Siscom.Agua.Api.Controllers
                     ToListAsync();
                 var taxUsers = await _context.TaxUsers.Where(t => orders.Where(o => o.AgrementId == 0).Select(x => x.TaxUserId).Contains(t.Id)).ToListAsync();
 
-                return StatusCode(StatusCodes.Status200OK, new List<Object> {dispatchOrders, staffs, orders, types, status, taxUsers});                    
+                return StatusCode(StatusCodes.Status200OK, new List<Object> {dispatchOrders, staffs, orders, types, status, taxUsers});
             }
             catch(Exception ex)
             {
@@ -154,7 +154,8 @@ namespace Siscom.Agua.Api.Controllers
                         dataTable.Load(result);
                     }
                 }
-                return Ok(dataTable);
+
+                return StatusCode(StatusCodes.Status200OK, new List<Object> {dataTable});                
             }
             catch (Exception ex)
             {
