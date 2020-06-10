@@ -86,13 +86,37 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         [HttpGet("Staffs/{id?}")]
         public async Task<IActionResult> GetStaffs([FromRoute] string id = null)
         {
+            List<Siscom.Agua.Api.Model.TechnicalStaffVM> lst = new List<Model.TechnicalStaffVM>();
             if (id == null)
             {
                 var Staffs = _context.TechnicalStaffs
                     .Include(x => x.TechnicalRole)
                     .Include(x => x.TechnicalTeam).ToList();
-               
-                return Ok(Staffs);
+
+                foreach (var tmpStaff in Staffs)
+                {
+                    var tmpUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == tmpStaff.UserId);
+                    Siscom.Agua.Api.Model.TechnicalStaffVM tmpTSvm = new Model.TechnicalStaffVM()
+                    {
+                        Id = tmpStaff.Id,
+                        Name = tmpStaff.Name,
+                        Phone = tmpStaff.Phone,
+                        IsActive = tmpStaff.IsActive,
+                        TechnicalRoleId = tmpStaff.TechnicalRoleId,
+                        TechnicalRole = tmpStaff.TechnicalRole,
+                        TechnicalTeamId = tmpStaff.TechnicalTeamId,
+                        TechnicalTeam = tmpStaff.TechnicalTeam,
+                        Nick = tmpUser != null ? tmpUser.UserName : "",
+                        IMEI = "",
+                        Email = tmpUser != null ? tmpUser.Email : "",
+                        DivisionId = tmpUser != null ? tmpUser.DivitionId : 0,
+                        UserId = tmpUser != null ? tmpUser.Id : "",
+                        Division = tmpUser != null ? _context.Divisions.FirstOrDefault(x => x.Id == tmpUser.DivitionId) : null
+                    };
+                    lst.Add(tmpTSvm);
+                }
+
+                return Ok(lst);
             }
             var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == id)
                 .Include(x => x.TechnicalRole)
@@ -113,7 +137,8 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 IMEI = "",
                 Email = userOT != null ? userOT.Email : "",
                 DivisionId = userOT != null ? userOT.DivitionId : 0,
-                UserId = userOT != null ? userOT.Id : ""
+                UserId = userOT != null ? userOT.Id : "",
+                Division = userOT != null ? _context.Divisions.FirstOrDefault(x => x.Id == userOT.DivitionId) : null
             };
 
             return Ok(technicalStaffVM);

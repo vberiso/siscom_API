@@ -44,6 +44,18 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(Divisions);
         }
 
+        [HttpGet("FromApp/{id}")]
+        public async Task<IActionResult> GetFromApp([FromRoute] int id)
+        {
+            var Divisions = await _context.Divisions.Where(d => d.IdSolution == id && d.IsActive == true).ToListAsync();
+
+            if (Divisions == null)
+            {
+                return NotFound();
+            }
+            return Ok(Divisions);
+        }
+
 
         [HttpGet("roles")]
         public IEnumerable<ApplicationRol> GetRoles()

@@ -81,9 +81,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("AddUsersOT")]
         public async Task<IActionResult> PostAddUserOT([FromBody] TechnicalStaffVM addUser)
         {
-            IdentityResult result;
-            var tmpDivision = await  _context.Divisions.FirstOrDefaultAsync(d => d.Name.Contains("ORDEN DE TRABAJO") );
-            addUser.DivisionId = tmpDivision != null ? tmpDivision.Id : 2;
+            IdentityResult result;            
             string password = CrearPassword(6);
             ApplicationUser user = new ApplicationUser()
             {                
