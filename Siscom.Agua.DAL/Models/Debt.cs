@@ -14,6 +14,7 @@ namespace Siscom.Agua.DAL.Models
             DebtDetails = new HashSet<DebtDetail>();
             DebtStatuses = new HashSet<DebtStatus>();
             DebtDiscounts = new HashSet<DebtDiscount>();
+            DebtUpdateFactories = new HashSet<DebtUpdateFactory>();
         }
 
         [Key]
@@ -47,6 +48,8 @@ namespace Siscom.Agua.DAL.Models
         public string DescriptionType { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
+        [Column("previous_debtId")]
+        public int PreviousDebtId { get; set; }
         [NotMapped]
         public string DescriptionStatus { get; set; }
         [NotMapped]       
@@ -66,5 +69,6 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<DebtDetail> DebtDetails { get; set; }
         public ICollection<DebtStatus> DebtStatuses { get; set; }
         public ICollection<DebtDiscount> DebtDiscounts { get; set; }
+        public ICollection<DebtUpdateFactory> DebtUpdateFactories { get; set; }
     }
 }

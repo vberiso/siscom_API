@@ -34,7 +34,9 @@
     <Compile Remove="Migrations\20200210172815_addFieldAccountNumberToTableSERVICE.cs" />
     <Compile Remove="Migrations\20200210172815_addFieldAccountNumberToTableSERVICE.Designer.cs" />
     <Compile Remove="Migrations\20200229172601_addTableDispatchOrder.cs" />
-    <Compile Remove="Migrations\20200229172601_addTableDispatchOrder.Designer.cs" /> 
+    <Compile Remove="Migrations\20200229172601_addTableDispatchOrder.Designer.cs" />
+    <Compile Remove="Migrations\20200603183744_addTablesUpdateFactoryAndValvulaControl.cs" />
+    <Compile Remove="Migrations\20200603183744_addTablesUpdateFactoryAndValvulaControl.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>

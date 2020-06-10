@@ -280,9 +280,12 @@ namespace Siscom.Agua.DAL
         /// <summary>
         /// Ot Mobile
         /// </summary>
-        public DbSet<Phones> Phones { get; set; } 
+        public DbSet<Phones> Phones { get; set; }
 
-
+        /// <summary>
+        /// Valvula
+        /// </summary>
+        public DbSet<ValvulaControl> ValvulaControls { get; set; }
 
         public ApplicationDbContext()
         {
@@ -786,6 +789,22 @@ namespace Siscom.Agua.DAL
                    .HasOne<Debt>(a => a.Debt)
                    .WithMany(s => s.DebtStatuses)
                    .HasForeignKey(s => s.DebtId);
+            #endregion
+
+            #region DebtUpdateFactory
+            builder.Entity<DebtUpdateFactory>()
+                   .HasOne<Debt>(a => a.Debt)
+                   .WithMany(s => s.DebtUpdateFactories)
+                   .HasForeignKey(s => s.DebtId);
+
+            builder.Entity<DebtUpdateFactory>()
+                   .Property(p => p.ChangeAmount)
+                   .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<DebtUpdateFactory>()
+                  .Property(p => p.OriginalAmount)
+                  .HasColumnType("decimal(18, 2)");
+
             #endregion
 
             #region Derivative
