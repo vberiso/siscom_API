@@ -225,6 +225,9 @@ namespace Siscom.Agua.DAL
         public DbSet<MaterialMovements> MaterialMovements { get; set; }
         public DbSet<UnitMeasurement> UnitMeasurements { get; set; }
         public DbSet<MaterialList> MaterialLists { get; set; }
+        public DbSet<GroupLists> GroupLists { get; set; }
+        public DbSet<Lists> Lists { get; set; }
+
 
         /// <summary>
         /// Otros
@@ -1169,6 +1172,13 @@ namespace Siscom.Agua.DAL
                 .HasForeignKey(bc => bc.OrderWorkId);
             #endregion
 
+            #region Lists
+            builder.Entity<Lists>()
+                .HasOne<GroupLists>(g => g.GroupLists)
+                .WithMany(l => l.Lists)
+                .HasForeignKey(x => x.GroupListsId);
+            #endregion
+
             #region OriginPayment
             builder.Entity<OriginPayment>()
                    .Property(x => x.IsActive)
@@ -1778,7 +1788,7 @@ namespace Siscom.Agua.DAL
                    .HasOne<ApplicationRol>(sc => sc.ApplicationRol)
                    .WithMany(s => s.ViewProfiles)
                    .HasForeignKey(sc => sc.RoleId);
-            #endregion
+            
             builder.Entity<ViewProfile>().HasKey(sc => new { sc.ViewId, sc.RoleId });
 
             builder.Entity<ViewProfile>()
@@ -1790,7 +1800,7 @@ namespace Siscom.Agua.DAL
                    .HasOne<ApplicationRol>(sc => sc.ApplicationRol)
                    .WithMany(s => s.ViewProfiles)
                    .HasForeignKey(sc => sc.RoleId);
-
+            #endregion
 
             #region DebtCampaign
 
