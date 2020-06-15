@@ -61,31 +61,38 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var debt = await _context.Debts.Include(dd => dd.DebtDetails)
+            try
+            {
+                var debt = await _context.Debts.Include(dd => dd.DebtDetails)
                         .Where(gs => _context.Statuses
                                 .Any(s => s.GroupStatusId == 4 && s.CodeName == gs.Status) && gs.AgreementId == idAgreement).OrderBy(x => x.FromDate).ToListAsync();
-            var status = await _context.Statuses.ToListAsync();
-            var type = await _context.Types.ToListAsync();
+                var status = await _context.Statuses.ToListAsync();
+                var type = await _context.Types.ToListAsync();
 
-            debt.ForEach(x =>
-            {
-                x.DescriptionStatus = (from d in status
-                                       where d.CodeName == x.Status
-                                       select d).FirstOrDefault().Description;
+                debt.ForEach(x =>
+                {
+                    x.DescriptionStatus = (from d in status
+                                           where d.CodeName == x.Status
+                                           select d).FirstOrDefault().Description;
 
-                x.DescriptionType = (from d in type
-                                     where d.CodeName == x.Type
-                                     select d).FirstOrDefault().Description;
+                    x.DescriptionType = (from d in type
+                                         where d.CodeName == x.Type
+                                         select d).FirstOrDefault().Description;
 
-            });
+                });
 
 
-            if (debt == null)
-            {
-                return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se ha encontrado deuda activa para esta cuenta" });
+                if (debt == null)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se ha encontrado deuda activa para esta cuenta" });
+                }
+
+                return Ok(debt);
             }
-
-            return Ok(debt);
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se podo obtener el adeudo." });
+            }
         }
 
         // GET: api/Debts/5

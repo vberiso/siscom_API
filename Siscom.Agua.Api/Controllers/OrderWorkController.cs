@@ -95,7 +95,7 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.LocationOrderWorks)
                     .First();
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
-
+                    .Include(x => x.TypeService)
                     .Include(x => x.TypeIntake)
                     .Include(x => x.TypeConsume)
                     .Include(x => x.OrderWork)

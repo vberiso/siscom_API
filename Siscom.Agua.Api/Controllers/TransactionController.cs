@@ -892,7 +892,7 @@ namespace Siscom.Agua.Api.Controllers
                                             _unitMeasurement = _serviceParam != null ? _serviceParam.UnitMeasurement : String.Empty;
                                         }
                                     }
-                                    else if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04")
+                                    else if (debtFind.Type == "TIP01" || debtFind.Type == "TIP04" || debtFind.Type == "TIP05")
                                     {
                                         var _serviceParam = await _context.ServiceParams
                                                                           .Where(x => x.ServiceId == Convert.ToInt32(!string.IsNullOrWhiteSpace(detail.CodeConcept) ? detail.CodeConcept : "0"))
