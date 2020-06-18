@@ -202,6 +202,12 @@ namespace Siscom.Agua.Api.Controllers
             }).ToListAsync());
         }
 
+        [HttpGet("ReasonOrders")]
+        public async Task<IActionResult> GetReasonOrders()
+        {
+            return Ok(await _context.GroupLists.Include(x => x.Lists).ToListAsync());
+        }
+
         [HttpGet("Campaign")]
         public async Task<IActionResult> ExistDiscount()
         {
@@ -304,7 +310,6 @@ namespace Siscom.Agua.Api.Controllers
         {
             return _context.SystemParameters.Any(e => e.Id == id);
         }
-
 
         [HttpGet("GetConfiguration")]
         public async Task<IActionResult> GetConfiguration([FromRoute] int teminalUserId)

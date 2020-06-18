@@ -625,6 +625,46 @@ namespace Siscom.Agua.Api.Controllers
                     _context.SaveChanges();
                     return Ok();
                 }
+                else if(order.Status == "EOT03" && order.Type == "OT012")
+                {
+                    syncData.ActivitySyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Actividad",
+                            Type = "OTD02",
+                            Value = x.ActivitiName,
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+                    });
+                    syncData.MaterialSyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Material",
+                            Type = "OTD03",
+                            Value = string.Format("{0}@{1}", x.Quantity, x.Description),
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+
+                        MaterialMovements material = new MaterialMovements
+                        {
+                            MaterialList = _context.MaterialLists.Find(x.IdMaterial),
+                            OrderWork = order,
+                            Quantity = x.Quantity,
+                            Type = "TMM01",
+                            MovementDate = DateTime.Now
+                        };
+
+                        _context.MaterialMovements.Add(material);
+                    });
+                    syncData.ValuesSyncMobiles.ForEach(x =>
+                    {
+
+                    });
+                }
             }
             return BadRequest();
         }

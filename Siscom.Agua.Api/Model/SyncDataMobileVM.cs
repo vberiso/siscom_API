@@ -13,6 +13,7 @@ namespace Siscom.Agua.Api.Model
             this.ActivitySyncMobiles = new List<ActivitySyncMobile>();
             this.MaterialSyncMobiles = new List<MaterialSyncMobile>();
             this.InspectionSyncMobiles = new List<InspectionSyncMobile>();
+            this.ValuesSyncMobiles = new List<ValuesSyncMobiles>();
         }
 
         public int IdDispatchOrder { get; set; }
@@ -31,6 +32,6 @@ namespace Siscom.Agua.Api.Model
         public List<ActivitySyncMobile> ActivitySyncMobiles { get; set; }
         public List<MaterialSyncMobile> MaterialSyncMobiles { get; set; }
         public List<InspectionSyncMobile> InspectionSyncMobiles { get; set; }
-
+        public List<ValuesSyncMobiles> ValuesSyncMobiles { get; set; }
     }
 }
