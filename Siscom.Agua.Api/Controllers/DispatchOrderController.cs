@@ -608,7 +608,17 @@ namespace Siscom.Agua.Api.Controllers
                         _context.MaterialMovements.Add(material);
                     });
 
-                    
+                    syncData.ValuesSyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = x.Name,
+                            OrderWorkId = x.OrderWorkId,
+                            OrderWork = order,
+                            Type = x.Type,
+                            Value = x.Value
+                        });
+                    });
                     _context.SaveChanges();
                     return Ok();
                 }
@@ -622,10 +632,22 @@ namespace Siscom.Agua.Api.Controllers
                         OrderWork = order,
                         OrderWorkId = order.Id
                     });
+
+                    syncData.ValuesSyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = x.Name,
+                            OrderWorkId = x.OrderWorkId,
+                            OrderWork = order,
+                            Type = x.Type,
+                            Value = x.Value
+                        });
+                    });
                     _context.SaveChanges();
                     return Ok();
                 }
-                else if(order.Status == "EOT03" && order.Type == "OT012")
+                else if(order.Status == "EOT03" && order.Type == "OT012" || order.Type == "OT013" || order.Type == "OT014")
                 {
                     syncData.ActivitySyncMobiles.ForEach(x =>
                     {
@@ -662,8 +684,33 @@ namespace Siscom.Agua.Api.Controllers
                     });
                     syncData.ValuesSyncMobiles.ForEach(x =>
                     {
-
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = x.Name,
+                            OrderWorkId = x.OrderWorkId,
+                            OrderWork = order,
+                            Type = x.Type,
+                            Value = x.Value
+                        });
                     });
+                    _context.SaveChanges();
+                    return Ok();
+                }
+                else if (order.Status == "EOT03" && order.Type == "OT015" || order.Type == "OT016")
+                {
+                    syncData.ValuesSyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = x.Name,
+                            OrderWorkId = x.OrderWorkId,
+                            OrderWork = order,
+                            Type = x.Type,
+                            Value = x.Value
+                        });
+                    });
+                    _context.SaveChanges();
+                    return Ok();
                 }
             }
             return BadRequest();
