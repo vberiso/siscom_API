@@ -36,7 +36,9 @@
     <Compile Remove="Migrations\20200229172601_addTableDispatchOrder.cs" />
     <Compile Remove="Migrations\20200229172601_addTableDispatchOrder.Designer.cs" />
     <Compile Remove="Migrations\20200603183744_addTablesUpdateFactoryAndValvulaControl.cs" />
-    <Compile Remove="Migrations\20200603183744_addTablesUpdateFactoryAndValvulaControl.Designer.cs" /> 
+    <Compile Remove="Migrations\20200603183744_addTablesUpdateFactoryAndValvulaControl.Designer.cs" />
+    <Compile Remove="Migrations\20200616220427_addTableOrderWorkList.cs" />
+    <Compile Remove="Migrations\20200616220427_addTableOrderWorkList.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>

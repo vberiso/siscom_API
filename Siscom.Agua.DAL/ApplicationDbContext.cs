@@ -227,6 +227,7 @@ namespace Siscom.Agua.DAL
         public DbSet<MaterialList> MaterialLists { get; set; }
         public DbSet<GroupLists> GroupLists { get; set; }
         public DbSet<Lists> Lists { get; set; }
+        public DbSet<OrderWorkList> OrderWorkLists { get; set; }
 
 
         /// <summary>
@@ -1126,6 +1127,15 @@ namespace Siscom.Agua.DAL
                .HasOne<OrderWork>(a => a.OrderWork)
                .WithMany(s => s.PhotosOrderWork)
                .HasForeignKey(s => s.OrderWorkId);
+
+            #endregion
+
+            #region OrderWorkList
+
+            builder.Entity<OrderWorkList>()
+                .HasOne<OrderWork>(o => o.OrderWork)
+                .WithMany(d => d.OrderWorkLists)
+                .HasForeignKey(k => k.OrderWorkId);
 
             #endregion
 

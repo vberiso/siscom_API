@@ -93,7 +93,10 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.PhotosOrderWork)
                     .Include(x => x.OrderWorkDetails)
                     .Include(x => x.LocationOrderWorks)
+                    .Include(x => x.OrderWorkLists)
                     .First();
+
+                
                 var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
                     .Include(x => x.TypeService)
                     .Include(x => x.TypeIntake)
@@ -111,26 +114,44 @@ namespace Siscom.Agua.Api.Controllers
                     .First();
 
 
-                if(OrderWork.LocationOrderWorks != null && OrderWork.LocationOrderWorks.Count > 0)
+                if (OrderWork.LocationOrderWorks != null && OrderWork.LocationOrderWorks.Count > 0)
                 {
                     foreach (var item in OrderWork.LocationOrderWorks)
                     {
                         item.LocationOfAttentionOrderWork = _context.LocationOfAttentionOrderWorks.FirstOrDefault(l => l.Id == item.LocationOfAttentionOrderWorkId);
-                    } 
+                    }
                 }
 
+                //if (!OrderWork.Type.Equals("OT019")) //En caso que sea una Orden de inspeccion.
+                //{
+                //    List<int> idsAgr = OrderWork.OrderWorkLists.Select(x => x.AgreementId).ToList();
+                //    var lstAgree = await _context.Agreements.Where(a => idsAgr.Contains(a.Id))
+                //                            .Include(x => x.TypeService)
+                //                            .Include(x => x.TypeIntake)
+                //                            .Include(x => x.TypeConsume)
+                //                            .Include(x => x.Clients)
+                //                            .Include(x => x.Addresses)
+                //                                .ThenInclude(x => x.Suburbs)
+                //                                    .ThenInclude(x => x.Towns)
+                //                                        .ThenInclude(x => x.States)
+                //                                            .ThenInclude(x => x.Countries)
+                //                            .ToListAsync();
+
+                //    return Ok(new List<object>() { agreement, OrderWork, null, lstAgree });
+                //}
+
                 TaxUser taxUser = new TaxUser();
-                if(OrderWork.AgrementId == 0 && OrderWork.TaxUserId != 0)
+                if (OrderWork.AgrementId == 0 && OrderWork.TaxUserId != 0)
                 {
                     taxUser = await _context.TaxUsers.Where(t => t.Id == OrderWork.TaxUserId)
                                                     .Include(x => x.TaxAddresses)
                                                     .FirstOrDefaultAsync();
                 }
-
+                
                 if (withOrder)
-                {                    
-                    return Ok(new List<object>() { agreement, OrderWork, taxUser });
-                }
+                    {
+                        return Ok(new List<object>() { agreement, OrderWork, taxUser });
+                    }
                 return Ok(agreement);
             }
             catch (Exception ex)
@@ -537,6 +558,114 @@ namespace Siscom.Agua.Api.Controllers
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, new { error = ex, msg = "No se pudo generar la orden." });
+            }
+        }
+
+        [HttpPost("OrderWorks/FromCulturaDelAgua")]
+        public async Task<IActionResult> CreateFromCulturaDelAgua([FromBody] object collection)
+        {
+            int ApplyIds = 0;
+            var data = JObject.Parse(collection.ToString());
+            try
+            {
+                List<OrderWorkList> orderWorkLists = JsonConvert.DeserializeObject<List<OrderWorkList>>(data["idsAgreement"].ToString());
+                                
+                OrderWork orderWork = new OrderWork()
+                {
+                    AgrementId = 0,
+                    TaxUserId = 0,
+                    DateOrder = DateTime.Now,
+                    Applicant = data["applicant"].ToString(),
+                    Type = data["type"].ToString(),
+                    Status = "EOT01",
+                    Observation = data["Observation"] == null ? "Sin Observacion" : data["Observation"].ToString(),
+                    Activities = data["Activities"] == null ? "Sin Actividad" : data["Activities"].ToString(),
+                    Folio = data["idFolios"] == null ? "LI" : data["idFolios"].ToString(),                    
+                    aviso = 0
+                };
+                await _context.OrderWorks.AddAsync(orderWork);
+                await _context.SaveChangesAsync();
+
+                var status = new OrderWorkStatus()
+                {
+                    IdStatus = "EOT01",
+                    OrderWorkId = orderWork.Id,
+                    User = data["applicant"].ToString(),
+                    OrderWorkStatusDate = DateTime.Now
+                };
+                await _context.OrderWorkStatus.AddAsync(status);
+                await _context.SaveChangesAsync();
+                
+                foreach (var item in orderWorkLists)
+                {
+                    #region validaciones originales
+                    //    canCreate = true;
+                    //    if (data["typeOrder"].ToString() == "OT003" || data["typeOrder"].ToString() == "OT006")
+                    //    {
+                    //Aggrement = _context.Agreements.Where(x => x.Id == id)
+                    //.Include(x => x.Clients)
+                    //.Include(x => x.OrderWork)
+                    //.Include(x => x.Debts)
+                    //.First();
+                    //        if (data["typeOrder"].ToString() == "OT006")
+                    //        {
+                    //            avisoError = ValidationOrderWorkAviso(Aggrement, false);
+                    //            bool isNumeric = int.TryParse(avisoError, out aviso);
+                    //            canCreate = isNumeric;
+                    //        }
+                    //        else
+                    //        {
+                    //            OrderWork = Aggrement.OrderWork.Where(x => x.Type == "OT003" && (x.Status == "EOT02" || x.Status == "EOT01")).FirstOrDefault();
+                    //            var deb = Aggrement.Debts.Where(x => x.Status == "ED001" || x.Status == "ED011" || x.Status == "ED007" || x.Status == "ED004").ToList();
+                    //            if (OrderWork != null || deb.Count() > 0 || Aggrement.TypeStateServiceId != 3)
+                    //            {
+                    //                canCreate = false;
+                    //            }
+                    //        }
+                    //        if (!canCreate)
+                    //        {
+                    //            var client = Aggrement.Clients.Where(x => x.TypeUser == "CLI01").First();
+                    //            string tipeOrder = "";
+                    //            switch (data["typeOrder"].ToString())
+                    //            {
+                    //                case "OT001":
+                    //                    tipeOrder = "Inspeccion / Verificacion";
+                    //                    break;
+                    //                case "OT002":
+                    //                    tipeOrder = "Corte";
+                    //                    break;
+                    //                case "OT003":
+                    //                    tipeOrder = "Reconexion";
+                    //                    break;
+                    //                case "OT004":
+                    //                    tipeOrder = "Mantenimiento / Sustitucion";
+                    //                    break;
+                    //                case "OT006":
+                    //                    tipeOrder = "Aviso de deuda";
+                    //                    break;
+                    //            }
+                    //            msgs.Add($"La cuenta {Aggrement.Account} con nombre de cliente {client.Name} {client.LastName} no se pudo generar una orden de tipo {tipeOrder}{avisoError}");
+                    //            continue;
+                    //        }
+                    //  }
+
+                    #endregion
+
+                    //Actualizo el listado de agrement ligados a la orden de inspeccion                                       
+                    item.Status = "ELI01";
+                    item.OrderWorkId = orderWork.Id;
+                    DAL.Models.Address address = await _context.Adresses.FirstOrDefaultAsync(a => a.TypeAddress.Equals("DIR01"));
+                    item.Longitude = string.IsNullOrEmpty(address?.Lon) ? "0.00" : address?.Lon;
+                    item.Latitude = string.IsNullOrEmpty(address?.Lat) ? "0.00" : address?.Lat;
+                }
+                await _context.OrderWorkLists.AddRangeAsync(orderWorkLists);
+                await _context.SaveChangesAsync();
+                                
+                return StatusCode(StatusCodes.Status200OK, new { msg = "Orden generada correctamente", id = orderWork.Id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex, msg = "Solo se pudieron generar las primeras " + ApplyIds + " ordenes" });
             }
         }
 

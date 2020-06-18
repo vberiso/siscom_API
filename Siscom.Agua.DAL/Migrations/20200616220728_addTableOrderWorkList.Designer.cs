@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200616220728_addTableOrderWorkList")]
+    partial class addTableOrderWorkList
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2511,7 +2513,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 6, 18, 11, 22, 2, 859, DateTimeKind.Local).AddTicks(8379));
+                        .HasDefaultValue(new DateTime(2020, 6, 16, 17, 7, 26, 752, DateTimeKind.Local).AddTicks(3624));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3510,88 +3512,22 @@ namespace Siscom.Agua.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Account")
-                        .HasColumnName("account")
-                        .HasMaxLength(10);
-
-                    b.Property<double>("Adeudo")
-                        .HasColumnName("adeudo");
-
                     b.Property<int>("AgreementId")
                         .HasColumnName("agreement_id");
 
-                    b.Property<string>("DescuentoVulnerable")
-                        .HasColumnName("descuento_vulnerable")
-                        .HasMaxLength(10);
-
-                    b.Property<string>("Domicilio")
-                        .HasColumnName("domicilio")
-                        .HasMaxLength(150);
-
-                    b.Property<string>("Email")
-                        .HasColumnName("email")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("FolioOrderResult")
-                        .HasColumnName("folio_order_result")
+                    b.Property<string>("FolioOrder")
+                        .HasColumnName("folio_order")
                         .HasMaxLength(30);
 
-                    b.Property<string>("HaveConvenio")
-                        .HasColumnName("have_convenio")
-                        .HasMaxLength(10);
-
-                    b.Property<string>("Latitude")
-                        .HasColumnName("latitude")
-                        .HasMaxLength(25);
-
-                    b.Property<string>("Longitude")
-                        .HasColumnName("longitude")
-                        .HasMaxLength(25);
-
-                    b.Property<string>("Nombre")
-                        .HasColumnName("nombre")
-                        .HasMaxLength(100);
-
                     b.Property<int>("OrderWorkId");
-
-                    b.Property<string>("OrderWorkIdResult")
-                        .HasColumnName("order_work_id_result")
-                        .HasMaxLength(5);
-
-                    b.Property<int>("Periodos")
-                        .HasColumnName("periodos");
-
-                    b.Property<string>("Ruta")
-                        .HasColumnName("ruta")
-                        .HasMaxLength(10);
 
                     b.Property<string>("Status")
                         .HasColumnName("status")
                         .HasMaxLength(6);
 
-                    b.Property<string>("StatusAccount")
-                        .HasColumnName("status_account")
-                        .HasMaxLength(20);
-
-                    b.Property<string>("Tel")
-                        .HasColumnName("tel")
-                        .HasMaxLength(15);
-
-                    b.Property<string>("TipoServicio")
-                        .HasColumnName("tipo_servicio")
-                        .HasMaxLength(25);
-
-                    b.Property<string>("TipoToma")
-                        .HasColumnName("tipo_toma")
-                        .HasMaxLength(25);
-
-                    b.Property<string>("TypeOrderResult")
-                        .HasColumnName("type_order_result")
+                    b.Property<string>("TypeOrder")
+                        .HasColumnName("type_order")
                         .HasMaxLength(5);
-
-                    b.Property<string>("Year")
-                        .HasColumnName("year")
-                        .HasMaxLength(10);
 
                     b.HasKey("Id");
 
