@@ -464,6 +464,30 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT002")
                 {
+                    syncData.MaterialSyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Material",
+                            Type = "OTD03",
+                            Value = string.Format("{0}@{1}", x.Quantity, x.Description),
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+
+                        MaterialMovements material = new MaterialMovements
+                        {
+                            MaterialList = _context.MaterialLists.Find(x.IdMaterial),
+                            OrderWork = order,
+                            Quantity = x.Quantity,
+                            Type = "TMM01",
+                            MovementDate = DateTime.Now
+                        };
+
+                        _context.MaterialMovements.Add(material);
+                    });
+                    _context.SaveChanges();
+
                     var parameters = new SqlParameter[]
                     {
                         new SqlParameter() { ParameterName = "@id", SqlDbType = System.Data.SqlDbType.Int, Direction = System.Data.ParameterDirection.Input, Value = order.AgrementId },
@@ -503,6 +527,30 @@ namespace Siscom.Agua.Api.Controllers
                         OrderWork = order,
                         OrderWorkId = order.Id
                     });
+
+                    syncData.MaterialSyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Material",
+                            Type = "OTD03",
+                            Value = string.Format("{0}@{1}", x.Quantity, x.Description),
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+
+                        MaterialMovements material = new MaterialMovements
+                        {
+                            MaterialList = _context.MaterialLists.Find(x.IdMaterial),
+                            OrderWork = order,
+                            Quantity = x.Quantity,
+                            Type = "TMM01",
+                            MovementDate = DateTime.Now
+                        };
+
+                        _context.MaterialMovements.Add(material);
+                    });
+
                     _context.SaveChanges();
                     return Ok();
                 }
@@ -519,6 +567,30 @@ namespace Siscom.Agua.Api.Controllers
                             OrderWorkId = order.Id
                         });
                     });
+
+                    syncData.MaterialSyncMobiles.ForEach(x =>
+                    {
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
+                        {
+                            Name = "Material",
+                            Type = "OTD03",
+                            Value = string.Format("{0}@{1}", x.Quantity, x.Description),
+                            OrderWork = order,
+                            OrderWorkId = order.Id
+                        });
+
+                        MaterialMovements material = new MaterialMovements
+                        {
+                            MaterialList = _context.MaterialLists.Find(x.IdMaterial),
+                            OrderWork = order,
+                            Quantity = x.Quantity,
+                            Type = "TMM01",
+                            MovementDate = DateTime.Now
+                        };
+
+                        _context.MaterialMovements.Add(material);
+                    });
+
                     _context.SaveChanges();
                     return Ok();
                 }
