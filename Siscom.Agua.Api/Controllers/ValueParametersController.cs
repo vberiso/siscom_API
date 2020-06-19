@@ -208,6 +208,12 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(await _context.GroupLists.Include(x => x.Lists).ToListAsync());
         }
 
+        [HttpGet("OrderWorkList/{id}")]
+        public async Task<IActionResult> GetOrderWorkList([FromRoute] int id)
+        {
+            return Ok(await _context.OrderWorkLists.Where(x => x.OrderWorkId == id).ToListAsync());
+        }
+
         [HttpGet("Campaign")]
         public async Task<IActionResult> ExistDiscount()
         {
