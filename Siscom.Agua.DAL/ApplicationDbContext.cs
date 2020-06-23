@@ -228,6 +228,7 @@ namespace Siscom.Agua.DAL
         public DbSet<GroupLists> GroupLists { get; set; }
         public DbSet<Lists> Lists { get; set; }
         public DbSet<OrderWorkList> OrderWorkLists { get; set; }
+        public DbSet<OrderWorkListPictures> OrderWorkListPictures { get; set; }
 
 
         /// <summary>
@@ -1137,6 +1138,15 @@ namespace Siscom.Agua.DAL
                 .WithMany(d => d.OrderWorkLists)
                 .HasForeignKey(k => k.OrderWorkId);
 
+            #endregion
+
+            #region OrderWorkListPictures
+
+            builder.Entity<OrderWorkListPictures>()
+                .HasOne<OrderWorkList>(ol => ol.OrderWorkList)
+                .WithMany(p => p.OrderWorkListPictures)
+                .HasForeignKey(k => k.OrderWorkListId);
+              
             #endregion
 
             #region TechnicalStaff

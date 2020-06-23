@@ -59,5 +59,7 @@ namespace Siscom.Agua.DAL.Models
 
         public int OrderWorkId { get; set; }
         public OrderWork OrderWork { get; set; }
+
+        public ICollection<OrderWorkListPictures> OrderWorkListPictures { get; set; }
     }
 }
