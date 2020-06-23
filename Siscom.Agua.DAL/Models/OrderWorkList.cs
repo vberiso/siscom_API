@@ -25,7 +25,7 @@ namespace Siscom.Agua.DAL.Models
         [Column("latitude"), StringLength(25)]
         public string Latitude { get; set; }
         [Column("longitude"), StringLength(25)]
-        public string Longitude { get; set; }
+        public string Longitude { get; set; }       
 
         [Column("year"), StringLength(10)]
         public string Year { get; set; }
@@ -55,7 +55,14 @@ namespace Siscom.Agua.DAL.Models
         public double Adeudo { get; set; }
         [Column("periodos")]
         public int Periodos { get; set; }
-        
+
+
+        [Column("latitude_final"), StringLength(25)]
+        public string LatitudeFinal { get; set; }
+        [Column("longitude_final"), StringLength(25)]
+        public string LongitudeFinal { get; set; }
+        [Column("observation_final"), StringLength(250)]
+        public string ObservationFinal { get; set; }
 
         public int OrderWorkId { get; set; }
         public OrderWork OrderWork { get; set; }

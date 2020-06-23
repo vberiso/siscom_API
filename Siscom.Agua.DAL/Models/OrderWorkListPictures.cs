@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Siscom.Agua.DAL.Models
 {
+    [Table("order_work_list_picture")]
     public class OrderWorkListPictures
     {
         [Key]

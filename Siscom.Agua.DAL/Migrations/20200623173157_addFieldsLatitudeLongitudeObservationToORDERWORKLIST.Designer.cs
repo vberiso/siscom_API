@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200623173157_addFieldsLatitudeLongitudeObservationToORDERWORKLIST")]
+    partial class addFieldsLatitudeLongitudeObservationToORDERWORKLIST
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2511,7 +2513,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 6, 23, 12, 35, 47, 348, DateTimeKind.Local).AddTicks(5629));
+                        .HasDefaultValue(new DateTime(2020, 6, 23, 12, 31, 55, 834, DateTimeKind.Local).AddTicks(4980));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3649,7 +3651,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.HasIndex("OrderWorkListId");
 
-                    b.ToTable("order_work_list_picture");
+                    b.ToTable("OrderWorkListPictures");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.OrderWorkReasonCatalog", b =>
