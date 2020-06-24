@@ -20,6 +20,7 @@ using Siscom.Agua.Api.Services.Providers;
 using Siscom.Agua.Api.Services.Settings;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
+using StackExchange.Redis;
 using Swashbuckle.AspNetCore.Examples;
 
 namespace Siscom.Agua.Api.Controllers
@@ -789,6 +790,91 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         
+        [HttpPost("SyncDataMobileList")]
+        public async Task<IActionResult> SyncDataList(SyncDataInspectionList syncData)
+        {
 
+            bool validDateOrderWork = true;
+            bool validDatePhoto = true;
+            string exceptionMessage = string.Empty;
+            int idFile = 0;
+            var uploadFilesPath = Path.Combine(appSettings.FilePath, "FotosOTInspección", DateTime.Now.ToString("yyyy-MM-dd"), syncData.UserIdAPI);
+            DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
+            OrderWork order = new OrderWork();
+            var user = await _context.Users.FindAsync(syncData.UserIdAPI);
+
+            //Verify Date Valid
+            DateTime dateRealization;
+            DateTime.TryParse(syncData.DateRealization, out dateRealization);
+            if (dateRealization == default)
+            {
+                return Conflict(new { error = "Fecha con mal formato favor de verificar" });
+            }
+            order.DateRealization = dateRealization;
+            dispatch.DateAttended = dateRealization;
+
+            if (syncData.HaveAnomaly)
+            {
+                return Ok();
+            }
+            else
+            {
+                foreach (var item in syncData.PhotoSyncMobiles)
+                {
+                    DateTime valid;
+                    DateTime.TryParse(item.DateTake, out valid);
+                    if (valid == default)
+                    {
+                        validDatePhoto = false;
+                        break;
+                    }
+                    else
+                    {
+                        FileInfo fi = null;
+                        //Check if directory exist
+                        if (!System.IO.Directory.Exists(uploadFilesPath))
+                        {
+                            System.IO.Directory.CreateDirectory(uploadFilesPath); //Create directory if it doesn't exist
+                        }
+                        Guid guid = Guid.NewGuid();
+                        string imageName = guid.ToString() + ".jpg";
+                        string imgPath = Path.Combine(uploadFilesPath, imageName);
+                        byte[] imageBytes = Convert.FromBase64String(item.Photo);
+                        try
+                        {
+                            await System.IO.File.WriteAllBytesAsync(imgPath, imageBytes);
+                            fi = new FileInfo(imgPath);
+                            var fileSize = FileConverterSize.SizeSuffix(fi.Length);
+                            PhotosOrderWork photosOrder = new PhotosOrderWork
+                            {
+                                BlobPhoto = imageBytes,
+                                DatePhoto = valid,
+                                NameFile = imageName,
+                                OrderWork = order,
+                                OrderWorkId = order.Id,
+                                PathFile = imgPath,
+                                Size = fi.Length,
+                                Type = item.Type = "OTF04",
+                                Weight = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1],
+                                User = syncData.UserIdAPI,
+                                UserName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
+                            };
+                            _context.PhotosOrderWork.Add(photosOrder);
+                            _context.SaveChanges();
+
+                            if (photosOrder.Type == "OTF03")
+                            {
+                                idFile = photosOrder.Id;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            exceptionMessage = e.Message;
+                        }
+                    }
+                }
+            }
+            return BadRequest();
+        }
     }
 }
