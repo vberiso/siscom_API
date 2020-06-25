@@ -94,6 +94,7 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.OrderWorkDetails)
                     .Include(x => x.LocationOrderWorks)
                     .Include(x => x.OrderWorkLists)
+                    .ThenInclude(x => x.OrderWorkListPictures)
                     .First();
 
                 
