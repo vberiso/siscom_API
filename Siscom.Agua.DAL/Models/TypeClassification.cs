@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -26,5 +27,7 @@ namespace Siscom.Agua.DAL.Models
         public bool IsActive { get; set; }
 
         public ICollection<Agreement> Agreements { get; set; }
+        [JsonIgnore]
+        public ICollection<PreAgreement> PreAgreements { get; set; }
     }
 }

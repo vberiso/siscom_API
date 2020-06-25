@@ -69,6 +69,7 @@ namespace Siscom.Agua.DAL
         public DbSet<AgreementComment> AgreementComments { get; set; }
         public DbSet<AgreementRulerCalculation> AgreementRulerCalculations { get; set; }
         public DbSet<AccountStatusInFile> AccountStatusInFiles { get; set; }
+        public DbSet<PreAgreement> PreAgreements { get; set; }
         /// <summary>
         /// Accounting
         /// </summary>
@@ -1374,6 +1375,28 @@ namespace Siscom.Agua.DAL
             builder.Entity<PayMethod>()
                    .Property(x => x.IsActive)
                    .HasDefaultValue(true);
+            #endregion
+
+            #region PreAgreement
+            builder.Entity<PreAgreement>()
+                   .HasOne<TypeIntake>(a => a.TypeIntake)
+                   .WithMany(s => s.PreAgreements)
+                   .HasForeignKey(s => s.TypeIntakeId);
+                       
+            builder.Entity<PreAgreement>()
+                   .HasOne<TypeService>(a => a.TypeService)
+                   .WithMany(s => s.PreAgreements)
+                   .HasForeignKey(s => s.TypeServiceId);
+                                 
+            builder.Entity<PreAgreement>()
+                   .HasOne<TypeUse>(a => a.TypeUse)
+                   .WithMany(s => s.PreAgreements)
+                   .HasForeignKey(s => s.TypeUseId);
+
+            builder.Entity<PreAgreement>()
+                  .HasOne<TypeClassification>(a => a.TypeClassification)
+                  .WithMany(s => s.PreAgreements)
+                  .HasForeignKey(s => s.TypeClassificationId);  
             #endregion
 
             #region Prepaid

@@ -26,5 +26,7 @@ namespace Siscom.Agua.DAL.Models
 
         [JsonIgnore]
         public ICollection<Agreement> Agreements { get; set; }
+        [JsonIgnore]
+        public ICollection<PreAgreement> PreAgreements { get; set; }
     }
 }
