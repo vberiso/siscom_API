@@ -208,6 +208,48 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(await _context.GroupLists.Include(x => x.Lists).ToListAsync());
         }
 
+        [HttpGet("GetAgreementCatalog")]
+        public async Task<IActionResult> GetAgreementCatalog()
+        {
+            TypesAgreementVM types = new TypesAgreementVM();
+            types.TypeClassifications = await _context.TypeClassifications
+                .Where(x => x.IsActive)
+                .Select(x => new TypeClassificationsVM
+                {
+                    Id = x.Id,
+                    IntakeAcronym = x.IntakeAcronym,
+                    Name = x.Name
+                }).ToListAsync();
+
+            types.TypeIntake = await _context.TypeIntakes
+                .Where(x => x.IsActive)
+                .Select(x => new TypeIntakeVM
+                {
+                    Id = x.Id,
+                    Acronym = x.Acronym,
+                    Name = x.Name
+                }).ToListAsync();
+
+            types.TypeService = await _context.TypeServices
+               .Where(x => x.IsActive)
+               .Select(x => new TypeServiceVM
+               {
+                   Id = x.Id,
+                   Name = x.Name
+               }).ToListAsync();
+
+            types.TypeUse = await _context.TypeUses
+               .Where(x => x.IsActive)
+               .Select(x => new TypeUseVM
+               {
+                   Id = x.Id,
+                   Name = x.Name,
+                   IntakeAcronym = x.IntakeAcronym
+               }).ToListAsync();
+
+            return Ok(types);
+        }
+
         [HttpGet("OrderWorkList/{id}")]
         public async Task<IActionResult> GetOrderWorkList([FromRoute] int id)
         {
