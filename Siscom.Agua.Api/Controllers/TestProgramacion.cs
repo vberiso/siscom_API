@@ -53,7 +53,7 @@ namespace Siscom.Agua.Api.Controllers
                         }
                     }
                 }).OrderByDescending(x => x.Id)
-                .Take(200);
+                .Take(20);
         }
 
         // GET api/<TestProgramacion>/5
