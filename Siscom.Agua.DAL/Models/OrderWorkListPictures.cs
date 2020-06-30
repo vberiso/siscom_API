@@ -28,6 +28,8 @@ namespace Siscom.Agua.DAL.Models
         public string UserName { get; set; }
         [Column("file_picture")]
         public byte[] FilePicture { get; set; }
+        [Column("path_file")]
+        public string PathFile { get; set; }
 
         public int OrderWorkListId { get; set; }
         public OrderWorkList OrderWorkList { get; set; }
