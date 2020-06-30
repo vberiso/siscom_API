@@ -11,7 +11,7 @@ namespace Siscom.Agua.Api.Model
         {
             this.PhotoSyncMobiles = new List<PhotoSyncMobile>();
         }
-
+        public int IdOrderWorkParent { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
         public string Comentary { get; set; }
@@ -20,8 +20,9 @@ namespace Siscom.Agua.Api.Model
         public int AgreementId { get; set; }
         public string UserIdAPI { get; set; }
         public int IdDispatchOrder { get; set; }
-        public string DateRealization { get; set; }
         public bool HaveAnomaly { get; set; }
+        public string Folio { get; set; }
         public List<PhotoSyncMobile> PhotoSyncMobiles { get; set; }
+        public List<AnomalySyncMobile> AnomalySyncMobiles { get; set; }
     }
 }

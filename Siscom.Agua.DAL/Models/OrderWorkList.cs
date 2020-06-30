@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
@@ -63,7 +64,8 @@ namespace Siscom.Agua.DAL.Models
         public string LongitudeFinal { get; set; }
         [Column("observation_final"), StringLength(250)]
         public string ObservationFinal { get; set; }
-
+        [Column("status_check"), DefaultValue(0)]
+        public byte StatusCheck { get; set; }
         public int OrderWorkId { get; set; }
         public OrderWork OrderWork { get; set; }
 

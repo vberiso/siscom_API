@@ -41,5 +41,10 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<TaxReceipt> TaxReceipts { get; set; }
         public ICollection<DiscountAuthorization> DiscountAuthorizations { get; set; }
         public ICollection<TransitPolice> TransitPolices { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1} {2}", Name, LastName, SecondLastName);
+        }
     }
 }

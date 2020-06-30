@@ -789,12 +789,10 @@ namespace Siscom.Agua.Api.Controllers
             return BadRequest();
         }
 
-        
-        [HttpPost("SyncDataMobileList")]
-        public async Task<IActionResult> SyncDataList(SyncDataInspectionList syncData)
-        {
 
-            bool validDateOrderWork = true;
+        [HttpPost("SyncDataMobileList/{idOrderWorkList}")]
+        public async Task<IActionResult> SyncDataList([FromRoute] int idOrderWorkList, SyncDataInspectionList syncData)
+        {
             bool validDatePhoto = true;
             string exceptionMessage = string.Empty;
             int idFile = 0;
@@ -803,17 +801,23 @@ namespace Siscom.Agua.Api.Controllers
             OrderWork order = new OrderWork();
             var user = await _context.Users.FindAsync(syncData.UserIdAPI);
 
-            //Verify Date Valid
-            DateTime dateRealization;
-            DateTime.TryParse(syncData.DateRealization, out dateRealization);
-            if (dateRealization == default)
-            {
-                return Conflict(new { error = "Fecha con mal formato favor de verificar" });
-            }
-            order.DateRealization = dateRealization;
-            dispatch.DateAttended = dateRealization;
+            //Create Order Work
+            order.DateOrder = DateTime.Now.AddDays(5);
+            order.Applicant = user.ToString();
+            order.Type = "OT001";
+            order.Status = "EOT01";
+            order.Observation = syncData.Observations;
+            order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
+            order.TechnicalStaffId = 0;
+            order.DateStimated = DateTime.Now.AddDays(6);
+            order.Agreement = await _context.Agreements.FindAsync(syncData.AgreementId);
+            order.TaxUserId = 0;
+            order.aviso = 0;
 
-            if (syncData.HaveAnomaly)
+            await _context.OrderWorks.AddAsync(order);
+            await _context.SaveChangesAsync();
+
+            if (!syncData.HaveAnomaly)
             {
                 return Ok();
             }
@@ -873,6 +877,14 @@ namespace Siscom.Agua.Api.Controllers
                         }
                     }
                 }
+
+                OrderWorkList workList = await _context.OrderWorkLists.FindAsync(idOrderWorkList);
+                workList.FolioOrderResult = syncData.Folio;
+                workList.TypeOrderResult = "OT001";
+                workList.OrderWorkIdResult = order.Id.ToString();
+                workList.LatitudeFinal = syncData.Latitude;
+                workList.LongitudeFinal = syncData.Longitude;
+                workList.ObservationFinal = syncData.Observations;
             }
             return BadRequest();
         }
