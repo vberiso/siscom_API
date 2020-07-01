@@ -812,7 +812,7 @@ namespace Siscom.Agua.Api.Controllers
             order.Applicant = user.ToString();
             order.Type = "OT018";
             order.Status = "EOT01";
-            order.Observation = syncData.Observations;
+            order.Observation = "Comentario:" + syncData.Comentary + " Detalles: " + syncData.Observations;
             order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
             order.TechnicalStaffId = 0;
             order.DateStimated = DateTime.Now.AddDays(6);
@@ -905,8 +905,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 if (syncData.CompleteList)
                 {
-                    int contValid = _context.OrderWorkLists.Where(x => x.StatusCheck == 0).Count();
-                    if (contValid > 0)
+                    if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == workList.OrderWorkId).Count() > 0)
                     {
                         return Conflict(new { error = "El tipo de orden de inspeccion no esta completamente atendido, Favor de verificar" });
                     }

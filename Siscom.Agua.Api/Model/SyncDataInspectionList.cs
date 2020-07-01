@@ -17,7 +17,6 @@ namespace Siscom.Agua.Api.Model
         public string Longitude { get; set; }
         public string Comentary { get; set; }
         public string Observations { get; set; }
-        public string Reason { get; set; }
         public int AgreementId { get; set; }
         public string UserIdAPI { get; set; }
         public int IdDispatchOrder { get; set; }
