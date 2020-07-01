@@ -42,7 +42,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("DispatchOrderById/{id}")]
         public async Task<IActionResult> getAgremmentsOfStaff([FromRoute] int id)
         {
-            var dispatchOrder =  await _context.DispatchOrders.FirstOrDefaultAsync(x => x.Id == id);
+            var dispatchOrder = await _context.DispatchOrders.FirstOrDefaultAsync(x => x.Id == id);
             return StatusCode(StatusCodes.Status200OK, dispatchOrder);
         }
 
@@ -68,7 +68,7 @@ namespace Siscom.Agua.Api.Controllers
                     });
                     scope.Complete();
                 }
-                    
+
             }
             catch (Exception e)
             {
@@ -108,10 +108,10 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 var dispatchOrders = await query.ToListAsync();
 
-                if(dispatchOrders.Count == 0)
+                if (dispatchOrders.Count == 0)
                     return StatusCode(StatusCodes.Status204NoContent, new { msg = "Sin información disponible." });
 
-                var staffs = await _context.TechnicalStaffs.Where(s => dispatchOrders.Select(d => d.TechnicalStaffId).Distinct().Contains(s.Id)).ToListAsync();                
+                var staffs = await _context.TechnicalStaffs.Where(s => dispatchOrders.Select(d => d.TechnicalStaffId).Distinct().Contains(s.Id)).ToListAsync();
                 var types = await _context.Types.Where(t => t.GroupTypeId == 15).ToListAsync();
                 var status = await _context.Statuses.Where(s => s.GroupStatusId == 14 || s.GroupStatusId == 18).ToListAsync();
                 var orders = await _context.OrderWorks
@@ -121,12 +121,12 @@ namespace Siscom.Agua.Api.Controllers
                     ToListAsync();
                 var taxUsers = await _context.TaxUsers.Where(t => orders.Where(o => o.AgrementId == 0).Select(x => x.TaxUserId).Contains(t.Id)).ToListAsync();
 
-                return StatusCode(StatusCodes.Status200OK, new List<Object> {dispatchOrders, staffs, orders, types, status, taxUsers});
+                return StatusCode(StatusCodes.Status200OK, new List<Object> { dispatchOrders, staffs, orders, types, status, taxUsers });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status400BadRequest , new { error = "No se pudo consultar la información solicitada." });
-            }            
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = "No se pudo consultar la información solicitada." });
+            }
         }
 
         [HttpPost("getOrderByDateStaff/{date}/{dateEnd}")]
@@ -146,7 +146,7 @@ namespace Siscom.Agua.Api.Controllers
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add(new SqlParameter("@fechaIni", fechaIni.ToString("yyyy-MM-dd")));
                     command.Parameters.Add(new SqlParameter("@fechaFin", fechaFin.ToString("yyyy-MM-dd")));
-                    command.Parameters.Add(new SqlParameter("@userIds", Ids));                    
+                    command.Parameters.Add(new SqlParameter("@userIds", Ids));
                     command.CommandTimeout = 6000;
 
                     this._context.Database.OpenConnection();
@@ -156,7 +156,7 @@ namespace Siscom.Agua.Api.Controllers
                     }
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new List<Object> {dataTable});                
+                return StatusCode(StatusCodes.Status200OK, new List<Object> { dataTable });
             }
             catch (Exception ex)
             {
@@ -173,12 +173,12 @@ namespace Siscom.Agua.Api.Controllers
             }
 
             try
-            {   
+            {
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     var dispatchOrder1 = await _context.DispatchOrders.Where(d => d.OrderWorkId == dispatchOrder.OrderWorkId).FirstOrDefaultAsync();
 
-                    if(dispatchOrder1 == null)
+                    if (dispatchOrder1 == null)
                     {
                         _context.DispatchOrders.Add(dispatchOrder);
                         await _context.SaveChangesAsync();
@@ -192,7 +192,7 @@ namespace Siscom.Agua.Api.Controllers
                         _context.SaveChanges();
                         scope.Complete();
                         return StatusCode(StatusCodes.Status200OK, new { msg = "Ya existe un despacho ligado a esta order work" });
-                    }                    
+                    }
                 }
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Los datos se actualizaron correctamente" });
             }
@@ -206,7 +206,7 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.Parameter = JsonConvert.SerializeObject(dispatchOrder);
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
-                return StatusCode(StatusCodes.Status400BadRequest , new { Error = "Problemas para agregar un dispatch_order" });
+                return StatusCode(StatusCodes.Status400BadRequest, new { Error = "Problemas para agregar un dispatch_order" });
             }
         }
 
@@ -226,11 +226,11 @@ namespace Siscom.Agua.Api.Controllers
                     {
                         return BadRequest();
                     }
-                    _context.Entry(dispatchOrder).State = EntityState.Modified;                    
+                    _context.Entry(dispatchOrder).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     scope.Complete();
                 }
-                return StatusCode(StatusCodes.Status200OK, new { msg = "Actualización exitosa" }  );
+                return StatusCode(StatusCodes.Status200OK, new { msg = "Actualización exitosa" });
             }
             catch (Exception e)
             {
@@ -269,7 +269,8 @@ namespace Siscom.Agua.Api.Controllers
                 DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
                 OrderWork order = await _context.OrderWorks.FindAsync(dispatch.OrderWorkId);
                 var user = await _context.Users.FindAsync(syncData.UserIdAPI);
-                switch (syncData.StatusOrderWork){
+                switch (syncData.StatusOrderWork)
+                {
                     case "FINALIZADA":
                         order.Status = "EOT03";
                         break;
@@ -311,7 +312,7 @@ namespace Siscom.Agua.Api.Controllers
 
                 }
 
-                if(order.Status == "EOT04")
+                if (order.Status == "EOT04")
                 {
                     return Ok();
                 }
@@ -350,7 +351,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 if (!validDateOrderWork)
                 {
-                    return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" } );
+                    return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
                 }
 
                 foreach (var item in syncData.PhotoSyncMobiles)
@@ -390,13 +391,13 @@ namespace Siscom.Agua.Api.Controllers
                                 Size = fi.Length,
                                 Type = item.Type == "Inicio" ? "OTF01" : item.Type == "Final" ? "OTF02" : "OTF03",
                                 Weight = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1],
-                            User = syncData.UserIdAPI,
+                                User = syncData.UserIdAPI,
                                 UserName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
                             };
                             _context.PhotosOrderWork.Add(photosOrder);
                             _context.SaveChanges();
 
-                            if(photosOrder.Type == "OTF03")
+                            if (photosOrder.Type == "OTF03")
                             {
                                 idFile = photosOrder.Id;
                             }
@@ -405,7 +406,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             exceptionMessage = e.Message;
                         }
-                        
+
                     }
                 }
 
@@ -420,7 +421,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
 
                 //Update Order
-                order.ObservationMobile = string.Format("{0} @ {1}", syncData.OpeningCommentary, syncData.FinalCommentary); 
+                order.ObservationMobile = string.Format("{0} @ {1}", syncData.OpeningCommentary, syncData.FinalCommentary);
                 _context.Entry(order).State = EntityState.Modified;
                 _context.SaveChanges();
                 //Update DispatchOrder
@@ -447,11 +448,11 @@ namespace Siscom.Agua.Api.Controllers
                     _context.SaveChanges();
                 }
 
-                if(order.Status == "EOT03" && order.Type == "OT001")
+                if (order.Status == "EOT03" && order.Type == "OT001")
                 {
-                    syncData.InspectionSyncMobiles.ForEach(x => 
+                    syncData.InspectionSyncMobiles.ForEach(x =>
                     {
-                        _context.OrderWorkDetails.Add( new OrderWorkDetail
+                        _context.OrderWorkDetails.Add(new OrderWorkDetail
                         {
                             Name = "Inspeccion",
                             Type = "OTD04",
@@ -519,7 +520,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT003")
                 {
-                    
+
                     _context.OrderWorkDetails.Add(new OrderWorkDetail
                     {
                         Name = "Reconexion",
@@ -631,7 +632,7 @@ namespace Siscom.Agua.Api.Controllers
                 }
                 else if (order.Status == "EOT03" && order.Type == "OT008")
                 {
-                    if(idFile > 0)
+                    if (idFile > 0)
                     {
                         _context.OrderWorkDetails.Add(new OrderWorkDetail
                         {
@@ -664,7 +665,7 @@ namespace Siscom.Agua.Api.Controllers
                         {
                             Name = "Material",
                             Type = "OTD03",
-                            Value = string.Format("{0}@{1}",x.Quantity, x.Description),
+                            Value = string.Format("{0}@{1}", x.Quantity, x.Description),
                             OrderWork = order,
                             OrderWorkId = order.Id
                         });
@@ -720,7 +721,7 @@ namespace Siscom.Agua.Api.Controllers
                     _context.SaveChanges();
                     return Ok();
                 }
-                else if(order.Status == "EOT03" && order.Type == "OT012" || order.Type == "OT013" || order.Type == "OT014")
+                else if (order.Status == "EOT03" && order.Type == "OT012" || order.Type == "OT013" || order.Type == "OT014")
                 {
                     syncData.ActivitySyncMobiles.ForEach(x =>
                     {
@@ -785,7 +786,7 @@ namespace Siscom.Agua.Api.Controllers
                     _context.SaveChanges();
                     return Ok();
                 }
-               
+
             }
             return BadRequest();
         }
@@ -798,30 +799,10 @@ namespace Siscom.Agua.Api.Controllers
             bool validDateOrderWork = true;
             string exceptionMessage = string.Empty;
             int idFile = 0;
-            var uploadFilesPath = Path.Combine(appSettings.FilePath, "FotosOTInspección", DateTime.Now.ToString("yyyy-MM-dd"), syncData.UserIdAPI);
-            DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
-            OrderWork order = new OrderWork();
-            var user = await _context.Users.FindAsync(syncData.UserIdAPI);
             OrderWorkList workList = await _context.OrderWorkLists
                 .Include(x => x.OrderWork)
                 .Where(x => x.Id == idOrderWorkList)
                 .FirstOrDefaultAsync();
-
-            //Create Order Work
-            order.DateOrder = DateTime.Now.AddDays(5);
-            order.Applicant = user.ToString();
-            order.Type = "OT018";
-            order.Status = "EOT01";
-            order.Observation = "Comentario:" + syncData.Comentary + " Detalles: " + syncData.Observations;
-            order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
-            order.TechnicalStaffId = 0;
-            order.DateStimated = DateTime.Now.AddDays(6);
-            order.Agreement = await _context.Agreements.FindAsync(syncData.AgreementId);
-            order.TaxUserId = 0;
-            order.aviso = 0;
-
-            await _context.OrderWorks.AddAsync(order);
-            await _context.SaveChangesAsync();
 
             if (!syncData.HaveAnomaly)
             {
@@ -832,6 +813,29 @@ namespace Siscom.Agua.Api.Controllers
             }
             else
             {
+                var uploadFilesPath = Path.Combine(appSettings.FilePath, "FotosOTInspección", DateTime.Now.ToString("yyyy-MM-dd"), syncData.UserIdAPI);
+                DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
+                OrderWork order = new OrderWork();
+                var user = await _context.Users.FindAsync(syncData.UserIdAPI);
+
+
+                //Create Order Work
+                order.DateOrder = DateTime.Now.AddDays(5);
+                order.Applicant = user.ToString();
+                order.Type = "OT018";
+                order.Status = "EOT01";
+                order.Observation = "Comentario:" + syncData.Comentary + " Detalles: " + syncData.Observations;
+                order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
+                order.TechnicalStaffId = 0;
+                order.DateStimated = DateTime.Now.AddDays(6);
+                order.Agreement = await _context.Agreements.FindAsync(syncData.AgreementId);
+                order.TaxUserId = 0;
+                order.aviso = 0;
+
+                await _context.OrderWorks.AddAsync(order);
+                await _context.SaveChangesAsync();
+
+
                 foreach (var item in syncData.PhotoSyncMobiles)
                 {
                     DateTime valid;
@@ -954,7 +958,7 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok();
         }
-    
+
         [HttpPost("SyncRegistrationAgreement")]
         public async Task<IActionResult> SyncRegistrationAgreement([FromBody] PreAgreementVM agreementVM)
         {
