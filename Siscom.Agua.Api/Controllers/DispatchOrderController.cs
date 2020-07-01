@@ -785,6 +785,7 @@ namespace Siscom.Agua.Api.Controllers
                     _context.SaveChanges();
                     return Ok();
                 }
+               
             }
             return BadRequest();
         }
@@ -794,17 +795,22 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> SyncDataList([FromRoute] int idOrderWorkList, SyncDataInspectionList syncData)
         {
             bool validDatePhoto = true;
+            bool validDateOrderWork = true;
             string exceptionMessage = string.Empty;
             int idFile = 0;
             var uploadFilesPath = Path.Combine(appSettings.FilePath, "FotosOTInspección", DateTime.Now.ToString("yyyy-MM-dd"), syncData.UserIdAPI);
             DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
             OrderWork order = new OrderWork();
             var user = await _context.Users.FindAsync(syncData.UserIdAPI);
+            OrderWorkList workList = await _context.OrderWorkLists
+                .Include(x => x.OrderWork)
+                .Where(x => x.Id == idOrderWorkList)
+                .FirstOrDefaultAsync();
 
             //Create Order Work
             order.DateOrder = DateTime.Now.AddDays(5);
             order.Applicant = user.ToString();
-            order.Type = "OT001";
+            order.Type = "OT018";
             order.Status = "EOT01";
             order.Observation = syncData.Observations;
             order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
@@ -819,6 +825,9 @@ namespace Siscom.Agua.Api.Controllers
 
             if (!syncData.HaveAnomaly)
             {
+                workList.StatusCheck = 2;
+                _context.Entry(workList).State = EntityState.Modified;
+                _context.SaveChanges();
                 return Ok();
             }
             else
@@ -849,21 +858,21 @@ namespace Siscom.Agua.Api.Controllers
                             await System.IO.File.WriteAllBytesAsync(imgPath, imageBytes);
                             fi = new FileInfo(imgPath);
                             var fileSize = FileConverterSize.SizeSuffix(fi.Length);
-                            PhotosOrderWork photosOrder = new PhotosOrderWork
+                            OrderWorkListPictures photosOrder = new OrderWorkListPictures
                             {
-                                BlobPhoto = imageBytes,
-                                DatePhoto = valid,
-                                NameFile = imageName,
-                                OrderWork = order,
-                                OrderWorkId = order.Id,
+                                FilePicture = imageBytes,
+                                CaptureDate = valid,
+                                Name = imageName,
+                                OrderWorkList = workList,
+                                OrderWorkListId = workList.Id,
                                 PathFile = imgPath,
                                 Size = fi.Length,
                                 Type = item.Type = "OTF04",
                                 Weight = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1],
                                 User = syncData.UserIdAPI,
-                                UserName = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
+                                UserName = user.ToString()
                             };
-                            _context.PhotosOrderWork.Add(photosOrder);
+                            _context.OrderWorkListPictures.Add(photosOrder);
                             _context.SaveChanges();
 
                             if (photosOrder.Type == "OTF03")
@@ -877,16 +886,111 @@ namespace Siscom.Agua.Api.Controllers
                         }
                     }
                 }
+                if (!string.IsNullOrEmpty(exceptionMessage))
+                {
+                    return Conflict(new { error = "Error al guardar los archivos: " + exceptionMessage });
+                }
 
-                OrderWorkList workList = await _context.OrderWorkLists.FindAsync(idOrderWorkList);
+                if (validDatePhoto)
+                {
+                    return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
+                }
+
                 workList.FolioOrderResult = syncData.Folio;
                 workList.TypeOrderResult = "OT001";
                 workList.OrderWorkIdResult = order.Id.ToString();
                 workList.LatitudeFinal = syncData.Latitude;
                 workList.LongitudeFinal = syncData.Longitude;
                 workList.ObservationFinal = syncData.Observations;
+
+                if (syncData.CompleteList)
+                {
+                    int contValid = _context.OrderWorkLists.Where(x => x.StatusCheck == 0).Count();
+                    if (contValid > 0)
+                    {
+                        return Conflict(new { error = "El tipo de orden de inspeccion no esta completamente atendido, Favor de verificar" });
+                    }
+                    else
+                    {
+                        var orderw = workList.OrderWork;
+                        orderw.DateRealization = DateTime.Now;
+                        dispatch.DateAttended = DateTime.Now;
+                        foreach (var item in syncData.OrderWorkStatuses)
+                        {
+                            DateTime valid;
+                            DateTime.TryParse(item.DateOrderWorkStatus, out valid);
+                            if (valid == default)
+                            {
+                                validDateOrderWork = false;
+                                break;
+                            }
+                            else
+                            {
+                                _context.OrderWorkStatus.Add(new OrderWorkStatus
+                                {
+                                    OrderWork = order,
+                                    OrderWorkId = order.Id,
+                                    IdStatus = item.IdStatus,
+                                    OrderWorkStatusDate = valid,
+                                    User = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
+                                });
+                                _context.SaveChanges();
+                            }
+
+                        }
+                        if (!validDateOrderWork)
+                        {
+                            return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
+                        }
+                        //Update Order
+                        orderw.ObservationMobile = "Orden de lista de Inspección";
+                        _context.Entry(orderw).State = EntityState.Modified;
+                        _context.SaveChanges();
+                        //Update DispatchOrder
+                        _context.Entry(dispatch).State = EntityState.Modified;
+                        _context.SaveChanges();
+                    }
+                }
+
             }
-            return BadRequest();
+            return Ok();
+        }
+    
+        [HttpPost("SyncRegistrationAgreement")]
+        public async Task<IActionResult> SyncRegistrationAgreement([FromBody] PreAgreementVM agreementVM)
+        {
+            DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(agreementVM.idDispatchOrder);
+
+            PreAgreement agreement = new PreAgreement
+            {
+                ClientLastName = agreementVM.ClientLastName,
+                ClientName = agreementVM.ClientName,
+                ClientSecondLastName = agreementVM.ClientSecondLastName,
+                DateRegistration = DateTime.Now,
+                Folio = agreementVM.Folio,
+                Indoor = agreementVM.Indoor,
+                Lat = agreementVM.Lat,
+                Lon = agreementVM.Lon,
+                Observation = agreementVM.Observation,
+                OrderWorkId = dispatch.OrderWorkId,
+                Outdoor = agreementVM.Outdoor,
+                Reference = agreementVM.Reference,
+                RegistrationReason = agreementVM.RegistrationReason,
+                ServiceId1 = agreementVM.ServiceId1,
+                ServiceId2 = agreementVM.ServiceId2,
+                ServiceId3 = agreementVM.ServiceId3,
+                Status = "PRE01",
+                Street = agreementVM.Street,
+                Suburbs = _context.Suburbs.Find(agreementVM.SuburbsId),
+                TypeClassification = _context.TypeClassifications.Find(agreementVM.TypeClassificationId),
+                TypeIntake = _context.TypeIntakes.Find(agreementVM.TypeIntakeId),
+                TypeService = _context.TypeServices.Find(agreementVM.TypeServiceId),
+                TypeUse = _context.TypeUses.Find(agreementVM.TypeUseId),
+                Zip = agreementVM.Zip
+            };
+            await _context.PreAgreements.AddAsync(agreement);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
     }
 }

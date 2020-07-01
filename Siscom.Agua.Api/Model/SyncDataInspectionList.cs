@@ -10,8 +10,9 @@ namespace Siscom.Agua.Api.Model
         public SyncDataInspectionList()
         {
             this.PhotoSyncMobiles = new List<PhotoSyncMobile>();
+            this.AnomalySyncMobiles = new List<AnomalySyncMobile>();
+            this.OrderWorkStatuses = new List<OrderWorkStatusVM>();
         }
-        public int IdOrderWorkParent { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
         public string Comentary { get; set; }
@@ -22,7 +23,9 @@ namespace Siscom.Agua.Api.Model
         public int IdDispatchOrder { get; set; }
         public bool HaveAnomaly { get; set; }
         public string Folio { get; set; }
+        public bool CompleteList { get; set; }
         public List<PhotoSyncMobile> PhotoSyncMobiles { get; set; }
         public List<AnomalySyncMobile> AnomalySyncMobiles { get; set; }
+        public List<OrderWorkStatusVM> OrderWorkStatuses { get; set; }
     }
 }
