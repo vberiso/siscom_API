@@ -29,9 +29,5 @@ namespace Siscom.Agua.Api.Model
         public int ServiceId3 { get; set; }
         public string RegistrationReason { get; set; }
         public string Observation { get; set; }
-        public int idDispatchOrder { get; set; }
-        public int OrderWorkId { get; set; }
-        public string folio_order_result { get; set; }
-        public int agreementId_new { get; set; }
     }
 }

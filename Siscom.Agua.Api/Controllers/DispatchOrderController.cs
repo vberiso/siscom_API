@@ -962,8 +962,6 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("SyncRegistrationAgreement")]
         public async Task<IActionResult> SyncRegistrationAgreement([FromBody] PreAgreementVM agreementVM)
         {
-            DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(agreementVM.idDispatchOrder);
-
             PreAgreement agreement = new PreAgreement
             {
                 ClientLastName = agreementVM.ClientLastName,
@@ -975,7 +973,6 @@ namespace Siscom.Agua.Api.Controllers
                 Lat = agreementVM.Lat,
                 Lon = agreementVM.Lon,
                 Observation = agreementVM.Observation,
-                OrderWorkId = dispatch.OrderWorkId,
                 Outdoor = agreementVM.Outdoor,
                 Reference = agreementVM.Reference,
                 RegistrationReason = agreementVM.RegistrationReason,
