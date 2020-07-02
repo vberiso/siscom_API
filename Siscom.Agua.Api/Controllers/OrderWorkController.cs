@@ -123,24 +123,6 @@ namespace Siscom.Agua.Api.Controllers
                     }
                 }
 
-                //if (!OrderWork.Type.Equals("OT019")) //En caso que sea una Orden de inspeccion.
-                //{
-                //    List<int> idsAgr = OrderWork.OrderWorkLists.Select(x => x.AgreementId).ToList();
-                //    var lstAgree = await _context.Agreements.Where(a => idsAgr.Contains(a.Id))
-                //                            .Include(x => x.TypeService)
-                //                            .Include(x => x.TypeIntake)
-                //                            .Include(x => x.TypeConsume)
-                //                            .Include(x => x.Clients)
-                //                            .Include(x => x.Addresses)
-                //                                .ThenInclude(x => x.Suburbs)
-                //                                    .ThenInclude(x => x.Towns)
-                //                                        .ThenInclude(x => x.States)
-                //                                            .ThenInclude(x => x.Countries)
-                //                            .ToListAsync();
-
-                //    return Ok(new List<object>() { agreement, OrderWork, null, lstAgree });
-                //}
-
                 TaxUser taxUser = new TaxUser();
                 if (OrderWork.AgrementId == 0 && OrderWork.TaxUserId != 0)
                 {

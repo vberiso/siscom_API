@@ -115,8 +115,16 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     transactionPayment.Payment.PaymentDetails.ToList().ForEach(x =>
                     {
-                        x.Debt = _context.Debts.Include(dd => dd.DebtDiscounts).Include(dd => dd.DebtDetails).Where(d => d.Id == x.DebtId).FirstOrDefault();
-                        x.Prepaid = _context.Prepaids.Find(x.PrepaidId);
+                        try
+                        {
+                            //x.Debt = _context.Debts.Where(d => d.Id == x.DebtId).FirstOrDefault();
+                            x.Debt = _context.Debts.Include(dd => dd.DebtDiscounts).Include(dd => dd.DebtDetails).Where(d => d.Id == x.DebtId).FirstOrDefault();
+                            x.Prepaid = _context.Prepaids.Find(x.PrepaidId);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }                        
                     });
                 }
 
