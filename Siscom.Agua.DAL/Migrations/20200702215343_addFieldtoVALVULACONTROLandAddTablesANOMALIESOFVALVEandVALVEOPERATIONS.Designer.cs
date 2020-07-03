@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200702215343_addFieldtoVALVULACONTROLandAddTablesANOMALIESOFVALVEandVALVEOPERATIONS")]
+    partial class addFieldtoVALVULACONTROLandAddTablesANOMALIESOFVALVEandVALVEOPERATIONS
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -748,6 +750,40 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("IdAgreement");
 
                     b.ToTable("Agreement_Service");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.AnomaliesOfValve", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_anomalies_of_valve")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("AnomaliesDate")
+                        .HasColumnName("anomalies_date");
+
+                    b.Property<DateTime>("AtentionDate")
+                        .HasColumnName("atention_date");
+
+                    b.Property<string>("Observations")
+                        .HasColumnName("observations")
+                        .HasMaxLength(300);
+
+                    b.Property<string>("Type")
+                        .HasColumnName("type")
+                        .HasMaxLength(5);
+
+                    b.Property<int>("ValvulaControlId");
+
+                    b.Property<string>("WorkDescription")
+                        .HasColumnName("work_description")
+                        .HasMaxLength(300);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ValvulaControlId");
+
+                    b.ToTable("anomalies_of_valve");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.ApplicationRol", b =>
@@ -2511,7 +2547,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 7, 2, 17, 56, 47, 879, DateTimeKind.Local).AddTicks(7899));
+                        .HasDefaultValue(new DateTime(2020, 7, 2, 16, 53, 42, 131, DateTimeKind.Local).AddTicks(7196));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -6025,40 +6061,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("UnitMeasurements");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.ValveIncident", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_anomalies_of_valve")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("AnomaliesDate")
-                        .HasColumnName("anomalies_date");
-
-                    b.Property<DateTime>("AtentionDate")
-                        .HasColumnName("atention_date");
-
-                    b.Property<string>("Observations")
-                        .HasColumnName("observations")
-                        .HasMaxLength(300);
-
-                    b.Property<string>("Type")
-                        .HasColumnName("type")
-                        .HasMaxLength(5);
-
-                    b.Property<int>("ValvulaControlId");
-
-                    b.Property<string>("WorkDescription")
-                        .HasColumnName("work_description")
-                        .HasMaxLength(300);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ValvulaControlId");
-
-                    b.ToTable("valve_incident");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.ValveOperation", b =>
                 {
                     b.Property<int>("Id")
@@ -6078,7 +6080,7 @@ namespace Siscom.Agua.DAL.Migrations
 
                     b.HasIndex("ValvulaControlId");
 
-                    b.ToTable("valve_operation");
+                    b.ToTable("ValveOperations");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.ValvulaControl", b =>
@@ -6403,6 +6405,14 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.Service", "Service")
                         .WithMany("AgreementServices")
                         .HasForeignKey("IdService")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.AnomaliesOfValve", b =>
+                {
+                    b.HasOne("Siscom.Agua.DAL.Models.ValvulaControl", "ValvulaControl")
+                        .WithMany()
+                        .HasForeignKey("ValvulaControlId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -7109,14 +7119,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.MaterialList", "MaterialList")
                         .WithMany("UnitMeasurements")
                         .HasForeignKey("MaterialListId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.ValveIncident", b =>
-                {
-                    b.HasOne("Siscom.Agua.DAL.Models.ValvulaControl", "ValvulaControl")
-                        .WithMany()
-                        .HasForeignKey("ValvulaControlId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

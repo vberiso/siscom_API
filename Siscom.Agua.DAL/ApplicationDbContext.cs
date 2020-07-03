@@ -292,6 +292,8 @@ namespace Siscom.Agua.DAL
         /// Valvula
         /// </summary>
         public DbSet<ValvulaControl> ValvulaControls { get; set; }
+        public DbSet<ValveIncident> ValveIncidents { get; set; }
+        public DbSet<ValveOperation> ValveOperations { get; set; }
 
         public ApplicationDbContext()
         {

@@ -48,8 +48,8 @@ namespace Siscom.Agua.DAL.Models
         public string DescriptionType { get; set; }
         [Column("status"), StringLength(5), Required]
         public string Status { get; set; }
-        //[Column("previous_debtId")]
-        //public int PreviousDebtId { get; set; }
+        [Column("previous_debtId")]
+        public int PreviousDebtId { get; set; }
         [NotMapped]
         public string DescriptionStatus { get; set; }
         [NotMapped]       

@@ -38,7 +38,9 @@
     <Compile Remove="Migrations\20200603183744_addTablesUpdateFactoryAndValvulaControl.cs" />
     <Compile Remove="Migrations\20200603183744_addTablesUpdateFactoryAndValvulaControl.Designer.cs" />
     <Compile Remove="Migrations\20200616220427_addTableOrderWorkList.cs" />
-    <Compile Remove="Migrations\20200616220427_addTableOrderWorkList.Designer.cs" /> 
+    <Compile Remove="Migrations\20200616220427_addTableOrderWorkList.Designer.cs" />
+    <Compile Remove="Migrations\20200702215017_addFieldtoVALVULACONTROLandAddTablesANOMALIESOFVALVEandVALVEOPERATIONS.cs" />
+    <Compile Remove="Migrations\20200702215017_addFieldtoVALVULACONTROLandAddTablesANOMALIESOFVALVEandVALVEOPERATIONS.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>

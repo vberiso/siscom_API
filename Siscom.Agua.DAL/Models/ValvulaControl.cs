@@ -25,5 +25,19 @@ namespace Siscom.Agua.DAL.Models
         public string Type { get; set; }
         [Column("is_active")]
         public bool IsActive { get; set; }
+        [Column("diameter"), StringLength(20)]
+        public string Diameter { get; set; }
+        [Column("hydraulic_circuit"), StringLength(50)]
+        public string HydraulicCircuit { get; set; }
+        [Column("physical_state")]
+        public string PhysicalState { get; set; }
+        [Column("actual_state")]
+        public string ActualState { get; set; }
+        [Column("last_service_date")]
+        public DateTime LastServiceDate { get; set; }
+
+        ICollection<ValveIncident> ValveIncidents { get; set; }
+        ICollection<ValveOperation> ValveOperations { get; set; }
+
     }
 }
