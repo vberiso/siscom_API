@@ -791,172 +791,169 @@ namespace Siscom.Agua.Api.Controllers
             return BadRequest();
         }
 
-
-        [HttpPost("SyncDataMobileList/{idOrderWorkList}")]
-        public async Task<IActionResult> SyncDataList([FromRoute] int idOrderWorkList, SyncDataInspectionList syncData)
+        [HttpPost("SyncDataMobileList/{idOrderWorkList}/{IsCompleteOrder?}")]
+        public async Task<IActionResult> SyncDataList([FromRoute] int idOrderWorkList, [FromBody] SyncDataInspectionList syncData, [FromRoute] bool IsCompleteOrder = false)
         {
             bool validDatePhoto = true;
             bool validDateOrderWork = true;
             string exceptionMessage = string.Empty;
+            OrderWorkList workList = null;
             int idFile = 0;
-            OrderWorkList workList = await _context.OrderWorkLists
-                .Include(x => x.OrderWork)
-                .Where(x => x.Id == idOrderWorkList)
-                .FirstOrDefaultAsync();
-
-            if (!syncData.HaveAnomaly)
+            DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
+            var user = await _context.Users.FindAsync(syncData.UserIdAPI);
+            if (IsCompleteOrder)
             {
-                workList.StatusCheck = 2;
-                _context.Entry(workList).State = EntityState.Modified;
-                _context.SaveChanges();
+                if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == workList.OrderWorkId).Count() > 0)
+                {
+                    return Conflict(new { error = "El tipo de orden de inspeccion no esta completamente atendido, Favor de verificar" });
+                }
+                else
+                {
+                    var orderw = await _context.OrderWorks.FindAsync(syncData.idOrderWork);
+                    orderw.DateRealization = DateTime.Now;
+                    orderw.Status = "EOT03";
+                    orderw.ObservationMobile = "Orden Atendida mediante lista de inspección";
+                    dispatch.DateAttended = DateTime.Now;
+                    foreach (var item in syncData.OrderWorkStatuses)
+                    {
+                        DateTime valid;
+                        DateTime.TryParse(item.DateOrderWorkStatus, out valid);
+                        if (valid == default)
+                        {
+                            validDateOrderWork = false;
+                            break;
+                        }
+                        else
+                        {
+                            _context.OrderWorkStatus.Add(new OrderWorkStatus
+                            {
+                                OrderWork = orderw,
+                                OrderWorkId = orderw.Id,
+                                IdStatus = item.IdStatus,
+                                OrderWorkStatusDate = valid,
+                                User = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
+                            });
+                            _context.SaveChanges();
+                        }
+                    }
+                    if (validDateOrderWork)
+                    {
+                        return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
+                    }
+                    _context.Entry(orderw).State = EntityState.Modified;
+                    _context.SaveChanges();
+                    //Update DispatchOrder
+                    _context.Entry(dispatch).State = EntityState.Modified;
+                    _context.SaveChanges();
+                }
                 return Ok();
             }
             else
             {
-                var uploadFilesPath = Path.Combine(appSettings.FilePath, "FotosOTInspección", DateTime.Now.ToString("yyyy-MM-dd"), syncData.UserIdAPI);
-                DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
-                OrderWork order = new OrderWork();
-                var user = await _context.Users.FindAsync(syncData.UserIdAPI);
-
-
-                //Create Order Work
-                order.DateOrder = DateTime.Now.AddDays(5);
-                order.Applicant = user.ToString();
-                order.Type = "OT018";
-                order.Status = "EOT01";
-                order.Observation = "Comentario:" + syncData.Comentary + " Detalles: " + syncData.Observations;
-                order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
-                order.TechnicalStaffId = 0;
-                order.DateStimated = DateTime.Now.AddDays(6);
-                order.Agreement = await _context.Agreements.FindAsync(syncData.AgreementId);
-                order.TaxUserId = 0;
-                order.aviso = 0;
-
-                await _context.OrderWorks.AddAsync(order);
-                await _context.SaveChangesAsync();
-
-
-                foreach (var item in syncData.PhotoSyncMobiles)
+                workList = await _context.OrderWorkLists.Include(x => x.OrderWork).Where(x => x.Id == idOrderWorkList).FirstOrDefaultAsync();
+                if (!syncData.HaveAnomaly)
                 {
-                    DateTime valid;
-                    DateTime.TryParse(item.DateTake, out valid);
-                    if (valid == default)
-                    {
-                        validDatePhoto = false;
-                        break;
-                    }
-                    else
-                    {
-                        FileInfo fi = null;
-                        //Check if directory exist
-                        if (!System.IO.Directory.Exists(uploadFilesPath))
-                        {
-                            System.IO.Directory.CreateDirectory(uploadFilesPath); //Create directory if it doesn't exist
-                        }
-                        Guid guid = Guid.NewGuid();
-                        string imageName = guid.ToString() + ".jpg";
-                        string imgPath = Path.Combine(uploadFilesPath, imageName);
-                        byte[] imageBytes = Convert.FromBase64String(item.Photo);
-                        try
-                        {
-                            await System.IO.File.WriteAllBytesAsync(imgPath, imageBytes);
-                            fi = new FileInfo(imgPath);
-                            var fileSize = FileConverterSize.SizeSuffix(fi.Length);
-                            OrderWorkListPictures photosOrder = new OrderWorkListPictures
-                            {
-                                FilePicture = imageBytes,
-                                CaptureDate = valid,
-                                Name = imageName,
-                                OrderWorkList = workList,
-                                OrderWorkListId = workList.Id,
-                                PathFile = imgPath,
-                                Size = fi.Length,
-                                Type = item.Type = "OTF04",
-                                Weight = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1],
-                                User = syncData.UserIdAPI,
-                                UserName = user.ToString()
-                            };
-                            _context.OrderWorkListPictures.Add(photosOrder);
-                            _context.SaveChanges();
+                    workList.StatusCheck = 2;
+                    workList.LatitudeFinal = syncData.Latitude;
+                    workList.LongitudeFinal = syncData.Longitude;
+                    _context.Entry(workList).State = EntityState.Modified;
+                    _context.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    var uploadFilesPath = Path.Combine(appSettings.FilePath, "FotosOTInspección", DateTime.Now.ToString("yyyy-MM-dd"), syncData.UserIdAPI);
+                    OrderWork order = new OrderWork();
+                    
+                    //Create Order Work
+                    order.DateOrder = DateTime.Now.AddDays(5);
+                    order.Applicant = user.ToString();
+                    order.Type = "OT018";
+                    order.Status = "EOT01";
+                    order.Observation = syncData.Observations;
+                    order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
+                    order.TechnicalStaffId = 0;
+                    order.DateStimated = DateTime.Now.AddDays(6);
+                    order.Agreement = await _context.Agreements.FindAsync(syncData.AgreementId);
+                    order.TaxUserId = 0;
+                    order.aviso = 0;
 
-                            if (photosOrder.Type == "OTF03")
+                    await _context.OrderWorks.AddAsync(order);
+                    await _context.SaveChangesAsync();
+
+                    foreach (var item in syncData.PhotoSyncMobiles)
+                    {
+                        DateTime valid;
+                        DateTime.TryParse(item.DateTake, out valid);
+                        if (valid == default)
+                        {
+                            validDatePhoto = false;
+                            break;
+                        }
+                        else
+                        {
+                            FileInfo fi = null;
+                            //Check if directory exist
+                            if (!System.IO.Directory.Exists(uploadFilesPath))
                             {
-                                idFile = photosOrder.Id;
+                                System.IO.Directory.CreateDirectory(uploadFilesPath); //Create directory if it doesn't exist
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            exceptionMessage = e.Message;
-                        }
-                    }
-                }
-                if (!string.IsNullOrEmpty(exceptionMessage))
-                {
-                    return Conflict(new { error = "Error al guardar los archivos: " + exceptionMessage });
-                }
-
-                if (validDatePhoto)
-                {
-                    return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
-                }
-
-                workList.FolioOrderResult = syncData.Folio;
-                workList.TypeOrderResult = "OT001";
-                workList.OrderWorkIdResult = order.Id.ToString();
-                workList.LatitudeFinal = syncData.Latitude;
-                workList.LongitudeFinal = syncData.Longitude;
-                workList.ObservationFinal = syncData.Observations;
-
-                if (syncData.CompleteList)
-                {
-                    if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == workList.OrderWorkId).Count() > 0)
-                    {
-                        return Conflict(new { error = "El tipo de orden de inspeccion no esta completamente atendido, Favor de verificar" });
-                    }
-                    else
-                    {
-                        var orderw = workList.OrderWork;
-                        orderw.DateRealization = DateTime.Now;
-                        dispatch.DateAttended = DateTime.Now;
-                        foreach (var item in syncData.OrderWorkStatuses)
-                        {
-                            DateTime valid;
-                            DateTime.TryParse(item.DateOrderWorkStatus, out valid);
-                            if (valid == default)
+                            Guid guid = Guid.NewGuid();
+                            string imageName = guid.ToString() + ".jpg";
+                            string imgPath = Path.Combine(uploadFilesPath, imageName);
+                            byte[] imageBytes = Convert.FromBase64String(item.Photo);
+                            try
                             {
-                                validDateOrderWork = false;
-                                break;
-                            }
-                            else
-                            {
-                                _context.OrderWorkStatus.Add(new OrderWorkStatus
+                                await System.IO.File.WriteAllBytesAsync(imgPath, imageBytes);
+                                fi = new FileInfo(imgPath);
+                                var fileSize = FileConverterSize.SizeSuffix(fi.Length);
+                                OrderWorkListPictures photosOrder = new OrderWorkListPictures
                                 {
-                                    OrderWork = order,
-                                    OrderWorkId = order.Id,
-                                    IdStatus = item.IdStatus,
-                                    OrderWorkStatusDate = valid,
-                                    User = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
-                                });
+                                    FilePicture = imageBytes,
+                                    CaptureDate = valid,
+                                    Name = imageName,
+                                    OrderWorkList = workList,
+                                    OrderWorkListId = workList.Id,
+                                    PathFile = imgPath,
+                                    Size = fi.Length,
+                                    Type = item.Type = "OTF04",
+                                    Weight = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1],
+                                    User = syncData.UserIdAPI,
+                                    UserName = user.ToString()
+                                };
+                                _context.OrderWorkListPictures.Add(photosOrder);
                                 _context.SaveChanges();
+
+                                if (photosOrder.Type == "OTF03")
+                                {
+                                    idFile = photosOrder.Id;
+                                }
                             }
-
+                            catch (Exception e)
+                            {
+                                exceptionMessage = e.Message;
+                            }
                         }
-                        if (!validDateOrderWork)
-                        {
-                            return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
-                        }
-                        //Update Order
-                        orderw.ObservationMobile = "Orden de lista de Inspección";
-                        _context.Entry(orderw).State = EntityState.Modified;
-                        _context.SaveChanges();
-                        //Update DispatchOrder
-                        _context.Entry(dispatch).State = EntityState.Modified;
-                        _context.SaveChanges();
                     }
-                }
+                    if (!string.IsNullOrEmpty(exceptionMessage))
+                    {
+                        return Conflict(new { error = "Error al guardar los archivos: " + exceptionMessage });
+                    }
 
+                    if (validDatePhoto)
+                    {
+                        return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
+                    }
+                    //UPDATE ORDER WORK LIST
+                    workList.FolioOrderResult = syncData.Folio;
+                    workList.TypeOrderResult = "OT001";
+                    workList.OrderWorkIdResult = order.Id.ToString();
+                    workList.LatitudeFinal = syncData.Latitude;
+                    workList.LongitudeFinal = syncData.Longitude;
+                    workList.ObservationFinal = syncData.Observations;
+                }
+                return Ok();
             }
-            return Ok();
         }
 
         [HttpPost("SyncRegistrationAgreement")]
