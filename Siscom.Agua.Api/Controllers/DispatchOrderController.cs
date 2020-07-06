@@ -801,6 +801,7 @@ namespace Siscom.Agua.Api.Controllers
             int idFile = 0;
             DispatchOrder dispatch = await _context.DispatchOrders.FindAsync(syncData.IdDispatchOrder);
             var user = await _context.Users.FindAsync(syncData.UserIdAPI);
+            var technical = await _context.TechnicalStaffs.Where(x => x.UserId == user.Id).FirstAsync();
             if (IsCompleteOrder)
             {
                 if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == workList.OrderWorkId).Count() > 0)
@@ -872,11 +873,12 @@ namespace Siscom.Agua.Api.Controllers
                     order.Status = "EOT01";
                     order.Observation = syncData.Observations;
                     order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
-                    order.TechnicalStaffId = 0;
+                    order.TechnicalStaff = technical;
                     order.DateStimated = DateTime.Now.AddDays(6);
                     order.Agreement = await _context.Agreements.FindAsync(syncData.AgreementId);
                     order.TaxUserId = 0;
                     order.aviso = 0;
+                    order.Folio = "OT";
 
                     await _context.OrderWorks.AddAsync(order);
                     await _context.SaveChangesAsync();
@@ -940,7 +942,7 @@ namespace Siscom.Agua.Api.Controllers
                         return Conflict(new { error = "Error al guardar los archivos: " + exceptionMessage });
                     }
 
-                    if (validDatePhoto)
+                    if (!validDatePhoto)
                     {
                         return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
                     }
@@ -951,6 +953,10 @@ namespace Siscom.Agua.Api.Controllers
                     workList.LatitudeFinal = syncData.Latitude;
                     workList.LongitudeFinal = syncData.Longitude;
                     workList.ObservationFinal = syncData.Observations;
+                    workList.StatusCheck = 1;
+
+                    _context.Entry(workList).State = EntityState.Modified;
+                    _context.SaveChanges();
                 }
                 return Ok();
             }
