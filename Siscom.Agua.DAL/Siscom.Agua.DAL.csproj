@@ -40,7 +40,11 @@
     <Compile Remove="Migrations\20200616220427_addTableOrderWorkList.cs" />
     <Compile Remove="Migrations\20200616220427_addTableOrderWorkList.Designer.cs" />
     <Compile Remove="Migrations\20200702215017_addFieldtoVALVULACONTROLandAddTablesANOMALIESOFVALVEandVALVEOPERATIONS.cs" />
-    <Compile Remove="Migrations\20200702215017_addFieldtoVALVULACONTROLandAddTablesANOMALIESOFVALVEandVALVEOPERATIONS.Designer.cs" /> 
+    <Compile Remove="Migrations\20200702215017_addFieldtoVALVULACONTROLandAddTablesANOMALIESOFVALVEandVALVEOPERATIONS.Designer.cs" />
+    <Compile Remove="Migrations\20200707205601_addFieldValvulaControlIdtoORDERWORK.cs" />
+    <Compile Remove="Migrations\20200707205601_addFieldValvulaControlIdtoORDERWORK.Designer.cs" />
+    <Compile Remove="Migrations\20200707210328_addFieldValvulaControlIdtoORDERWORK.cs" />
+    <Compile Remove="Migrations\20200707210328_addFieldValvulaControlIdtoORDERWORK.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>

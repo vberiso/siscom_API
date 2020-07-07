@@ -38,6 +38,7 @@ namespace Siscom.Agua.DAL.Models
 
         public ICollection<ValveIncident> ValveIncidents { get; set; }
         public ICollection<ValveOperation> ValveOperations { get; set; }
+        public ICollection<OrderWork> OrderWorks { get; set; }
 
     }
 }

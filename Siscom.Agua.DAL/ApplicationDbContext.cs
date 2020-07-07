@@ -1106,6 +1106,10 @@ namespace Siscom.Agua.DAL
                 .Property(o => o.ObservationMobile)
                 .HasDefaultValue("");
 
+            builder.Entity<OrderWork>()
+                .Property(o => o.ValvulaControlId)
+                .HasDefaultValue(0);
+
             #endregion
 
             #region OrderWorkDetail
@@ -1825,6 +1829,12 @@ namespace Siscom.Agua.DAL
                    .HasOne<ValvulaControl>(a => a.ValvulaControl)
                    .WithMany(s => s.ValveOperations)
                    .HasForeignKey(s => s.ValvulaControlId);
+
+            builder.Entity<OrderWork>()
+                   .HasOne<ValvulaControl>(a => a.ValvulaControl)
+                   .WithMany(s => s.OrderWorks)
+                   .HasForeignKey(s => s.ValvulaControlId);
+
             #endregion
 
             #region Version

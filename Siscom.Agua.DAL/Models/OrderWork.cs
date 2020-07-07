@@ -68,9 +68,13 @@ namespace Siscom.Agua.DAL.Models
         [Column("observation_mobile")]
         public string ObservationMobile { get; set; }
 
+        [Column("ValvulaControlId"), Required]
+        public int ValvulaControlId { get; set; }
+
         //public Debt Debt { get; set; }
         public TechnicalStaff TechnicalStaff { get; set; }
         public Agreement Agreement { get; set; }
+        public ValvulaControl ValvulaControl { get; set; }
         public ICollection<OrderWorkStatus> OrderWorkStatus { get; set; }
         public ICollection<OrderWorkReasonCatalog> OrderWorkReasonCatalogs { get; set; }
         public ICollection<PhotosOrderWork> PhotosOrderWork { get; set; }

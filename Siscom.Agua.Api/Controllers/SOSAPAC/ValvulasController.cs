@@ -125,5 +125,20 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             }
         }
 
+        [HttpGet("Catalogos")]
+        public async Task<IActionResult> GetCatalogos()
+        {
+            try
+            {
+                var estadosFisico = await _context.Lists.Where(f => f.IsActive == true && f.GroupListsId == 10).ToListAsync();
+                var estadosActual = await _context.Lists.Where(f => f.IsActive == true && f.GroupListsId == 11).ToListAsync();
+                List<object> catalogos = new List<object>() { estadosFisico, estadosActual };
+                return Ok(catalogos);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { error = "No se encontraron los catalogos" });
+            }
+        }
     }
 }
