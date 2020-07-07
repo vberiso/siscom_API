@@ -36,8 +36,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("last_service_date")]
         public DateTime LastServiceDate { get; set; }
 
-        ICollection<ValveIncident> ValveIncidents { get; set; }
-        ICollection<ValveOperation> ValveOperations { get; set; }
+        public ICollection<ValveIncident> ValveIncidents { get; set; }
+        public ICollection<ValveOperation> ValveOperations { get; set; }
 
     }
 }

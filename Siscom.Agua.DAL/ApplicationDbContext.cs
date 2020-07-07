@@ -1815,6 +1815,18 @@ namespace Siscom.Agua.DAL
                    .HasDefaultValue(true);
             #endregion
 
+            #region Valve
+            builder.Entity<ValveIncident>()
+                   .HasOne<ValvulaControl>(a => a.ValvulaControl)
+                   .WithMany(s => s.ValveIncidents)
+                   .HasForeignKey(s => s.ValvulaControlId);
+
+            builder.Entity<ValveOperation>()
+                   .HasOne<ValvulaControl>(a => a.ValvulaControl)
+                   .WithMany(s => s.ValveOperations)
+                   .HasForeignKey(s => s.ValvulaControlId);
+            #endregion
+
             #region Version
             builder.Entity<VersionApp>()
                    .Property(x => x.PublishDate)

@@ -59,7 +59,7 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                                         .First()
                     ;
                 }
-                else
+                else if(orderWork.TaxUserId != 0)
                 {
                     orderWork.Agreement = _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
                                                             .Include(x => x.Clients)
@@ -74,6 +74,26 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                         .Where(x => x.TaxUserId == orderWork.TaxUserId)
                         .Select(d => new Address() { Id = 0, TypeAddress = "DIR01", Street = d.Street, Outdoor = d.Outdoor, Indoor = d.Indoor, Suburbs = new Suburb() { Id = 0, Name = d.Suburb, Towns = new Town() { Id = 0, Name = d.Town } } })
                         .First());
+                }
+                else
+                {
+                    orderWork.Agreement = _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
+                                                            .Include(x => x.Clients)
+                                                            .Include(x => x.Addresses)
+                                                            .First();
+                    orderWork.Agreement.Clients.Clear();
+                    orderWork.Agreement.Clients.Add( new Client() { Id = 0, TypeUser = "CLI01", Name = "Multipes cuentas", LastName = "" });
+                    orderWork.Agreement.Addresses.Clear();
+                    orderWork.Agreement.Addresses.Add( new Address() { 
+                        Id = 0, 
+                        TypeAddress = "DIR01", 
+                        Street = "Multiple", 
+                        Outdoor = "...", 
+                        Indoor = "...", 
+                        Suburbs = new Suburb() { Id = 0, Name = "Multiple", 
+                            Towns = new Town() { Id = 0, Name = "Multiple" } 
+                        } 
+                    });
                 }
                 
             }
