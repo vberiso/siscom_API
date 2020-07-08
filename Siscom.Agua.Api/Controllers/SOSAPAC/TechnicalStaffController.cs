@@ -59,21 +59,28 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                                         .First()
                     ;
                 }
-                else if(orderWork.TaxUserId != 0)
+                else if(orderWork.TaxUserId != 0 || orderWork.ValvulaControlId != 0)
                 {
                     orderWork.Agreement = _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
                                                             .Include(x => x.Clients)
                                                             .Include(x => x.Addresses)                                                                
                                                             .First();
                     orderWork.Agreement.Clients.Clear();
-                    orderWork.Agreement.Clients.Add( _context.TaxUsers.Where(x => x.Id == orderWork.TaxUserId)
-                        .Select(c => new Client() { Id = 0, TypeUser = "CLI01", Name = c.Name, LastName = "" } )
-                        .First());
+                    TaxUser taxUser = _context.TaxUsers.FirstOrDefault(x => x.Id == orderWork.TaxUserId);
+                    orderWork.Agreement.Clients.Add( new Client() { Id = 0, TypeUser = "CLI01", Name = taxUser != null ? taxUser.Name : "Sin Nombre", LastName = "" } );
                     orderWork.Agreement.Addresses.Clear();
-                    orderWork.Agreement.Addresses.Add(_context.TaxAddresses
-                        .Where(x => x.TaxUserId == orderWork.TaxUserId)
-                        .Select(d => new Address() { Id = 0, TypeAddress = "DIR01", Street = d.Street, Outdoor = d.Outdoor, Indoor = d.Indoor, Suburbs = new Suburb() { Id = 0, Name = d.Suburb, Towns = new Town() { Id = 0, Name = d.Town } } })
-                        .First());
+                    TaxAddress taxAddress = _context.TaxAddresses.FirstOrDefault(x => x.TaxUserId == orderWork.TaxUserId);
+                    orderWork.Agreement.Addresses.Add(new Address() 
+                                                            {   
+                                                                Id = 0, 
+                                                                TypeAddress = "DIR01", 
+                                                                Street = taxAddress != null ? taxAddress.Street : "Sin Calle", 
+                                                                Outdoor = taxAddress != null ? taxAddress.Outdoor : "Sin Numero", 
+                                                                Indoor = taxAddress != null ? taxAddress.Indoor : "", 
+                                                                Suburbs = new Suburb() { Id = 0, Name = taxAddress != null ? taxAddress.Suburb : "Sin Colonia", 
+                                                                    Towns = new Town() { Id = 0, Name = taxAddress != null ? taxAddress.Town : "" } 
+                                                                } 
+                                                            });
                 }
                 else
                 {

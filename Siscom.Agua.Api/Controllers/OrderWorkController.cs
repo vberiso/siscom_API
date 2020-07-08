@@ -124,16 +124,25 @@ namespace Siscom.Agua.Api.Controllers
                 }
 
                 TaxUser taxUser = new TaxUser();
-                if (OrderWork.AgrementId == 0 && OrderWork.TaxUserId != 0)
+                ValvulaControl valvulaControl = new ValvulaControl();
+                if (OrderWork.Type.Equals("OT011"))
                 {
-                    taxUser = await _context.TaxUsers.Where(t => t.Id == OrderWork.TaxUserId)
-                                                    .Include(x => x.TaxAddresses)
-                                                    .FirstOrDefaultAsync();
+                    valvulaControl = await _context.ValvulaControls.FirstOrDefaultAsync(x => x.Id == OrderWork.ValvulaControlId);
                 }
+                else
+                {
+                    if (OrderWork.AgrementId == 0 && OrderWork.TaxUserId != 0)
+                    {
+                        taxUser = await _context.TaxUsers.Where(t => t.Id == OrderWork.TaxUserId)
+                                                        .Include(x => x.TaxAddresses)
+                                                        .FirstOrDefaultAsync();
+                    }
+                }
+                
                 
                 if (withOrder)
                     {
-                        return Ok(new List<object>() { agreement, OrderWork, taxUser });
+                        return Ok(new List<object>() { agreement, OrderWork, taxUser, valvulaControl });
                     }
                 return Ok(agreement);
             }
@@ -171,10 +180,15 @@ namespace Siscom.Agua.Api.Controllers
                     .ToListAsync();
 
                 
-                List<int> idsTaxUser = info.lstOrderWork.Where(a => a.AgrementId == 0).Select(t => t.TaxUserId).ToList();
+                List<int> idsTaxUser = info.lstOrderWork.Where(a => a.AgrementId == 0 && a.TaxUserId != 0).Select(t => t.TaxUserId).ToList();
                 info.lstTaxUser = await _context.TaxUsers
                     .Include(d => d.TaxAddresses)
                     .Where(t => idsTaxUser.Contains(t.Id)).ToListAsync();
+
+
+                List<int> idsValvulas = info.lstOrderWork.Where(a => a.Type.Equals("OT011")).Select(t => t.ValvulaControlId).ToList();
+                info.lstValvulas = await _context.ValvulaControls                    
+                    .Where(t => idsValvulas.Contains(t.Id)).ToListAsync();
                 
                 if (withOrder)
                 {
@@ -464,77 +478,118 @@ namespace Siscom.Agua.Api.Controllers
             {
                 int aviso = 0;
                 var data = JObject.Parse(collection.ToString());
+                var tipoOT = data["typeOrder"].ToString();
+                OrderWork orderWork = null;
 
-                var datos = new
+                if (tipoOT.Equals("OT011"))
                 {
-                    user = "",
-                    rfc = "",
-                    curp = "",
-                    mail = "",
-                    tel = "",
-                    street = "",
-                    numExt = "",
-                    numInt = "",
-                    suburb = "",
-                    zip = "",
-                    town = "",
-                    state = ""
-                };
-                var datosSinCuenta = JsonConvert.DeserializeAnonymousType(data["Datos"].ToString(), datos);
+                    ValvulaControl valvulaControl = JsonConvert.DeserializeObject<ValvulaControl>(data["Datos"].ToString());
 
-                TaxUser taxUser = new TaxUser()
+                    orderWork = new OrderWork()
+                    {
+                        AgrementId = 0,
+                        ValvulaControlId = valvulaControl.Id,
+                        TaxUserId = 0,
+                        DateOrder = DateTime.Now,
+                        DateStimated = DateTime.Now.AddHours(2),
+                        Applicant = data["applicant"].ToString(),
+                        Type = data["typeOrder"].ToString(),
+                        Status = "EOT01",
+                        Activities = data["Activities"].ToString(),
+                        Observation = data["Observation"].ToString(),
+                        Folio = "f",
+                        aviso = aviso
+                    };
+                    _context.OrderWorks.Add(orderWork);
+                    _context.SaveChanges();
+
+                    var Status = new OrderWorkStatus()
+                    {
+                        IdStatus = "EOT01",
+                        OrderWorkId = orderWork.Id,
+                        User = data["applicant"].ToString(),
+                        OrderWorkStatusDate = DateTime.Now,
+
+                    };
+                    _context.OrderWorkStatus.Add(Status);
+                    _context.SaveChanges();
+                }
+                else
                 {
-                    Name = datosSinCuenta.user,
-                    RFC = datosSinCuenta.rfc,
-                    CURP = datosSinCuenta.curp,
-                    PhoneNumber = datosSinCuenta.tel,
-                    EMail = datosSinCuenta.mail,
-                    IsActive = true,
-                    IsProvider = false
-                };
-                _context.TaxUsers.Add(taxUser);
-                _context.SaveChanges();
+                    var datos = new
+                    {
+                        user = "",
+                        rfc = "",
+                        curp = "",
+                        mail = "",
+                        tel = "",
+                        street = "",
+                        numExt = "",
+                        numInt = "",
+                        suburb = "",
+                        zip = "",
+                        town = "",
+                        state = ""
+                    };
+                    var datosSinCuenta = JsonConvert.DeserializeAnonymousType(data["Datos"].ToString(), datos);
 
-                TaxAddress taxAddress = new TaxAddress()
-                {
-                    Street = datosSinCuenta.street,
-                    Outdoor = datosSinCuenta.numExt,
-                    Indoor = datosSinCuenta.numInt,
-                    Zip = datosSinCuenta.zip,
-                    Suburb = datosSinCuenta.suburb,
-                    Town = datosSinCuenta.town,
-                    State = datosSinCuenta.state,
-                    TaxUserId = taxUser.Id
-                };
-                _context.TaxAddresses.Add(taxAddress);
-                _context.SaveChanges();
+                    TaxUser taxUser = new TaxUser()
+                    {
+                        Name = datosSinCuenta.user,
+                        RFC = datosSinCuenta.rfc,
+                        CURP = datosSinCuenta.curp,
+                        PhoneNumber = datosSinCuenta.tel,
+                        EMail = datosSinCuenta.mail,
+                        IsActive = true,
+                        IsProvider = false
+                    };
+                    _context.TaxUsers.Add(taxUser);
+                    _context.SaveChanges();
 
-                OrderWork orderWork = new OrderWork()
-                {
-                    AgrementId = 0,
-                    TaxUserId = taxUser.Id,
-                    DateOrder = DateTime.Now,
-                    Applicant = data["applicant"].ToString(),
-                    Type = data["typeOrder"].ToString(),
-                    Status = "EOT01",
-                    Activities = data["Activities"].ToString(),
-                    Observation = data["Observation"].ToString(),
-                    Folio = "f",                    
-                    aviso = aviso
-                };
-                _context.OrderWorks.Add(orderWork);
-                _context.SaveChanges();
+                    TaxAddress taxAddress = new TaxAddress()
+                    {
+                        Street = datosSinCuenta.street,
+                        Outdoor = datosSinCuenta.numExt,
+                        Indoor = datosSinCuenta.numInt,
+                        Zip = datosSinCuenta.zip,
+                        Suburb = datosSinCuenta.suburb,
+                        Town = datosSinCuenta.town,
+                        State = datosSinCuenta.state,
+                        TaxUserId = taxUser.Id
+                    };
+                    _context.TaxAddresses.Add(taxAddress);
+                    _context.SaveChanges();
 
-                var Status = new OrderWorkStatus()
-                {
-                    IdStatus = "EOT01",
-                    OrderWorkId = orderWork.Id,
-                    User = data["applicant"].ToString(),
-                    OrderWorkStatusDate = DateTime.Now,
+                    orderWork = new OrderWork()
+                    {
+                        AgrementId = 0,
+                        ValvulaControlId = 0,
+                        TaxUserId = taxUser.Id,
+                        DateOrder = DateTime.Now,
+                        Applicant = data["applicant"].ToString(),
+                        Type = data["typeOrder"].ToString(),
+                        Status = "EOT01",
+                        Activities = data["Activities"].ToString(),
+                        Observation = data["Observation"].ToString(),
+                        Folio = "f",
+                        aviso = aviso
+                    };
+                    _context.OrderWorks.Add(orderWork);
+                    _context.SaveChanges();
 
-                };
-                _context.OrderWorkStatus.Add(Status);
-                _context.SaveChanges();
+                    var Status = new OrderWorkStatus()
+                    {
+                        IdStatus = "EOT01",
+                        OrderWorkId = orderWork.Id,
+                        User = data["applicant"].ToString(),
+                        OrderWorkStatusDate = DateTime.Now,
+
+                    };
+                    _context.OrderWorkStatus.Add(Status);
+                    _context.SaveChanges();
+                }
+
+                
 
                 return Ok(orderWork);
             }
