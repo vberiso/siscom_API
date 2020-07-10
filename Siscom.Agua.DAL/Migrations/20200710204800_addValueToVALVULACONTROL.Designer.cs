@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200710204800_addValueToVALVULACONTROL")]
+    partial class addValueToVALVULACONTROL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2511,7 +2513,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 7, 10, 15, 52, 3, 969, DateTimeKind.Local).AddTicks(4087));
+                        .HasDefaultValue(new DateTime(2020, 7, 10, 15, 47, 59, 530, DateTimeKind.Local).AddTicks(3290));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3465,11 +3467,6 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("type")
                         .HasMaxLength(6);
 
-                    b.Property<int>("ValvulaControlId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("ValvulaControlId")
-                        .HasDefaultValue(1);
-
                     b.Property<int?>("aviso")
                         .HasColumnName("aviso");
 
@@ -3478,8 +3475,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("AgrementId");
 
                     b.HasIndex("TechnicalStaffId");
-
-                    b.HasIndex("ValvulaControlId");
 
                     b.ToTable("Order_work");
                 });
@@ -6148,7 +6143,7 @@ namespace Siscom.Agua.DAL.Migrations
                             Diameter = "",
                             HydraulicCircuit = "",
                             IsActive = true,
-                            LastServiceDate = new DateTime(2020, 7, 10, 15, 52, 4, 46, DateTimeKind.Local).AddTicks(157),
+                            LastServiceDate = new DateTime(2020, 7, 10, 15, 47, 59, 654, DateTimeKind.Local).AddTicks(5568),
                             Latitude = "19.0954579",
                             Longitude = "-98.2792209",
                             PhysicalState = "",
@@ -6740,11 +6735,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasOne("Siscom.Agua.DAL.Models.TechnicalStaff", "TechnicalStaff")
                         .WithMany("OrderWorks")
                         .HasForeignKey("TechnicalStaffId");
-
-                    b.HasOne("Siscom.Agua.DAL.Models.ValvulaControl", "ValvulaControl")
-                        .WithMany("OrderWorks")
-                        .HasForeignKey("ValvulaControlId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.OrderWorkDetail", b =>

@@ -44,7 +44,11 @@
     <Compile Remove="Migrations\20200707205601_addFieldValvulaControlIdtoORDERWORK.cs" />
     <Compile Remove="Migrations\20200707205601_addFieldValvulaControlIdtoORDERWORK.Designer.cs" />
     <Compile Remove="Migrations\20200707210328_addFieldValvulaControlIdtoORDERWORK.cs" />
-    <Compile Remove="Migrations\20200707210328_addFieldValvulaControlIdtoORDERWORK.Designer.cs" /> 
+    <Compile Remove="Migrations\20200707210328_addFieldValvulaControlIdtoORDERWORK.Designer.cs" />
+    <Compile Remove="Migrations\20200707213038_addFieldValvulaControlIdtoORDERWORK.cs" />
+    <Compile Remove="Migrations\20200707213038_addFieldValvulaControlIdtoORDERWORK.Designer.cs" />
+    <Compile Remove="Migrations\20200710204418_addValueToVALVULACONTROL.cs" />
+    <Compile Remove="Migrations\20200710204418_addValueToVALVULACONTROL.Designer.cs" /> 
   </ItemGroup>
   
   <ItemGroup>

@@ -43,6 +43,27 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetValve([FromRoute] int id)
+        {
+            try
+            {
+                var valve = await _context.ValvulaControls
+                                    .Include(x => x.ValveIncidents)
+                                    .Include(x => x.ValveOperations)
+                                    .FirstOrDefaultAsync(v => v.Id == id);
+
+                if (valve == null)
+                    return NotFound();
+                else
+                    return Ok(valve);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutValve([FromRoute] int id, [FromBody] ValvulaControl valvulaControl)
         {

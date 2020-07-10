@@ -1108,7 +1108,7 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<OrderWork>()
                 .Property(o => o.ValvulaControlId)
-                .HasDefaultValue(0);
+                .HasDefaultValue(1);
 
             #endregion
 
@@ -1829,6 +1829,23 @@ namespace Siscom.Agua.DAL
                    .HasOne<ValvulaControl>(a => a.ValvulaControl)
                    .WithMany(s => s.ValveOperations)
                    .HasForeignKey(s => s.ValvulaControlId);
+
+            var valvulaInicial = new ValvulaControl()
+            {
+                Id = 1,
+                Description = "Sin Valvula",
+                Reference = "Sin referencia",
+                Latitude = "19.0954579",
+                Longitude = "-98.2792209",
+                Type = "OT011",
+                IsActive = true,
+                ActualState = "",
+                Diameter = "",
+                HydraulicCircuit = "",
+                LastServiceDate = DateTime.Now,
+                PhysicalState = ""
+            };
+            builder.Entity<ValvulaControl>().HasData(new ValvulaControl[] { valvulaInicial });
 
             builder.Entity<OrderWork>()
                    .HasOne<ValvulaControl>(a => a.ValvulaControl)
