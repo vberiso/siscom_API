@@ -38,169 +38,169 @@ namespace Siscom.Agua.Api.Controllers
             _context = context;
         }
 
-        //[HttpGet("OrderWorks/{id?}")]
-        //public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo = null, [FromQuery] bool withOrder = false, [FromQuery] string account = null)
-        //{
-        //    try
-        //    {
-        //        if (id == null)
-        //        {
-        //            System.Linq.IQueryable<OrderWork> query = _context.OrderWorks.Include(x => x.Agreement);
+        [HttpGet("OrderWorks/{id?}")]
+        public async Task<IActionResult> GetOrderWorks([FromQuery] string id = null, [FromQuery] string status = null, [FromQuery] string folio = null, [FromQuery] string type = null, [FromQuery] string fecha = null, [FromQuery] string IsMasivo = null, [FromQuery] bool withOrder = false, [FromQuery] string account = null)
+        {
+            try
+            {
+                if (id == null)
+                {
+                    System.Linq.IQueryable<OrderWork> query = _context.OrderWorks.Include(x => x.Agreement);
 
-        //            if (folio == null)
-        //            {
+                    if (folio == null)
+                    {
 
-        //                if (account != null)
-        //                {
-        //                    query = query.Where(x => x.Agreement.Account == account);
-        //                }
-        //                if (fecha != null)
-        //                {
-        //                    fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
-        //                    query = query.Where(x => x.DateOrder.ToString("dd-MM-yyyy") == fecha);
-        //                }
-        //                if (status != null)
-        //                {
-        //                    query = query.Where(x => x.Status == status);
-        //                }
+                        if (account != null)
+                        {
+                            query = query.Where(x => x.Agreement.Account == account);
+                        }
+                        if (fecha != null)
+                        {
+                            fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
+                            query = query.Where(x => x.DateOrder.ToString("dd-MM-yyyy") == fecha);
+                        }
+                        if (status != null)
+                        {
+                            query = query.Where(x => x.Status == status);
+                        }
 
-        //                if (type != null)
-        //                {
-        //                    query = query.Where(x => x.Type == type);
-        //                }
-        //                if (IsMasivo != null)
-        //                {
-        //                    query = query.Where(x => x.Status == "EOT01");
-        //                }
-        //            }
-        //            else
-        //            {
-        //                query = query.Where(x => x.Folio == folio);
-        //            }
-
-
-        //            query = query.OrderBy(x => x.Folio);
-
-        //            var OrderWorks = query.ToList();
-
-        //            return Ok(OrderWorks);
-        //        }
+                        if (type != null)
+                        {
+                            query = query.Where(x => x.Type == type);
+                        }
+                        if (IsMasivo != null)
+                        {
+                            query = query.Where(x => x.Status == "EOT01");
+                        }
+                    }
+                    else
+                    {
+                        query = query.Where(x => x.Folio == folio);
+                    }
 
 
-        //        var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
-        //            .Include(x => x.OrderWorkReasonCatalogs)
-        //            .ThenInclude(x => x.ReasonCatalog)
-        //            .Include(x => x.PhotosOrderWork)
-        //            .Include(x => x.OrderWorkDetails)
-        //            .Include(x => x.LocationOrderWorks)
-        //            .Include(x => x.OrderWorkLists)
-        //            .ThenInclude(x => x.OrderWorkListPictures)
-        //            .First();
+                    query = query.OrderBy(x => x.Folio);
 
-                
-        //        var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
-        //            .Include(x => x.TypeService)
-        //            .Include(x => x.TypeIntake)
-        //            .Include(x => x.TypeConsume)
-        //            .Include(x => x.OrderWork)
-        //                .ThenInclude(x => x.TechnicalStaff)
+                    var OrderWorks = query.ToList();
+
+                    return Ok(OrderWorks);
+                }
 
 
-        //            .Include(x => x.Clients)
-        //            .Include(x => x.Addresses)
-        //                .ThenInclude(x => x.Suburbs)
-        //                    .ThenInclude(x => x.Towns)
-        //                        .ThenInclude(x => x.States)
-        //                            .ThenInclude(x => x.Countries)
-        //            .First();
+                var OrderWork = _context.OrderWorks.Where(x => x.Id.ToString() == id)
+                    .Include(x => x.OrderWorkReasonCatalogs)
+                    .ThenInclude(x => x.ReasonCatalog)
+                    .Include(x => x.PhotosOrderWork)
+                    .Include(x => x.OrderWorkDetails)
+                    .Include(x => x.LocationOrderWorks)
+                    .Include(x => x.OrderWorkLists)
+                    .ThenInclude(x => x.OrderWorkListPictures)
+                    .First();
 
 
-        //        if (OrderWork.LocationOrderWorks != null && OrderWork.LocationOrderWorks.Count > 0)
-        //        {
-        //            foreach (var item in OrderWork.LocationOrderWorks)
-        //            {
-        //                item.LocationOfAttentionOrderWork = _context.LocationOfAttentionOrderWorks.FirstOrDefault(l => l.Id == item.LocationOfAttentionOrderWorkId);
-        //            }
-        //        }
-
-        //        TaxUser taxUser = new TaxUser();
-        //        ValvulaControl valvulaControl = new ValvulaControl();
-        //        if (OrderWork.Type.Equals("OT011"))
-        //        {
-        //            valvulaControl = await _context.ValvulaControls.FirstOrDefaultAsync(x => x.Id == OrderWork.ValvulaControlId);
-        //        }
-        //        else
-        //        {
-        //            if (OrderWork.AgrementId == 0 && OrderWork.TaxUserId != 0)
-        //            {
-        //                taxUser = await _context.TaxUsers.Where(t => t.Id == OrderWork.TaxUserId)
-        //                                                .Include(x => x.TaxAddresses)
-        //                                                .FirstOrDefaultAsync();
-        //            }
-        //        }
-                
-                
-        //        if (withOrder)
-        //            {
-        //                return Ok(new List<object>() { agreement, OrderWork, taxUser, valvulaControl });
-        //            }
-        //        return Ok(agreement);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Ok("");
-        //    }
-
-        //}
-
-        //[HttpPost("OrderWorksList/{withOrder}")]
-        //public async Task<IActionResult> PostOrderWorksList([FromBody] List<int> pIds, [FromRoute]bool withOrder = false)
-        //{
-        //    try
-        //    {
-        //        InfoOrderVM info = new InfoOrderVM();
-        //        info.lstOrderWork = await _context.OrderWorks.Where(x => pIds.Contains(x.Id))
-        //            .Include(x => x.OrderWorkReasonCatalogs)
-        //            .ThenInclude(x => x.ReasonCatalog)
-        //            .Include(x => x.PhotosOrderWork)
-        //            .ToListAsync();
-
-        //        List<int> idsAgr = info.lstOrderWork.Select(o => o.AgrementId).ToList();
-        //        info.lstAgreements = await _context.Agreements.Where(a => idsAgr.Contains(a.Id))
-        //            .Include(x => x.TypeIntake)
-        //            .Include(x => x.TypeConsume)
-        //            .Include(x => x.OrderWork)
-        //                .ThenInclude(x => x.TechnicalStaff)
-        //            .Include(x => x.Clients)
-        //            .Include(x => x.Addresses)
-        //                .ThenInclude(x => x.Suburbs)
-        //                    .ThenInclude(x => x.Towns)
-        //                        .ThenInclude(x => x.States)
-        //                            .ThenInclude(x => x.Countries)
-        //            .ToListAsync();
-
-                
-        //        List<int> idsTaxUser = info.lstOrderWork.Where(a => a.AgrementId == 0 && a.TaxUserId != 0).Select(t => t.TaxUserId).ToList();
-        //        info.lstTaxUser = await _context.TaxUsers
-        //            .Include(d => d.TaxAddresses)
-        //            .Where(t => idsTaxUser.Contains(t.Id)).ToListAsync();
+                var agreement = _context.Agreements.Where(a => a.Id == OrderWork.AgrementId)
+                    .Include(x => x.TypeService)
+                    .Include(x => x.TypeIntake)
+                    .Include(x => x.TypeConsume)
+                    .Include(x => x.OrderWork)
+                        .ThenInclude(x => x.TechnicalStaff)
 
 
-        //        List<int> idsValvulas = info.lstOrderWork.Where(a => a.Type.Equals("OT011")).Select(t => t.ValvulaControlId).ToList();
-        //        info.lstValvulas = await _context.ValvulaControls                    
-        //            .Where(t => idsValvulas.Contains(t.Id)).ToListAsync();
-                
-        //        if (withOrder)
-        //        {
-        //            return Ok(info);
-        //        }
-        //        return Ok(info.lstAgreements);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest();
-        //    }
-        //}
+                    .Include(x => x.Clients)
+                    .Include(x => x.Addresses)
+                        .ThenInclude(x => x.Suburbs)
+                            .ThenInclude(x => x.Towns)
+                                .ThenInclude(x => x.States)
+                                    .ThenInclude(x => x.Countries)
+                    .First();
+
+
+                if (OrderWork.LocationOrderWorks != null && OrderWork.LocationOrderWorks.Count > 0)
+                {
+                    foreach (var item in OrderWork.LocationOrderWorks)
+                    {
+                        item.LocationOfAttentionOrderWork = _context.LocationOfAttentionOrderWorks.FirstOrDefault(l => l.Id == item.LocationOfAttentionOrderWorkId);
+                    }
+                }
+
+                TaxUser taxUser = new TaxUser();
+                ValvulaControl valvulaControl = new ValvulaControl();
+                if (OrderWork.Type.Equals("OT011"))
+                {
+                    valvulaControl = await _context.ValvulaControls.FirstOrDefaultAsync(x => x.Id == OrderWork.ValvulaControlId);
+                }
+                else
+                {
+                    if (OrderWork.AgrementId == 0 && OrderWork.TaxUserId != 0)
+                    {
+                        taxUser = await _context.TaxUsers.Where(t => t.Id == OrderWork.TaxUserId)
+                                                        .Include(x => x.TaxAddresses)
+                                                        .FirstOrDefaultAsync();
+                    }
+                }
+
+
+                if (withOrder)
+                {
+                    return Ok(new List<object>() { agreement, OrderWork, taxUser, valvulaControl });
+                }
+                return Ok(agreement);
+            }
+            catch (Exception ex)
+            {
+                return Ok("");
+            }
+
+        }
+
+        [HttpPost("OrderWorksList/{withOrder}")]
+        public async Task<IActionResult> PostOrderWorksList([FromBody] List<int> pIds, [FromRoute]bool withOrder = false)
+        {
+            try
+            {
+                InfoOrderVM info = new InfoOrderVM();
+                info.lstOrderWork = await _context.OrderWorks.Where(x => pIds.Contains(x.Id))
+                    .Include(x => x.OrderWorkReasonCatalogs)
+                    .ThenInclude(x => x.ReasonCatalog)
+                    .Include(x => x.PhotosOrderWork)
+                    .ToListAsync();
+
+                List<int> idsAgr = info.lstOrderWork.Select(o => o.AgrementId).ToList();
+                info.lstAgreements = await _context.Agreements.Where(a => idsAgr.Contains(a.Id))
+                    .Include(x => x.TypeIntake)
+                    .Include(x => x.TypeConsume)
+                    .Include(x => x.OrderWork)
+                        .ThenInclude(x => x.TechnicalStaff)
+                    .Include(x => x.Clients)
+                    .Include(x => x.Addresses)
+                        .ThenInclude(x => x.Suburbs)
+                            .ThenInclude(x => x.Towns)
+                                .ThenInclude(x => x.States)
+                                    .ThenInclude(x => x.Countries)
+                    .ToListAsync();
+
+
+                List<int> idsTaxUser = info.lstOrderWork.Where(a => a.AgrementId == 0 && a.TaxUserId != 0).Select(t => t.TaxUserId).ToList();
+                info.lstTaxUser = await _context.TaxUsers
+                    .Include(d => d.TaxAddresses)
+                    .Where(t => idsTaxUser.Contains(t.Id)).ToListAsync();
+
+
+                List<int> idsValvulas = info.lstOrderWork.Where(a => a.Type.Equals("OT011")).Select(t => t.ValvulaControlId).ToList();
+                info.lstValvulas = await _context.ValvulaControls
+                    .Where(t => idsValvulas.Contains(t.Id)).ToListAsync();
+
+                if (withOrder)
+                {
+                    return Ok(info);
+                }
+                return Ok(info.lstAgreements);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
 
         [HttpPost("OrderWorks/GetByIds")]
         public async Task<IActionResult> GetListOrderWorks([FromBody] List<int> list)
@@ -471,133 +471,133 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
-        //[HttpPost("withoutAccount")]
-        //public async Task<IActionResult> withoutAccount([FromBody] object collection)
-        //{
-        //    try
-        //    {
-        //        int aviso = 0;
-        //        var data = JObject.Parse(collection.ToString());
-        //        var tipoOT = data["typeOrder"].ToString();
-        //        OrderWork orderWork = null;
+        [HttpPost("withoutAccount")]
+        public async Task<IActionResult> withoutAccount([FromBody] object collection)
+        {
+            try
+            {
+                int aviso = 0;
+                var data = JObject.Parse(collection.ToString());
+                var tipoOT = data["typeOrder"].ToString();
+                OrderWork orderWork = null;
 
-        //        if (tipoOT.Equals("OT011"))
-        //        {
-        //            ValvulaControl valvulaControl = JsonConvert.DeserializeObject<ValvulaControl>(data["Datos"].ToString());
+                if (tipoOT.Equals("OT011"))
+                {
+                    ValvulaControl valvulaControl = JsonConvert.DeserializeObject<ValvulaControl>(data["Datos"].ToString());
 
-        //            orderWork = new OrderWork()
-        //            {
-        //                AgrementId = 0,
-        //                ValvulaControlId = valvulaControl.Id,
-        //                TaxUserId = 0,
-        //                DateOrder = DateTime.Now,
-        //                DateStimated = DateTime.Now.AddHours(2),
-        //                Applicant = data["applicant"].ToString(),
-        //                Type = data["typeOrder"].ToString(),
-        //                Status = "EOT01",
-        //                Activities = data["Activities"].ToString(),
-        //                Observation = data["Observation"].ToString(),
-        //                Folio = "f",
-        //                aviso = aviso
-        //            };
-        //            _context.OrderWorks.Add(orderWork);
-        //            _context.SaveChanges();
+                    orderWork = new OrderWork()
+                    {
+                        AgrementId = 0,
+                        ValvulaControlId = valvulaControl.Id,
+                        TaxUserId = 0,
+                        DateOrder = DateTime.Now,
+                        DateStimated = DateTime.Now.AddHours(2),
+                        Applicant = data["applicant"].ToString(),
+                        Type = data["typeOrder"].ToString(),
+                        Status = "EOT01",
+                        Activities = data["Activities"].ToString(),
+                        Observation = data["Observation"].ToString(),
+                        Folio = "f",
+                        aviso = aviso
+                    };
+                    _context.OrderWorks.Add(orderWork);
+                    _context.SaveChanges();
 
-        //            var Status = new OrderWorkStatus()
-        //            {
-        //                IdStatus = "EOT01",
-        //                OrderWorkId = orderWork.Id,
-        //                User = data["applicant"].ToString(),
-        //                OrderWorkStatusDate = DateTime.Now,
+                    var Status = new OrderWorkStatus()
+                    {
+                        IdStatus = "EOT01",
+                        OrderWorkId = orderWork.Id,
+                        User = data["applicant"].ToString(),
+                        OrderWorkStatusDate = DateTime.Now,
 
-        //            };
-        //            _context.OrderWorkStatus.Add(Status);
-        //            _context.SaveChanges();
-        //        }
-        //        else
-        //        {
-        //            var datos = new
-        //            {
-        //                user = "",
-        //                rfc = "",
-        //                curp = "",
-        //                mail = "",
-        //                tel = "",
-        //                street = "",
-        //                numExt = "",
-        //                numInt = "",
-        //                suburb = "",
-        //                zip = "",
-        //                town = "",
-        //                state = ""
-        //            };
-        //            var datosSinCuenta = JsonConvert.DeserializeAnonymousType(data["Datos"].ToString(), datos);
+                    };
+                    _context.OrderWorkStatus.Add(Status);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    var datos = new
+                    {
+                        user = "",
+                        rfc = "",
+                        curp = "",
+                        mail = "",
+                        tel = "",
+                        street = "",
+                        numExt = "",
+                        numInt = "",
+                        suburb = "",
+                        zip = "",
+                        town = "",
+                        state = ""
+                    };
+                    var datosSinCuenta = JsonConvert.DeserializeAnonymousType(data["Datos"].ToString(), datos);
 
-        //            TaxUser taxUser = new TaxUser()
-        //            {
-        //                Name = datosSinCuenta.user,
-        //                RFC = datosSinCuenta.rfc,
-        //                CURP = datosSinCuenta.curp,
-        //                PhoneNumber = datosSinCuenta.tel,
-        //                EMail = datosSinCuenta.mail,
-        //                IsActive = true,
-        //                IsProvider = false
-        //            };
-        //            _context.TaxUsers.Add(taxUser);
-        //            _context.SaveChanges();
+                    TaxUser taxUser = new TaxUser()
+                    {
+                        Name = datosSinCuenta.user,
+                        RFC = datosSinCuenta.rfc,
+                        CURP = datosSinCuenta.curp,
+                        PhoneNumber = datosSinCuenta.tel,
+                        EMail = datosSinCuenta.mail,
+                        IsActive = true,
+                        IsProvider = false
+                    };
+                    _context.TaxUsers.Add(taxUser);
+                    _context.SaveChanges();
 
-        //            TaxAddress taxAddress = new TaxAddress()
-        //            {
-        //                Street = datosSinCuenta.street,
-        //                Outdoor = datosSinCuenta.numExt,
-        //                Indoor = datosSinCuenta.numInt,
-        //                Zip = datosSinCuenta.zip,
-        //                Suburb = datosSinCuenta.suburb,
-        //                Town = datosSinCuenta.town,
-        //                State = datosSinCuenta.state,
-        //                TaxUserId = taxUser.Id
-        //            };
-        //            _context.TaxAddresses.Add(taxAddress);
-        //            _context.SaveChanges();
+                    TaxAddress taxAddress = new TaxAddress()
+                    {
+                        Street = datosSinCuenta.street,
+                        Outdoor = datosSinCuenta.numExt,
+                        Indoor = datosSinCuenta.numInt,
+                        Zip = datosSinCuenta.zip,
+                        Suburb = datosSinCuenta.suburb,
+                        Town = datosSinCuenta.town,
+                        State = datosSinCuenta.state,
+                        TaxUserId = taxUser.Id
+                    };
+                    _context.TaxAddresses.Add(taxAddress);
+                    _context.SaveChanges();
 
-        //            orderWork = new OrderWork()
-        //            {
-        //                AgrementId = 0,
-        //                ValvulaControlId = 0,
-        //                TaxUserId = taxUser.Id,
-        //                DateOrder = DateTime.Now,
-        //                Applicant = data["applicant"].ToString(),
-        //                Type = data["typeOrder"].ToString(),
-        //                Status = "EOT01",
-        //                Activities = data["Activities"].ToString(),
-        //                Observation = data["Observation"].ToString(),
-        //                Folio = "f",
-        //                aviso = aviso
-        //            };
-        //            _context.OrderWorks.Add(orderWork);
-        //            _context.SaveChanges();
+                    orderWork = new OrderWork()
+                    {
+                        AgrementId = 0,
+                        ValvulaControlId = 0,
+                        TaxUserId = taxUser.Id,
+                        DateOrder = DateTime.Now,
+                        Applicant = data["applicant"].ToString(),
+                        Type = data["typeOrder"].ToString(),
+                        Status = "EOT01",
+                        Activities = data["Activities"].ToString(),
+                        Observation = data["Observation"].ToString(),
+                        Folio = "f",
+                        aviso = aviso
+                    };
+                    _context.OrderWorks.Add(orderWork);
+                    _context.SaveChanges();
 
-        //            var Status = new OrderWorkStatus()
-        //            {
-        //                IdStatus = "EOT01",
-        //                OrderWorkId = orderWork.Id,
-        //                User = data["applicant"].ToString(),
-        //                OrderWorkStatusDate = DateTime.Now,
+                    var Status = new OrderWorkStatus()
+                    {
+                        IdStatus = "EOT01",
+                        OrderWorkId = orderWork.Id,
+                        User = data["applicant"].ToString(),
+                        OrderWorkStatusDate = DateTime.Now,
 
-        //            };
-        //            _context.OrderWorkStatus.Add(Status);
-        //            _context.SaveChanges();
-        //        }
+                    };
+                    _context.OrderWorkStatus.Add(Status);
+                    _context.SaveChanges();
+                }
 
-                
 
-        //        return Ok(orderWork);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status400BadRequest, new { error = ex, msg = "No se pudo generar la orden." });
-        //    }
-        //}
+
+                return Ok(orderWork);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex, msg = "No se pudo generar la orden." });
+            }
+        }
 
         [HttpPost("OrderWorks/FromCulturaDelAgua")]
         public async Task<IActionResult> CreateFromCulturaDelAgua([FromBody] object collection)

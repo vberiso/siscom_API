@@ -30,85 +30,92 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             _context = context;
         }
 
-        //[HttpGet("getAgremmentsOfStaff/{staffId}")]
-        //public async Task<IActionResult> getAgremmentsOfStaff([FromRoute] string staffId)
-        //{
-        //    DateTime DiaActual = DateTime.Now;
-        //    int delta = DayOfWeek.Monday - DiaActual.DayOfWeek;
-        //    DateTime LunesSemanaPasada = DiaActual.AddDays(delta - 7);
+        [HttpGet("getAgremmentsOfStaff/{staffId}")]
+        public async Task<IActionResult> getAgremmentsOfStaff([FromRoute] string staffId)
+        {
+            DateTime DiaActual = DateTime.Now;
+            int delta = DayOfWeek.Monday - DiaActual.DayOfWeek;
+            DateTime LunesSemanaPasada = DiaActual.AddDays(delta - 7);
 
-        //    //var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).Include(x => x.OrderWorks).First();
-        //    var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).First();
-        //    Staff.OrderWorks = await _context.OrderWorks.Where(ow => ow.TechnicalStaffId == Staff.Id && ow.DateOrder >= LunesSemanaPasada).ToListAsync();
+            //var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).Include(x => x.OrderWorks).First();
+            var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).First();
+            Staff.OrderWorks = await _context.OrderWorks.Where(ow => ow.TechnicalStaffId == Staff.Id && ow.DateOrder >= LunesSemanaPasada).ToListAsync();
 
-        //    List<Agreement> Agreements = new List<Agreement>();
-        //    foreach (var orderWork in Staff.OrderWorks)
-        //    {
-        //        if(orderWork.AgrementId != 0)
-        //        {
-        //            orderWork.Agreement =
-        //            _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
-        //            //.Include(x => x.OrderWork)
+            List<Agreement> Agreements = new List<Agreement>();
+            foreach (var orderWork in Staff.OrderWorks)
+            {
+                if (orderWork.AgrementId != 0)
+                {
+                    orderWork.Agreement =
+                    _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
+                    //.Include(x => x.OrderWork)
 
-        //            .Include(x => x.Clients)
-        //            .Include(x => x.Addresses)
-        //                .ThenInclude(x => x.Suburbs)
-        //                    .ThenInclude(x => x.Towns)
-        //                        .ThenInclude(x => x.States)
-        //                            .ThenInclude(x => x.Countries)
-        //                                .First()
-        //            ;
-        //        }
-        //        else if(orderWork.TaxUserId != 0 || orderWork.ValvulaControlId != 0)
-        //        {
-        //            orderWork.Agreement = _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
-        //                                                    .Include(x => x.Clients)
-        //                                                    .Include(x => x.Addresses)                                                                
-        //                                                    .First();
-        //            orderWork.Agreement.Clients.Clear();
-        //            TaxUser taxUser = _context.TaxUsers.FirstOrDefault(x => x.Id == orderWork.TaxUserId);
-        //            orderWork.Agreement.Clients.Add( new Client() { Id = 0, TypeUser = "CLI01", Name = taxUser != null ? taxUser.Name : "Sin Nombre", LastName = "" } );
-        //            orderWork.Agreement.Addresses.Clear();
-        //            TaxAddress taxAddress = _context.TaxAddresses.FirstOrDefault(x => x.TaxUserId == orderWork.TaxUserId);
-        //            orderWork.Agreement.Addresses.Add(new Address() 
-        //                                                    {   
-        //                                                        Id = 0, 
-        //                                                        TypeAddress = "DIR01", 
-        //                                                        Street = taxAddress != null ? taxAddress.Street : "Sin Calle", 
-        //                                                        Outdoor = taxAddress != null ? taxAddress.Outdoor : "Sin Numero", 
-        //                                                        Indoor = taxAddress != null ? taxAddress.Indoor : "", 
-        //                                                        Suburbs = new Suburb() { Id = 0, Name = taxAddress != null ? taxAddress.Suburb : "Sin Colonia", 
-        //                                                            Towns = new Town() { Id = 0, Name = taxAddress != null ? taxAddress.Town : "" } 
-        //                                                        } 
-        //                                                    });
-        //        }
-        //        else
-        //        {
-        //            orderWork.Agreement = _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
-        //                                                    .Include(x => x.Clients)
-        //                                                    .Include(x => x.Addresses)
-        //                                                    .First();
-        //            orderWork.Agreement.Clients.Clear();
-        //            orderWork.Agreement.Clients.Add( new Client() { Id = 0, TypeUser = "CLI01", Name = "Multipes cuentas", LastName = "" });
-        //            orderWork.Agreement.Addresses.Clear();
-        //            orderWork.Agreement.Addresses.Add( new Address() { 
-        //                Id = 0, 
-        //                TypeAddress = "DIR01", 
-        //                Street = "Multiple", 
-        //                Outdoor = "...", 
-        //                Indoor = "...", 
-        //                Suburbs = new Suburb() { Id = 0, Name = "Multiple", 
-        //                    Towns = new Town() { Id = 0, Name = "Multiple" } 
-        //                } 
-        //            });
-        //        }
-                
-        //    }
+                    .Include(x => x.Clients)
+                    .Include(x => x.Addresses)
+                        .ThenInclude(x => x.Suburbs)
+                            .ThenInclude(x => x.Towns)
+                                .ThenInclude(x => x.States)
+                                    .ThenInclude(x => x.Countries)
+                                        .First()
+                    ;
+                }
+                else if (orderWork.TaxUserId != 0 || orderWork.ValvulaControlId != 0)
+                {
+                    orderWork.Agreement = _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
+                                                            .Include(x => x.Clients)
+                                                            .Include(x => x.Addresses)
+                                                            .First();
+                    orderWork.Agreement.Clients.Clear();
+                    TaxUser taxUser = _context.TaxUsers.FirstOrDefault(x => x.Id == orderWork.TaxUserId);
+                    orderWork.Agreement.Clients.Add(new Client() { Id = 0, TypeUser = "CLI01", Name = taxUser != null ? taxUser.Name : "Sin Nombre", LastName = "" });
+                    orderWork.Agreement.Addresses.Clear();
+                    TaxAddress taxAddress = _context.TaxAddresses.FirstOrDefault(x => x.TaxUserId == orderWork.TaxUserId);
+                    orderWork.Agreement.Addresses.Add(new Address()
+                    {
+                        Id = 0,
+                        TypeAddress = "DIR01",
+                        Street = taxAddress != null ? taxAddress.Street : "Sin Calle",
+                        Outdoor = taxAddress != null ? taxAddress.Outdoor : "Sin Numero",
+                        Indoor = taxAddress != null ? taxAddress.Indoor : "",
+                        Suburbs = new Suburb()
+                        {
+                            Id = 0,
+                            Name = taxAddress != null ? taxAddress.Suburb : "Sin Colonia",
+                            Towns = new Town() { Id = 0, Name = taxAddress != null ? taxAddress.Town : "" }
+                        }
+                    });
+                }
+                else
+                {
+                    orderWork.Agreement = _context.Agreements.Where(x => x.Id == orderWork.AgrementId)
+                                                            .Include(x => x.Clients)
+                                                            .Include(x => x.Addresses)
+                                                            .First();
+                    orderWork.Agreement.Clients.Clear();
+                    orderWork.Agreement.Clients.Add(new Client() { Id = 0, TypeUser = "CLI01", Name = "Multipes cuentas", LastName = "" });
+                    orderWork.Agreement.Addresses.Clear();
+                    orderWork.Agreement.Addresses.Add(new Address()
+                    {
+                        Id = 0,
+                        TypeAddress = "DIR01",
+                        Street = "Multiple",
+                        Outdoor = "...",
+                        Indoor = "...",
+                        Suburbs = new Suburb()
+                        {
+                            Id = 0,
+                            Name = "Multiple",
+                            Towns = new Town() { Id = 0, Name = "Multiple" }
+                        }
+                    });
+                }
+
+            }
 
 
 
-        //    return Ok(Staff.OrderWorks);
-        //}
+            return Ok(Staff.OrderWorks);
+        }
 
         [HttpGet("Staffs/{id?}")]
         public async Task<IActionResult> GetStaffs([FromRoute] string id = null)
