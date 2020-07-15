@@ -957,6 +957,7 @@ namespace Siscom.Agua.Api.Controllers
 
                     _context.Entry(workList).State = EntityState.Modified;
                     _context.SaveChanges();
+                    
                 }
                 return Ok();
             }
