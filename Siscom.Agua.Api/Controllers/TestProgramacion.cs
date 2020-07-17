@@ -52,8 +52,8 @@ namespace Siscom.Agua.Api.Controllers
                             Zip = x.TaxAddresses.FirstOrDefault().Zip
                         }
                     }
-                })
-                .Take(20);
+                }).OrderByDescending(x => x.Id)
+                .Take(30);
             return data;
         }
 
