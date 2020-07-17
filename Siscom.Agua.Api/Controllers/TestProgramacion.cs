@@ -28,7 +28,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet]
         public IEnumerable<TaxUserVM> Get()
         {
-            return _context.TaxUsers
+            var data = _context.TaxUsers
                 .Include(x => x.TaxAddresses)
                 .Select(x => new TaxUserVM
                 {
@@ -40,8 +40,8 @@ namespace Siscom.Agua.Api.Controllers
                     Name = x.Name,
                     PhoneNumber = x.PhoneNumber,
                     RFC = x.RFC,
-                    TaxAddresses = new List<TaxAddressVM> { 
-                        new TaxAddressVM() { 
+                    TaxAddresses = new List<TaxAddressVM> {
+                        new TaxAddressVM() {
                             Id = x.TaxAddresses.FirstOrDefault().Id,
                             Indoor = x.TaxAddresses.FirstOrDefault().Indoor,
                             Outdoor = x.TaxAddresses.FirstOrDefault().Outdoor,
@@ -52,8 +52,9 @@ namespace Siscom.Agua.Api.Controllers
                             Zip = x.TaxAddresses.FirstOrDefault().Zip
                         }
                     }
-                }).OrderByDescending(x => x.Id)
+                })
                 .Take(20);
+            return data;
         }
 
         // GET api/<TestProgramacion>/5
