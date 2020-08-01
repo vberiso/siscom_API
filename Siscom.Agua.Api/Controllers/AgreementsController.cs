@@ -142,6 +142,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+            if(id == 0)
+                return BadRequest(ModelState);
 
             var currentUserName = this.User.Claims.ToList()[1].Value;
             var agreement = await GetAgreementData(id);

@@ -57,7 +57,7 @@ namespace Siscom.Agua.Api.Controllers
         {
             DateTime FechaIni = new DateTime(int.Parse(ini.Split("-")[0]), int.Parse(ini.Split("-")[1]), int.Parse(ini.Split("-")[2]));
             DateTime FechaFin = new DateTime(int.Parse(fin.Split("-")[0]), int.Parse(fin.Split("-")[1]), int.Parse(fin.Split("-")[2]), 23, 59, 59);
-            var tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == "ET001").ToList();
+            var tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == "ET001" && x.IdXmlFacturama != "Timbox").ToList();
 
             RequestsAPI RequestsFacturama = new RequestsAPI("https://api.facturama.mx/");
             int count = 0, refresh = 0;
