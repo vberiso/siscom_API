@@ -218,8 +218,8 @@ namespace Siscom.Agua.Api.Controllers
                                         .Include(x => x.OrderSaleDiscounts)
                                         .Where(x => x.Folio == folio)
                                         .ToListAsync();
-
-                    if(lstOS.Any(x => x.Status == "EOS03"))//Si para este folio se aplico un descuento adicional.
+                                        
+                    if (lstOS.Any(x => x.Status == "EOS03"))//Si para este folio se aplico un descuento adicional.
                     {
                     }
                     else if(lstOS.Any(x => x.Status == "EOS01"))   //Solo si no se ha aplicado descuento adicional

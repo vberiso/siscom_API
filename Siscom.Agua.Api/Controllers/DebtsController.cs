@@ -195,6 +195,39 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(new { Detail, DebtDiscount });
         }
 
+        [HttpGet("promocionCOVID/{idAgreement}/{aniosDebt}")]
+        public async Task<IActionResult> GetPromocionCOVID([FromRoute] int idAgreement, [FromRoute] string aniosDebt)
+        {
+            //Busca todas los recargos que fueron cancelados por covid, para indicar en caja cuales fueron.            
+            try
+            {
+                var lstTemp = aniosDebt.Split('|').ToList();
+                var debt = await _context.Debts
+                                //.Include(dd => dd.DebtDetails)
+                                .Where(gs => gs.Type == "TIP05" 
+                                        && gs.Status == "ED015"
+                                        && gs.AgreementId == idAgreement
+                                        && lstTemp.Contains(gs.Year.ToString()))
+                                .OrderBy(x => x.FromDate)
+                                .ToListAsync();
+                
+                if (debt == null)
+                {
+                    return Ok(0.00m);
+                }
+
+                decimal TotalDescuento = debt.Sum(x => x.Amount);
+
+                return Ok(TotalDescuento);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se podo obtener el adeudo." });
+            }
+        }
+
+
+
         [HttpPost("GetDiscountAnnual/{porcentajeDiscount}")]
         public async Task<IActionResult> CheckIsAnnual([FromRoute] int porcentajeDiscount, [FromBody] List<int> DebtIds)
         {
