@@ -2,12 +2,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.runSp;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http.Cors;
@@ -312,6 +315,37 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para condonar debts." });
             }            
         }
+
+        [HttpPost("ApplyDiscountProductsCOVID")]
+        public async Task<ActionResult> ApplyDiscountProductsCOVID([FromBody] object pObjeto)
+        {
+            try
+            {
+                var definition = new { tipo = 0, valor = 0.0M, id = 0, idsOSD = "" };                
+                var atributos = JsonConvert.DeserializeAnonymousType(JsonConvert.SerializeObject(pObjeto), definition);
+
+                List<SPParameters> parameters = new List<SPParameters> {
+                new SPParameters{Key ="id", Value = atributos.id.ToString()},
+                new SPParameters{Key ="idsOSD", Value = atributos.idsOSD},
+                new SPParameters{Key ="porcentage_value", Value = atributos.tipo == 1 ? ((int)atributos.valor).ToString() : "0"},
+                new SPParameters{Key ="discount_value", Value = atributos.tipo == 2 ? atributos.valor.ToString() : "0" },
+                new SPParameters{Key ="text_discount", Value = "Descuento aplicado por apoyo a contingencia COVID"},                    
+                new SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },                    
+                new SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
+                };
+                var ss = await new RunSP(this, _context).runProcedureNT("aply_discount_to_product_by_covid", parameters);
+                var data = JObject.Parse(JsonConvert.SerializeObject(ss));
+                var SPParameters = JsonConvert.DeserializeObject<SPParameters>(JsonConvert.SerializeObject(data["paramsOut"][0]));
+
+                int res = int.Parse(SPParameters.Value);                               
+                return Ok(res);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest();
+            }            
+        }
+       
 
     }
 }
