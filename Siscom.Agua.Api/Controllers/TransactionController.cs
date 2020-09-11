@@ -287,7 +287,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("FromUserInDay/{date}/{idUser}")]
         public async Task<IActionResult> FindTransactionsFromUserInDay([FromRoute] string date, string idUser)
         {
-            var idTerminal = _context.TerminalUsers.Where(t => t.UserId == idUser && t.OpenDate.ToString("yyyy-MM-dd") == date).Select(t => t.Id).ToList();
+            var idTerminal = await _context.TerminalUsers.Where(t => t.UserId == idUser && t.OpenDate.ToString("yyyy-MM-dd") == date).Select(t => t.Id).ToListAsync();
 
             List<DAL.Models.Transaction> transaction = new List<DAL.Models.Transaction>();
             foreach (var item in idTerminal)
@@ -333,19 +333,212 @@ namespace Siscom.Agua.Api.Controllers
             {
                 if (x.Operacion == "Cobro" || x.Operacion.Contains("Cancelaci"))
                 {
-                    x.HaveInvoice = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().HaveTaxReceipt;
-                    x.IdPayment = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().Id;
-                    if (_context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().AgreementId != 0)
+                    var tmpPayment = _context.Payments.FirstOrDefault(p => p.TransactionFolio == x.FolioTransaccion);
+                    x.HaveInvoice = tmpPayment.HaveTaxReceipt;
+                    x.IdPayment = tmpPayment.Id;
+                    if (tmpPayment.AgreementId != 0)
                     {
-                        var idAgreement = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().AgreementId;
-                        var Cliente = _context.Clients.Where(c => c.AgreementId == idAgreement && c.TypeUser == "CLI01").FirstOrDefault();
+                        var idAgreement = tmpPayment.AgreementId;
+                        var Cliente = _context.Clients.FirstOrDefault(c => c.AgreementId == idAgreement && c.TypeUser == "CLI01");
                         x.Cliente = Cliente != null ? Cliente.Name + " " + Cliente.LastName + " " + Cliente.SecondLastName : "Contribuyente";
                     }
                     else
                     {
-                        var idOS = _context.Payments.Where(p => p.TransactionFolio == x.FolioTransaccion).FirstOrDefault().OrderSaleId;
-                        var OS = _context.OrderSales.Where(o => o.Id == idOS).FirstOrDefault();
-                        var taxUser = _context.TaxUsers.Where(t => t.Id == OS.TaxUserId && t.IsActive == true).FirstOrDefault();
+                        var idOS = tmpPayment.OrderSaleId;
+                        var OS = _context.OrderSales.FirstOrDefault(o => o.Id == idOS);
+                        var taxUser = _context.TaxUsers.FirstOrDefault(t => t.Id == OS.TaxUserId && t.IsActive == true);
+                        x.Cliente = taxUser != null ? taxUser.Name : "Contribuyente";
+                    }
+                }
+                else
+                    x.HaveInvoice = false;
+            });
+
+            return Ok(lstMovs);
+        }
+
+        //Obtengo la transaccion correspondiente a un folio fiscal.
+        [HttpGet("FromFolioFiscal/{folio}")]
+        public async Task<IActionResult> FindPaymentForFolioFiscal([FromRoute] string folio)
+        {            
+            var idPayment = _context.TaxReceipts.FirstOrDefault(t => t.FielXML.Contains(folio))?.PaymentId;
+            var payments = await _context.Payments.Where(p => p.Id == (int)idPayment).ToListAsync();
+            List<DAL.Models.Transaction> transaction = new List<DAL.Models.Transaction>();
+
+            if (payments != null && payments.Count > 0)
+            {
+                transaction = await _context.Transactions
+                                        .Include(x => x.TypeTransaction)
+                                        .Include(x => x.TransactionFolios)
+                                        .Where(t => payments.Select(x => x.TransactionFolio).Contains(t.Folio))
+                                        .ToListAsync();
+            }
+
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+                        
+            List<TransactionMovimientosCaja> lstMovs = transaction
+                .Select(t => new TransactionMovimientosCaja()
+                {
+                    IdTransaction = t.Id,
+                    FolioTransaccion = t.TypeTransactionId == 3 ? t.Folio : t.CancellationFolio,
+                    Cuenta = t.TypeTransactionId == 3 ? t.Account : transaction.Where(x => x.Folio == t.CancellationFolio).FirstOrDefault().Account,
+                    Operacion = t.TypeTransaction.Name,
+                    FolioImpresion = t.TypeTransactionId == 3 ? (t.TransactionFolios.Count > 0 ? t.TransactionFolios.FirstOrDefault().Folio : "") : "---",
+                    Hora = t.DateTransaction.ToString("hh:mm tt"),
+                    Total = t.Total,
+                    Signo = t.Sign
+                })
+                .ToList();
+
+            lstMovs.ToList().ForEach(x =>
+            {
+                if (x.Operacion == "Cobro" || x.Operacion.Contains("Cancelaci"))
+                {
+                    var tmpPayment = _context.Payments.FirstOrDefault(p => p.TransactionFolio == x.FolioTransaccion);
+                    x.HaveInvoice = tmpPayment.HaveTaxReceipt;
+                    x.IdPayment = tmpPayment.Id;
+                    if (tmpPayment.AgreementId != 0)
+                    {
+                        var idAgreement = tmpPayment.AgreementId;
+                        var Cliente = _context.Clients.FirstOrDefault(c => c.AgreementId == idAgreement && c.TypeUser == "CLI01");
+                        x.Cliente = Cliente != null ? Cliente.Name + " " + Cliente.LastName + " " + Cliente.SecondLastName : "Contribuyente";
+                    }
+                    else
+                    {
+                        var idOS = tmpPayment.OrderSaleId;
+                        var OS = _context.OrderSales.FirstOrDefault(o => o.Id == idOS);
+                        var taxUser = _context.TaxUsers.FirstOrDefault(t => t.Id == OS.TaxUserId && t.IsActive == true);
+                        x.Cliente = taxUser != null ? taxUser.Name : "Contribuyente";
+                    }
+                }
+                else
+                    x.HaveInvoice = false;
+            });
+
+            return Ok(lstMovs);
+        }
+
+        //Obtengo la transaccion correspondiente a un folio.
+        [HttpGet("FromFolio/{folio}")]
+        public async Task<IActionResult> FindPaymentForFolio([FromRoute] string folio)
+        {
+            string tmpFolio = folio.Substring((folio.Contains('-') ? folio.IndexOf('-') : 0));
+            var payments = await _context.Payments.Include(x => x.TaxReceipts).Where(p => p.ImpressionSheet.Contains(folio)).ToListAsync();
+            List<DAL.Models.Transaction> transaction = new List<DAL.Models.Transaction>();
+
+            if (payments != null && payments.Count > 0)
+            {
+                transaction = await _context.Transactions
+                                        .Include(x => x.TypeTransaction)
+                                        .Include(x => x.TransactionFolios)
+                                        .Where(t => payments.Select(x => x.TransactionFolio).Contains(t.Folio))
+                                        .ToListAsync();
+            }
+
+            if (transaction == null || transaction.Count == 0)
+            {
+                return NotFound();
+            }
+
+            List<TransactionMovimientosCaja> lstMovs = transaction
+                .Select(t => new TransactionMovimientosCaja()
+                {
+                    IdTransaction = t.Id,
+                    FolioTransaccion = t.TypeTransactionId == 3 ? t.Folio : t.CancellationFolio,
+                    Cuenta = t.TypeTransactionId == 3 ? t.Account : transaction.Where(x => x.Folio == t.CancellationFolio).FirstOrDefault().Account,
+                    Operacion = t.TypeTransaction.Name,
+                    FolioImpresion = t.TypeTransactionId == 3 ? (t.TransactionFolios.Count > 0 ? t.TransactionFolios.FirstOrDefault().Folio : "") : "---",
+                    Hora = t.DateTransaction.ToString("hh:mm tt"),
+                    Total = t.Total,
+                    Signo = t.Sign
+                })
+                .ToList();
+
+            lstMovs.ToList().ForEach(x =>
+            {
+                if (x.Operacion == "Cobro" || x.Operacion.Contains("Cancelaci"))
+                {
+                    //var tmpPayment = _context.Payments.FirstOrDefault(p => p.TransactionFolio == x.FolioTransaccion);
+                    var tmpPayment = payments.FirstOrDefault(p => p.TransactionFolio == x.FolioTransaccion);
+                    x.HaveInvoice = tmpPayment.HaveTaxReceipt;
+                    x.IdPayment = tmpPayment.Id;                    
+                    if (tmpPayment.AgreementId != 0)
+                    {
+                        var idAgreement = tmpPayment.AgreementId;
+                        var Cliente = _context.Clients.FirstOrDefault(c => c.AgreementId == idAgreement && c.TypeUser == "CLI01");
+                        x.Cliente = Cliente != null ? Cliente.Name + " " + Cliente.LastName + " " + Cliente.SecondLastName : "Contribuyente";
+                    }
+                    else
+                    {
+                        var idOS = tmpPayment.OrderSaleId;
+                        var OS = _context.OrderSales.FirstOrDefault(o => o.Id == idOS);
+                        var taxUser = _context.TaxUsers.FirstOrDefault(t => t.Id == OS.TaxUserId && t.IsActive == true);
+                        x.Cliente = taxUser != null ? taxUser.Name : "Contribuyente";
+                    }
+                }
+                else
+                    x.HaveInvoice = false;
+            });
+
+            return Ok(lstMovs);
+        }
+
+        //Obtengo la transaccion correspondiente a un folio.
+        [HttpGet("FromCuenta/{cuenta}")]
+        public async Task<IActionResult> FindPaymentForCuenta([FromRoute] string cuenta)
+        {
+            var payments = await _context.Payments.Where(p => p.Account.Contains(cuenta)).ToListAsync();
+            List<DAL.Models.Transaction> transaction = new List<DAL.Models.Transaction>();
+
+            if (payments != null && payments.Count > 0)
+            {
+                transaction = await _context.Transactions
+                                        .Include(x => x.TypeTransaction)
+                                        .Include(x => x.TransactionFolios)
+                                        .Where(t => payments.Select(x => x.TransactionFolio).Contains(t.Folio))
+                                        .ToListAsync();
+            }
+
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            List<TransactionMovimientosCaja> lstMovs = transaction
+                .Select(t => new TransactionMovimientosCaja()
+                {
+                    IdTransaction = t.Id,
+                    FolioTransaccion = t.TypeTransactionId == 3 ? t.Folio : t.CancellationFolio,
+                    Cuenta = t.TypeTransactionId == 3 ? t.Account : transaction.Where(x => x.Folio == t.CancellationFolio).FirstOrDefault().Account,
+                    Operacion = t.TypeTransaction.Name,
+                    FolioImpresion = t.TypeTransactionId == 3 ? (t.TransactionFolios.Count > 0 ? t.TransactionFolios.FirstOrDefault().Folio : "") : "---",
+                    Hora = t.DateTransaction.ToString("hh:mm tt"),
+                    Total = t.Total,
+                    Signo = t.Sign
+                })
+                .ToList();
+
+            lstMovs.ToList().ForEach(x =>
+            {
+                if (x.Operacion == "Cobro" || x.Operacion.Contains("Cancelaci"))
+                {
+                    var tmpPayment = _context.Payments.FirstOrDefault(p => p.TransactionFolio == x.FolioTransaccion);
+                    x.HaveInvoice = tmpPayment.HaveTaxReceipt;
+                    x.IdPayment = tmpPayment.Id;
+                    if (tmpPayment.AgreementId != 0)
+                    {
+                        var idAgreement = tmpPayment.AgreementId;
+                        var Cliente = _context.Clients.FirstOrDefault(c => c.AgreementId == idAgreement && c.TypeUser == "CLI01");
+                        x.Cliente = Cliente != null ? Cliente.Name + " " + Cliente.LastName + " " + Cliente.SecondLastName : "Contribuyente";
+                    }
+                    else
+                    {
+                        var idOS = tmpPayment.OrderSaleId;
+                        var OS = _context.OrderSales.FirstOrDefault(o => o.Id == idOS);
+                        var taxUser = _context.TaxUsers.FirstOrDefault(t => t.Id == OS.TaxUserId && t.IsActive == true);
                         x.Cliente = taxUser != null ? taxUser.Name : "Contribuyente";
                     }
                 }
