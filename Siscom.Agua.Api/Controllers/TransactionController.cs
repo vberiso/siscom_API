@@ -362,7 +362,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> FindPaymentForFolioFiscal([FromRoute] string folio)
         {            
             var idPayment = _context.TaxReceipts.FirstOrDefault(t => t.FielXML.Contains(folio))?.PaymentId;
-            var payments = await _context.Payments.Where(p => p.Id == (int)idPayment).ToListAsync();
+            var payments = await _context.Payments.Where(p => p.Id == (int)idPayment && p.TerminalUserId > 0).ToListAsync();
             List<DAL.Models.Transaction> transaction = new List<DAL.Models.Transaction>();
 
             if (payments != null && payments.Count > 0)
@@ -426,7 +426,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> FindPaymentForFolio([FromRoute] string folio)
         {
             string tmpFolio = folio.Substring((folio.Contains('-') ? folio.IndexOf('-') : 0));
-            var payments = await _context.Payments.Include(x => x.TaxReceipts).Where(p => p.ImpressionSheet.Contains(folio)).ToListAsync();
+            var payments = await _context.Payments.Where(p => p.ImpressionSheet.Contains(folio) && p.TerminalUserId > 0).ToListAsync();
             List<DAL.Models.Transaction> transaction = new List<DAL.Models.Transaction>();
 
             if (payments != null && payments.Count > 0)
@@ -490,7 +490,7 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("FromCuenta/{cuenta}")]
         public async Task<IActionResult> FindPaymentForCuenta([FromRoute] string cuenta)
         {
-            var payments = await _context.Payments.Where(p => p.Account.Contains(cuenta)).ToListAsync();
+            var payments = await _context.Payments.Where(p => p.Account.Contains(cuenta) && p.TerminalUserId > 0).ToListAsync();
             List<DAL.Models.Transaction> transaction = new List<DAL.Models.Transaction>();
 
             if (payments != null && payments.Count > 0)
@@ -3693,16 +3693,24 @@ namespace Siscom.Agua.Api.Controllers
                         position++;
                     }
 
-                    //Se resta el monto la cancelacion al cierre del dia correspondiente.
-                    DAL.Models.Transaction trans = movimientosCaja.Where(x => x.TypeTransactionId == 6 && x.PayMethodId == transactionData.PayMethodId).FirstOrDefault();
-                    trans.TransactionDetails = _context.TransactionDetails.Where(x => x.TransactionId == trans.Id).ToList();
-                    trans.Amount = trans.Amount - transactionData.Amount;
-                    trans.Tax = trans.Tax - transactionData.Tax;
-                    trans.Total = trans.Total - transactionData.Total;
-                    trans.TransactionDetails.Where(x => x.Description.Contains("Retiro") && x.CodeConcept == "6").FirstOrDefault().Amount = trans.Total;
-
-                    _context.Entry(trans).State = EntityState.Modified;
-                    _context.SaveChanges();
+                    //Verifico si la caja ya fue cerrada.
+                    var transaccionCierre = await _context.Transactions
+                                                .Include(x => x.TypeTransaction)
+                                                .Where(x => x.TerminalUser.Id == terminalUser.Id && x.TypeTransactionId == 7)
+                                                .OrderBy(x => x.Id).ToListAsync();
+                    if(transaccionCierre != null && transaccionCierre.Count > 0)
+                    {
+                        //Se resta el monto la cancelacion al cierre del dia correspondiente.
+                        DAL.Models.Transaction trans = movimientosCaja.Where(x => x.TypeTransactionId == 6 && x.PayMethodId == transactionData.PayMethodId).FirstOrDefault();
+                        trans.TransactionDetails = _context.TransactionDetails.Where(x => x.TransactionId == trans.Id).ToList();
+                        trans.Amount = trans.Amount - transactionData.Amount;
+                        trans.Tax = trans.Tax - transactionData.Tax;
+                        trans.Total = trans.Total - transactionData.Total;
+                        trans.TransactionDetails.Where(x => x.Description.Contains("Retiro") && x.CodeConcept == "6").FirstOrDefault().Amount = trans.Total;
+                        _context.Entry(trans).State = EntityState.Modified;
+                        _context.SaveChanges();
+                    }
+                                       
                     scope.Complete();
                 }
             }
@@ -3954,52 +3962,24 @@ namespace Siscom.Agua.Api.Controllers
                     #endregion
 
 
-                    #region Codigo previo de Julio
-                    ////await _context.Terminal.Include(x => x.BranchOffice).FirstOrDefaultAsync(y => y.Id == transaction.TerminalUser.Terminal.Id);
+                    //Verifico si la caja ya fue cerrada.
+                    var transaccionCierre = await _context.Transactions
+                                                .Include(x => x.TypeTransaction)
+                                                .Where(x => x.TerminalUser.Id == terminalUser.Id && x.TypeTransactionId == 7)
+                                                .OrderBy(x => x.Id).ToListAsync();
+                    if (transaccionCierre != null && transaccionCierre.Count > 0)
+                    {
+                        //Se resta el monto la cancelacion al cierre del dia correspondiente.
+                        DAL.Models.Transaction trans = movimientosCaja.Where(x => x.TypeTransactionId == 6 && x.PayMethodId == transactionData.PayMethodId).FirstOrDefault();
+                        trans.TransactionDetails = _context.TransactionDetails.Where(x => x.TransactionId == trans.Id).ToList();
+                        trans.Amount = trans.Amount - transactionData.Amount;
+                        trans.Tax = trans.Tax - transactionData.Tax;
+                        trans.Total = trans.Total - transactionData.Total;
+                        trans.TransactionDetails.Where(x => x.Description.Contains("Retiro") && x.CodeConcept == "6").FirstOrDefault().Amount = trans.Total;
 
-                    ////var orderList = paymentData.PaymentDetails.Select(x => x.OrderSaleId).Distinct();
-
-                    ////foreach (var item in orderList)
-                    ////{
-                    ////    OrderSale order = await _context.OrderSales.FindAsync(item);
-                    ////    order.OnAccount = (order.Amount - order.OnAccount);
-                    ////    order.Status = "EOS01";
-                    ////    _context.Entry(order).State = EntityState.Modified;
-                    ////    _context.SaveChanges();
-                    ////}
-
-                    ////int position = 0;
-                    ////List<OrderSaleDetail> saleDetails = await _context.OrderSaleDetails.Where(x => x.OrderSaleId == paymentData.PaymentDetails.First().OrderSaleId).ToListAsync();
-                    ////foreach (var pay in paymentData.PaymentDetails)
-                    ////{
-                    ////    TransactionDetail transactionDetail = new TransactionDetail();
-                    ////    transactionDetail.CodeConcept = pay.CodeConcept;
-                    ////    transactionDetail.Amount = transaction.Amount;
-                    ////    transactionDetail.Description = pay.Description;
-                    ////    transactionDetail.Transaction = transaction;
-                    ////    _context.TransactionDetails.Add(transactionDetail);
-                    ////    await _context.SaveChangesAsync();
-
-                    ////    if (saleDetails[position].OnAccount - pay.Amount < 0)
-                    ////        return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format("Monto a cuenta del concepto: {0}, inválido", arg0: pay.Description) });
-
-                    ////    saleDetails[position].OnAccount -= pay.Amount;
-                    ////    saleDetails[position].Tax = 0;
-                    ////    await _context.SaveChangesAsync();
-                    ////    position++;
-                    ////}
-                    #endregion
-
-                    //Se resta el monto la cancelacion al cierre del dia correspondiente.
-                    DAL.Models.Transaction trans = movimientosCaja.Where(x => x.TypeTransactionId == 6 && x.PayMethodId == transactionData.PayMethodId).FirstOrDefault();
-                    trans.TransactionDetails = _context.TransactionDetails.Where(x => x.TransactionId == trans.Id).ToList();
-                    trans.Amount = trans.Amount - transactionData.Amount;
-                    trans.Tax = trans.Tax - transactionData.Tax;
-                    trans.Total = trans.Total - transactionData.Total;
-                    trans.TransactionDetails.Where(x => x.Description.Contains("Retiro") && x.CodeConcept == "6").FirstOrDefault().Amount = trans.Total;
-
-                    _context.Entry(trans).State = EntityState.Modified;
-                    _context.SaveChanges();
+                        _context.Entry(trans).State = EntityState.Modified;
+                        _context.SaveChanges();
+                    }
 
                     if (CancelSAC)
                     {
