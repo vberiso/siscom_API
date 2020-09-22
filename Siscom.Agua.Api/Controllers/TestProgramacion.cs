@@ -119,9 +119,24 @@ namespace Siscom.Agua.Api.Controllers
                 RFC = taxUser.RFC,
                 TaxAddresses = new List<TaxAddress>() { address }
             };
-            
-            _context.TaxUsers.Add(user);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.TaxUsers.Add(user);
+                await _context.SaveChangesAsync();
+                
+            }
+            catch (Exception e)
+            {
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(e.Message);
+                    e = e.InnerException;
+                }
+                while (e != null);
+                var message = string.Join(" - ", messages);
+                return Conflict(message);
+            }
             return CreatedAtAction("Get", new { id = user.Id }, user);
         }
 
@@ -174,6 +189,18 @@ namespace Siscom.Agua.Api.Controllers
                 {
                     throw;
                 }
+            }
+            catch(Exception e)
+            {
+                var messages = new List<string>();
+                do
+                {
+                    messages.Add(e.Message);
+                    e = e.InnerException;
+                }
+                while (e != null);
+                var message = string.Join(" - ", messages);
+                return Conflict(message);
             }
             return Ok();
 
