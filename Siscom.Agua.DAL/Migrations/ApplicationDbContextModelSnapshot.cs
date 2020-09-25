@@ -129,42 +129,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("Account");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.AccountStatusInFile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("account_status_In_File_id")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AgreementId")
-                        .HasColumnName("AgreementId");
-
-                    b.Property<string>("FileName")
-                        .HasColumnName("file_name")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("Folio")
-                        .HasColumnName("folio");
-
-                    b.Property<DateTime>("GenerationDate")
-                        .HasColumnName("generation_date");
-
-                    b.Property<byte[]>("PDFBytes")
-                        .HasColumnName("PDFBytes");
-
-                    b.Property<string>("UserId")
-                        .HasColumnName("user_id");
-
-                    b.Property<string>("UserName")
-                        .HasColumnName("user_name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgreementId");
-
-                    b.ToTable("account_status_In_File");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.AccountingCode", b =>
                 {
                     b.Property<int>("Id")
@@ -337,6 +301,42 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AccountsAccumulated");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.AccountStatusInFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("account_status_In_File_id")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AgreementId")
+                        .HasColumnName("AgreementId");
+
+                    b.Property<string>("FileName")
+                        .HasColumnName("file_name")
+                        .HasMaxLength(200);
+
+                    b.Property<string>("Folio")
+                        .HasColumnName("folio");
+
+                    b.Property<DateTime>("GenerationDate")
+                        .HasColumnName("generation_date");
+
+                    b.Property<byte[]>("PDFBytes")
+                        .HasColumnName("PDFBytes");
+
+                    b.Property<string>("UserId")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("UserName")
+                        .HasColumnName("user_name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgreementId");
+
+                    b.ToTable("account_status_In_File");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Address", b =>
@@ -2511,7 +2511,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2020, 7, 10, 15, 52, 3, 969, DateTimeKind.Local).AddTicks(4087));
+                        .HasDefaultValue(new DateTime(2020, 7, 10, 15, 52, 3, 969, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -3979,33 +3979,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("partial_payment_detail_status");
                 });
 
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.PayMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_pay_method")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnName("code")
-                        .HasMaxLength(5);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("is_active")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnName("name")
-                        .HasMaxLength(50);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Pay_Method");
-                });
-
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -4189,6 +4162,33 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasIndex("PaymentId");
 
                     b.ToTable("Payment_Detail");
+                });
+
+            modelBuilder.Entity("Siscom.Agua.DAL.Models.PayMethod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id_pay_method")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnName("code")
+                        .HasMaxLength(5);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("is_active")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnName("name")
+                        .HasMaxLength(50);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Pay_Method");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.Phones", b =>
@@ -6140,21 +6140,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("valvula_control");
 
                     b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ActualState = "",
-                            Description = "Sin Valvula",
-                            Diameter = "",
-                            HydraulicCircuit = "",
-                            IsActive = true,
-                            LastServiceDate = new DateTime(2020, 7, 10, 15, 52, 4, 46, DateTimeKind.Local).AddTicks(157),
-                            Latitude = "19.0954579",
-                            Longitude = "-98.2792209",
-                            PhysicalState = "",
-                            Reference = "Sin referencia",
-                            Type = "OT011"
-                        });
+                        new { Id = 1, ActualState = "", Description = "Sin Valvula", Diameter = "", HydraulicCircuit = "", IsActive = true, LastServiceDate = new DateTime(2020, 7, 10, 15, 52, 4, 46, DateTimeKind.Local), Latitude = "19.0954579", Longitude = "-98.2792209", PhysicalState = "", Reference = "Sin referencia", Type = "OT011" }
+                    );
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.VersionApp", b =>

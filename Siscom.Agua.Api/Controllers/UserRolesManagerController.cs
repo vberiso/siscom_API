@@ -358,7 +358,7 @@ namespace Siscom.Agua.Api.Controllers
         {
             var idRole = _context.Roles.Where(r => r.Name == "User").FirstOrDefault();
             var lstUsersInRol = _context.UserRoles.Where(ur => ur.RoleId == idRole.Id).Select(ur => ur.UserId).ToList();
-            var res = _context.Users.Where(u => lstUsersInRol.Contains(u.Id) && u.IsActive == true && u.Serial != null).Select(x => new { Id = x.Id, Name = x.Name, LastName = x.LastName, SecondLastName = x.SecondLastName }  ).ToList();
+            var res = _context.Users.Where(u => lstUsersInRol.Contains(u.Id) && u.IsActive == true && u.Serial != null).Select(x => new { Id = x.Id, Name = x.Name, LastName = x.LastName, SecondLastName = x.SecondLastName, divitionId = x.DivitionId }  ).ToList();
             return Ok(res);
         }
 

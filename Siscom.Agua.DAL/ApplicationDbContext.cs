@@ -282,6 +282,7 @@ namespace Siscom.Agua.DAL
         public DbSet<PromotionDebt> PromotionDebt { get; set; }
         public DbSet<DebtCampaign> DebtCampaign { get; set; }
         public DbSet<DebtCampaignFiles> DebtCampaignFiles { get; set; }
+        public DbSet<BenefitedCampaign> BenefitedCampaign { get; set; }
 
         /// <summary>
         /// Ot Mobile

@@ -55,9 +55,12 @@ namespace Siscom.Agua.Api.Controllers
                             query = query.Where(x => x.Agreement.Account == account);
                         }
                         if (fecha != null)
-                        {
-                            fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
-                            query = query.Where(x => x.DateOrder.ToString("dd-MM-yyyy") == fecha);
+                        {                            
+                            int Año = int.Parse(fecha.Split("-")[0]), Mes = int.Parse(fecha.Split("-")[1]), Dia = int.Parse(fecha.Split("-")[2]), Hora = DateTime.Now.Hour, Minuto = DateTime.Now.Minute, Segundo = DateTime.Now.Second;
+                            DateTime fechaBusqueda = new DateTime(Año, Mes, Dia, Hora, Minuto, Segundo);
+                            query = query.Where(x => (x.DateOrder <= fechaBusqueda && x.DateStimated >= fechaBusqueda) || x.DateOrder.ToString("dd-MM-yyyy") == fechaBusqueda.ToString("dd-MM-yyyy"));
+                            //fecha = DateTime.Parse(fecha).ToString("dd-MM-yyyy");
+                            //query = query.Where(x => x.DateOrder.ToString("dd-MM-yyyy") == fecha);
                         }
                         if (status != null)
                         {
@@ -731,7 +734,7 @@ namespace Siscom.Agua.Api.Controllers
                     id_agreement = OrderWork.Agreement.Id;
                     OrderWork.Agreement = null;
                 }
-
+                OrderWork.DateStimated = new DateTime(OrderWork.DateStimated.Year, OrderWork.DateStimated.Month, OrderWork.DateStimated.Day, 23, 59, 59);
 
                 _context.OrderWorks.Update(OrderWork);
                 //_context.Entry(OrderWork).State = EntityState.Modified;
