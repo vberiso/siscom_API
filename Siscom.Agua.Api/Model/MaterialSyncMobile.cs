@@ -7,7 +7,7 @@ namespace Siscom.Agua.Api.Model
 {
     public class MaterialSyncMobile
     {
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public String Description { get; set; }
         public int IdMaterial { get; set; }
     }
