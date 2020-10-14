@@ -804,7 +804,9 @@ namespace Siscom.Agua.Api.Controllers
             var technical = await _context.TechnicalStaffs.Where(x => x.UserId == user.Id).FirstAsync();
             if (IsCompleteOrder)
             {
-                if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == workList.OrderWorkId).Count() > 0)
+                //var data = await _context.OrderWorkLists.Include(x => x.OrderWork).Where(x => x.Id == idOrderWorkList).FirstOrDefaultAsync();
+                var data = await _context.OrderWorks.Include(x => x.OrderWorkLists).Where(x => x.OrderWorkLists.Any(z => z.Id == idOrderWorkList)).FirstOrDefaultAsync();
+                if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == syncData.idOrderWork).Count() > 1)
                 {
                     return Conflict(new { error = "El tipo de orden de inspeccion no esta completamente atendido, Favor de verificar" });
                 }
@@ -837,7 +839,7 @@ namespace Siscom.Agua.Api.Controllers
                             _context.SaveChanges();
                         }
                     }
-                    if (validDateOrderWork)
+                    if (!validDateOrderWork)
                     {
                         return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
                     }
@@ -846,8 +848,118 @@ namespace Siscom.Agua.Api.Controllers
                     //Update DispatchOrder
                     _context.Entry(dispatch).State = EntityState.Modified;
                     _context.SaveChanges();
+
+
+                    workList = await _context.OrderWorkLists.Include(x => x.OrderWork).Where(x => x.Id == idOrderWorkList).FirstOrDefaultAsync();
+                    if (!syncData.HaveAnomaly)
+                    {
+                        workList.StatusCheck = 2;
+                        workList.LatitudeFinal = syncData.Latitude;
+                        workList.LongitudeFinal = syncData.Longitude;
+                        _context.Entry(workList).State = EntityState.Modified;
+                        _context.SaveChanges();
+                        return Ok();
+                    }
+                    else
+                    {
+                        var uploadFilesPath = Path.Combine(appSettings.FilePath, "FotosOTInspección", DateTime.Now.ToString("yyyy-MM-dd"), syncData.UserIdAPI);
+                        OrderWork order = new OrderWork();
+
+                        //Create Order Work
+                        order.DateOrder = DateTime.Now.AddDays(5);
+                        order.Applicant = user.ToString();
+                        order.Type = "OT018";
+                        order.Status = "EOT01";
+                        order.Observation = syncData.Observations;
+                        order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
+                        order.TechnicalStaff = technical;
+                        order.DateStimated = DateTime.Now.AddDays(6);
+                        order.Agreement = await _context.Agreements.FindAsync(syncData.AgreementId);
+                        order.TaxUserId = 0;
+                        order.aviso = 0;
+                        order.Folio = "OT";
+
+                        await _context.OrderWorks.AddAsync(order);
+                        await _context.SaveChangesAsync();
+
+                        foreach (var item in syncData.PhotoSyncMobiles)
+                        {
+                            DateTime valid;
+                            DateTime.TryParse(item.DateTake, out valid);
+                            if (valid == default)
+                            {
+                                validDatePhoto = false;
+                                break;
+                            }
+                            else
+                            {
+                                FileInfo fi = null;
+                                //Check if directory exist
+                                if (!System.IO.Directory.Exists(uploadFilesPath))
+                                {
+                                    System.IO.Directory.CreateDirectory(uploadFilesPath); //Create directory if it doesn't exist
+                                }
+                                Guid guid = Guid.NewGuid();
+                                string imageName = guid.ToString() + ".jpg";
+                                string imgPath = Path.Combine(uploadFilesPath, imageName);
+                                byte[] imageBytes = Convert.FromBase64String(item.Photo);
+                                try
+                                {
+                                    await System.IO.File.WriteAllBytesAsync(imgPath, imageBytes);
+                                    fi = new FileInfo(imgPath);
+                                    var fileSize = FileConverterSize.SizeSuffix(fi.Length);
+                                    OrderWorkListPictures photosOrder = new OrderWorkListPictures
+                                    {
+                                        FilePicture = imageBytes,
+                                        CaptureDate = valid,
+                                        Name = imageName,
+                                        OrderWorkList = workList,
+                                        OrderWorkListId = workList.Id,
+                                        PathFile = imgPath,
+                                        Size = fi.Length,
+                                        Type = item.Type = "OTF04",
+                                        Weight = Math.Round(Convert.ToDouble(fileSize.Split(' ')[0])) + " " + fileSize.Split(' ')[1],
+                                        User = syncData.UserIdAPI,
+                                        UserName = user.ToString()
+                                    };
+                                    _context.OrderWorkListPictures.Add(photosOrder);
+                                    _context.SaveChanges();
+
+                                    if (photosOrder.Type == "OTF03")
+                                    {
+                                        idFile = photosOrder.Id;
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    exceptionMessage = e.Message;
+                                }
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(exceptionMessage))
+                        {
+                            return Conflict(new { error = "Error al guardar los archivos: " + exceptionMessage });
+                        }
+
+                        if (!validDatePhoto)
+                        {
+                            return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
+                        }
+                        //UPDATE ORDER WORK LIST
+                        workList.FolioOrderResult = syncData.Folio;
+                        workList.TypeOrderResult = "OT001";
+                        workList.OrderWorkIdResult = order.Id.ToString();
+                        workList.LatitudeFinal = syncData.Latitude;
+                        workList.LongitudeFinal = syncData.Longitude;
+                        workList.ObservationFinal = syncData.Observations;
+                        workList.StatusCheck = 1;
+
+                        _context.Entry(workList).State = EntityState.Modified;
+                        _context.SaveChanges();
+                        return Ok();
+                    }
                 }
-                return Ok();
+                
             }
             else
             {
@@ -957,9 +1069,9 @@ namespace Siscom.Agua.Api.Controllers
 
                     _context.Entry(workList).State = EntityState.Modified;
                     _context.SaveChanges();
-                    
+                    return Ok();
                 }
-                return Ok();
+                
             }
         }
 
