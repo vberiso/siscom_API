@@ -805,7 +805,7 @@ namespace Siscom.Agua.Api.Controllers
             if (IsCompleteOrder)
             {
                 //var data = await _context.OrderWorkLists.Include(x => x.OrderWork).Where(x => x.Id == idOrderWorkList).FirstOrDefaultAsync();
-                var data = await _context.OrderWorks.Include(x => x.OrderWorkLists).Where(x => x.OrderWorkLists.Any(z => z.Id == idOrderWorkList)).FirstOrDefaultAsync();
+                //var data = await _context.OrderWorks.Include(x => x.OrderWorkLists).Where(x => x.OrderWorkLists.Any(z => z.Id == idOrderWorkList)).FirstOrDefaultAsync();
                 if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == syncData.idOrderWork).Count() > 1)
                 {
                     return Conflict(new { error = "El tipo de orden de inspeccion no esta completamente atendido, Favor de verificar" });
@@ -856,6 +856,7 @@ namespace Siscom.Agua.Api.Controllers
                         workList.StatusCheck = 2;
                         workList.LatitudeFinal = syncData.Latitude;
                         workList.LongitudeFinal = syncData.Longitude;
+                        workList.Status = "ELI03";
                         _context.Entry(workList).State = EntityState.Modified;
                         _context.SaveChanges();
                         return Ok();
@@ -953,6 +954,7 @@ namespace Siscom.Agua.Api.Controllers
                         workList.LongitudeFinal = syncData.Longitude;
                         workList.ObservationFinal = syncData.Observations;
                         workList.StatusCheck = 1;
+                        workList.Status = "ELI02";
 
                         _context.Entry(workList).State = EntityState.Modified;
                         _context.SaveChanges();
@@ -963,14 +965,57 @@ namespace Siscom.Agua.Api.Controllers
             }
             else
             {
+   
                 workList = await _context.OrderWorkLists.Include(x => x.OrderWork).Where(x => x.Id == idOrderWorkList).FirstOrDefaultAsync();
                 if (!syncData.HaveAnomaly)
                 {
                     workList.StatusCheck = 2;
                     workList.LatitudeFinal = syncData.Latitude;
                     workList.LongitudeFinal = syncData.Longitude;
+                    workList.Status = "ELI03";
                     _context.Entry(workList).State = EntityState.Modified;
                     _context.SaveChanges();
+
+                    if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == syncData.idOrderWork).Count() == 0)
+                    {
+                        var orderw = await _context.OrderWorks.FindAsync(syncData.idOrderWork);
+                        orderw.DateRealization = DateTime.Now;
+                        orderw.Status = "EOT03";
+                        orderw.ObservationMobile = "Orden Atendida mediante lista de inspección";
+                        dispatch.DateAttended = DateTime.Now;
+                        foreach (var item in syncData.OrderWorkStatuses)
+                        {
+                            DateTime valid;
+                            DateTime.TryParse(item.DateOrderWorkStatus, out valid);
+                            if (valid == default)
+                            {
+                                validDateOrderWork = false;
+                                break;
+                            }
+                            else
+                            {
+                                _context.OrderWorkStatus.Add(new OrderWorkStatus
+                                {
+                                    OrderWork = orderw,
+                                    OrderWorkId = orderw.Id,
+                                    IdStatus = item.IdStatus,
+                                    OrderWorkStatusDate = valid,
+                                    User = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
+                                });
+                                _context.SaveChanges();
+                            }
+                        }
+                        if (!validDateOrderWork)
+                        {
+                            return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
+                        }
+                        _context.Entry(orderw).State = EntityState.Modified;
+                        _context.SaveChanges();
+                        //Update DispatchOrder
+                        _context.Entry(dispatch).State = EntityState.Modified;
+                        _context.SaveChanges();
+                    }
+
                     return Ok();
                 }
                 else
@@ -1066,12 +1111,54 @@ namespace Siscom.Agua.Api.Controllers
                     workList.LongitudeFinal = syncData.Longitude;
                     workList.ObservationFinal = syncData.Observations;
                     workList.StatusCheck = 1;
+                    workList.Status = "ELI02";
 
                     _context.Entry(workList).State = EntityState.Modified;
                     _context.SaveChanges();
+
+                    if (_context.OrderWorkLists.Where(x => x.StatusCheck == 0 && x.OrderWorkId == syncData.idOrderWork).Count() == 0)
+                    {
+                        var orderw = await _context.OrderWorks.FindAsync(syncData.idOrderWork);
+                        orderw.DateRealization = DateTime.Now;
+                        orderw.Status = "EOT03";
+                        orderw.ObservationMobile = "Orden Atendida mediante lista de inspección";
+                        dispatch.DateAttended = DateTime.Now;
+                        foreach (var item in syncData.OrderWorkStatuses)
+                        {
+                            DateTime valid;
+                            DateTime.TryParse(item.DateOrderWorkStatus, out valid);
+                            if (valid == default)
+                            {
+                                validDateOrderWork = false;
+                                break;
+                            }
+                            else
+                            {
+                                _context.OrderWorkStatus.Add(new OrderWorkStatus
+                                {
+                                    OrderWork = orderw,
+                                    OrderWorkId = orderw.Id,
+                                    IdStatus = item.IdStatus,
+                                    OrderWorkStatusDate = valid,
+                                    User = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
+                                });
+                                _context.SaveChanges();
+                            }
+                        }
+                        if (!validDateOrderWork)
+                        {
+                            return Conflict(new { error = "Fecha con mal formato dentro de OrderWorkStatus favor de verificar" });
+                        }
+                        _context.Entry(orderw).State = EntityState.Modified;
+                        _context.SaveChanges();
+                        //Update DispatchOrder
+                        _context.Entry(dispatch).State = EntityState.Modified;
+                        _context.SaveChanges();
+                    }
+
                     return Ok();
                 }
-                
+
             }
         }
 
