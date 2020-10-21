@@ -1026,7 +1026,7 @@ namespace Siscom.Agua.Api.Controllers
                     //Create Order Work
                     order.DateOrder = DateTime.Now.AddDays(5);
                     order.Applicant = user.ToString();
-                    order.Type = "OT018";
+                    order.Type = "OT001";
                     order.Status = "EOT01";
                     order.Observation = syncData.Observations;
                     order.Activities = string.Join("@", syncData.AnomalySyncMobiles.Select(x => x.Name));
