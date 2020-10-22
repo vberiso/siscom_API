@@ -1134,11 +1134,13 @@ namespace Siscom.Agua.Api.Controllers
                             }
                             else
                             {
+                                var data = _context.Statuses.Select(z => new { z.CodeName, z.GroupStatusId, z.Description }).Where(x => x.GroupStatusId == 14 && x.Description.Equals("PARCIALMENTE ATENDIDA")).FirstOrDefault();
                                 _context.OrderWorkStatus.Add(new OrderWorkStatus
                                 {
                                     OrderWork = orderw,
                                     OrderWorkId = orderw.Id,
-                                    IdStatus = item.IdStatus,
+                                    //IdStatus = item.IdStatus,
+                                    IdStatus = data.CodeName,
                                     OrderWorkStatusDate = valid,
                                     User = string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)
                                 });
