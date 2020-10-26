@@ -134,7 +134,7 @@ namespace Siscom.Agua.Api.Controllers
                     new runSp.SPParameters{Key ="id", Value = item.Id.ToString() },
                     new runSp.SPParameters{Key ="porcentage_value", Value = condonacion.Percentage.ToString() },
                     new runSp.SPParameters{Key ="discount_value", Value = "0" },
-                    new runSp.SPParameters{Key ="text_discount", Value = "Descuento Mes Patrio 2020", DbType= DbType.String, Size = 50 },
+                    new runSp.SPParameters{Key ="text_discount", Value = condonacion.Alias, DbType= DbType.String, Size = 50 },
                     new runSp.SPParameters{Key ="option", Value = "1" },
                     new runSp.SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },
                     new runSp.SPParameters{Key ="Debt", Value = "", Direccion= ParameterDirection.Output, DbType= DbType.String, Size = 30 },

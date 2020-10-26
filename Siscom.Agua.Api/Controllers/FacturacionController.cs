@@ -129,8 +129,45 @@ namespace Siscom.Agua.Api.Controllers
                 if(status != "ET111")
                     tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.Status == status && x.UserId == id && x.PDFInvoce != null).ToList();
                 else
-                    tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate > FechaIni && x.TaxReceiptDate < FechaFin && x.UserId == id && x.PDFInvoce != null).ToList();
+                    tmp = _context.TaxReceipts.Where(x => x.TaxReceiptDate >= FechaIni && x.TaxReceiptDate <= FechaFin && x.UserId == id && x.PDFInvoce != null).ToList();
                                           
+                return Ok(tmp);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = string.Format("Error al tratar solicitar facturas canceladas.") });
+            }
+        }
+
+        [HttpGet("FacturasFromDivision/{ini}/{fin}/{id}/{status}")]
+        public async Task<IActionResult> GetFacturasFromDivision([FromRoute] string ini, [FromRoute] string fin, [FromRoute] string id, [FromRoute] string status)
+        {
+            try
+            {
+                DateTime FechaIni = new DateTime(int.Parse(ini.Split("-")[0]), int.Parse(ini.Split("-")[1]), int.Parse(ini.Split("-")[2]));
+                DateTime FechaFin = new DateTime(int.Parse(fin.Split("-")[0]), int.Parse(fin.Split("-")[1]), int.Parse(fin.Split("-")[2]), 23, 59, 59);
+                List<DAL.Models.TaxReceipt> tmp;
+
+                string databaseName = _context.Database.GetDbConnection().Database;
+                //Obtengo todos los pago en el rango de fechas                
+                List<Payment> pagos = new List<Payment>();
+                if ((databaseName.Contains("siscom_ayuntamiento") && int.Parse(id) == 6) || (databaseName.Contains("siscom_agua") && int.Parse(id) == 1)) //predial o sosapac
+                {
+                    pagos = await _context.Payments.Where(x => x.PaymentDate >= FechaIni && x.PaymentDate <= FechaFin && x.OrderSaleId == 0).ToListAsync();
+                    List<int> idsPay = pagos.Select(x => x.Id).ToList();
+                    tmp = _context.TaxReceipts.Where(x => x.Status == status && x.PDFInvoce != null && idsPay.Contains(x.PaymentId)).ToList();
+                }
+                else
+                {
+                    List<int> idsPaymentsTmps = new List<int>();
+                    pagos = await _context.Payments.Where(x => x.PaymentDate >= FechaIni && x.PaymentDate <= FechaFin && x.OrderSaleId != 0).ToListAsync();
+                    idsPaymentsTmps = pagos.Select(p => p.OrderSaleId).ToList();
+                    List<OrderSale> orderSales = await _context.OrderSales.Where(o => idsPaymentsTmps.Contains(o.Id) && o.DivisionId == int.Parse(id)).ToListAsync();
+                    List<int> idsOS = orderSales.Select(x => x.Id).ToList();
+                    idsPaymentsTmps = pagos.Where(p => idsOS.Contains(p.OrderSaleId)).Select(p => p.Id).ToList();
+                    tmp = _context.TaxReceipts.Where(x => x.Status == status && x.PDFInvoce != null && idsPaymentsTmps.Contains(x.PaymentId)).ToList();
+                }
+
                 return Ok(tmp);
             }
             catch (Exception ex)
