@@ -165,6 +165,52 @@ namespace Siscom.Agua.Api.Controllers
             return Unauthorized();
         }
 
+        [HttpPost]
+        [Route("ValidExpirationToken")]
+        public async Task<IActionResult> ValidateCurrentToken([FromBody] RefreshMobileToken token)
+        {
+            var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.IssuerSigningKey));
+            var tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken validatedToken;
+            try
+            {
+                tokenHandler.ValidateToken(token.Token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidIssuer = appSettings.ValidIssuer,
+                    ValidAudience = appSettings.ValidAudience,
+                    IssuerSigningKey = mySecurityKey
+                }, out validatedToken);
+            }
+            catch (Exception)
+            {
+                var user = await userManager.FindByNameAsync(token.UserName);
+                var claims = new List<Claim>()
+                    {
+                        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                        new Claim(JwtRegisteredClaimNames.UniqueName, string.Format("{0} {1} {2}", user.Name, user.LastName, user.SecondLastName)),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim(JwtRegisteredClaimNames.NameId, user.Id),
+                    };
+
+                var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.IssuerSigningKey));
+                var refreshtoken = new JwtSecurityToken(
+                        issuer: appSettings.ValidIssuer,
+                        audience: appSettings.ValidAudience,
+                        expires: DateTime.UtcNow.ToLocalTime().AddHours(9),
+                        claims: claims,
+                        signingCredentials: new Microsoft.IdentityModel.Tokens.SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
+                    );
+                return Ok(new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(refreshtoken)
+                });
+            }
+            return Conflict();
+        }
+
         [HttpPost("Logger")]
         public async Task<IActionResult> LoginLog([FromBody] LogginLog log)
         {
@@ -178,7 +224,6 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpGet("getAllUsers")]
-
         public async Task<IActionResult> GetAllUsers()
         {
             return Ok(await _context.Users.Where(x => x.IsActive == true).Select(x => new { 
