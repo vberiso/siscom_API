@@ -238,11 +238,11 @@ namespace Siscom.Agua.Api.Controllers
                 pathXML = string.Format("{0}\\{1}", path, nombreXml);
                 rutaFile = pathXML;
 
-                XmlSerializerNamespaces xmlSerializerNamespaces = new XmlSerializerNamespaces();
+                XmlSerializerNamespaces xmlSerializerNamespaces = new XmlSerializerNamespaces();                
                 xmlSerializerNamespaces.Add("cfdi", "http://www.sat.gob.mx/cfd/3");
                 xmlSerializerNamespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-                xmlSerializerNamespaces.Add("tfd", "http://www.sat.gob.mx/timbrefiscaldigital");
-                
+                //xmlSerializerNamespaces.Add("tfd", "http://www.sat.gob.mx/timbrefiscaldigital");
+
                 //SERIALIZAMOS.------------------------------------------------- 
                 XmlSerializer oXmlSerializar = new XmlSerializer(typeof(Comprobante));
 
