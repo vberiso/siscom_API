@@ -98,6 +98,7 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.LocationOrderWorks)
                     .Include(x => x.OrderWorkLists)
                     .ThenInclude(x => x.OrderWorkListPictures)
+                    .Include(x => x.TechnicalStaff)
                     .First();
 
 
@@ -105,8 +106,8 @@ namespace Siscom.Agua.Api.Controllers
                     .Include(x => x.TypeService)
                     .Include(x => x.TypeIntake)
                     .Include(x => x.TypeConsume)
-                    .Include(x => x.OrderWork)
-                        .ThenInclude(x => x.TechnicalStaff)
+                    //.Include(x => x.OrderWork)
+                    //    .ThenInclude(x => x.TechnicalStaff)
 
 
                     .Include(x => x.Clients)
@@ -117,6 +118,7 @@ namespace Siscom.Agua.Api.Controllers
                                     .ThenInclude(x => x.Countries)
                     .First();
 
+                agreement.OrderWork.Add(OrderWork);
 
                 if (OrderWork.LocationOrderWorks != null && OrderWork.LocationOrderWorks.Count > 0)
                 {
@@ -695,7 +697,7 @@ namespace Siscom.Agua.Api.Controllers
                     //Actualizo el listado de agrement ligados a la orden de inspeccion                                       
                     item.Status = "ELI01";
                     item.OrderWorkId = orderWork.Id;
-                    DAL.Models.Address address = await _context.Adresses.FirstOrDefaultAsync(a => a.TypeAddress.Equals("DIR01"));
+                    DAL.Models.Address address = await _context.Adresses.FirstOrDefaultAsync(a => a.TypeAddress.Equals("DIR01") && a.AgreementsId == item.AgreementId);
                     item.Longitude = string.IsNullOrEmpty(address?.Lon) ? "0.00" : address?.Lon;
                     item.Latitude = string.IsNullOrEmpty(address?.Lat) ? "0.00" : address?.Lat;
                 }
@@ -986,8 +988,14 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> SetReasonCatalogs([FromRoute] int orderWorkId, [FromBody] List<int> idsReason)
         {
             try
-
             {
+                var tmpOWRC = await _context.OrderWorkReasonCatalog.Where(o => o.OrderWorkId == orderWorkId).ToListAsync();
+                if(tmpOWRC != null && tmpOWRC.Count > 0)
+                {
+                    _context.OrderWorkReasonCatalog.RemoveRange(tmpOWRC);
+                    await _context.SaveChangesAsync();
+                }
+
                 OrderWorkReasonCatalog OrderWorkReasonCatalog = null;
                 idsReason.ForEach(x =>
                 {
