@@ -13,7 +13,7 @@ namespace Siscom.Agua.DAL.Models
         public int Id { get; set; }
         [Column("name"), StringLength(50), Required]
         public string Name { get; set; }
-        [Column("alias"), StringLength(200)]
+        [Column("alias"), StringLength(2000)]
         public string Alias { get; set; }
 
         [Column("tipes"), StringLength(100)]

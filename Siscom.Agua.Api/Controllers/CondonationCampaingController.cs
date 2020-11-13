@@ -47,6 +47,24 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(discount);
         }
 
+        [HttpGet("byAnual/{name}")]
+        public async Task<IActionResult> GetCondonation([FromRoute]string name)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var discount = await _context.CondonationCampaings.Where(c => c.Name.Equals(name)).FirstOrDefaultAsync();
+
+            if (discount == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(discount);
+        }
+
 
         [HttpPost("{idAgreement}/{idCondonation}")]
         public async Task<IActionResult> PostCondonation([FromRoute] int idAgreement, [FromRoute] int idCondonation)

@@ -276,6 +276,19 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(tmpCond);
         }
 
+        [HttpGet("AnualDiscount/{name}")]
+        public async Task<IActionResult> AnualDiscount([FromRoute] string name)
+        {
+            var discount = await _context.CondonationCampaings.Where(c => c.Name.Equals(name)).FirstOrDefaultAsync();
+
+            if (discount == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(discount);
+        }
+
         [HttpGet("{mac}")]
         public async Task<IActionResult> FindTerminalMac([FromRoute] string mac)
         {
