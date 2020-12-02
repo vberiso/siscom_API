@@ -2678,7 +2678,7 @@ namespace Siscom.Agua.Api.Controllers
         }
 
         [HttpPost("GeneratePagosAnuales/{AgreementId}/{porcentajeDiscount}/{user}/{userId}/{IsMSI}/{HaveMes}")]
-        public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int porcentajeDiscount, [FromRoute] string user, [FromRoute] string userId,[FromRoute] bool IsMSI, [FromBody] List<int> DebtsId, [FromRoute] int HaveMes)
+        public async Task<IActionResult> GeneratePagosAnuales([FromRoute] int AgreementId, [FromRoute] int porcentajeDiscount, [FromRoute] string user, [FromRoute] string userId,[FromRoute] bool IsMSI, [FromBody] List<int> DebtsId, [FromRoute] int HaveMes, [FromQuery] string msgdesc = "")
         {
             //using (var transaction = _context.Database.BeginTransaction())
             //{
@@ -2698,7 +2698,7 @@ namespace Siscom.Agua.Api.Controllers
                     
                     if (!IsMSI && porcentajeDiscount > 0)
                     {
-                        idDebt = await ApplyDiscount(x, porcentajeDiscount);
+                        idDebt = await ApplyDiscount(x, porcentajeDiscount, msgdesc);
                     }
                    
                     else if(IsMSI)
@@ -2751,13 +2751,13 @@ namespace Siscom.Agua.Api.Controllers
             }
             return Ok(newIds);
         }
-        private async Task<int> ApplyDiscount(int DebtId, int porcentajeDiscount)
+        private async Task<int> ApplyDiscount(int DebtId, int porcentajeDiscount, string msgdesc = "")
         {
             List<SPParameters> parameters = new List<SPParameters> {
                 new SPParameters{Key ="id", Value = DebtId.ToString() },
                 new SPParameters{Key ="porcentage_value", Value = porcentajeDiscount.ToString() },
                 new SPParameters{Key ="discount_value", Value = "0" },
-                new SPParameters{Key ="text_discount", Value = "Descuento aplicado por pago anual", DbType= DbType.String, Size = 50 },
+                new SPParameters{Key ="text_discount", Value = (string.IsNullOrEmpty(msgdesc) ? "Descuento aplicado por pago anual" : msgdesc), DbType= DbType.String, Size = 50 },
                 new SPParameters{Key ="option", Value = "1" },
                 new SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },
                 new SPParameters{Key ="Debt", Value = "", Direccion= ParameterDirection.Output, DbType= DbType.String, Size = 30 },
