@@ -319,11 +319,13 @@ namespace Siscom.Agua.Api.Controllers
                 DateTime maxPeriod = agreement.Debts.Max(x => x.UntilDate);
                 DateTime minPeriod = agreement.Debts.Min(x => x.FromDate);
                 DateTime toDay = DateTime.Now;
-                var notificaciones = _context.Notifications.Where(x => x.AgreementId == agreement.Id && (x.NotificationDate >= minPeriod && x.NotificationDate <= maxPeriod)).ToList();
-                if (notificaciones.Count < 2)
-                {
-                    return " 1, debe tener minimo dos notificaciones";
-                }
+
+                ////Los usuario pidieron que se quitara esta validacion, para poder generar avisos de adeudo aunque no tenga noficaciones (2020-12-03)
+                //var notificaciones = _context.Notifications.Where(x => x.AgreementId == agreement.Id && (x.NotificationDate >= minPeriod && x.NotificationDate <= maxPeriod)).ToList();
+                //if (notificaciones.Count < 2)
+                //{
+                //    return " 1, debe tener minimo dos notificaciones";
+                //}
 
                 var orders = agreement.OrderWork.Where(x => x.Type == "OT006" && (x.DateOrder >= minPeriod && x.DateOrder <= maxPeriod)).ToList();
                 if (orders.Where(x => x.Status == "EOT01" || x.Status == "EOT02").ToList().Count == 1)
@@ -380,7 +382,8 @@ namespace Siscom.Agua.Api.Controllers
                         else
                         {
                             OrderWork = Aggrement.OrderWork.Where(x => x.Type == "OT003" && (x.Status == "EOT02" || x.Status == "EOT01")).FirstOrDefault();
-                            var deb = Aggrement.Debts.Where(x => x.Status == "ED001" || x.Status == "ED011" || x.Status == "ED007" || x.Status == "ED004").ToList();
+                            var lstStatusDeuda = _context.Statuses.Where(s => s.GroupStatusId == 4).Select(x => x.CodeName).ToList();
+                            var deb = Aggrement.Debts.Where(x => x.Type.Equals("TIP01") && lstStatusDeuda.Contains(x.Status) ).ToList();
                             if (OrderWork != null || deb.Count() > 0 || Aggrement.TypeStateServiceId != 3)
                             {
                                 canCreate = false;
