@@ -35,9 +35,9 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         {
             DateTime DiaActual = DateTime.Now;
             int delta = DayOfWeek.Monday - DiaActual.DayOfWeek;
-            DateTime LunesSemanaPasada = DiaActual.AddDays(delta - 7);
+            //DateTime LunesSemanaPasada = DiaActual.AddDays(delta - 7);
+            DateTime LunesSemanaPasada = DiaActual.AddDays(-3);
 
-            //var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).Include(x => x.OrderWorks).First();
             var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).First();
             Staff.OrderWorks = await _context.OrderWorks.Where(ow => ow.TechnicalStaffId == Staff.Id && ow.DateOrder >= LunesSemanaPasada).ToListAsync();
 
@@ -120,8 +120,9 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
         {
             DateTime DiaActual = DateTime.Now;
             int delta = DayOfWeek.Monday - DiaActual.DayOfWeek;
-            DateTime LunesSemanaPasada = DiaActual.AddDays(delta - 7);
-                        
+            //DateTime LunesSemanaPasada = DiaActual.AddDays(delta - 7);
+            DateTime LunesSemanaPasada = DiaActual.AddDays(- 3);
+
             var Staff = _context.TechnicalStaffs.Where(x => x.Id.ToString() == staffId).First();
 
             Staff.OrderWorks = await _context.OrderWorks
