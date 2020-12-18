@@ -10,6 +10,8 @@ namespace Siscom.Agua.Api.Model
         public int AgreementId { get; set; }
         public string Account { get; set; }
         public string Nombre { get; set; }
+        public decimal taxableBase { get; set; }
+        public int idClient { get; set; }
         public string RFC { get; set; }
         public string Address { get; set; }
         public bool WithDiscount { get; set; }

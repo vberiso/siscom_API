@@ -582,6 +582,8 @@ namespace Siscom.Agua.Api.Controllers
                                 command.CommandText = "SELECT A.id_agreement " +
                                     ",A.account Account " +
                                     ",CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name) Nombre " +
+                                    ",C.id_client idClient " +
+                                    ",AgreementDetail.taxable_base taxableBase " +
                                     ",C.rfc RFC " +
                                     ",TSS.id_type_state_service idStus " +
                                     ",TSS.name [Status] " +
@@ -596,6 +598,7 @@ namespace Siscom.Agua.Api.Controllers
                                     ",ADI.is_active " +
                                     "FROM [dbo].[Client] as C " +
                                     "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
+                                    "INNER JOIN [dbo].[Agreement_Detail] AS AgreementDetail ON C.AgreementId = AgreementDetail.AgreementId " +
                                     "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
                                     "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
                                     "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
@@ -603,7 +606,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "LEFT JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name,ADI.is_active";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), C.id_client, AgreementDetail.taxable_base, RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name,ADI.is_active";
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -628,18 +631,20 @@ namespace Siscom.Agua.Api.Controllers
                                             AgreementId = Convert.ToInt32(result[0]),
                                             Account = result[1].ToString(),
                                             Nombre = result[2].ToString().ToUpper(),
-                                            RFC = result[3].ToString(),
-                                            idStus = Convert.ToInt32(result[4]),
-                                            Status = result[5].ToString(),
-                                            WithDiscount = Convert.ToBoolean(result[6]),
-                                            Address = result[7].ToString(),
-                                            Type = result[8].ToString(),
-                                            NumDerivades = Convert.ToInt32(result[9]),
-                                            Debit = Convert.ToInt32(result[10]),
-                                            Token = result[11].ToString(),
-                                            EndDate = result[12].ToString(),
-                                            NameDiscount = result[13].ToString(),
-                                            isActiveDiscount = result[14] == DBNull.Value ? false : bool.Parse(result[14].ToString())
+                                            idClient = Convert.ToInt32(result[3]),
+                                            taxableBase = Convert.ToDecimal(result[4]),
+                                            RFC = result[5].ToString(),
+                                            idStus = Convert.ToInt32(result[6]),
+                                            Status = result[7].ToString(),
+                                            WithDiscount = Convert.ToBoolean(result[8]),
+                                            Address = result[9].ToString(),
+                                            Type = result[10].ToString(),
+                                            NumDerivades = Convert.ToInt32(result[11]),
+                                            Debit = Convert.ToInt32(result[12]),
+                                            Token = result[13].ToString(),
+                                            EndDate = result[14].ToString(),
+                                            NameDiscount = result[15].ToString(),
+                                            isActiveDiscount = result[16] == DBNull.Value ? false : bool.Parse(result[16].ToString())
                                         });
                                     }
                                 }
@@ -1459,20 +1464,21 @@ namespace Siscom.Agua.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            var mensaje = "";
             Agreement agreement = await _context.Agreements
                                                 .Include(x => x.TypeIntake)
                                                 .Include(x => x.TypeStateService)
                                                 //.Include(x => x.AgreementDiscounts.Where(z => z.IsActive == true))
                                                 .Where(x => x.Id == agreementDiscountt.AgreementId)
                                                 .FirstOrDefaultAsync();
-            agreement.AgreementDiscounts = await _context.AgreementDiscounts.Where(x => x.IsActive == true && x.IdAgreement == agreementDiscountt.AgreementId).ToListAsync();
+            agreement.AgreementDiscounts = await _context.AgreementDiscounts.Where(x => x.IdAgreement == agreementDiscountt.AgreementId).ToListAsync();
+            //agreement.AgreementDiscounts = await _context.AgreementDiscounts.Where(x => x.IsActive == true && x.IdAgreement == agreementDiscountt.AgreementId).ToListAsync();
             Discount discount = await _context.Discounts.FindAsync(agreementDiscountt.DiscountId);
 
 
             if (agreement == null || discount == null)
             {
-                return StatusCode((int)TypeError.Code.NotFound, new { Error = "El número de contrato o El tipo de descuento no se no se encuentran, favor de verificar" });
+                return StatusCode((int)TypeError.Code.NotFound, new { Error = "El número de contrato o El tipo de descuento no se encuentran, favor de verificar" });
             }
 
             //if (agreement.TypeIntake.Acronym != "HA" || agreement.TypeIntake.Acronym != "UR")
@@ -1485,10 +1491,33 @@ namespace Siscom.Agua.Api.Controllers
                 return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "Las características del contrato no permite el descuento, favor de verificar" });
             }
 
-            if (agreement.AgreementDiscounts.Count >= 1)//suspendido
+            if (agreement.AgreementDiscounts.Count > 0)//suspendido
             {
-                //if(agreement.AgreementDiscounts.)
-                return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asignar más de un descuento, favor de verificar" });
+                foreach (var item in agreement.AgreementDiscounts)
+                {
+                    if (item.IsActive)
+                    {
+                        item.IsActive = false;
+                        _context.Entry(item).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+                        mensaje = "Se desactivó un concepto de descuento, y se sustituyó por el nuevo";
+                    }
+                }
+                
+                foreach (var item in agreement.AgreementDiscounts)
+                {
+                    if (item.IdDiscount == agreementDiscountt.DiscountId)
+                    {
+                        item.IsActive = true;
+                        item.StartDate = DateTime.UtcNow.ToLocalTime();
+                        item.EndDate = DateTime.UtcNow.ToLocalTime().AddMonths(discount.Month);
+
+                        _context.Entry(item).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+                        return Ok("Cambio de concepto de descuento correcto, " + mensaje);
+                    }
+                }
+                //return StatusCode((int)TypeError.Code.NotAcceptable, new { Error = "El contrato no permite asignar más de un descuento, favor de verificar" });
             }
 
             if (discount.IsActive == false)
@@ -1531,10 +1560,10 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.Parameter = JsonConvert.SerializeObject(agreementDiscountt);
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el descuento" });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Ocurrió un problema para agregar el descuento" });
 
             }
-            return Ok("Descuento realizado");
+            return Ok("Concepto de descuento aplicado. " + mensaje);
         }
 
         [HttpPut("PutDiscount/{AgreementId}")]
@@ -2605,7 +2634,7 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.Parameter = idAgreement.ToString();
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el descuento" });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Ocurrió un problema al aplicar el descuento, esto sucede porque no se puede aplicar descuento a una deuda con descuento aplicado" });
             }
 
         }
@@ -2877,6 +2906,31 @@ namespace Siscom.Agua.Api.Controllers
             }
 
         }
+
+        [HttpPost("SearchByNameClient")]
+        public async Task<IActionResult> GetClientsByName([FromBody] NombrePredio body)
+        {
+            try
+            {
+                Agreement b = new Agreement();
+                var clients = _context.Clients
+                    .Include(x => x.Agreement)
+                        //.ThenInclude(x => x.Addresses)
+                    .Where(x => String.Concat(x.Name, x.LastName, x.SecondLastName) == body.nombre && x.IsActive).ToList();
+                
+                var data = JsonConvert.DeserializeObject<List<Client>>(JsonConvert.SerializeObject(clients, Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    }));
+
+                return Ok(data);
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
     }
 
 
@@ -2884,6 +2938,11 @@ namespace Siscom.Agua.Api.Controllers
     {
         public string Type { get; set; }
         public string Description { get; set; }
+    }
+
+    public class NombrePredio
+    {
+        public string nombre { get; set; }
     }
 
 

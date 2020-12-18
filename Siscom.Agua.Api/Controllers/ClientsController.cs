@@ -43,7 +43,7 @@ namespace Siscom.Agua.Api.Controllers
             });
             return a;
         }
-
+        
         //// GET: api/Clients/5
         //[HttpGet("{id}")]
         //public async Task<IActionResult> GetClient([FromRoute] int id)
