@@ -357,6 +357,39 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(lstMovs);
         }
 
+        //FromOnlineInDay
+        //Obtiene las transacciones de un usuario para un dia especifico.
+        [HttpGet("FromOnlineInDay/{date}/{idUser}")]
+        public async Task<IActionResult> FindTransactionsFromOnlineInDay([FromRoute] string date, string idUser)
+        {
+            DateTime DateInicio = new DateTime(int.Parse(date.Split("-")[0]), int.Parse(date.Split("-")[1]), int.Parse(date.Split("-")[2]));
+            DateTime DateFin = new DateTime(int.Parse(date.Split("-")[0]), int.Parse(date.Split("-")[1]), int.Parse(date.Split("-")[2]),23,59,59);
+            //Obtengo los pagos correspondientes a las transacciones, que esten activos.            
+            var pagos = await _context.Payments.Where(p => p.PaymentDate >= DateInicio && p.PaymentDate <= DateFin && p.TerminalUserId == -1).ToListAsync();
+
+            List<TransactionMovimientosCaja> cajas = pagos.Select(p => new TransactionMovimientosCaja()
+            {
+                IdTransaction = p.AgreementId,
+                FolioTransaccion = p.TransactionFolio,
+                Cuenta = p.Account,
+                Operacion = p.Status == "EP001" ? "Cobro" : "Cancelación",
+                FolioImpresion = p.ImpressionSheet,
+                Hora = p.PaymentDate.ToString("hh:mm tt"),
+                Total = p.Total,
+                Signo = p.Status == "EP001" ? true : false,
+                HaveInvoice = p.HaveTaxReceipt,
+                IdPayment = p.Id                
+            }).ToList();
+
+            cajas.ForEach(x =>
+            {
+                var Cliente = _context.Clients.FirstOrDefault(c => c.AgreementId == x.IdTransaction && c.TypeUser == "CLI01");
+                x.Cliente = Cliente != null ? Cliente.Name + " " + Cliente.LastName + " " + Cliente.SecondLastName : "Contribuyente";
+            });
+
+            return Ok(cajas);
+        }
+
         //Obtengo la transaccion correspondiente a un folio fiscal.
         [HttpGet("FromFolioFiscal/{folio}")]
         public async Task<IActionResult> FindPaymentForFolioFiscal([FromRoute] string folio)

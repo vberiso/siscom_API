@@ -752,6 +752,19 @@ namespace Siscom.Agua.Api.Controllers
                     _context.Agreements.Update(agreement);
                     _context.SaveChanges();
                 }
+
+                //Se es una cancelacion
+                if(OrderWork.Status == "EOT05" || OrderWork.Status == "EOT04") 
+                {
+                    var tmpDisp = await _context.DispatchOrders.Where(x => x.OrderWorkId == OrderWork.Id).FirstOrDefaultAsync();
+                    if(tmpDisp != null)
+                    {
+                        tmpDisp.Status = "DSO05";
+                        _context.DispatchOrders.Update(tmpDisp);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Orden actualizada correctamente", id = OrderWork.Id });
             }
             catch (Exception ex)

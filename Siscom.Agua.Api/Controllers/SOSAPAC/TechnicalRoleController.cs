@@ -13,15 +13,13 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
     [ApiController]
     public class TechnicalRoleController : ControllerBase
     {
-
-
-
         private readonly ApplicationDbContext _context;
+        private readonly IServiceProvider serviceProvider;
 
-        public TechnicalRoleController(ApplicationDbContext context)
+        public TechnicalRoleController(ApplicationDbContext context, IServiceProvider serviceProvider)
         {
-
             _context = context;
+            this.serviceProvider = serviceProvider;
         }
 
         [HttpGet("Roles/{id?}")]
@@ -43,6 +41,10 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
             {
                 _context.TechnicalRoles.Add(data);
                 _context.SaveChanges();
+
+                UserRolesManagerController userRolesManagerController = new UserRolesManagerController(serviceProvider, _context);
+                var resultRole = await userRolesManagerController.createRoleAsync(data.Name);
+
                 return StatusCode(StatusCodes.Status200OK, new { msg = "Los datos se guardaron correctamente" , ID= data.Id});
             }
             catch (Exception ex)

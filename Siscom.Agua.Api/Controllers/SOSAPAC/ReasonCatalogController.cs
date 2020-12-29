@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Siscom.Agua.DAL;
 using Siscom.Agua.DAL.Models;
 
@@ -94,7 +95,6 @@ namespace Siscom.Agua.Api.Controllers.SOSAPAC
                 return StatusCode(StatusCodes.Status500InternalServerError, new { error = ex.Message});
             }
         }
-
 
     }
 }

@@ -229,6 +229,34 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        [HttpGet("fromIds/{ids}")]
+        public async Task<IActionResult> GetfromIds([FromRoute] string ids)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                List<string> lstIds = ids.Split(',').ToList();
+                var debt = await _context.Debts
+                    .Include(dd => dd.DebtDetails)
+                    .Include(dd => dd.DebtDiscounts)
+                    .Where(d => lstIds.Contains(d.Id.ToString())).ToListAsync();
+                
+                if (debt == null)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se ha encontrado lo deuda." });
+                }
+
+                return Ok(debt);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "No se podo obtener el adeudo." });
+            }
+        }
 
 
         [HttpPost("GetDiscountAnnual/{porcentajeDiscount}")]

@@ -148,6 +148,31 @@ namespace Siscom.Agua.Api.Controllers
             return BadRequest();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> createRoleAsync(string name)
+        {
+            var roleExist = await RoleManager.RoleExistsAsync(name);
+
+            if (!roleExist)
+            {
+                var roleResult = await RoleManager.CreateAsync(new ApplicationRol(name));
+                if (roleResult.Succeeded)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode((int)TypeError.Code.InternalServerError,
+                                  new { Error = "Error al crear el role. Detalles del error: " + string.Join(" ", roleResult.Errors) });
+                }
+            }
+            else
+            {
+                return StatusCode((int)TypeError.Code.Conflict,
+                                  new { Error = "El rol ya existe favor de verificar" });
+            }
+        }
+
         [HttpPost("UpdateStaffOT/{id}")]
         public async Task<IActionResult> UpdateStaffOT([FromRoute] int id, [FromBody] TechnicalStaffVM user)
         {

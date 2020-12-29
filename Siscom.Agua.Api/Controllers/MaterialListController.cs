@@ -43,22 +43,94 @@ namespace Siscom.Agua.Api.Controllers
                 .FirstOrDefaultAsync();
         }
 
-        //// POST: api/MaterialList
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
+        //-------------------Materiales
+        [HttpGet("listado/{id?}")]
+        public async Task<IActionResult> GetMateriales([FromRoute] int id = 0)
+        {
+            try
+            {
+                System.Linq.IQueryable<MaterialList> query = _context.MaterialLists.AsQueryable();
 
-        //// PUT: api/MaterialList/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
+                if (id != 0)
+                {
+                    query = query.Where(x => x.Id == id);
+                }
 
-        //// DELETE: api/ApiWithActions/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+                var materialLists = query.ToList();
+                return Ok(materialLists);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = e.Message });
+            }
+        }
+
+        [HttpPost()]
+        public async Task<IActionResult> PostMateriales([FromBody] MaterialList materialList)
+        {
+            try
+            {
+                var tmpMaterialList = await _context.MaterialLists.FirstOrDefaultAsync(m => m.Name.Equals(materialList.Name) && m.Code.Equals(materialList.Code));
+                if (tmpMaterialList != null)
+                {
+                    return StatusCode(StatusCodes.Status409Conflict, new { error = "El material ya existe" });
+                }
+
+                await _context.AddAsync(materialList);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = e.Message });
+            }
+        }
+
+        [HttpPut()]
+        public async Task<IActionResult> PutMateriales([FromBody] MaterialList materialList)
+        {
+            try
+            {
+                var tmpMaterialList = await _context.MaterialLists.FirstOrDefaultAsync(m => m.Id == materialList.Id);
+                if (tmpMaterialList == null)
+                {
+                    return StatusCode(StatusCodes.Status409Conflict, new { error = "El material no existe" });
+                }
+
+                tmpMaterialList.Name = materialList.Name;
+                tmpMaterialList.Code = materialList.Code;
+                tmpMaterialList.IsActive = materialList.IsActive;
+
+                _context.MaterialLists.Update(tmpMaterialList);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = e.Message });
+            }
+        }
+
+        [HttpDelete()]
+        public async Task<ActionResult> deleteMateriales([FromBody] int id)
+        {
+            try
+            {
+                var tmpMaterialList = await _context.MaterialLists.FirstOrDefaultAsync(m => m.Id == id);
+                if (tmpMaterialList == null)
+                {
+                    return StatusCode(StatusCodes.Status204NoContent, new { error = "el material no existe." });
+                }
+
+                _context.MaterialLists.Remove(tmpMaterialList);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = ex.Message });
+            }
+        }
+
     }
 }
