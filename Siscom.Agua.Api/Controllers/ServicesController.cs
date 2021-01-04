@@ -128,6 +128,7 @@ namespace Siscom.Agua.Api.Controllers
                     //service.IsService = serviceVM.IsService;
                     service.Name = serviceVM.Name;
                     service.Order = serviceVM.Order;
+                    service.AccountNumber = "";
 
                     _context.Services.Add(service);
                     await _context.SaveChangesAsync();

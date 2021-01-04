@@ -19,13 +19,16 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <Compile Remove="wwwroot\**" />
+    <Content Remove="wwwroot\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <None Remove="wwwroot\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Compile Remove="Model\TransactionDetailVM.cs" />
     <Compile Remove="Controllers\TaxUser.cs" />
     <Compile Remove="Controllers\TaxReceipt.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">

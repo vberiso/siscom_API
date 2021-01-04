@@ -192,6 +192,35 @@ namespace Siscom.Agua.Api.Controllers
             return NoContent();
         }
 
+
+        [HttpGet("GetAddressByPostalCode/{postalCode}")]
+        public async Task<List<Suburb>> GetMunicipioByPostalCode([FromRoute] string postalCode)
+        {
+            var data = _context.Suburbs.Where(x => x.Zip == postalCode).ToList();
+
+            if (data.Count == 0)
+            {
+                return new List<Suburb>();
+            }
+            var Municipio = _context.Towns.Where(x => x.Id == data.First().TownsId).Select(x => new Town() { Id = x.Id, Name = x.Name, StateId = x.StateId }).First();
+            var Estado = _context.States.Where(x => x.Id == Municipio.StateId).Select(x => new State() { Id = x.Id, Name = x.Name, CountriesId = x.CountriesId }).First();
+            Municipio.States = Estado;
+            var Pais = _context.Countries.Where(x => x.Id == Estado.CountriesId).First();
+            Estado.Countries = Pais;
+            var Colonias = new List<Suburb>();
+            foreach (var colonia in data)
+            {
+                colonia.Towns = Municipio;
+                Colonias.Add(colonia);
+            }
+
+            return JsonConvert.DeserializeObject<List<Suburb>>(JsonConvert.SerializeObject(Colonias, Formatting.Indented,
+                           new JsonSerializerSettings
+                           {
+                               ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                           }));
+        }
+
         // POST: api/Adresses
         //[HttpPost]
         //public async Task<IActionResult> PostAdress([FromBody] AdressVM adress)

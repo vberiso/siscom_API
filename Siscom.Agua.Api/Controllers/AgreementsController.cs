@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Siscom.Agua.Api.Data;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
 using Siscom.Agua.Api.Model;
@@ -579,7 +580,9 @@ namespace Siscom.Agua.Api.Controllers
                             await connection.OpenAsync();
                             using (var command = connection.CreateCommand())
                             {
-                                command.CommandText = "SELECT A.id_agreement " +
+                                if (Plataform.IsAyuntamiento)
+                                {
+                                    command.CommandText = "SELECT A.id_agreement " +
                                     ",A.account Account " +
                                     ",CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name) Nombre " +
                                     ",C.id_client idClient " +
@@ -607,6 +610,37 @@ namespace Siscom.Agua.Api.Controllers
                                     "LEFT JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
                                     "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), C.id_client, AgreementDetail.taxable_base, RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name,ADI.is_active";
+                                }
+                                else
+                                {
+                                    command.CommandText = "SELECT A.id_agreement " +
+                                    ",A.account Account " +
+                                    ",CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name) Nombre " +
+                                    ",C.id_client idClient " +
+                                    ",C.rfc RFC " +
+                                    ",TSS.id_type_state_service idStus " +
+                                    ",TSS.name [Status] " +
+                                    ",COUNT(ADI.id_discount) " +
+                                    ",CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name) " +
+                                    ",TY.name Tipo" +
+                                    ",A.num_derivatives Derivadas " +
+                                    ",(Select ISNULL(Sum(D.amount - D.on_account),0) from Debt D Where D.AgreementId = A.id_agreement AND D.status in (Select St.id_status from Status St Where St.GroupStatusId = 4)) Debit " +
+                                    ",A.token" +
+                                    ",ADI.end_date" +
+                                    ",DS.name NombreDescuento " +
+                                    ",ADI.is_active " +
+                                    "FROM [dbo].[Client] as C " +
+                                    "INNER JOIN [dbo].[Agreement] AS A ON C.AgreementId = A.id_agreement " +
+                                    "INNER JOIN [dbo].[Address] AS AD ON C.AgreementId = AD.AgreementsId " +
+                                    "INNER JOIN [dbo].[Type_State_Service] AS TSS ON A.TypeStateServiceId = TSS.id_type_state_service " +
+                                    "INNER JOIN [dbo].Type_Intake AS TY ON TY.id_type_intake= A.TypeIntakeId " +
+                                    "LEFT JOIN [dbo].[Agreement_Discount] AS ADI ON C.AgreementId = ADI.id_agreement " +
+                                    "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
+                                    "LEFT JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
+                                    "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), C.id_client, RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name,ADI.is_active";
+                                }
+                                
                                 using (var result = await command.ExecuteReaderAsync())
                                 {
                                     //dataTable.Load(result);
@@ -626,26 +660,51 @@ namespace Siscom.Agua.Api.Controllers
                                     //}
                                     while (await result.ReadAsync())
                                     {
-                                        clientsFilter.Add(new FindAgreementParamVM
+                                        if (Plataform.IsAyuntamiento)
                                         {
-                                            AgreementId = Convert.ToInt32(result[0]),
-                                            Account = result[1].ToString(),
-                                            Nombre = result[2].ToString().ToUpper(),
-                                            idClient = Convert.ToInt32(result[3]),
-                                            taxableBase = Convert.ToDecimal(result[4]),
-                                            RFC = result[5].ToString(),
-                                            idStus = Convert.ToInt32(result[6]),
-                                            Status = result[7].ToString(),
-                                            WithDiscount = Convert.ToBoolean(result[8]),
-                                            Address = result[9].ToString(),
-                                            Type = result[10].ToString(),
-                                            NumDerivades = Convert.ToInt32(result[11]),
-                                            Debit = Convert.ToInt32(result[12]),
-                                            Token = result[13].ToString(),
-                                            EndDate = result[14].ToString(),
-                                            NameDiscount = result[15].ToString(),
-                                            isActiveDiscount = result[16] == DBNull.Value ? false : bool.Parse(result[16].ToString())
-                                        });
+                                            clientsFilter.Add(new FindAgreementParamVM
+                                            {
+                                                AgreementId = Convert.ToInt32(result[0]),
+                                                Account = result[1].ToString(),
+                                                Nombre = result[2].ToString().ToUpper(),
+                                                idClient = Convert.ToInt32(result[3]),
+                                                taxableBase = Convert.ToDecimal(result[4]),
+                                                RFC = result[5].ToString(),
+                                                idStus = Convert.ToInt32(result[6]),
+                                                Status = result[7].ToString(),
+                                                WithDiscount = Convert.ToBoolean(result[8]),
+                                                Address = result[9].ToString(),
+                                                Type = result[10].ToString(),
+                                                NumDerivades = Convert.ToInt32(result[11]),
+                                                Debit = Convert.ToInt32(result[12]),
+                                                Token = result[13].ToString(),
+                                                EndDate = result[14].ToString(),
+                                                NameDiscount = result[15].ToString(),
+                                                isActiveDiscount = result[16] == DBNull.Value ? false : bool.Parse(result[16].ToString())
+                                            });
+                                        }
+                                        else
+                                        {
+                                            clientsFilter.Add(new FindAgreementParamVM
+                                            {
+                                                AgreementId = Convert.ToInt32(result[0]),
+                                                Account = result[1].ToString(),
+                                                Nombre = result[2].ToString().ToUpper(),
+                                                idClient = Convert.ToInt32(result[3]),
+                                                RFC = result[4].ToString(),
+                                                idStus = Convert.ToInt32(result[5]),
+                                                Status = result[6].ToString(),
+                                                WithDiscount = Convert.ToBoolean(result[7]),
+                                                Address = result[8].ToString(),
+                                                Type = result[9].ToString(),
+                                                NumDerivades = Convert.ToInt32(result[10]),
+                                                Debit = Convert.ToInt32(result[11]),
+                                                Token = result[12].ToString(),
+                                                EndDate = result[13].ToString(),
+                                                NameDiscount = result[14].ToString(),
+                                                isActiveDiscount = result[15] == DBNull.Value ? false : bool.Parse(result[15].ToString())
+                                            });
+                                        }
                                     }
                                 }
                                 //clientsFilter.ForEach(x =>
