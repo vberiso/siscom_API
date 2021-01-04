@@ -43,6 +43,13 @@ namespace Siscom.Agua.Api.Controllers
                 .FirstOrDefaultAsync();
         }
 
+        //-------------------Catalogos ligados a Materiales
+        //[HttpGet("Catalogos")]
+        //public async Task<IActionResult> GetCatalogos()
+        //{
+        //    return await _context.UnitMeasurements.Select(x => new { name = x.Description, acronym = x.Acronym }).Distinct();
+        //}
+
         //-------------------Materiales
         [HttpGet("listado/{id?}")]
         public async Task<IActionResult> GetMateriales([FromRoute] int id = 0)
