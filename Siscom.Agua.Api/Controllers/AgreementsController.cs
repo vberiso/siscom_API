@@ -561,8 +561,21 @@ namespace Siscom.Agua.Api.Controllers
         ///
         /// </remarks>
         [HttpGet("FindAgreementParam")]
-        public async Task<IActionResult> FindAgreementParam([FromQuery] SearchAgreementVM search, [FromQuery] bool isAgua = false)
+        public async Task<IActionResult> FindAgreementParam([FromQuery] SearchAgreementVM search)
         {
+            var sparameter = _context.SystemParameters.Where(x => x.Name == "ISMUNICIPAL").FirstOrDefault();
+            var response = JsonConvert.DeserializeObject<SystemParameters>(JsonConvert.SerializeObject(sparameter));
+            bool isMunicipal;
+
+            if (response.TextColumn == "NO")
+            {
+                isMunicipal = false;
+            }
+            else
+            {
+                isMunicipal = true;
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -580,7 +593,7 @@ namespace Siscom.Agua.Api.Controllers
                             await connection.OpenAsync();
                             using (var command = connection.CreateCommand())
                             {
-                                if (!isAgua)
+                                if (isMunicipal)
                                 {
                                     command.CommandText = "SELECT A.id_agreement " +
                                     ",A.account Account " +
@@ -660,7 +673,7 @@ namespace Siscom.Agua.Api.Controllers
                                     //}
                                     while (await result.ReadAsync())
                                     {
-                                        if (!isAgua)
+                                        if (isMunicipal)
                                         {
                                             clientsFilter.Add(new FindAgreementParamVM
                                             {
