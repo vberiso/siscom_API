@@ -561,7 +561,7 @@ namespace Siscom.Agua.Api.Controllers
         ///
         /// </remarks>
         [HttpGet("FindAgreementParam")]
-        public async Task<IActionResult> FindAgreementParam([FromQuery] SearchAgreementVM search)
+        public async Task<IActionResult> FindAgreementParam([FromQuery] SearchAgreementVM search, [FromQuery] bool isAgua = false)
         {
             if (!ModelState.IsValid)
             {
@@ -580,7 +580,7 @@ namespace Siscom.Agua.Api.Controllers
                             await connection.OpenAsync();
                             using (var command = connection.CreateCommand())
                             {
-                                if (Plataform.IsAyuntamiento)
+                                if (!isAgua)
                                 {
                                     command.CommandText = "SELECT A.id_agreement " +
                                     ",A.account Account " +
@@ -660,7 +660,7 @@ namespace Siscom.Agua.Api.Controllers
                                     //}
                                     while (await result.ReadAsync())
                                     {
-                                        if (Plataform.IsAyuntamiento)
+                                        if (!isAgua)
                                         {
                                             clientsFilter.Add(new FindAgreementParamVM
                                             {

@@ -173,9 +173,7 @@ namespace Siscom.Agua.Api
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Siscom API V1");
             });
             app.UseMvc();
-
-            Plataform.Services = app.ApplicationServices;
-        
+                    
         }
     }
 }
