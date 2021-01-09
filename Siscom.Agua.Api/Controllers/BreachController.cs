@@ -311,6 +311,7 @@ namespace Siscom.Agua.Api.Controllers
                     order.DivisionId = 14;
 
                     List<OrderSaleDetail> orderSaleDetails = new List<OrderSaleDetail>();
+                    int indice = 1;
                     breach.BreachDetails.ToList().ForEach(x => {
 
 
@@ -327,7 +328,7 @@ namespace Siscom.Agua.Api.Controllers
                             HaveTax = false,
                             Description = na + " " +article.Article + " Fracción " + x.BreachList.Fraction + " " + x.BreachList.Description,
                             CodeConcept = serParam.TextColumn,
-                            NameConcept = x.BreachList.Description,
+                            NameConcept = indice + ". " + x.BreachList.Description,
                             Amount = x.Amount,
                             OnAccount = 0,
                             Quantity = x.Amount/factor.NumberColumn,
@@ -335,6 +336,7 @@ namespace Siscom.Agua.Api.Controllers
 
                         };
                         orderSaleDetails.Add(orderSaleDetail);
+                        indice++;
                     });
 
                     if (!string.IsNullOrEmpty( breach.CodeConceptArrastre) ) {
@@ -352,7 +354,7 @@ namespace Siscom.Agua.Api.Controllers
                                 HaveTax = TariffArrastre.HaveTax,
                                 Description = "Arratres " + SuperParent.Name + " - " + Parent.Name + " - " + Arrastre.Name,
                                 CodeConcept = Arrastre.Id.ToString(),
-                                NameConcept = "Arratres " + SuperParent.Name + " - " + Parent.Name + " - " + Arrastre.Name,
+                                NameConcept = indice + ". " + "Arratres " + SuperParent.Name + " - " + Parent.Name + " - " + Arrastre.Name,
                                 Amount = TariffArrastre.Amount,
                                 OnAccount = 0,
                                 Quantity = 1,
@@ -361,7 +363,7 @@ namespace Siscom.Agua.Api.Controllers
                             }
                             );
                         order.Amount = order.Amount + TariffArrastre.Amount;
-
+                        indice++;
                     }
 
                     if (!string.IsNullOrEmpty(breach.CodeConceptDaysCorralon))
@@ -382,7 +384,7 @@ namespace Siscom.Agua.Api.Controllers
                                 HaveTax = TariffCorralon.HaveTax,
                                 Description = "Corralon " + SuperParent.Name + " - " + Parent.Name + " - " + Corralon.Name +" - "+ dias + " Días",
                                 CodeConcept = Corralon.Id.ToString(),
-                                NameConcept = "Corralon " + SuperParent.Name + " - " + Parent.Name + " - " + Corralon.Name +" - "+ dias + " Días",
+                                NameConcept = indice + ". " + "Corralon " + SuperParent.Name + " - " + Parent.Name + " - " + Corralon.Name +" - "+ dias + " Días",
                                 Amount = TariffCorralon.Amount * dias,
                                 OnAccount = 0,
                                 Quantity = dias,
@@ -391,6 +393,7 @@ namespace Siscom.Agua.Api.Controllers
                             }
                             );
                         order.Amount = order.Amount + (TariffCorralon.Amount * dias);
+                        indice++;
                     }
 
                     order.OrderSaleDetails = orderSaleDetails;
