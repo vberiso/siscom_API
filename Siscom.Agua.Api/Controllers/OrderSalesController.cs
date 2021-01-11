@@ -262,8 +262,10 @@ namespace Siscom.Agua.Api.Controllers
                                 {
                                     List<OrderSaleDiscount> lstOSDis = new List<OrderSaleDiscount>();
                                     foreach (var OSD in OS.OrderSaleDetails.ToList())
-                                    {
-                                        var BD = B.BreachDetails.Where(bd => bd.BreachList.Description == OSD.NameConcept).FirstOrDefault();
+                                    {                                        
+                                        int largoTextoAQuitar = OSD.NameConcept.IndexOf(". ") + 2;
+                                        string tmpNameConcept = OSD.NameConcept.Substring(largoTextoAQuitar);
+                                        var BD = B.BreachDetails.Where(bd => bd.BreachList.Description == tmpNameConcept).FirstOrDefault();
                                         if (BD != null && BD.BreachList.HaveBonification)
                                         {
                                             OrderSaleDiscount OSDis = new OrderSaleDiscount();
@@ -293,7 +295,7 @@ namespace Siscom.Agua.Api.Controllers
                                         OS.Observation = OS.Observation.TrimEnd();
                                         OS.Observation += ", Descuento a infracción del " + item.Percentage + "% ";
 
-                                        _context.Entry(OS).State = EntityState.Modified;
+                                           _context.Entry(OS).State = EntityState.Modified;
                                         _context.SaveChanges();
                                     }                                    
                                 }
@@ -308,7 +310,9 @@ namespace Siscom.Agua.Api.Controllers
                                     //}
                                     foreach (var OSD in OS.OrderSaleDetails.ToList())
                                     {
-                                        var BD = B.BreachDetails.Where(bd => bd.BreachList.Description == OSD.NameConcept).FirstOrDefault();
+                                        int largoTextoAQuitar = OSD.NameConcept.IndexOf(". ") + 2;
+                                        string tmpNameConcept = OSD.NameConcept.Substring(largoTextoAQuitar);
+                                        var BD = B.BreachDetails.Where(bd => bd.BreachList.Description == tmpNameConcept).FirstOrDefault();
                                         if (BD != null && BD.BreachList.HaveBonification)
                                         {
                                             OrderSaleDiscount tmpOSDis = OS.OrderSaleDiscounts.FirstOrDefault(o => o.OrderSaleDetailId == OSD.Id);
