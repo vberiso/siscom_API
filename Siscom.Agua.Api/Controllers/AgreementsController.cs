@@ -1245,7 +1245,6 @@ namespace Siscom.Agua.Api.Controllers
                                && agreementvm.ServicesId.Count > 0
                                && agreementvm.Adresses.Count > 0
                                && agreementvm.Clients.Count > 0)
-
             {
 
                 try
@@ -1432,9 +1431,6 @@ namespace Siscom.Agua.Api.Controllers
                             };
                             await _context.AgreementLogs.AddAsync(agreementLog);
                         }
-
-
-
                         scope.Complete();
                     }
                 }
@@ -1453,6 +1449,332 @@ namespace Siscom.Agua.Api.Controllers
             }
             RedirectToActionResult redirect = new RedirectToActionResult("GetAccountById", "Agreements", new { @id = NewAgreement.Id });
             return redirect;
+        }
+
+        [HttpPost("NewPost")]
+        public async Task<IActionResult> PostAgreementNewProject([FromBody] AgreementVM agreementvm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
+            TypeCommercialBusiness cBusiness = null;
+            Agreement NewAgreement = new Agreement();
+            Agreement Principal = null;
+            bool IsDerivative = false;
+            bool HasError = false;
+
+            if (agreementvm.TypeCommertialBusinessId == 0)
+            {
+                cBusiness = await _context.TypeCommertialBusinesses.FindAsync(1);
+            }
+            else
+            {
+                cBusiness = await _context.TypeCommertialBusinesses.FindAsync(agreementvm.TypeCommertialBusinessId);
+            }
+            var service = await _context.TypeServices.FindAsync(agreementvm.TypeServiceId);
+            var intake = await _context.TypeIntakes.FindAsync(agreementvm.TypeIntakeId);
+            var use = await _context.TypeUses.FindAsync(agreementvm.TypeUseId);
+            var consume = await _context.TypeConsumes.FindAsync(agreementvm.TypeConsumeId);
+            var regime = await _context.TypeRegimes.FindAsync(agreementvm.TypeRegimeId);
+            var sService = await _context.TypeStateServices.FindAsync(agreementvm.TypeStateServiceId);
+            var period = await _context.TypePeriods.FindAsync(agreementvm.TypePeriodId);
+            var diam = await _context.Diameters.FindAsync(agreementvm.DiameterId);
+            var typeAgreement = await _context.Types.Where(z => z.CodeName == agreementvm.TypeAgreement).ToListAsync();
+            var typeClas = await _context.TypeClassifications.FindAsync(agreementvm.TypeClasificationId);
+            if (service == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de servicio')]" });
+            }
+            if (intake == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de toma')]" });
+            }
+            if (use == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de uso')]" });
+            }
+            if (consume == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de consumo')]" });
+            }
+            if (regime == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de regimen')]" });
+            }
+            if (cBusiness == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de negocio comercial')]" });
+            }
+            if (sService == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo estado del servicio')]" });
+            }
+            if (period == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de periodo')]" });
+            }
+            if (diam == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de diametro')]" });
+            }
+            if (agreementvm.ServicesId.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe agregar por lo menos un servio al contrato')]" });
+            }
+            if (agreementvm.Adresses.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe agregar por lo menos una dirección al contrato')]" });
+            }
+            if (agreementvm.Clients.Count == 0)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe agregar por lo menos un cliente al contrato')]" });
+            }
+            if (typeAgreement == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Debe verificar el tipo de contrato (Principal / Derivado)')]" });
+            }
+
+            if (typeClas == null)
+            {
+                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "Se ha enviado mal los datos favor de verificar [Detalles('Problemas en el tipo de Tipo de clasificación')]" });
+            }
+
+            if (service != null && intake != null && use != null
+                               && consume != null && regime != null
+                               && cBusiness != null && sService != null
+                               && period != null && diam != null && typeClas != null
+                               && agreementvm.ServicesId.Count > 0
+                               && agreementvm.Adresses.Count > 0
+                               && agreementvm.Clients.Count > 0)
+            {
+
+                try
+                {
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        if (await _context.Agreements.Where(x => x.Account == agreementvm.Account).FirstOrDefaultAsync() != null)
+                        {
+                            return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "El número de cuenta ya fue asignado a otro contrato, Favor de verificar " });
+                        }
+
+                        if (agreementvm.AgreementPrincipalId != 0)
+                        {
+                            Principal = await _context.Agreements.Include(a => a.Addresses)
+                                                                    .ThenInclude(s => s.Suburbs)
+                                                                 .Where(x => x.Id == agreementvm.AgreementPrincipalId)
+                                                                 .FirstOrDefaultAsync();
+                            if (Principal.TypeAgreement == "AGR02")
+                            {
+                                return StatusCode((int)TypeError.Code.BadRequest,
+                                   new { Error = "El número de cuenta es un contrato derivado, no se puede realizar esta operación, Favor de verificar " });
+                            }
+                        }
+
+                        NewAgreement.Account = agreementvm.Account;
+                        //NewAgreement.AccountDate = TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Now);
+                        NewAgreement.AccountDate = DateTime.UtcNow.ToLocalTime();
+                        NewAgreement.StratDate = DateTime.UtcNow.ToLocalTime();
+                        NewAgreement.NumDerivatives = agreementvm.Derivatives;
+                        NewAgreement.Route = agreementvm.Route;
+                        NewAgreement.TypeAgreement = agreementvm.TypeAgreement;
+                        NewAgreement.TypeService = service;
+                        NewAgreement.TypeIntake = intake;
+                        NewAgreement.TypeUse = use;
+                        NewAgreement.TypeConsume = consume;
+                        NewAgreement.TypeRegime = regime;
+                        NewAgreement.TypeStateService = sService;
+                        NewAgreement.TypePeriod = period;
+                        NewAgreement.TypeCommertialBusiness = cBusiness;
+                        NewAgreement.Diameter = diam;
+                        NewAgreement.TypeClassification = typeClas;
+
+                        //
+                        if (Principal != null)
+                        {
+
+                            foreach (var item in agreementvm.Adresses)
+                            {
+                                if (item.TypeAddress == "DIR01")
+                                {
+                                    var suburb = await _context.Suburbs.FindAsync(item.SuburbsId);
+                                    if (Principal.Addresses.Where(p => p.TypeAddress == "DIR01").FirstOrDefault().Suburbs.Name != suburb.Name)
+                                    {
+                                        HasError = true;
+                                    }
+                                    else
+                                    {
+                                        Principal.NumDerivatives = Principal.NumDerivatives + 1;
+                                        _context.Entry(Principal).State = EntityState.Modified;
+                                        await _context.SaveChangesAsync();
+                                        IsDerivative = true;
+                                    }
+                                }
+                            }
+
+                            if (HasError)
+                            {
+                                return StatusCode((int)TypeError.Code.Conflict, new { Error = "El contrato no puede ser derivada, ya que no coincide la dirección o la colonia " });
+                            }
+
+                        }
+
+                        foreach (var address in agreementvm.Adresses)
+                        {
+                            NewAgreement.Addresses.Add(new Siscom.Agua.DAL.Models.Address
+                            {
+                                Street = address.Street,
+                                Outdoor = address.Outdoor,
+                                Indoor = address.Indoor,
+                                Zip = address.Zip,
+                                Reference = address.Reference,
+                                Lat = address.Lat,
+                                Lon = address.Lon,
+                                TypeAddress = address.TypeAddress,
+                                Suburbs = await _context.Suburbs.FindAsync(address.SuburbsId),
+                                IsActive = true
+                            });
+                        }
+
+                        foreach (var client in agreementvm.Clients)
+                        {
+                            Client nc = new Client()
+                            {
+                                Name = client.Name,
+                                LastName = client.LastName,
+                                SecondLastName = client.SecondLastName,
+                                RFC = (client.RFC == "") ? "XAXX010101000" : client.RFC,
+                                CURP = (client.CURP == "") ? (client.IsMale == true) ? "XEXX010101HNEXXXA4" : "XEXX010101HNEXXXA8" : client.CURP,
+                                INE = client.INE,
+                                EMail = client.EMail,
+                                TypeUser = client.TypeUser,
+                                IsActive = true,
+                                TaxRegime = client.TaxRegime,
+
+                            };
+
+                            foreach (var item in client.Contacts)
+                            {
+                                nc.Contacts.Add(new Contact
+                                {
+                                    PhoneNumber = item.PhoneNumber,
+                                    TypeNumber = item.TypeNumber,
+                                    IsActive = 1
+                                });
+                            }
+                            NewAgreement.Clients.Add(nc);
+                        }
+
+                        await _context.Agreements.AddAsync(NewAgreement);
+                        await _context.SaveChangesAsync();
+                        if (IsDerivative)
+                        {
+                            Derivative derivative = new Derivative()
+                            {
+                                Agreement = Principal,
+                                AgreementId = Principal.Id,
+                                AgreementDerivative = NewAgreement.Id,
+                                IsActive = true
+                            };
+                            //_context.Derivatives.Attach(derivative);
+                            await _context.Derivatives.AddAsync(derivative);
+                            await _context.SaveChangesAsync();
+
+                            AgreementLog agreementLogderivative = new AgreementLog()
+                            {
+                                Agreement = NewAgreement,
+                                AgreementLogDate = DateTime.UtcNow.ToLocalTime(),
+                                AgreementId = NewAgreement.Id,
+                                UserId = agreementvm.UserId,
+                                User = await userManager.FindByIdAsync(agreementvm.UserId),
+                                Description = "Se Agrego Derivada al Contrato con Cuenta " + Principal.Account,
+                                Observation = agreementvm.Observations,
+                                NewValue = "",
+                                OldValue = "",
+                                Visible = false,
+                                Action = "PostContoller",
+                                Controller = "AgreementController"
+                            };
+
+                            await _context.AgreementLogs.AddAsync(agreementLogderivative);
+                            int a = await _context.SaveChangesAsync();
+                        }
+
+
+                        foreach (var aservice in agreementvm.ServicesId)
+                        {
+                            await _context.AgreementServices.AddAsync(new AgreementService
+                            {
+                                Agreement = NewAgreement,
+                                DateAgreement = DateTime.UtcNow.ToLocalTime(),
+                                IdAgreement = NewAgreement.Id,
+                                IdService = aservice,
+                                IsActive = true,
+                                Service = await _context.Services.FindAsync(aservice)
+                            });
+                            await _context.SaveChangesAsync();
+                        }
+                        if (!IsDerivative)
+                        {
+                            AgreementLog agreementLog = new AgreementLog()
+                            {
+                                Agreement = NewAgreement,
+                                AgreementLogDate = DateTime.UtcNow.ToLocalTime(),
+                                User = await userManager.FindByIdAsync(agreementvm.UserId),
+                                UserId = agreementvm.UserId,
+                                Description = "Nuevo Contrato",
+                                Observation = agreementvm.Observations,
+                                NewValue = "",
+                                OldValue = "",
+                                Visible = false,
+                                Action = "PostContoller",
+                                Controller = "AgreementController",
+                            };
+                            await _context.AgreementLogs.AddAsync(agreementLog);
+                        }
+                        scope.Complete();
+                    }
+                }
+                catch (Exception e)
+                {
+                    SystemLog systemLog = new SystemLog();
+                    systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                    systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                    systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                    systemLog.Parameter = JsonConvert.SerializeObject(agreementvm);
+                    CustomSystemLog helper = new CustomSystemLog(_context);
+                    helper.AddLog(systemLog);
+                    return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el contrato" });
+                }
+            }
+
+            var data = _context.Agreements.Where(x => x.Id == NewAgreement.Id).FirstOrDefault();
+            return StatusCode((int)TypeError.Code.Ok, new { Id = data.Id });
+        }
+
+        [HttpGet("FoundAgreement/{idAgreement}")]
+        public async Task<IActionResult> FoundAgreement([FromRoute] int idAgreement)
+        {
+            var data = _context.Agreements.Find(idAgreement);
+            return StatusCode((int)TypeError.Code.Ok, new { Success = "El número de cuenta asignado fue: " + data.Account, Id = data.Id, Account = data.Account });
         }
 
         [HttpPut("agreementDetail/{id}")]
@@ -1526,7 +1848,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IActionResult> GetAccountById(int id)
         {
             var data = _context.Agreements.Find(id);
-            return StatusCode((int)TypeError.Code.Ok, new { Success = "El número de cuenta asignado fue: " + data.Account });
+            return StatusCode((int)TypeError.Code.Ok, new { Success = "El número de cuenta asignado fue: " + data.Account});
         }
 
         [HttpPost("AddDiscount")]

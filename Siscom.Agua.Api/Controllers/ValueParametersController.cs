@@ -36,7 +36,7 @@ namespace Siscom.Agua.Api.Controllers
         public async Task<IEnumerable<SystemParameters>> GetAll()
         {
             var today = DateTime.UtcNow.ToLocalTime().Date;
-            return (await _context.SystemParameters.Where(x => x.IsActive == true && (x.StartDate <= today && x.EndDate >= today)) .ToListAsync());
+            return (await _context.SystemParameters.Where(x => x.IsActive == true && (x.StartDate <= today && x.EndDate >= today)).ToListAsync());
         }
 
         [HttpGet("GetParametersById/{id}")]
