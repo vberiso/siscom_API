@@ -22,6 +22,7 @@ using Siscom.Agua.DAL.Models;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Data.SqlClient;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -832,7 +833,33 @@ namespace Siscom.Agua.Api.Controllers
 
         }
 
+        [HttpPost("runAccountSimulation/{account}")]
+        public async Task<IActionResult> ExectSpAccountSimulation([FromRoute] string account)
+        {
+            try
+            {
+                string error = string.Empty;
+                var dataTable = new DataTable();
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = "[dbo].[sp_account_simulation]";
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.Add(new SqlParameter("@account", account));                    
+                    command.CommandTimeout = 6000;
 
+                    this._context.Database.OpenConnection();
+                    using (var result = await command.ExecuteReaderAsync())
+                    {
+                        dataTable.Load(result);
+                    }
+                }
+                return Ok(dataTable);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.Conflict, new { Error = string.Format($"{ex.ToMessageAndCompleteStacktrace()}") });
+            }
+        }
     }
 
 
