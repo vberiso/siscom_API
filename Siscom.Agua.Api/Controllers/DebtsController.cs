@@ -258,6 +258,38 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        [HttpGet("debtPaid")]
+        public async Task<IActionResult> GetDebtPaid([FromQuery]int idAgreement, [FromQuery] int year = 0)
+        {
+            try
+            {
+                var debtQuery = _context.Debts
+                        .Include(d => d.DebtDetails)
+                        .Include(d => d.DebtDiscounts)
+                        .Include(d => d.DebtStatuses)
+                        .AsQueryable();
+
+                debtQuery = debtQuery.Where(d => d.AgreementId == idAgreement && d.Type == "TIP01"  && d.Status == "ED005");
+
+                if(year > 0)
+                {
+                    debtQuery = debtQuery.Where(d => d.Year == year);
+                }
+                
+                var debt = await debtQuery.ToListAsync();
+
+                if (debt == null)
+                {
+                    return StatusCode((int)TypeError.Code.NotFound, new { Error = "No se ha encontrado deuda pagada para esta cuenta" });
+                }
+
+                return Ok(debt);
+            }
+            catch(Exception ex)
+            {
+                return Conflict(new { error = $"error: {ex.Message}" });
+            }
+        }
 
         [HttpPost("GetDiscountAnnual/{porcentajeDiscount}")]
         public async Task<IActionResult> CheckIsAnnual([FromRoute] int porcentajeDiscount, [FromBody] List<int> DebtIds)
