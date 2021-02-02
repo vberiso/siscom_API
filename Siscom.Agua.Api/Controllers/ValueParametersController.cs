@@ -270,9 +270,12 @@ namespace Siscom.Agua.Api.Controllers
         [HttpGet("Condonations")]
         public async Task<IActionResult> ExistCondonations()
         {
-            var tmpCond = await _context.CondonationCampaings.Where(c => c.IsActive == true &&
-                                                                            c.StartDate < DateTime.Now &&
-                                                                            c.EndDate > DateTime.Now).ToListAsync();
+            var tmpCond = await _context.CondonationCampaings
+                                        .Where(c => c.IsActive == true &&
+                                            c.StartDate < DateTime.Now &&
+                                            c.EndDate > DateTime.Now &&
+                                            (c.Name.Contains("CDN") || c.Name.Contains("DSC")))
+                                        .ToListAsync();
             return Ok(tmpCond);
         }
 

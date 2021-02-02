@@ -37,7 +37,13 @@ namespace Siscom.Agua.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var discount = await _context.CondonationCampaings.Where(c => c.IsActive == true && c.StartDate < DateTime.Now && c.EndDate > DateTime.Now).ToListAsync();
+            var discount = await _context.CondonationCampaings
+                .Where(c => c.IsActive == true 
+                    && c.StartDate < DateTime.Now 
+                    && c.EndDate > DateTime.Now
+                    && (c.Name.Contains("CDN") || c.Name.Contains("DSC"))
+                    )
+                .ToListAsync();
 
             if (discount == null)
             {
@@ -65,6 +71,30 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(discount);
         }
 
+        [HttpGet("SearchFor")]
+        public async Task<IActionResult> GetSearchFor([FromQuery]string text)
+        {
+            try
+            {
+                var discount = await _context.CondonationCampaings
+                                            .Where(c => c.Name.Contains(text) 
+                                                && c.IsActive == true 
+                                                && c.StartDate < DateTime.Now 
+                                                && c.EndDate > DateTime.Now)
+                                            .ToListAsync();
+
+                if (discount == null)
+                {
+                    return NoContent();
+                }
+
+                return Ok(discount);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = ex.Message });
+            }
+        }
 
         [HttpPost("{idAgreement}/{idCondonation}")]
         public async Task<IActionResult> PostCondonation([FromRoute] int idAgreement, [FromRoute] int idCondonation)
@@ -336,5 +366,6 @@ namespace Siscom.Agua.Api.Controllers
             }
 
         }
+
     }
 }
