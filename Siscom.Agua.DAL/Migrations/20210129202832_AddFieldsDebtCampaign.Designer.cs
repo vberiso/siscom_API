@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Siscom.Agua.DAL;
 
 namespace Siscom.Agua.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210129202832_AddFieldsDebtCampaign")]
+    partial class AddFieldsDebtCampaign
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1793,9 +1795,8 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<decimal>("DescuentoRecargo")
                         .HasColumnName("descuento_recargo");
 
-                    b.Property<string>("EndYearDebt")
-                        .HasColumnName("end_year_debt")
-                        .HasMaxLength(20);
+                    b.Property<int>("EndYearDebt")
+                        .HasColumnName("end_year_debt");
 
                     b.Property<string>("Folio")
                         .HasColumnName("folio")
@@ -1823,18 +1824,14 @@ namespace Siscom.Agua.DAL.Migrations
                         .HasColumnName("servicios")
                         .HasMaxLength(100);
 
-                    b.Property<string>("StartYearDebt")
-                        .HasColumnName("start_year_debt")
-                        .HasMaxLength(20);
+                    b.Property<int>("StartYearDebt")
+                        .HasColumnName("start_year_debt");
 
                     b.Property<string>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("status")
                         .HasMaxLength(10)
                         .HasDefaultValue("ECD01");
-
-                    b.Property<decimal>("TaotalDescuentoServicios")
-                        .HasColumnName("total_descuento_servicios");
 
                     b.Property<decimal>("Total")
                         .HasColumnName("total");
@@ -2540,7 +2537,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.Property<DateTime>("DateCurrent")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("date_current")
-                        .HasDefaultValue(new DateTime(2021, 2, 2, 22, 50, 39, 72, DateTimeKind.Local));
+                        .HasDefaultValue(new DateTime(2021, 1, 29, 14, 28, 31, 324, DateTimeKind.Local));
 
                     b.Property<int>("Initial")
                         .HasColumnName("initial");
@@ -2657,39 +2654,6 @@ namespace Siscom.Agua.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Folio_order_work");
-                });
-
-            modelBuilder.Entity("Siscom.Agua.DAL.Models.GenericFolios", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id_generic_folio")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("is_active")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Prefix")
-                        .HasColumnName("prefix")
-                        .HasMaxLength(3);
-
-                    b.Property<int>("Secuential")
-                        .HasColumnName("secuential");
-
-                    b.Property<string>("Suffixes")
-                        .HasColumnName("suffixes")
-                        .HasMaxLength(3);
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnName("type")
-                        .HasMaxLength(5);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("generic_folios");
                 });
 
             modelBuilder.Entity("Siscom.Agua.DAL.Models.GroupCatalogue", b =>
@@ -6202,7 +6166,7 @@ namespace Siscom.Agua.DAL.Migrations
                     b.ToTable("valvula_control");
 
                     b.HasData(
-                        new { Id = 1, ActualState = "", Description = "Sin Valvula", Diameter = "", HydraulicCircuit = "", IsActive = true, LastServiceDate = new DateTime(2021, 2, 2, 22, 50, 39, 123, DateTimeKind.Local), Latitude = "19.0954579", Longitude = "-98.2792209", PhysicalState = "", Reference = "Sin referencia", Type = "OT011" }
+                        new { Id = 1, ActualState = "", Description = "Sin Valvula", Diameter = "", HydraulicCircuit = "", IsActive = true, LastServiceDate = new DateTime(2021, 1, 29, 14, 28, 31, 454, DateTimeKind.Local), Latitude = "19.0954579", Longitude = "-98.2792209", PhysicalState = "", Reference = "Sin referencia", Type = "OT011" }
                     );
                 });
 

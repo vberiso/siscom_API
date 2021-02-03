@@ -154,5 +154,22 @@ namespace Siscom.Agua.Api.Controllers
             }
         }
 
+        [HttpPost("GetAccountsCampaign")]
+        public async Task<IActionResult> GetAccountsCampaign([FromBody] List<int> route)
+        {
+            var list = route.Select(x => x.ToString()).ToList();
+            var query = await (from o in _context.DebtCampaign
+                                                 .Include(x => x.Agreement)
+                                                    .ThenInclude(x => x.Addresses)
+                                                        .ThenInclude(s => s.Suburbs)
+                                                 .Include(x => x.Agreement)
+                                                    .ThenInclude(x => x.Clients)
+                                                 .Include(x => x.Agreement)
+                                                    .ThenInclude(x => x.TypeService)
+                        where list.Contains(o.Ruta.ToString())
+                        select o).ToListAsync();
+            //_context.DebtCampaign.Where((x) => (x.Ruta.ToString().Contains(list)));
+            return Ok(query);
+        }
     }
 }

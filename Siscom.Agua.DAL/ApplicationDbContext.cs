@@ -59,6 +59,7 @@ namespace Siscom.Agua.DAL
         public DbSet<Account> Accounts { get; set; }
         public DbSet<FolioOrderSale> FolioOrderSales { get; set; }
         public DbSet<FolioOrderWork> FolioOrderWorks { get; set; }
+        public DbSet<GenericFolios> GenericFolios { get; set; }
         public DbSet<TypeClassification> TypeClassifications { get; set; }
         public DbSet<Prepaid> Prepaids { get; set; }
         public DbSet<PrepaidDetail> PrepaidDetails { get; set; }
@@ -926,6 +927,12 @@ namespace Siscom.Agua.DAL
             builder.Entity<FolioAccountStatement>()
                   .Property(x => x.IsActive)
                   .HasDefaultValue(true);
+            #endregion
+
+            #region GenericFolios
+            builder.Entity<GenericFolios>()
+                .Property(x => x.IsActive)
+                .HasDefaultValue(true);
             #endregion
 
             #region INPC
