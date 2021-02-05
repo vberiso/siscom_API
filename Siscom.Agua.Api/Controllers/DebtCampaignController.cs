@@ -171,5 +171,40 @@ namespace Siscom.Agua.Api.Controllers
             //_context.DebtCampaign.Where((x) => (x.Ruta.ToString().Contains(list)));
             return Ok(query);
         }
+
+        [HttpPost("UpdateAccountDebtCampaign")]
+        public async Task<IActionResult> UpdateAccountDebtCampaign([FromBody] List<int> accountIDs)
+        {
+            foreach (var item in accountIDs)
+            {
+                var original = _context.DebtCampaign.Find(item);
+                original.Status = "ECD02";
+                _context.Entry(original).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+            //RedirectToActionResult redirect = new RedirectToActionResult("GetAccountsCampaignById", "DebtCampaign", new { @ids = accountIDs });
+            return RedirectToAction("GetAccountsCampaignById", new { @ids = accountIDs });
+        }
+
+        [AllowAnonymous]
+        [HttpGet(Name = "GetAccountsCampaignById")]
+        public async Task<IActionResult> GetAccountsCampaignById(List<int> ids)
+        {
+            List<DebtCampaign> debtCampaigns = new List<DebtCampaign>();
+            ids.ForEach(y =>
+            {
+                var data = _context.DebtCampaign
+                                    .Include(x => x.Agreement)
+                                        .ThenInclude(x => x.Addresses)
+                                            .ThenInclude(s => s.Suburbs)
+                                    .Include(x => x.Agreement)
+                                        .ThenInclude(x => x.Clients)
+                                    .Include(x => x.Agreement)
+                                        .ThenInclude(x => x.TypeService).Where(c => c.Id == y).FirstAsync();
+                debtCampaigns.Add(data.Result);
+            });
+            
+            return Ok(debtCampaigns);
+        }
     }
 }

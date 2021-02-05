@@ -76,6 +76,8 @@ namespace Siscom.Agua.DAL.Models
         public decimal DescuentoNotificaciones { get; set; }
         [Column("total_descuento_servicios")]
         public decimal TaotalDescuentoServicios { get; set; }
+        [Column("servicios_adelantados")]
+        public decimal ServiciosAdeltados { get; set; }
         public Agreement Agreement { get; set; }
     }
 }
