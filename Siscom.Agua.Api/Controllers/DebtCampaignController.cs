@@ -12,6 +12,9 @@ using System.IO;
 using Siscom.Agua.DAL.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Enums;
+using Siscom.Agua.Api.Services.Extension;
 
 namespace Siscom.Agua.Api.Controllers
 {
@@ -166,8 +169,8 @@ namespace Siscom.Agua.Api.Controllers
                                                     .ThenInclude(x => x.Clients)
                                                  .Include(x => x.Agreement)
                                                     .ThenInclude(x => x.TypeService)
-                        where list.Contains(o.Ruta.ToString())
-                        select o).ToListAsync();
+                        where list.Contains(o.Ruta.ToString()) && o.Status != "ECD02"
+                               select o).ToListAsync();
             //_context.DebtCampaign.Where((x) => (x.Ruta.ToString().Contains(list)));
             return Ok(query);
         }
@@ -175,15 +178,32 @@ namespace Siscom.Agua.Api.Controllers
         [HttpPost("UpdateAccountDebtCampaign")]
         public async Task<IActionResult> UpdateAccountDebtCampaign([FromBody] List<int> accountIDs)
         {
-            foreach (var item in accountIDs)
+            try
             {
-                var original = _context.DebtCampaign.Find(item);
-                original.Status = "ECD02";
-                _context.Entry(original).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                foreach (var item in accountIDs)
+                {
+                    var original = _context.DebtCampaign.Find(item);
+                    original.Status = "ECD02";
+                    _context.Entry(original).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
+                //RedirectToActionResult redirect = new RedirectToActionResult("GetAccountsCampaignById", "DebtCampaign", new { @ids = accountIDs });
+                return RedirectToAction("GetAccountsCampaignById", new { @ids = accountIDs });
             }
-            //RedirectToActionResult redirect = new RedirectToActionResult("GetAccountsCampaignById", "DebtCampaign", new { @ids = accountIDs });
-            return RedirectToAction("GetAccountsCampaignById", new { @ids = accountIDs });
+            catch (Exception e)
+            {
+
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = JsonConvert.SerializeObject(accountIDs);
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para agregar el contrato" });
+            }
+          
         }
 
         [AllowAnonymous]
