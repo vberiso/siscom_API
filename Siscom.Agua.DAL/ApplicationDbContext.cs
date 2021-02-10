@@ -1444,9 +1444,9 @@ namespace Siscom.Agua.DAL
             #region Proof
 
             builder.Entity<ProofNoDebt>()
-                .HasOne<Agreement>(a => a.Agreement)
-                .WithMany(x => x.ProofNoDebts)
-                .HasForeignKey(x => x.AgreementId);
+                .HasOne<Agreement>(a => a.Agreement);
+                //.WithMany(x => x.ProofNoDebts)
+                //.HasForeignKey(x => x.AgreementId);
             #endregion
 
             #region Region  
