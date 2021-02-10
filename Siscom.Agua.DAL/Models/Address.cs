@@ -19,7 +19,7 @@ namespace Siscom.Agua.DAL.Models
         public string Outdoor { get; set; }
         [Column("indoor"), StringLength(50)]
         public string Indoor { get; set; }
-        [Column("zip"), StringLength(5)]
+        [Column("zip"), StringLength(50)]
         public string Zip { get; set; }
         [Column("reference"), StringLength(200), Required]
         public string Reference { get; set; }

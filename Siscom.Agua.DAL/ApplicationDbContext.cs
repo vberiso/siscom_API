@@ -285,6 +285,8 @@ namespace Siscom.Agua.DAL
         public DbSet<DebtCampaignFiles> DebtCampaignFiles { get; set; }
         public DbSet<BenefitedCampaign> BenefitedCampaign { get; set; }
 
+        public DbSet<ProofNoDebt> ProofNoDebts { get; set; }
+
         /// <summary>
         /// Ot Mobile
         /// </summary>
@@ -1437,6 +1439,13 @@ namespace Siscom.Agua.DAL
             builder.Entity<PrepaidDetail>()
                  .Property(p => p.Amount)
                  .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region Proof
+            builder.Entity<ProofNoDebt>()
+                .HasOne<Agreement>(a => a.Agreement)
+                .WithMany(x => x.ProofNoDebts)
+                .HasForeignKey(x => x.AgreementId);
             #endregion
 
             #region Region  

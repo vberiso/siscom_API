@@ -600,6 +600,8 @@ namespace Siscom.Agua.Api.Controllers
                                     ",CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name) Nombre " +
                                     ",C.id_client idClient " +
                                     ",AgreementDetail.taxable_base taxableBase " +
+                                    ",AgreementDetail.ground ground " +
+                                    ",AgreementDetail.built built " +
                                     ",C.rfc RFC " +
                                     ",TSS.id_type_state_service idStus " +
                                     ",TSS.name [Status] " +
@@ -622,7 +624,7 @@ namespace Siscom.Agua.Api.Controllers
                                     "INNER JOIN [dbo].[Suburb] AS S ON AD.SuburbsId = S.id_suburb " +
                                     "LEFT JOIN [dbo].Discount AS DS ON DS.id_discount = ADI.id_discount " +
                                     "WHERE A.account = '" + search.StringSearch + "' AND AD.type_address = 'DIR01' AND C.type_user = 'CLI01' " +
-                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), C.id_client, AgreementDetail.taxable_base, RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name,ADI.is_active";
+                                    "GROUP BY A.id_agreement, A.account, CONCAT(C.name , ' ' , c.last_name, ' ' , C.second_last_name), C.id_client, AgreementDetail.taxable_base, AgreementDetail.ground, AgreementDetail.built, RFC, TSS.id_type_state_service, TSS.name, CONCAT(AD.street, ' ', AD.outdoor, ' ', S.name), TY.name, A.num_derivatives, A.token, ADI.end_date,DS.name,ADI.is_active";
                                 }
                                 else
                                 {
@@ -682,18 +684,20 @@ namespace Siscom.Agua.Api.Controllers
                                                 Nombre = result[2].ToString().ToUpper(),
                                                 idClient = Convert.ToInt32(result[3]),
                                                 taxableBase = Convert.ToDecimal(result[4]),
-                                                RFC = result[5].ToString(),
-                                                idStus = Convert.ToInt32(result[6]),
-                                                Status = result[7].ToString(),
-                                                WithDiscount = Convert.ToBoolean(result[8]),
-                                                Address = result[9].ToString(),
-                                                Type = result[10].ToString(),
-                                                NumDerivades = Convert.ToInt32(result[11]),
-                                                Debit = Convert.ToInt32(result[12]),
-                                                Token = result[13].ToString(),
-                                                EndDate = result[14].ToString(),
-                                                NameDiscount = result[15].ToString(),
-                                                isActiveDiscount = result[16] == DBNull.Value ? false : bool.Parse(result[16].ToString())
+                                                ground = Convert.ToDecimal(result[5]),
+                                                built = Convert.ToDecimal(result[6]),
+                                                RFC = result[7].ToString(),
+                                                idStus = Convert.ToInt32(result[8]),
+                                                Status = result[9].ToString(),
+                                                WithDiscount = Convert.ToBoolean(result[10]),
+                                                Address = result[11].ToString(),
+                                                Type = result[12].ToString(),
+                                                NumDerivades = Convert.ToInt32(result[13]),
+                                                Debit = Convert.ToInt32(result[14]),
+                                                Token = result[15].ToString(),
+                                                EndDate = result[16].ToString(),
+                                                NameDiscount = result[17].ToString(),
+                                                isActiveDiscount = result[18] == DBNull.Value ? false : bool.Parse(result[18].ToString())
                                             });
                                         }
                                         else
@@ -2700,7 +2704,7 @@ namespace Siscom.Agua.Api.Controllers
 
         [HttpPost("addDebtAyuntamiento/{idAgreement}/")]
         public async Task<IActionResult> PostDebtAyuntamiento([FromRoute] int idAgreement)
-        {
+        {   
             string error = string.Empty;
             try
             {
@@ -3028,7 +3032,7 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.Parameter = idAgreement.ToString();
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
-                return Conflict(new { Error = "Ocurrió un problema al aplicar el descuento, esto sucede porque no se puede aplicar descuento a una deuda con descuento aplicado" });
+                return Conflict(new { Error = "Ocurrió un problema al aplicar el descuento." + e.Message });
             }
 
         }
@@ -3325,6 +3329,47 @@ namespace Siscom.Agua.Api.Controllers
                 return null;
             }
         }
+
+        [HttpGet("GetProof/{id}")]
+        public async Task<IActionResult> GetFolioProofNoDebt([FromRoute] int id)
+        {
+            try
+            {
+                var proof = await _context.ProofNoDebts.Where(x => x.Id == id).FirstOrDefaultAsync();
+                if (proof == null)
+                {
+                    return NotFound();
+                }
+                return Ok(proof);
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message + e.InnerException);
+            }
+        }
+
+        [HttpPost("GenerateFolioProofNoDebt")]
+        public async Task<IActionResult> GenerateFolioProofNoDebt([FromBody] ProofNoDebt proof)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _context.ProofNoDebts.Add(proof);
+                await _context.SaveChangesAsync();
+                return Ok(new { id = proof.Id });
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message + e.InnerException);
+            }            
+        }
+
+        
+
     }
 
 

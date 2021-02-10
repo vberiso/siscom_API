@@ -25,6 +25,7 @@ namespace Siscom.Agua.DAL.Models
             PartialPayments = new HashSet<PartialPayment>();
             AccountStatusInFiles = new HashSet<AccountStatusInFile>();
             DebtCampaign = new HashSet<DebtCampaign>();
+            ProofNoDebts = new HashSet<ProofNoDebt>();
         }
 
         [Column("id_agreement"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -103,6 +104,7 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<OrderWork> OrderWork { get; set; }
         public ICollection<PartialPayment> PartialPayments { get; set; }
         public ICollection<AccountStatusInFile> AccountStatusInFiles { get; set; }
+        public ICollection<ProofNoDebt> ProofNoDebts { get; set; }
 
 
     }

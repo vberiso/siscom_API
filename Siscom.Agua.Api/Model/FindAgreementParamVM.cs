@@ -11,6 +11,8 @@ namespace Siscom.Agua.Api.Model
         public string Account { get; set; }
         public string Nombre { get; set; }
         public decimal taxableBase { get; set; }
+        public decimal ground { get; set; }
+        public decimal built { get; set; }
         public int idClient { get; set; }
         public string RFC { get; set; }
         public string Address { get; set; }
