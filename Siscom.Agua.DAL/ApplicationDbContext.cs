@@ -1442,6 +1442,7 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region Proof
+
             builder.Entity<ProofNoDebt>()
                 .HasOne<Agreement>(a => a.Agreement)
                 .WithMany(x => x.ProofNoDebts)

@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Siscom.Agua.DAL.Models
 {
+
     [Table("Proof_No_Debt")]
     public class ProofNoDebt
     {
