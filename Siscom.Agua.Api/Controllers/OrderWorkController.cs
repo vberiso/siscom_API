@@ -1107,6 +1107,38 @@ namespace Siscom.Agua.Api.Controllers
             return Ok(new List<object>() { Types, Status});
         }
 
+
+        [HttpGet("OrderWorks/Materiales")]
+        public async Task<IActionResult> getMaterialesList([FromQuery]string fromDate, [FromQuery]string untilDate)
+        {
+            try
+            {
+                int numeroDia = (int)DateTime.Now.DayOfWeek * -1;
+                DateTime fechaIni = string.IsNullOrEmpty(fromDate) ? DateTime.Now.AddDays(numeroDia) : Convert.ToDateTime(fromDate);
+                DateTime fechaFin = string.IsNullOrEmpty(untilDate) ? DateTime.Now : Convert.ToDateTime(untilDate);
+
+                var orders = await _context.OrderWorks
+                                    .Include(owd => owd.OrderWorkDetails)
+                                    .Where(ow => ow.Status == "EOT03" 
+                                        && ow.OrderWorkDetails.Where(sub => sub.Type == "OTD03").Count() > 0
+                                        && ow.DateRealization > fechaIni
+                                        && ow.DateRealization < fechaFin
+                                        )
+                                    .ToListAsync();
+
+                List<int> tmpIds = orders.Select(x => x.AgrementId).ToList();
+                var agreements = await _context.Agreements.Where(a => tmpIds.Contains(a.Id)).ToListAsync();
+
+                var types = await _context.Types.Where(t => t.GroupTypeId == 15).ToListAsync();
+
+                return Ok(new List<object>() { orders, agreements, types });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode( StatusCodes.Status400BadRequest, new { error = ex.Message});
+            }
+        }
+
         //Methods from Order Work Mobile
 
 

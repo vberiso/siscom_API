@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Siscom.Agua.Api.Enums;
 using Siscom.Agua.Api.Helpers;
+using Siscom.Agua.Api.Model.Promos;
 using Siscom.Agua.Api.runSp;
 using Siscom.Agua.Api.Services.Extension;
 using Siscom.Agua.DAL;
@@ -82,6 +84,30 @@ namespace Siscom.Agua.Api.Controllers
                                                 && c.StartDate < DateTime.Now 
                                                 && c.EndDate > DateTime.Now)
                                             .ToListAsync();
+                                
+                if (discount == null)
+                {
+                    return NoContent();
+                }
+
+                return Ok(discount);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("Promociones")]
+        public async Task<IActionResult> getPromociones()
+        {
+            try
+            {
+                var discount = await _context.CondonationCampaings
+                                            .Where(c => c.IsActive == true
+                                                && c.StartDate < DateTime.Now
+                                                && c.EndDate > DateTime.Now)
+                                            .ToListAsync();
 
                 if (discount == null)
                 {
@@ -89,6 +115,28 @@ namespace Siscom.Agua.Api.Controllers
                 }
 
                 return Ok(discount);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("cintilloName")]
+        public async Task<IActionResult> getCintilloName([FromQuery] string name)
+        {
+            try
+            {
+                string ruta = @"C:\Inetpub\wwwroot\img\api_caja\" + name;
+                Byte[] bytes = System.IO.File.ReadAllBytes(ruta);
+                String fileBase64 = Convert.ToBase64String(bytes);
+
+                if (string.IsNullOrEmpty(fileBase64))
+                {
+                    return NoContent();
+                }
+
+                return Ok(fileBase64);
             }
             catch (Exception ex)
             {
@@ -156,6 +204,8 @@ namespace Siscom.Agua.Api.Controllers
             try
             {
                 CondonationCampaing condonacion = await _context.CondonationCampaings.FirstOrDefaultAsync(c => c.Id == idCondonation);
+                PromotionCaja promotion = JsonConvert.DeserializeObject<PromotionCaja>(condonacion.Alias);
+                promotion.Id = condonacion.Id;
 
                 //Valido si tiene convenio
                 PartialPayment partialPayment = await _context.PartialPayments.Where(p => p.AgreementId == idAgreement && p.Status == "COV01").FirstOrDefaultAsync();
@@ -168,32 +218,49 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = "Ya se aplico esta promocion" });
 
                 //Valido si pertenece a los tipos de predio
-                Agreement contrato = await _context.Agreements.FirstOrDefaultAsync(a => a.Id == idAgreement);
-                if (contrato.TypeIntakeId != 1 && contrato.TypeIntakeId != 2)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Esta promocion solo aplica para tipos: Habitacional y Comercial" });
+                if (promotion.TiposToma.Count > 0)
+                {
+                    Agreement contrato = await _context.Agreements.FirstOrDefaultAsync(a => a.Id == idAgreement);
+                    if (!promotion.TiposToma.Contains(contrato.TypeIntakeId))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Esta promoción no aplica para el tipo de toma del contrato." });
+                }
+
 
                 List<string> statuses = await _context.Statuses.Where(s => s.GroupStatusId == 4).Select(x => x.CodeName).ToListAsync();
-                //DateTime FechaInicial = condonacion.CondonationFrom;
-                List<string> lsTypes = condonacion.Types.Split(",").ToList();
-                List<Debt> debts = await _context.Debts.Where(d =>
-                    d.AgreementId == idAgreement
-                    && statuses.Contains(d.Status)
-                    && lsTypes.Contains(d.Type)
-                    && d.FromDate >= condonacion.CondonationFrom
-                    && d.UntilDate <= condonacion.CondonationUntil
-                    ).ToListAsync();
+                List<Debt> debts = new List<Debt>();
+                foreach (var item in promotion.Condonaciones)
+                {
+                    List<Debt> debtsTmp = await _context.Debts.Where(d =>
+                       d.AgreementId == idAgreement
+                       && statuses.Contains(d.Status)
+                       && item.tipos.Contains(d.Type)
+                       && d.FromDate >= item.condonacionDeudaDesde
+                       && d.UntilDate <= item.condonacionDeudaHasta
+                        ).ToListAsync();
 
+                    debts.AddRange(debtsTmp);
+                }
+
+                List<DebtStatus> debtStatuses = new List<DebtStatus>();
                 foreach (var item in debts)
                 {
                     item.Status = "ED009";
+
+                    DebtStatus debtStatus = new DebtStatus();
+                    debtStatus.id_status = "ED009";
+                    debtStatus.DebtStatusDate = DateTime.Now;
+                    debtStatus.User = promotion.Nombre;
+                    debtStatus.DebtId = item.Id;
+                    debtStatuses.Add(debtStatus);
                 }
+                await _context.DebtStatuses.AddRangeAsync(debtStatuses);
                 await _context.SaveChangesAsync();
 
                 AgreementComment agreementComment = new AgreementComment()
                 {
                     AgreementId = idAgreement,
                     DateIn = DateTime.Now,
-                    Observation = condonacion.Name,
+                    Observation = promotion.Nombre,
                     IsVisible = true,
                     UserId = us,
                     UserName = usName,
@@ -203,19 +270,23 @@ namespace Siscom.Agua.Api.Controllers
                 await _context.SaveChangesAsync();
 
                 decimal TotalDeuda = debts.Sum(x => (x.Amount - x.OnAccount));
-                //Se agrega el contrato beneficiado.
-                BenefitedCampaign benefitedCampaign = new BenefitedCampaign()
-                {
-                    AgreementId = idAgreement,
-                    DiscountCampaignId = condonacion.Id,
-                    NameCamping = condonacion.Name,
-                    AmountDiscount = TotalDeuda,
-                    ApplicationDate = DateTime.Now
-                };
-                _context.BenefitedCampaign.Add(benefitedCampaign);
-                await _context.SaveChangesAsync();
 
-                return Ok();
+                //Se agrega el contrato beneficiado.
+                if (promotion.Nombre.Substring(0, 3).Equals("CDN"))
+                {
+                    BenefitedCampaign benefitedCampaign = new BenefitedCampaign()
+                    {
+                        AgreementId = idAgreement,
+                        DiscountCampaignId = promotion.Id,
+                        NameCamping = promotion.Nombre,
+                        AmountDiscount = TotalDeuda,
+                        ApplicationDate = DateTime.Now
+                    };
+                    _context.BenefitedCampaign.Add(benefitedCampaign);
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok(new { condonado = TotalDeuda });
             }
             catch (Exception e)
             {
@@ -239,6 +310,8 @@ namespace Siscom.Agua.Api.Controllers
             try
             {
                 CondonationCampaing condonacion = await _context.CondonationCampaings.FirstOrDefaultAsync(c => c.Id == idCondonation);
+                PromotionCaja promotion = JsonConvert.DeserializeObject<PromotionCaja>(condonacion.Alias);
+                promotion.Id = condonacion.Id;
 
                 //Valido si tiene convenio
                 PartialPayment partialPayment = await _context.PartialPayments.Where(p => p.AgreementId == idAgreement && p.Status == "COV01").FirstOrDefaultAsync();
@@ -251,48 +324,113 @@ namespace Siscom.Agua.Api.Controllers
                     return StatusCode((int)TypeError.Code.Conflict, new { Error = "Ya se aplico esta promocion" });
 
                 //Valido si pertenece a los tipos de predio
-                Agreement contrato = await _context.Agreements.FirstOrDefaultAsync(a => a.Id == idAgreement);
-                if (contrato.TypeIntakeId != 1 && contrato.TypeIntakeId != 2)
-                    return StatusCode((int)TypeError.Code.Conflict, new { Error = "Esta promocion solo aplica para tipos: Habitacional y Comercial" });
+                if (promotion.TiposToma.Count > 0)
+                {
+                    Agreement contrato = await _context.Agreements.FirstOrDefaultAsync(a => a.Id == idAgreement);
+                    if (!promotion.TiposToma.Contains(contrato.TypeIntakeId))
+                        return StatusCode((int)TypeError.Code.Conflict, new { Error = "Esta promoción no aplica para el tipo de toma del contrato." });
+                }                
 
                 List<string> statuses = await _context.Statuses.Where(s => s.GroupStatusId == 4).Select(x => x.CodeName).ToListAsync();
-                //DateTime FechaInicial = condonacion.CondonationFrom;
-                List<string> lsTypes = condonacion.Types.Split(",").ToList();
-                List<Debt> debts = await _context.Debts.Where(d =>
-                    d.AgreementId == idAgreement
-                    && statuses.Contains(d.Status)
-                    && lsTypes.Contains(d.Type)
-                    && d.FromDate >= condonacion.CondonationFrom
-                    && d.UntilDate <= condonacion.CondonationUntil
-                    ).ToListAsync();
-
-                foreach (var item in debts)
+                //List<string> lsTypes = condonacion.Types.Split(",").ToList();
+                //List<Debt> debts = await _context.Debts.Where(d =>
+                //    d.AgreementId == idAgreement
+                //    && statuses.Contains(d.Status)
+                //    && lsTypes.Contains(d.Type)
+                //    && d.FromDate >= condonacion.CondonationFrom
+                //    && d.UntilDate <= condonacion.CondonationUntil
+                //    ).ToListAsync();
+                
+                foreach (var descuento in promotion.Descuentos)
                 {
-                    List<runSp.SPParameters> parameters = new List<runSp.SPParameters> {
-                    new runSp.SPParameters{Key ="id", Value = item.Id.ToString() },
-                    new runSp.SPParameters{Key ="porcentage_value", Value = condonacion.Percentage.ToString() },
-                    new runSp.SPParameters{Key ="discount_value", Value = "0" },
-                    new runSp.SPParameters{Key ="text_discount", Value = condonacion.Alias, DbType= DbType.String, Size = 50 },
-                    new runSp.SPParameters{Key ="option", Value = "1" },
-                    new runSp.SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },
-                   // new runSp.SPParameters{Key ="Debt", Value = "", Direccion= ParameterDirection.Output, DbType= DbType.String, Size = 30 },
-                    new runSp.SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
-                    };
+                    List<Debt> debtsTmp = await _context.Debts.Where(d =>
+                       d.AgreementId == idAgreement
+                       && statuses.Contains(d.Status)
+                       && descuento.tipos.Contains(d.Type)
+                       && d.FromDate >= descuento.condonacionDeudaDesde
+                       && d.UntilDate <= descuento.condonacionDeudaHasta
+                        ).ToListAsync();
 
-                    var ss = await new RunSP(this, _context).runProcedureNT("dbo.billing_Adjusment", parameters);
-                    var data = JObject.Parse(JsonConvert.SerializeObject(ss));
-                    var SPParameters = JsonConvert.DeserializeObject<SPParameters>(JsonConvert.SerializeObject(data["paramsOut"][1]));
+                    foreach (var item in debtsTmp)
+                    {
+                        List<runSp.SPParameters> parameters = new List<runSp.SPParameters> {
+                        new runSp.SPParameters{Key ="id", Value = item.Id.ToString() },
+                        new runSp.SPParameters{Key ="porcentage_value", Value = descuento.descuento.ToString() },
+                        new runSp.SPParameters{Key ="discount_value", Value = "0" },
+                        new runSp.SPParameters{Key ="text_discount", Value = promotion.ObservacionFactura, DbType= DbType.String, Size = 50 },
+                        new runSp.SPParameters{Key ="option", Value = "1" },
+                        new runSp.SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },                       
+                        new runSp.SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
+                        };
+
+                        var ss = await new RunSP(this, _context).runProcedureNT("dbo.billing_Adjusment", parameters);
+                        var data = JObject.Parse(JsonConvert.SerializeObject(ss));
+                        var SPParameters = JsonConvert.DeserializeObject<SPParameters>(JsonConvert.SerializeObject(data["paramsOut"][1]));
+                    }
                 }
 
-                decimal TotalDeuda = debts.Sum(x => (x.Amount - x.OnAccount));
-                decimal Descuento = (TotalDeuda * condonacion.Percentage) / 100;
+                List<Debt> debts = new List<Debt>();
+                foreach (var descuento in promotion.Descuentos)
+                {
+                    List<Debt> debtsTmp = await _context.Debts.Where(d =>
+                       d.AgreementId == idAgreement
+                       && statuses.Contains(d.Status)
+                       && descuento.tipos.Contains(d.Type)
+                       && d.FromDate >= descuento.condonacionDeudaDesde
+                       && d.UntilDate <= descuento.condonacionDeudaHasta
+                        ).ToListAsync();
+                    debts.AddRange(debtsTmp);                    
+                }
+                List<int> idsDebt = debts.Select(d => d.Id).ToList();
+                List<DebtDiscount> debtDiscounts = await _context.DebtDiscounts.Where(dd => idsDebt.Contains(dd.DebtId)).ToListAsync();
+                decimal Descuento = debtDiscounts.Sum(dd => dd.DiscountAmount);
+
                 //Se agrega el contrato beneficiado.
+                if (promotion.Nombre.Substring(0, 3).Equals("DSC"))
+                {
+                    BenefitedCampaign benefitedCampaign = new BenefitedCampaign()
+                    {
+                        AgreementId = idAgreement,
+                        DiscountCampaignId = condonacion.Id,
+                        NameCamping = condonacion.Name,
+                        AmountDiscount = Descuento,
+                        ApplicationDate = DateTime.Now
+                    };
+                    _context.BenefitedCampaign.Add(benefitedCampaign);
+                    _context.SaveChanges();
+                }
+                
+                return Ok(new { descuento = Descuento });
+            }
+            catch (Exception e)
+            {
+                SystemLog systemLog = new SystemLog();
+                systemLog.Description = e.ToMessageAndCompleteStacktrace();
+                systemLog.DateLog = DateTime.UtcNow.ToLocalTime();
+                systemLog.Controller = this.ControllerContext.RouteData.Values["controller"].ToString();
+                systemLog.Action = this.ControllerContext.RouteData.Values["action"].ToString();
+                systemLog.Parameter = idAgreement.ToString();
+                CustomSystemLog helper = new CustomSystemLog(_context);
+                helper.AddLog(systemLog);
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para aplicar promocion" });
+            }
+        }
+
+        [HttpPost("RegisterBenefitedAccount/{idAgreement}/{idCondonation}/{total}")]
+        public async Task<IActionResult> RegisterBenefitedAccount([FromRoute] int idAgreement, [FromRoute] int idCondonation, [FromRoute] decimal total)
+        {
+            try
+            {
+                CondonationCampaing condonacion = await _context.CondonationCampaings.FirstOrDefaultAsync(c => c.Id == idCondonation);
+                PromotionCaja promotion = JsonConvert.DeserializeObject<PromotionCaja>(condonacion.Alias);
+                promotion.Id = condonacion.Id;
+
                 BenefitedCampaign benefitedCampaign = new BenefitedCampaign()
                 {
                     AgreementId = idAgreement,
                     DiscountCampaignId = condonacion.Id,
                     NameCamping = condonacion.Name,
-                    AmountDiscount = Descuento,
+                    AmountDiscount = total,
                     ApplicationDate = DateTime.Now
                 };
                 _context.BenefitedCampaign.Add(benefitedCampaign);
@@ -310,10 +448,10 @@ namespace Siscom.Agua.Api.Controllers
                 systemLog.Parameter = idAgreement.ToString();
                 CustomSystemLog helper = new CustomSystemLog(_context);
                 helper.AddLog(systemLog);
-                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para aplicar promocion" });
+                return StatusCode((int)TypeError.Code.InternalServerError, new { Error = "Problemas para registrar la cuenta beneficiada de promocion" });
             }
-
         }
+            
 
         [HttpPost("BorrarDeudaDeAño/{idAgreement}/{año}/{usuario}" )]
         public async Task<IActionResult> PostBorrarDeudaDeAño([FromRoute] int idAgreement, [FromRoute] int año, [FromRoute] string usuario)
