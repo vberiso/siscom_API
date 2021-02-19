@@ -105,8 +105,8 @@ namespace Siscom.Agua.Api.Controllers
             {
                 var discount = await _context.CondonationCampaings
                                             .Where(c => c.IsActive == true
-                                                && c.StartDate < DateTime.Now
-                                                && c.EndDate > DateTime.Now)
+                                                && c.StartDate <= DateTime.Now
+                                                && c.EndDate >= DateTime.Now)
                                             .ToListAsync();
 
                 if (discount == null)
