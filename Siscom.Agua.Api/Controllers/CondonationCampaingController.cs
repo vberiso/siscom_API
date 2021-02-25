@@ -227,10 +227,10 @@ namespace Siscom.Agua.Api.Controllers
 
 
                 List<string> statuses = await _context.Statuses.Where(s => s.GroupStatusId == 4).Select(x => x.CodeName).ToListAsync();
-                List<Debt> debts = new List<Debt>();
+                List<Debt> debts = new List<Debt>();                
                 foreach (var item in promotion.Condonaciones)
                 {
-                    List<Debt> debtsTmp = await _context.Debts.Where(d =>
+                    List<Debt> debtsTmp = await _context.Debts.Include(x => x.DebtDetails).Where(d =>
                        d.AgreementId == idAgreement
                        && statuses.Contains(d.Status)
                        && item.tipos.Contains(d.Type)
@@ -238,24 +238,41 @@ namespace Siscom.Agua.Api.Controllers
                        && d.UntilDate <= item.condonacionDeudaHasta
                         ).ToListAsync();
 
+                    List<DebtStatus> debtStatuses = new List<DebtStatus>();
+                    foreach (var deuda in debtsTmp)
+                    {
+                        if (!deuda.Type.Equals("TIP02"))
+                        {
+                            deuda.Status = "ED009";
+
+                            DebtStatus debtStatus = new DebtStatus();
+                            debtStatus.id_status = "ED009";
+                            debtStatus.DebtStatusDate = DateTime.Now;
+                            debtStatus.User = promotion.Nombre;
+                            debtStatus.DebtId = deuda.Id;
+                            debtStatuses.Add(debtStatus);
+                        }
+                        else if (deuda.Type.Equals("TIP02") 
+                            && deuda.DebtDetails.Count == 1 
+                            && item.codes.Contains(int.Parse(deuda.DebtDetails.FirstOrDefault().CodeConcept)))
+                        {
+                            deuda.Status = "ED009";
+
+                            DebtStatus debtStatus = new DebtStatus();
+                            debtStatus.id_status = "ED009";
+                            debtStatus.DebtStatusDate = DateTime.Now;
+                            debtStatus.User = promotion.Nombre;
+                            debtStatus.DebtId = deuda.Id;
+                            debtStatuses.Add(debtStatus);
+                        }
+                    }
+
+                    await _context.DebtStatuses.AddRangeAsync(debtStatuses);
+                    await _context.SaveChangesAsync();
+
                     debts.AddRange(debtsTmp);
                 }
-
-                List<DebtStatus> debtStatuses = new List<DebtStatus>();
-                foreach (var item in debts)
-                {
-                    item.Status = "ED009";
-
-                    DebtStatus debtStatus = new DebtStatus();
-                    debtStatus.id_status = "ED009";
-                    debtStatus.DebtStatusDate = DateTime.Now;
-                    debtStatus.User = promotion.Nombre;
-                    debtStatus.DebtId = item.Id;
-                    debtStatuses.Add(debtStatus);
-                }
-                await _context.DebtStatuses.AddRangeAsync(debtStatuses);
-                await _context.SaveChangesAsync();
-
+                 
                 AgreementComment agreementComment = new AgreementComment()
                 {
                     AgreementId = idAgreement,
@@ -332,18 +349,10 @@ namespace Siscom.Agua.Api.Controllers
                 }                
 
                 List<string> statuses = await _context.Statuses.Where(s => s.GroupStatusId == 4).Select(x => x.CodeName).ToListAsync();
-                //List<string> lsTypes = condonacion.Types.Split(",").ToList();
-                //List<Debt> debts = await _context.Debts.Where(d =>
-                //    d.AgreementId == idAgreement
-                //    && statuses.Contains(d.Status)
-                //    && lsTypes.Contains(d.Type)
-                //    && d.FromDate >= condonacion.CondonationFrom
-                //    && d.UntilDate <= condonacion.CondonationUntil
-                //    ).ToListAsync();
-                
+                                
                 foreach (var descuento in promotion.Descuentos)
                 {
-                    List<Debt> debtsTmp = await _context.Debts.Where(d =>
+                    List<Debt> debtsTmp = await _context.Debts.Include(x => x.DebtDetails).Where(d =>
                        d.AgreementId == idAgreement
                        && statuses.Contains(d.Status)
                        && descuento.tipos.Contains(d.Type)
@@ -353,22 +362,44 @@ namespace Siscom.Agua.Api.Controllers
 
                     foreach (var item in debtsTmp)
                     {
-                        List<runSp.SPParameters> parameters = new List<runSp.SPParameters> {
-                        new runSp.SPParameters{Key ="id", Value = item.Id.ToString() },
-                        new runSp.SPParameters{Key ="porcentage_value", Value = descuento.descuento.ToString() },
-                        new runSp.SPParameters{Key ="discount_value", Value = "0" },
-                        new runSp.SPParameters{Key ="text_discount", Value = promotion.ObservacionFactura, DbType= DbType.String, Size = 50 },
-                        new runSp.SPParameters{Key ="option", Value = "1" },
-                        new runSp.SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },                       
-                        new runSp.SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
-                        };
+                        if (!item.Type.Equals("TIP02"))
+                        {
+                            List<runSp.SPParameters> parameters = new List<runSp.SPParameters> {
+                                new runSp.SPParameters{Key ="id", Value = item.Id.ToString() },
+                                new runSp.SPParameters{Key ="porcentage_value", Value = descuento.descuento.ToString() },
+                                new runSp.SPParameters{Key ="discount_value", Value = "0" },
+                                new runSp.SPParameters{Key ="text_discount", Value = promotion.ObservacionFactura, DbType= DbType.String, Size = 50 },
+                                new runSp.SPParameters{Key ="option", Value = "1" },
+                                new runSp.SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },
+                                new runSp.SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
+                            };
 
-                        var ss = await new RunSP(this, _context).runProcedureNT("dbo.billing_Adjusment", parameters);
-                        var data = JObject.Parse(JsonConvert.SerializeObject(ss));
-                        var SPParameters = JsonConvert.DeserializeObject<SPParameters>(JsonConvert.SerializeObject(data["paramsOut"][1]));
+                            var ss = await new RunSP(this, _context).runProcedureNT("dbo.billing_Adjusment", parameters);
+                            var data = JObject.Parse(JsonConvert.SerializeObject(ss));
+                            var SPParameters = JsonConvert.DeserializeObject<SPParameters>(JsonConvert.SerializeObject(data["paramsOut"][1]));
+                        }
+                        else if (item.Type.Equals("TIP02")
+                            && item.DebtDetails.Count == 1
+                            && descuento.codes.Contains(int.Parse(item.DebtDetails.FirstOrDefault().CodeConcept)))
+                        {
+                            List<runSp.SPParameters> parameters = new List<runSp.SPParameters> {
+                                new runSp.SPParameters{Key ="id", Value = item.Id.ToString() },
+                                new runSp.SPParameters{Key ="porcentage_value", Value = descuento.descuento.ToString() },
+                                new runSp.SPParameters{Key ="discount_value", Value = "0" },
+                                new runSp.SPParameters{Key ="text_discount", Value = promotion.ObservacionFactura, DbType= DbType.String, Size = 50 },
+                                new runSp.SPParameters{Key ="option", Value = "1" },
+                                new runSp.SPParameters{Key ="account_folio", Value = "", Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Size = 30 },
+                                new runSp.SPParameters { Key = "error", Size=200, Direccion= ParameterDirection.InputOutput, DbType= DbType.String, Value =""}
+                            };
+
+                            var ss = await new RunSP(this, _context).runProcedureNT("dbo.billing_Adjusment", parameters);
+                            var data = JObject.Parse(JsonConvert.SerializeObject(ss));
+                            var SPParameters = JsonConvert.DeserializeObject<SPParameters>(JsonConvert.SerializeObject(data["paramsOut"][1]));
+                        }
                     }
                 }
 
+                //Se obtiene la suma del descuento.
                 List<Debt> debts = new List<Debt>();
                 foreach (var descuento in promotion.Descuentos)
                 {
