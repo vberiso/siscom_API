@@ -9,9 +9,11 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
     [Table("Available_Procedure")]
     public class AvailableProcedure
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_available_procedure"), Required]
         public int Id { get; set; }
-        [Column("procedure_description"), Required]
+        [Column("procedure_description"), Required, StringLength(255)]
         public string ProcedureDescription { get; set; }
         [Column("cost"), Required]
         public decimal Cost { get; set; }

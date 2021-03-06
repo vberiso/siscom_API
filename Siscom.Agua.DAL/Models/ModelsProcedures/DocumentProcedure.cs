@@ -6,23 +6,19 @@ using System.Text;
 
 namespace Siscom.Agua.DAL.Models.ModelsProcedures
 {
-    class DocumentProcedure
+    [Table("Document_Procedure")]
+    public class DocumentProcedure
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_document_procedure")]
         public int Id { get; set; }
-
-
-        [Column("uploadDate")]
+        [Column("upload_date")]
         public DateTime UploadDate { get; set; }
-
         [Column("sha512")]
         public String Sha512 { get; set; }
-
-        [Column("UserId")]
+        [Required]
         public String UserId { get; set; }
-
         //no estoy seguro de que este vaya aqui
         public int DivisionId { get; set; }
         public Division Division { get; set; }

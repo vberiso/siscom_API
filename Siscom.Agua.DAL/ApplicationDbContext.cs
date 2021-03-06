@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 using Siscom.Agua.DAL.Models;
+using Siscom.Agua.DAL.Models.ModelsProcedures;
 using System;
 using System.Linq;
 using System.Text;
@@ -268,7 +269,7 @@ namespace Siscom.Agua.DAL
         /// </summary>
         /// 
         public DbSet<PagosAnuales> PagosAnuales { get; set; }
-        
+
 
         /// <summary>
         /// Tabla temporal para condonacion anual.
@@ -298,6 +299,22 @@ namespace Siscom.Agua.DAL
         public DbSet<ValvulaControl> ValvulaControls { get; set; }
         public DbSet<ValveIncident> ValveIncidents { get; set; }
         public DbSet<ValveOperation> ValveOperations { get; set; }
+
+
+        /// <summary>
+        /// Tramites
+        /// </summary>
+        public DbSet<CitizenProcedure> CitizenProcedures { get; set; }
+        public DbSet<OrderCitizenProcedure> OrderCitizenProcedures { get; set; }
+        public DbSet<DateProcedure> DateProcedures { get; set; }
+        public DbSet<DocumentProcedure> DocumentProcedures { get; set; }
+        public DbSet<NoteProcedure> NoteProcedures { get; set; }
+        public DbSet<AdditionalProcedureConcept> AdditionalProcedureConcepts { get; set; }
+        public DbSet<AvailableProcedure> AvailableProcedures { get; set; }
+        public DbSet<StepProcedure> StepProcedures { get; set; }
+        public DbSet<RequirementForStep> RequirementForSteps { get; set; }
+
+
 
         public ApplicationDbContext()
         {
@@ -1928,7 +1945,83 @@ namespace Siscom.Agua.DAL
               .Property(x => x.IsActive)
               .HasDefaultValue(true);
             #endregion
-           
+
+            #region TRAMITES
+
+            #region Date Procedure
+            builder.Entity<DateProcedure>()
+                   .HasOne<CitizenProcedure>(c => c.CitizenProcedure)
+                   .WithMany(s => s.DateProcedures)
+                   .HasForeignKey(s => s.CitizenProcedureId);
+
+            builder.Entity<DateProcedure>()
+                .Property(x => x.Done)
+                .HasDefaultValue(false);
+
+            builder.Entity<DateProcedure>()
+                .Property(x => x.CreateDate)
+                .HasDefaultValue(DateTime.Now);
+            #endregion
+
+            #region Order Citizen Procedure
+            #endregion
+
+            #region Document Procedure
+            builder.Entity<DocumentProcedure>()
+                  .HasOne<CitizenProcedure>(c => c.CitizenProcedure)
+                  .WithMany(s => s.DocumentProcedures)
+                  .HasForeignKey(s => s.CitizenProcedureId);
+
+            builder.Entity<DocumentProcedure>()
+                .Property(x => x.UploadDate)
+                .HasDefaultValue(DateTime.Now);
+
+            builder.Entity<DocumentProcedure>()
+               .Property(x => x.Sha512)
+               .HasColumnType("text");
+            #endregion
+
+            #region Note Procedure
+            builder.Entity<NoteProcedure>()
+                 .HasOne<CitizenProcedure>(c => c.CitizenProcedure)
+                 .WithMany(s => s.NoteProcedures)
+                 .HasForeignKey(s => s.CitizenProcedureId);
+
+            builder.Entity<NoteProcedure>()
+               .Property(x => x.CreateDate)
+               .HasDefaultValue(DateTime.Now);
+            #endregion
+
+            #region Requirements For Step
+            builder.Entity<RequirementForStep>()
+                .HasOne<StepProcedure>(s => s.StepProcedure)
+                .WithMany(s => s.RequirementForSteps)
+                .HasForeignKey(s => s.StepProcedureId);
+            #endregion
+
+            #region Citizen Procedure
+            builder.Entity<CitizenProcedure>()
+                .HasOne<AvailableProcedure>(d => d.AvailableProcedure); //Revisar para continuar
+
+            builder.Entity<CitizenProcedure>()
+                .Property(x => x.ClosingRemark)
+                .HasColumnType("text");
+
+            builder.Entity<CitizenProcedure>()
+                .Property(x => x.BeginDate)
+                .HasDefaultValue(DateTime.Now);
+
+            builder.Entity<CitizenProcedure>()
+                .Property(x => x.CurrentStep)
+                .HasDefaultValue(1);
+
+            builder.Entity<CitizenProcedure>()
+                .Property(x => x.MeetAllRequirements)
+                .HasDefaultValue(false);
+            #endregion
+
+            #endregion
+
 
             base.OnModelCreating(builder);
         }

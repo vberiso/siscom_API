@@ -6,18 +6,19 @@ using System.Text;
 
 namespace Siscom.Agua.DAL.Models.ModelsProcedures
 {
-    class OrderCitizenProcedure
+    [Table("Order_Citizen_Procedure")]
+    public class OrderCitizenProcedure
     {
 
         [Key]
-        public int OrderSaleID { get; set; }
+        public int OrderSaleId { get; set; }
         public OrderSale OrderSale { get; set; }
 
         [Key]
         public int CitizenProcedureId { get; set; }
         public CitizenProcedure CitizenProcedure { get; set; }
 
-        [Column("UserId")]
+        [Required]
         public String UserId { get; set; }
 
         //no estoy seguro de que este vaya aqui

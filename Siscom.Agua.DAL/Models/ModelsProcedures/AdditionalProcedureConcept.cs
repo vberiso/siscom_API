@@ -9,9 +9,11 @@ namespace Siscom.Agua.DAL.Models
     [Table("Additional_Procedure_Concept")]
     public class AdditionalProcedureConcept
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_additional_procedure_concept"), Required]
         public int Id { get; set; }
-        [Column("description"), Required]
+        [Column("description"), Required, StringLength(255)]
         public string Description { get; set; }
         [Column("cost"), Required]
         public decimal Cost { get; set; }

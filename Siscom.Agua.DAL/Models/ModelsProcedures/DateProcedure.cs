@@ -6,38 +6,38 @@ using System.Text;
 
 namespace Siscom.Agua.DAL.Models.ModelsProcedures
 {
-    class DateProcedure
+    [Table("Date_Procedure")]
+    public class DateProcedure
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id_date_procedure")]
+        [Column("id_date_procedure"), Required]
         public int Id { get; set; }
 
-        [Column("createDate")]
-        public DateTime CeateDate { get; set; }
+        [Column("create_date"), Required]
+        public DateTime CreateDate { get; set; }
 
-        [Column("beginDate")]
+        [Column("begin_date"), Required]
         public DateTime BeginDate { get; set; }
 
-        [Column("finishDate")]
+        [Column("finish_date"), Required]
         public DateTime FinishDate { get; set; }
 
-        [Column("reason")]
+        [Column("reason"), Required]
         public String Reason { get; set; }
 
-        [Column("place")]
+        [Column("place"), Required]
         public String Place { get; set; }
 
-        [Column("done")]
+        [Column("done"), Required]
         public Boolean Done { get; set; }
 
-        [Column("UserId")]
+        [Required]
         public String UserId{ get; set; }
 
 
         //no estoy seguro de que este vaya aqui
         public int DivisionId { get; set; }
-        public Division Division { get; set; }
 
 
         public int CitizenProcedureId { get; set; }
