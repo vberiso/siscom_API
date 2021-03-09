@@ -1964,6 +1964,8 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region Order Citizen Procedure
+            builder.Entity<OrderCitizenProcedure>()
+                .HasKey(t => new { t.OrderSaleId, t.CitizenProcedureId });
 
             builder.Entity<OrderCitizenProcedure>()
                   .HasOne<OrderSale>(c => c.OrderSale)

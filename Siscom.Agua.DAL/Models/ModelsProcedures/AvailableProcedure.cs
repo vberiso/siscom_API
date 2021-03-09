@@ -20,7 +20,6 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
         [Column("isActive"), Required]
         public bool IsActive { get; set; }
 
-
         public int DivisionId { get; set; }
         public Division Division { get; set; }
 

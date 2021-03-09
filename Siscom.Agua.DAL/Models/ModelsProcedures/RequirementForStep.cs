@@ -13,8 +13,8 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id_note_procedure")]
         public int Id { get; set; }
-        [Column("id_note_procedure")]
-        public String DocumentName { get; set; }
+        [Column("document_name")]
+        public string DocumentName { get; set; }
         public int StepProcedureId { get; set; }
         public StepProcedure StepProcedure { get; set; }
     }
