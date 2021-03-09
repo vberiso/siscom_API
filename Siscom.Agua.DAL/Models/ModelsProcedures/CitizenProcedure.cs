@@ -46,6 +46,7 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<DateProcedure> DateProcedures { get; set; }
         public ICollection<DocumentProcedure> DocumentProcedures { get; set; }
         public ICollection<NoteProcedure> NoteProcedures { get; set; }
+        public ICollection<OrderCitizenProcedure> OrderCitizenProcedures { get; set; }
 
     }
 }

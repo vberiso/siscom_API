@@ -37,6 +37,7 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
 
 
         //no estoy seguro de que este vaya aqui
+        [Required]
         public int DivisionId { get; set; }
 
 

@@ -1964,6 +1964,17 @@ namespace Siscom.Agua.DAL
             #endregion
 
             #region Order Citizen Procedure
+
+            builder.Entity<OrderCitizenProcedure>()
+                  .HasOne<OrderSale>(c => c.OrderSale)
+                  .WithMany(s => s.OrderCitizenProcedures)
+                  .HasForeignKey(s => s.OrderSaleId);
+
+            builder.Entity<OrderCitizenProcedure>()
+                .HasOne<CitizenProcedure>(c => c.CitizenProcedure)
+                .WithMany(s => s.OrderCitizenProcedures)
+                .HasForeignKey(s => s.CitizenProcedureId);
+
             #endregion
 
             #region Document Procedure

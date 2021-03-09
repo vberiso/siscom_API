@@ -20,8 +20,8 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
         [Required]
         public String UserId { get; set; }
         //no estoy seguro de que este vaya aqui
+        [Required]
         public int DivisionId { get; set; }
-        public Division Division { get; set; }
 
         public int CitizenProcedureId { get; set; }
         public CitizenProcedure CitizenProcedure { get; set; }

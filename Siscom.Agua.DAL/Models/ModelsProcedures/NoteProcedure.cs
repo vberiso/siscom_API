@@ -20,10 +20,13 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
         [Column("create_date"), Required]
         public DateTime CreateDate { get; set; }
         //no estoy seguro de que este vaya aqui
+        [Required]
         public int DivisionId { get; set; }
-        public Division Division { get; set; }
+
         [Required]
         public String UserId { get; set; }
+
+
         public int CitizenProcedureId { get; set; }
         public CitizenProcedure CitizenProcedure { get; set; }
     }

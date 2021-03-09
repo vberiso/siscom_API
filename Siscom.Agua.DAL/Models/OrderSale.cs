@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Siscom.Agua.DAL.Models.ModelsProcedures;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -55,6 +56,8 @@ namespace Siscom.Agua.DAL.Models
         public ICollection<OrderSaleDetail> OrderSaleDetails { get; set; }
         public ICollection<OrderSaleDiscount> OrderSaleDiscounts { get; set; }
         public ICollection<OrderSaleStatus> OrderSaleStatuses { get; set; }
+
+        public ICollection<OrderCitizenProcedure> OrderCitizenProcedures { get; set; }
 
     }
 }
