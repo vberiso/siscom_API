@@ -38,6 +38,8 @@ namespace Siscom.Agua.DAL.Models
         [Column("meet_all_requirements"), Required]
         public bool MeetAllRequirements { get; set; }
         [Column("AvailableProcedureId"), Required]
+
+
         public int AvailableProcedureId { get; set; }
         public AvailableProcedure AvailableProcedure { get; set; }
 

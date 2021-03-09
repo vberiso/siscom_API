@@ -2020,6 +2020,56 @@ namespace Siscom.Agua.DAL
                 .HasDefaultValue(false);
             #endregion
 
+            #region Aditional Procedure Concepts
+            builder.Entity<AdditionalProcedureConcept>()
+                .HasOne<AvailableProcedure>(s => s.AvailableProcedure)
+                .WithMany(s => s.AdditionalProcedureConcepts)
+                .HasForeignKey(s => s.AvailableProcedureId);
+
+            builder.Entity<AdditionalProcedureConcept>()
+                  .Property(p => p.Cost)
+                  .HasColumnType("decimal(18, 2)");
+            #endregion
+
+            #region Available Procedure
+            builder.Entity<AvailableProcedure>()
+                .HasOne<Division>(s => s.Division)
+                .WithMany(s => s.AvailableProcedures)
+                .HasForeignKey(s => s.DivisionId);
+
+            builder.Entity<AvailableProcedure>()
+                 .Property(p => p.Cost)
+                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<AvailableProcedure>()
+               .Property(x => x.IsActive)
+               .HasDefaultValue(true);
+            #endregion
+
+            #region Step Procedure
+            builder.Entity<StepProcedure>()
+               .HasOne<AvailableProcedure>(s => s.AvailableProcedure)
+               .WithMany(s => s.StepProcedures)
+               .HasForeignKey(s => s.AvailableProcedureId);
+
+            builder.Entity<StepProcedure>()
+               .Property(x => x.CanDate)
+               .HasDefaultValue(false);
+
+            builder.Entity<StepProcedure>()
+               .Property(x => x.CanDocument)
+               .HasDefaultValue(false);
+
+            builder.Entity<StepProcedure>()
+               .Property(x => x.CanNote)
+               .HasDefaultValue(false);
+
+            builder.Entity<StepProcedure>()
+               .Property(x => x.CanOrder)
+               .HasDefaultValue(false);
+
+            #endregion
+
             #endregion
 
 

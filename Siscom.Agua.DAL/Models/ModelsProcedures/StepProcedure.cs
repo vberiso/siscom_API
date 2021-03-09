@@ -21,7 +21,7 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
         [Column("position"), Required]
         public int Position { get; set; }
         [Column("step_name"), Required, StringLength(255)]
-        public string StepNamne { get; set; }
+        public string StepName { get; set; }
         [Column("recommended_days")]
         public int RecommendedDays { get; set; }
         [Column("can_date"), Required]
@@ -32,9 +32,11 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
         public bool CanDocument { get; set; }
         [Column("can_note"), Required]
         public bool CanNote { get; set; }
-        [Column("AvailableProcedureId"), Required] 
+
+
         public int AvailableProcedureId { get; set; }
         public AvailableProcedure AvailableProcedure { get; set; }
+
 
         public ICollection<RequirementForStep> RequirementForSteps { get; set; }
     }

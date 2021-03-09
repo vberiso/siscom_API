@@ -19,8 +19,13 @@ namespace Siscom.Agua.DAL.Models.ModelsProcedures
         public decimal Cost { get; set; }
         [Column("isActive"), Required]
         public bool IsActive { get; set; }
-        [Column("DivisionId"), Required]
+
+
         public int DivisionId { get; set; }
         public Division Division { get; set; }
+
+        public ICollection<AdditionalProcedureConcept> AdditionalProcedureConcepts { get; set; }
+        public ICollection<CitizenProcedure> CitizenProcedures { get; set; }
+        public ICollection<StepProcedure> StepProcedures { get; set; }
     }
 }

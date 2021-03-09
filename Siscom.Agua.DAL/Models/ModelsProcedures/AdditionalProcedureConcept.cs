@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Siscom.Agua.DAL.Models.ModelsProcedures;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,7 +18,9 @@ namespace Siscom.Agua.DAL.Models
         public string Description { get; set; }
         [Column("cost"), Required]
         public decimal Cost { get; set; }
-        [Column("AvailableProcedureId"), Required]
+
+
         public int AvailableProcedureId { get; set; }
+        public AvailableProcedure AvailableProcedure { get; set; }
     }
 }
