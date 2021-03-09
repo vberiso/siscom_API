@@ -1960,7 +1960,7 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<DateProcedure>()
                 .Property(x => x.CreateDate)
-                .HasDefaultValue(DateTime.Now);
+                .HasDefaultValue("getdate()");
             #endregion
 
             #region Order Citizen Procedure
@@ -1987,7 +1987,7 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<DocumentProcedure>()
                 .Property(x => x.UploadDate)
-                .HasDefaultValue(DateTime.Now);
+                .HasDefaultValue("getdate()");
 
             builder.Entity<DocumentProcedure>()
                .Property(x => x.Sha512)
@@ -2002,7 +2002,7 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<NoteProcedure>()
                .Property(x => x.CreateDate)
-               .HasDefaultValue(DateTime.Now);
+               .HasDefaultValue("getdate()");
             #endregion
 
             #region Requirements For Step
@@ -2022,7 +2022,7 @@ namespace Siscom.Agua.DAL
 
             builder.Entity<CitizenProcedure>()
                 .Property(x => x.BeginDate)
-                .HasDefaultValue(DateTime.Now);
+                .HasDefaultValue("getdate()");
 
             builder.Entity<CitizenProcedure>()
                 .Property(x => x.CurrentStep)
